@@ -158,7 +158,7 @@ export default function BuilderPage() {
   const providerAdapter = providerAdapters.find((item) => item.id === provider) ?? providerAdapters[0];
 
   return <main className="build-app">
-    <header className="build-header"><Link href="/" className="build-brand"><span>↗</span>Odds<i>Aura</i></Link><div><span>{predictions.length} selectable predictions</span><Link href="/convert">Convert</Link><Link href="/login">Account</Link><Link href="/matches">Matches</Link></div></header>
+    <header className="build-header"><Link href="/" className="build-brand"><span>↗</span>Odds<i>Aura</i></Link><div><span>{predictions.length} selectable predictions</span><Link href="/login">Account</Link><Link href="/matches">Matches</Link></div></header>
     <section className="build-hero"><div><span>Predicted ticket builder</span><h1>Choose our picks.<br /><i>Build your own ticket.</i></h1></div><p>Every option below has already passed through OddsAura’s probability model. Pick one prediction per match, then save it, share it, export a JPEG or prepare it for SportyBet mapping.</p></section>
     <section className="build-layout">
       <div className="build-board">
@@ -177,7 +177,6 @@ export default function BuilderPage() {
         <button className="build-code" type="button" disabled={!picks.length || creatingCode} onClick={() => void requestCode()}>{creatingCode ? "Creating real SportyBet code…" : `${provider === "sportybet" ? "Create" : "Prepare"} ${providerAdapter.label} ${providerAdapter.capability === "booking-code" ? "code" : "links"}`} <span>→</span></button>
         {sportyCode && <div className="build-real-code"><span>SportyBet booking code</span><strong>{sportyCode.code}</strong><div><button type="button" onClick={() => void navigator.clipboard.writeText(sportyCode.code)}>Copy code</button><a href={sportyCode.deepLink} target="_blank" rel="noreferrer">Load on SportyBet ↗</a></div></div>}
         <div className="build-share"><button type="button" disabled={!picks.length} onClick={() => void save()}>Save</button><button type="button" disabled={!picks.length} onClick={() => void share()}>Share link</button><button type="button" disabled={!picks.length} onClick={jpeg}>JPEG</button></div>
-        <Link className="build-universal-converter" href="/convert">Open universal code converter ↗</Link>
         {notice && <p className="build-notice">{notice}</p>}
         <small>Only model-scored predictions appear here. SportyBet codes are returned only after every selection is matched and the new code is loaded back from SportyBet for verification.</small>
       </aside>
