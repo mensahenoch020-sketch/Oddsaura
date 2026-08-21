@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { fallbackSnapshot, loadSnapshot, type Fixture, type FixtureOdd, type Snapshot } from "../data";
+import { inspectProviderSlip, providerAdapters, type ProviderId } from "./providers";
 import "./builder.css";
 
 type Pick = { fixture: Fixture; odd: FixtureOdd };
 type SavedPick = { fixtureId: string; marketId: string; selectionId: string };
-
-const providers = ["SportyBet", "Bet9ja", "BetPawa", "1xBet", "DraftKings"];
 
 function serialize(picks: Pick[]) {
   const compact: SavedPick[] = picks.map(({ fixture, odd }) => ({ fixtureId: fixture.id, marketId: odd.marketId, selectionId: odd.selectionId }));
@@ -35,7 +35,7 @@ export default function BuilderPage() {
   const [snapshot, setSnapshot] = useState<Snapshot>(fallbackSnapshot);
   const [picks, setPicks] = useState<Pick[]>([]);
   const [search, setSearch] = useState("");
-  const [provider, setProvider] = useState("SportyBet");
+  const [provider, setProvider] = useState<ProviderId>("sportybet");
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -45,6 +45,9 @@ export default function BuilderPage() {
       const shared = parseSlip(new URLSearchParams(window.location.search).get("slip"));
       const local = parseSlip(window.localStorage.getItem("oddsaura-slip"));
       setPicks(hydrate(shared.length ? shared : local, data.fixtures ?? []));
+      const fixtureId = new URLSearchParams(window.location.search).get("fixture");
+      const target = data.fixtures?.find((fixture) => fixture.id === fixtureId);
+      if (target) setSearch(`${target.homeTeam.name} ${target.awayTeam.name}`);
     }).catch(() => undefined).finally(() => setLoading(false));
   }, []);
 
@@ -97,11 +100,13 @@ export default function BuilderPage() {
   }
 
   function requestCode() {
-    setNotice(`${provider} mapping is prepared, but its verified booking-code endpoint is not connected yet. OddsAura will never invent a code.`);
+    setNotice(inspectProviderSlip(provider, picks.map((pick) => pick.odd)));
   }
 
+  const providerAdapter = providerAdapters.find((item) => item.id === provider) ?? providerAdapters[0];
+
   return <main className="build-app">
-    <header className="build-header"><a href="/" className="build-brand"><span>↗</span>Odds<i>Aura</i></a><div><span>{snapshot.metrics.pricedMarkets} verified prices</span><a href="/">Back to predictions</a></div></header>
+    <header className="build-header"><Link href="/" className="build-brand"><span>↗</span>Odds<i>Aura</i></Link><div><span>{snapshot.metrics.pricedMarkets} verified prices</span><Link href="/matches">All matches</Link></div></header>
     <section className="build-hero"><div><span>Personal ticket builder</span><h1>Pick the matches.<br /><i>We’ll handle the format.</i></h1></div><p>Select one market per match. Your slip is provider-neutral, so the same selections can later be mapped to SportyBet, Bet9ja, BetPawa and other supported bookmakers.</p></section>
     <section className="build-layout">
       <div className="build-board">
@@ -115,8 +120,8 @@ export default function BuilderPage() {
         <div className="build-slip-title"><div><span>Your selections</span><h2>{picks.length} {picks.length === 1 ? "pick" : "picks"}</h2></div>{picks.length > 0 && <button type="button" onClick={() => setPicks([])}>Clear</button>}</div>
         <div className="build-picks">{picks.map((pick) => <div key={pick.fixture.id}><button type="button" aria-label={`Remove ${pick.fixture.homeTeam.name} versus ${pick.fixture.awayTeam.name}`} onClick={() => setPicks((rows) => rows.filter((row) => row.fixture.id !== pick.fixture.id))}>×</button><span>{pick.fixture.homeTeam.name} vs {pick.fixture.awayTeam.name}</span><strong>{pick.odd.market}: {pick.odd.selection}</strong><b>{pick.odd.odds.toFixed(2)}</b></div>)}{!picks.length && <p>Tap a market price to add your first match.</p>}</div>
         <div className="build-total"><span>Total odds</span><strong>{totalOdds.toFixed(2)}</strong></div>
-        <label className="build-provider">Convert for<select value={provider} onChange={(event) => setProvider(event.target.value)}>{providers.map((name) => <option key={name}>{name}</option>)}</select></label>
-        <button className="build-code" type="button" disabled={!picks.length} onClick={requestCode}>Prepare {provider} code <span>→</span></button>
+        <label className="build-provider">Convert for<select value={provider} onChange={(event) => setProvider(event.target.value as ProviderId)}>{providerAdapters.map((item) => <option value={item.id} key={item.id}>{item.label}</option>)}</select></label>
+        <button className="build-code" type="button" disabled={!picks.length} onClick={requestCode}>Prepare {providerAdapter.label} {providerAdapter.capability === "booking-code" ? "code" : "links"} <span>→</span></button>
         <div className="build-share"><button type="button" disabled={!picks.length} onClick={save}>Save</button><button type="button" disabled={!picks.length} onClick={() => void share()}>Share link</button><button type="button" disabled={!picks.length} onClick={jpeg}>JPEG</button></div>
         {notice && <p className="build-notice">{notice}</p>}
         <small>Prices shown are source prices, not guarantees. A real provider code will only appear after every selection is verified against that provider.</small>
