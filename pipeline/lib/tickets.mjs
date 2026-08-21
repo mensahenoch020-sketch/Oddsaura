@@ -8,7 +8,7 @@ export function buildTicket(candidates, category, fixtures) {
   const band = bands[category];
   const fixtureMap = new Map(fixtures.map((fixture) => [fixture.id, fixture]));
   const eligible = candidates
-    .filter((item) => item.quotedOdds && item.confidence >= band.confidence && item.quotedOdds >= band.minOdds && item.quotedOdds <= band.maxOdds && (item.edge == null || item.edge >= -0.015))
+    .filter((item) => item.quotedOdds && item.factors?.homePlayed >= 5 && item.factors?.awayPlayed >= 5 && item.confidence >= band.confidence && item.quotedOdds >= band.minOdds && item.quotedOdds <= band.maxOdds && (item.edge == null || item.edge >= -0.015))
     .sort((a, b) => (b.confidence + Math.max(0, b.edge ?? 0)) - (a.confidence + Math.max(0, a.edge ?? 0)));
   const selected = [];
   const used = new Set();

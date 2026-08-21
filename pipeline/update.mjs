@@ -1,8 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { collectSofaScore } from "./lib/sofascore.mjs";
-import { collectEspn } from "./lib/espn.mjs";
+import { collectEspn, collectEspnGlobal } from "./lib/espn.mjs";
 import { attachOdds, scoreEvent } from "./lib/model.mjs";
 import { buildTicket } from "./lib/tickets.mjs";
 
@@ -18,39 +17,31 @@ let warnings = [];
 let sourceStatus = "error";
 let message = "The source did not respond; serving the last successful snapshot.";
 const sources = [];
-try {
-  const collected = await collectSofaScore({
-    historyDays: Number(process.env.HISTORY_DAYS ?? 10),
-    futureDays,
-    oddsLimit: Number(process.env.ODDS_MATCH_LIMIT ?? 45),
-  });
-  events = collected.events;
-  warnings = collected.warnings;
-  if (!events.length) throw new Error(`${collected.blocked ? "SOFASCORE_BLOCKED: " : ""}${collected.warnings[0] ?? "The source returned no football events"}`);
-  sourceStatus = warnings.length ? "partial" : "healthy";
-  message = warnings.length ? "Updated with partial source coverage." : "Fixtures, odds and predictions updated automatically.";
-  sources.push({ id: "sofascore-public-json", label: "SofaScore public JSON", status: sourceStatus, lastSuccessAt: now.toISOString(), records: events.length, warnings: warnings.slice(0, 8) });
-} catch (error) {
-  const reason = error instanceof Error ? error.message : "SofaScore collection failed";
-  console.error(reason);
-  sources.push({ id: "sofascore-public-json", label: "SofaScore public JSON", status: reason.startsWith("SOFASCORE_BLOCKED:") ? "blocked" : "error", lastSuccessAt: null, records: 0, warnings: [reason.replace("SOFASCORE_BLOCKED: ", "")].slice(0, 8) });
-  try {
-    const collected = await collectEspn({
-      historyDays: Number(process.env.ESPN_HISTORY_DAYS ?? 35),
-      futureDays,
-    });
-    events = collected.events;
-    warnings = collected.warnings;
-    if (!events.length) throw new Error("The fallback returned no football events");
-    sourceStatus = warnings.length ? "partial" : "healthy";
-    message = "The keyless ESPN feed is supplying live, current and upcoming football data. SofaScore is optional and presently blocked at its network edge.";
-    sources.push({ id: "espn-public-json", label: "ESPN public JSON fallback", status: sourceStatus, lastSuccessAt: now.toISOString(), records: events.length, warnings: warnings.slice(0, 8) });
-  } catch (fallbackError) {
-    const fallbackReason = fallbackError instanceof Error ? fallbackError.message : "ESPN fallback failed";
-    console.error(fallbackReason);
-    sources.push({ id: "espn-public-json", label: "ESPN public JSON fallback", status: "error", lastSuccessAt: null, records: 0, warnings: [fallbackReason].slice(0, 8) });
-  }
+const [historyRun, globalRun] = await Promise.allSettled([
+  collectEspn({ historyDays: Number(process.env.ESPN_HISTORY_DAYS ?? 35), futureDays }),
+  collectEspnGlobal({ historyDays: Number(process.env.GLOBAL_HISTORY_DAYS ?? 14), futureDays }),
+]);
+const eventMap = new Map();
+if (historyRun.status === "fulfilled" && historyRun.value.events.length) {
+  for (const event of historyRun.value.events) eventMap.set(event.id, event);
+  warnings.push(...historyRun.value.warnings);
+  sources.push({ id: "espn-league-history", label: "ESPN league history", status: historyRun.value.warnings.length ? "partial" : "healthy", lastSuccessAt: now.toISOString(), records: historyRun.value.events.length, warnings: historyRun.value.warnings.slice(0, 8) });
+} else {
+  const reason = historyRun.status === "rejected" ? String(historyRun.reason) : "The league history feed returned no matches";
+  sources.push({ id: "espn-league-history", label: "ESPN league history", status: "error", lastSuccessAt: null, records: 0, warnings: [reason] });
 }
+if (globalRun.status === "fulfilled" && globalRun.value.events.length) {
+  for (const event of globalRun.value.events) eventMap.set(event.id, event);
+  warnings.push(...globalRun.value.warnings);
+  sources.push({ id: "espn-global-json", label: "ESPN global match board", status: globalRun.value.warnings.length ? "partial" : "healthy", lastSuccessAt: now.toISOString(), records: globalRun.value.events.length, warnings: globalRun.value.warnings.slice(0, 8) });
+} else {
+  const reason = globalRun.status === "rejected" ? String(globalRun.reason) : "The global match board returned no matches";
+  sources.push({ id: "espn-global-json", label: "ESPN global match board", status: "error", lastSuccessAt: null, records: 0, warnings: [reason] });
+}
+events = [...eventMap.values()].sort((a, b) => a.kickoff.localeCompare(b.kickoff));
+const healthySources = sources.filter((source) => ["healthy", "partial"].includes(source.status)).length;
+sourceStatus = healthySources === sources.length && !warnings.length ? "healthy" : healthySources ? "partial" : "error";
+message = healthySources ? "Global fixtures, team badges, recent results and model-ready history are updating without paid API keys." : message;
 
 if (!events.length) {
   const stale = { ...previous, generatedAt: now.toISOString(), stale: true, status: "stale", message, sources };
@@ -63,6 +54,39 @@ const liveFixtures = events.filter((event) => event.status === "LIVE").sort((a, 
 const predictions = upcoming.flatMap((event) => attachOdds(scoreEvent(event, events), event.odds));
 const tickets = ["SAFE", "BALANCED", "HIGH_RISK"].map((category) => buildTicket(predictions, category, upcoming)).filter(Boolean);
 const fixtureMap = new Map(upcoming.map((fixture) => [fixture.id, fixture]));
+const predictedPicks = [];
+const predictionKeys = new Set();
+const fixturePickCounts = new Map();
+for (const pick of [...predictions].filter((item) => item.quotedOdds && item.factors?.homePlayed >= 5 && item.factors?.awayPlayed >= 5 && item.confidence >= 0.52 && (item.edge == null || item.edge >= -0.04)).sort((a, b) => (b.confidence + Math.max(0, b.edge ?? 0)) - (a.confidence + Math.max(0, a.edge ?? 0)))) {
+  const fixture = fixtureMap.get(pick.fixtureId);
+  const identity = `${pick.fixtureId}-${pick.providerMarketId}-${pick.providerSelectionId}`;
+  if (!fixture || predictionKeys.has(identity) || (fixturePickCounts.get(pick.fixtureId) ?? 0) >= 5 || predictedPicks.length >= 600) continue;
+  const tier = pick.confidence >= 0.72 && pick.quotedOdds <= 1.8 ? "SAFE" : pick.confidence >= 0.62 ? "BALANCED" : "HIGH_RISK";
+  predictedPicks.push({
+    id: `${pick.fixtureId}-${pick.key}`,
+    fixtureId: pick.fixtureId,
+    league: fixture.league,
+    kickoff: fixture.kickoff,
+    homeTeam: fixture.homeTeam,
+    awayTeam: fixture.awayTeam,
+    market: { key: pick.key, name: pick.name, category: pick.category, line: pick.line ?? null },
+    selection: pick.selection,
+    probability: pick.probability,
+    confidence: pick.confidence,
+    fairOdds: pick.fairOdds,
+    quotedOdds: pick.quotedOdds,
+    edge: pick.edge,
+    tier,
+    oddsSource: pick.oddsSource,
+    oddsProvider: pick.oddsProvider,
+    providerMarketId: pick.providerMarketId,
+    providerSelectionId: pick.providerSelectionId,
+    providerDeepLink: pick.providerDeepLink,
+    reasoning: `Modelled from ${pick.factors.homePlayed + pick.factors.awayPlayed} recent team performances · expected goals ${pick.expectedHomeGoals}-${pick.expectedAwayGoals}`,
+  });
+  predictionKeys.add(identity);
+  fixturePickCounts.set(pick.fixtureId, (fixturePickCounts.get(pick.fixtureId) ?? 0) + 1);
+}
 const watchlist = [];
 const usedFixtures = new Set();
 for (const pick of [...predictions].filter((item) => item.confidence >= 0.62).sort((a, b) => b.confidence - a.confidence)) {
@@ -92,7 +116,7 @@ const marketCatalog = [...new Set([
   "Corners", "Cards", "Shots and player props",
 ])].sort();
 const snapshot = {
-  version: 3,
+  version: 4,
   generatedAt: now.toISOString(),
   stale: false,
   status: sourceStatus,
@@ -104,15 +128,17 @@ const snapshot = {
     completed: events.filter((event) => event.status === "FINISHED").length,
     pricedMarkets: events.reduce((sum, event) => sum + event.odds.length, 0),
     predictions: predictions.length,
+    selectablePredictions: predictedPicks.length,
     publishedTickets: tickets.length,
   },
-  fixtures: upcoming.slice(0, 240),
-  liveFixtures: liveFixtures.slice(0, 120),
-  recentResults: events.filter((event) => event.status === "FINISHED").slice(-1000),
+  fixtures: upcoming,
+  liveFixtures: liveFixtures.slice(0, 200),
+  recentResults: events.filter((event) => event.status === "FINISHED").slice(-500),
+  predictedPicks,
   marketCatalog,
   watchlist,
   tickets,
 };
 await mkdir(dirname(output), { recursive: true });
 await writeFile(output, `${JSON.stringify(snapshot, null, 2)}\n`);
-console.log(`OddsAura updated: ${upcoming.length} fixtures, ${predictions.length} predictions, ${watchlist.length} watchlist picks, ${tickets.length} tickets`);
+console.log(`OddsAura updated: ${upcoming.length} fixtures, ${predictions.length} model scores, ${predictedPicks.length} selectable predictions, ${tickets.length} tickets`);
