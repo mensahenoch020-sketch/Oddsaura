@@ -1,18 +1,8 @@
 import Link from "next/link";
-import { chatGPTSignInPath } from "../chatgpt-auth";
+import AuthForm from "../auth-form";
+import Brand from "../brand";
 import "../login/auth.css";
 
-export const dynamic = "force-dynamic";
-
 export default function SignupPage() {
-  return <main className="auth-page">
-    <header><Link href="/" className="auth-brand"><span>↗</span>Odds<i>Aura</i></Link><Link href="/login">Already registered?</Link></header>
-    <section className="auth-card">
-      <span className="auth-kicker">Free OddsAura account</span>
-      <h1>Keep every ticket.<br /><i>Track every result.</i></h1>
-      <p>Create your secure account to save prediction slips, generate booking codes and follow your ticket history across devices.</p>
-      <div className="auth-actions"><a className="primary" href={chatGPTSignInPath("/account")}>Create my account</a><Link href="/login">Sign in instead</Link></div>
-      <small>Account identity is handled securely. OddsAura never sees or stores your provider password.</small>
-    </section>
-  </main>;
+  return <main className="auth-page"><header><Brand /><Link href="/login">Already registered?</Link></header><div className="auth-layout"><section className="auth-story"><span className="auth-kicker">Free OddsAura account</span><h1>Make every pick<br /><i>easy to revisit.</i></h1><p>Create one account for your selected matches, SportyBet codes, shared JPEGs and tracked results.</p><ul><li>Private prediction dashboard</li><li>Saved tickets across devices</li><li>Editable profile and security settings</li></ul></section><section className="auth-card"><span className="auth-kicker">Create your account</span><h2>Start building<br /><i>better slips.</i></h2><p>It takes less than a minute.</p><AuthForm mode="signup" /><small>Already have an account? <Link href="/login">Log in</Link></small></section></div></main>;
 }

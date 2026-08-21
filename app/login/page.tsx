@@ -1,25 +1,8 @@
 import Link from "next/link";
-import { chatGPTSignInPath, chatGPTSignOutPath, getChatGPTUser } from "../chatgpt-auth";
+import AuthForm from "../auth-form";
+import Brand from "../brand";
 import "./auth.css";
 
-export const dynamic = "force-dynamic";
-
-export default async function LoginPage() {
-  const user = await getChatGPTUser();
-  return <main className="auth-page">
-    <header><Link href="/" className="auth-brand"><span>↗</span>Odds<i>Aura</i></Link><Link href="/signup">Create account</Link></header>
-    <section className="auth-card">
-      <span className="auth-kicker">OddsAura account</span>
-      {user ? <>
-        <h1>Welcome back,<br /><i>{user.displayName}</i></h1>
-        <p>Your account is active. Save prediction slips across devices and reopen them from your dashboard.</p>
-        <div className="auth-actions"><Link className="primary" href="/account">Open my account</Link><a href={chatGPTSignOutPath("/")}>Sign out</a></div>
-      </> : <>
-        <h1>Keep your slips.<br /><i>Come back anytime.</i></h1>
-        <p>Sign in to save slips, reopen booking codes and keep your ticket history together across devices.</p>
-        <div className="auth-actions"><a className="primary" href={chatGPTSignInPath("/account")}>Sign in securely</a><Link href="/signup">Create a free account</Link></div>
-        <small>Your password is handled by the secure identity provider and is never visible to OddsAura.</small>
-      </>}
-    </section>
-  </main>;
+export default function LoginPage() {
+  return <main className="auth-page"><header><Brand /><Link href="/signup">Create account</Link></header><div className="auth-layout"><section className="auth-story"><span className="auth-kicker">One private workspace</span><h1>Your slips.<br /><i>Your history.</i></h1><p>Log in to unlock qualified predictions, generate booking codes and continue from any device.</p><ul><li>Save and reopen prediction slips</li><li>Keep generated booking codes together</li><li>Track tickets and calculated returns</li></ul></section><section className="auth-card"><span className="auth-kicker">Welcome back</span><h2>Log in to<br /><i>OddsAura.</i></h2><p>Enter the details you used when creating your account.</p><AuthForm mode="login" /><small>New here? <Link href="/signup">Create a free account</Link></small></section></div></main>;
 }
