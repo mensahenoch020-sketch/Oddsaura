@@ -1,0 +1,44 @@
+/* Small screens use a deliberately separate composition, not a shrunken desktop layout. */
+html,body,main{width:100%;max-width:100%;overflow-x:hidden}
+
+@media (max-width:800px){
+  .hero{min-height:0;grid-template-columns:1fr;gap:42px;padding:52px 0 66px}
+  .hero-visual{width:100%;height:420px;overflow:hidden;border-radius:10px}
+  .ticket-card{left:20px;top:38px;width:calc(100% - 54px);transform:none}
+  .float-score{right:13px;top:31px;transform:scale(.82) rotate(4deg);transform-origin:top right}
+  .float-code{right:8px;bottom:22px;transform:scale(.78) rotate(-2deg);transform-origin:bottom right}
+}
+
+@media (max-width:600px){
+  .shell{width:calc(100% - 32px);max-width:none}
+  .nav{height:70px}
+  .hero{gap:34px;padding:40px 0 58px}
+  .hero-actions{flex-wrap:wrap;margin-top:28px}
+  .hero-visual{height:auto;min-height:0;padding:16px;background-size:24px 24px}
+  .hero-visual .orbit{display:none}
+  .ticket-card{position:relative;top:auto;left:auto;width:100%;padding:14px;transform:none}
+  .ticket-heading{padding:15px 0 12px}
+  .ticket-game{padding:10px 0}
+  .ticket-game strong{font-size:10px}
+  .ticket-game span{font-size:8px}
+  .ticket-footer{padding-top:11px}
+  .float-score{display:none}
+  .float-code{position:relative;right:auto;bottom:auto;width:100%;margin-top:12px;padding:11px;transform:none;box-shadow:none}
+  .float-code strong{font-size:12px}
+  .float-code small{font-size:8px}
+  .metrics{overflow:hidden}
+  .metric-inner{gap:18px}
+  .pick-row{grid-template-columns:28px minmax(0,1fr) 46px}
+  .pick-main{min-width:0}
+  .pick-main h3{font-size:13px}
+  .pick-tags{flex-wrap:wrap}
+  .footer{grid-template-columns:minmax(0,1fr) auto}
+}
+
+@media (max-width:390px){
+  h1{font-size:46px;letter-spacing:-3.6px}
+  .button{padding:12px 13px;font-size:11px}
+  .section-intro h2,.features h2,.join h2{font-size:36px}
+  .nav-cta{font-size:12px}
+  .ticket-heading strong{font-size:21px}
+}
