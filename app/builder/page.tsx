@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { fallbackSnapshot, loadSnapshot, type PredictedPick, type Snapshot, type Team } from "../data";
+import { LEAGUE_FILTERS, leagueMatches, type LeagueFilter } from "../leagues";
 import { generateSportyBetCode, inspectProviderSlip, providerAdapters, type ProviderId, type SportyBetCodeResponse } from "./providers";
 import "./builder.css";
 import "./predictions.css";
@@ -42,6 +43,7 @@ export default function BuilderPage() {
   const [picks, setPicks] = useState<PredictedPick[]>([]);
   const [search, setSearch] = useState("");
   const [tier, setTier] = useState<Tier>("ALL");
+  const [league, setLeague] = useState<LeagueFilter>("ALL");
   const [provider, setProvider] = useState<ProviderId>("sportybet");
   const [notice, setNotice] = useState("");
   const [sportyCode, setSportyCode] = useState<SportyBetCodeResponse | null>(null);
@@ -67,13 +69,13 @@ export default function BuilderPage() {
     const groups = new Map<string, { fixtureId: string; league: PredictedPick["league"]; kickoff: string; homeTeam: Team; awayTeam: Team; predictions: PredictedPick[] }>();
     for (const pick of predictions) {
       const text = `${pick.homeTeam.name} ${pick.awayTeam.name} ${pick.league.name} ${pick.market.name} ${pick.selection}`.toLowerCase();
-      if (!text.includes(search.trim().toLowerCase()) || (tier !== "ALL" && pick.tier !== tier)) continue;
+      if (!text.includes(search.trim().toLowerCase()) || (tier !== "ALL" && pick.tier !== tier) || !leagueMatches(pick.league, league)) continue;
       const group = groups.get(pick.fixtureId) ?? { fixtureId: pick.fixtureId, league: pick.league, kickoff: pick.kickoff, homeTeam: pick.homeTeam, awayTeam: pick.awayTeam, predictions: [] };
       group.predictions.push(pick);
       groups.set(pick.fixtureId, group);
     }
     return [...groups.values()].sort((a, b) => a.kickoff.localeCompare(b.kickoff));
-  }, [predictions, search, tier]);
+  }, [predictions, search, tier, league]);
   const totalOdds = useMemo(() => picks.every((pick) => pick.quotedOdds) ? picks.reduce((value, pick) => value * (pick.quotedOdds ?? 1), 1) : null, [picks]);
 
   function choose(pick: PredictedPick) {
@@ -103,7 +105,8 @@ export default function BuilderPage() {
 
   function jpeg() {
     const canvas = document.createElement("canvas");
-    canvas.width = 1080; canvas.height = 1350;
+    const exported = picks.slice(0, 21);
+    canvas.width = 1080; canvas.height = Math.max(1350, 330 + exported.length * 112);
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     ctx.fillStyle = "#0b1426"; ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -111,15 +114,16 @@ export default function BuilderPage() {
     ctx.fillStyle = "#ffffff"; ctx.font = "700 44px Arial"; ctx.fillText("OddsAura", 135, 108);
     ctx.fillStyle = "#9ba8b9"; ctx.font = "24px Arial"; ctx.fillText("MY PREDICTED MATCH SLIP", 70, 180);
     let y = 250;
-    for (const pick of picks.slice(0, 9)) {
+    for (const pick of exported) {
       ctx.fillStyle = "#17243a"; ctx.fillRect(60, y - 40, 960, 104);
       ctx.fillStyle = "#ffffff"; ctx.font = "700 25px Arial"; ctx.fillText(`${pick.homeTeam.name} vs ${pick.awayTeam.name}`.slice(0, 58), 85, y);
       ctx.fillStyle = "#aab5c4"; ctx.font = "22px Arial"; ctx.fillText(`${pick.market.name}: ${pick.selection} · ${Math.round(pick.confidence * 100)}% confidence`.slice(0, 72), 85, y + 36);
       ctx.fillStyle = "#c7fa45"; ctx.font = "700 25px Arial"; ctx.textAlign = "right"; ctx.fillText(pick.quotedOdds?.toFixed(2) ?? "PRICE PENDING", 985, y + 12); ctx.textAlign = "left";
-      y += 122;
+      y += 112;
     }
-    ctx.fillStyle = "#c7fa45"; ctx.font = "700 58px Arial"; ctx.fillText(totalOdds?.toFixed(2) ?? "MODEL SLIP", 70, 1260);
-    ctx.fillStyle = "#ffffff"; ctx.font = "22px Arial"; ctx.fillText(totalOdds ? "TOTAL ODDS · Prices may change" : "SOME BOOKMAKER PRICES ARE PENDING", 70, 1302);
+    const footerY = canvas.height - 90;
+    ctx.fillStyle = "#c7fa45"; ctx.font = "700 58px Arial"; ctx.fillText(totalOdds?.toFixed(2) ?? "MODEL SLIP", 70, footerY);
+    ctx.fillStyle = "#ffffff"; ctx.font = "22px Arial"; ctx.fillText(totalOdds ? "TOTAL ODDS · Prices may change" : "SOME BOOKMAKER PRICES ARE PENDING", 70, footerY + 42);
     const link = document.createElement("a"); link.download = "oddsaura-predicted-slip.jpg"; link.href = canvas.toDataURL("image/jpeg", .92); link.click();
     setNotice("Prediction slip saved as a JPEG.");
   }
@@ -147,7 +151,9 @@ export default function BuilderPage() {
         providerOutcomeId: pick.fixtureId.startsWith("sr:match:") ? pick.providerSelectionId : null,
       })));
       setSportyCode(result);
-      setNotice(`Verified by SportyBet · ${result.resolved.length} selections matched.`);
+      setNotice(result.partial
+        ? `Code created for ${result.resolved.length} of ${picks.length} selections. Remove or pick manually for the unmatched games.`
+        : `Verified by SportyBet · ${result.resolved.length} selections matched.`);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "SportyBet could not create this code.");
     } finally {
@@ -158,12 +164,13 @@ export default function BuilderPage() {
   const providerAdapter = providerAdapters.find((item) => item.id === provider) ?? providerAdapters[0];
 
   return <main className="build-app">
-    <header className="build-header"><Link href="/" className="build-brand"><span>↗</span>Odds<i>Aura</i></Link><div><span>{predictions.length} selectable predictions</span><Link href="/login">Account</Link><Link href="/matches">Matches</Link></div></header>
+    <header className="build-header"><Link href="/" className="build-brand"><span>↗</span>Odds<i>Aura</i></Link><div><span>{predictions.length} selectable predictions</span><Link href="/results">Results</Link><Link href="/login">Account</Link><Link href="/matches">Matches</Link></div></header>
     <section className="build-hero"><div><span>Predicted ticket builder</span><h1>Choose our picks.<br /><i>Build your own ticket.</i></h1></div><p>Every option below has already passed through OddsAura’s probability model. Pick one prediction per match, then save it, share it, export a JPEG or prepare it for SportyBet mapping.</p></section>
     <section className="build-layout">
       <div className="build-board">
         <div className="build-toolbar"><div><h2>Predicted games</h2><span>{loading ? "Scoring today’s matches…" : `${fixtureGroups.length} matches with selectable predictions`}</span></div><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search team, league or market" aria-label="Search predicted games" /></div>
         <div className="build-tier-tabs" aria-label="Prediction risk"><button type="button" className={tier === "ALL" ? "active" : ""} onClick={() => setTier("ALL")}>All <b>{tierCounts.ALL}</b></button><button type="button" className={tier === "SAFE" ? "active" : ""} onClick={() => setTier("SAFE")}>Safe <b>{tierCounts.SAFE}</b></button><button type="button" className={tier === "BALANCED" ? "active" : ""} onClick={() => setTier("BALANCED")}>Balanced <b>{tierCounts.BALANCED}</b></button><button type="button" className={tier === "HIGH_RISK" ? "active" : ""} onClick={() => setTier("HIGH_RISK")}>High risk <b>{tierCounts.HIGH_RISK}</b></button></div>
+        <div className="build-league-tabs" aria-label="League filter">{LEAGUE_FILTERS.map((item) => <button type="button" key={item.id} className={league === item.id ? "active" : ""} onClick={() => setLeague(item.id)}>{item.label}</button>)}</div>
         <div className="build-fixtures">{fixtureGroups.map((group) => <article key={group.fixtureId} className="build-fixture">
           <div className="build-match build-predicted-match"><div><TeamBadge team={group.homeTeam} /><strong>{group.homeTeam.name}</strong><span>vs</span><TeamBadge team={group.awayTeam} /><strong>{group.awayTeam.name}</strong></div><small>{group.league.name} · {new Date(group.kickoff).toLocaleString()}</small></div>
           <div className="build-markets build-predictions">{group.predictions.map((pick) => { const active = picks.some((item) => item.id === pick.id); return <button className={active ? "active" : ""} type="button" key={pick.id} onClick={() => choose(pick)}><span>{pick.tier.replace("_", " ")} · {pick.market.name}</span><b>{pick.selection}</b><strong>{pick.quotedOdds?.toFixed(2) ?? `Fair ${pick.fairOdds.toFixed(2)}`}</strong><small>{pick.dataQuality === "LOW" ? "Limited data" : `${Math.round(pick.confidence * 100)}% confidence`}</small><em>{pick.reasoning}</em></button>; })}</div>
@@ -176,6 +183,7 @@ export default function BuilderPage() {
         <label className="build-provider">Convert for<select value={provider} onChange={(event) => setProvider(event.target.value as ProviderId)}>{providerAdapters.map((item) => <option value={item.id} key={item.id}>{item.label}</option>)}</select></label>
         <button className="build-code" type="button" disabled={!picks.length || creatingCode} onClick={() => void requestCode()}>{creatingCode ? "Creating real SportyBet code…" : `${provider === "sportybet" ? "Create" : "Prepare"} ${providerAdapter.label} ${providerAdapter.capability === "booking-code" ? "code" : "links"}`} <span>→</span></button>
         {sportyCode && <div className="build-real-code"><span>SportyBet booking code</span><strong>{sportyCode.code}</strong><div><button type="button" onClick={() => void navigator.clipboard.writeText(sportyCode.code)}>Copy code</button><a href={sportyCode.deepLink} target="_blank" rel="noreferrer">Load on SportyBet ↗</a></div></div>}
+        {sportyCode?.unmatched.length ? <div className="build-unmatched"><strong>Not included in this code</strong>{sportyCode.unmatched.map((item) => <div key={item.fixtureId}><span>{item.homeTeam} vs {item.awayTeam}</span><small>{item.reason}</small><button type="button" onClick={() => setPicks((rows) => rows.filter((row) => row.fixtureId !== item.fixtureId))}>Drop selection</button></div>)}</div> : null}
         <div className="build-share"><button type="button" disabled={!picks.length} onClick={() => void save()}>Save</button><button type="button" disabled={!picks.length} onClick={() => void share()}>Share link</button><button type="button" disabled={!picks.length} onClick={jpeg}>JPEG</button></div>
         {notice && <p className="build-notice">{notice}</p>}
         <small>Only model-scored predictions appear here. SportyBet codes are returned only after every selection is matched and the new code is loaded back from SportyBet for verification.</small>

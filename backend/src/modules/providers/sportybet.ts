@@ -30,6 +30,8 @@ export type SportyBetCodeResult = {
   code: string;
   deepLink: string;
   resolved: SportyBetResolvedSelection[];
+  partial: boolean;
+  unmatched: Array<{ fixtureId: string; homeTeam: string; awayTeam: string; reason: string }>;
 };
 
 type JsonRecord = Record<string, unknown>;
@@ -72,9 +74,80 @@ function normalize(value: string) {
     .replace(/[^a-z0-9]+/g, " ").trim();
 }
 
+// Sport data providers often use a club's legal name while bookmakers use a
+// short or popular name. Keep common aliases here, then let kickoff-aware
+// matching handle the long tail without requiring a hand-written entry for
+// every club in world football.
+const TEAM_ALIAS_GROUPS = [
+  ["wolverhampton wanderers", "wolverhampton", "wolves"],
+  ["manchester united", "man united", "man utd"],
+  ["manchester city", "man city"],
+  ["tottenham hotspur", "tottenham", "spurs"],
+  ["newcastle united", "newcastle utd", "newcastle"],
+  ["west ham united", "west ham utd", "west ham"],
+  ["brighton and hove albion", "brighton hove albion", "brighton"],
+  ["nottingham forest", "nottm forest", "nottingham"],
+  ["sheffield wednesday", "sheff wednesday", "sheffield wed"],
+  ["sheffield united", "sheff united", "sheffield utd"],
+  ["queens park rangers", "qpr"],
+  ["paris saint germain", "paris sg", "psg"],
+  ["internazionale", "inter milan", "inter"],
+  ["ac milan", "milan"],
+  ["juventus turin", "juventus", "juve"],
+  ["napoli", "ssc napoli"],
+  ["as roma", "roma"],
+  ["lazio", "ss lazio"],
+  ["bayern munich", "bayern munchen", "bayern"],
+  ["borussia monchengladbach", "borussia m gladbach", "gladbach"],
+  ["rb leipzig", "rasenballsport leipzig", "leipzig"],
+  ["bayer leverkusen", "bayer 04 leverkusen", "leverkusen"],
+  ["atletico madrid", "atletico de madrid", "atl madrid"],
+  ["athletic club", "athletic bilbao", "bilbao"],
+  ["real betis", "real betis balompie", "betis"],
+  ["real sociedad", "real sociedad san sebastian", "sociedad"],
+  ["sporting clube de portugal", "sporting cp", "sporting lisbon"],
+  ["vitoria guimaraes", "vitoria sc", "guimaraes"],
+  ["psv eindhoven", "psv"],
+  ["ajax amsterdam", "ajax"],
+  ["feyenoord rotterdam", "feyenoord"],
+  ["az alkmaar", "az"],
+  ["fenerbahce istanbul", "fenerbahce"],
+  ["galatasaray istanbul", "galatasaray"],
+  ["besiktas istanbul", "besiktas"],
+  ["istanbul basaksehir", "basaksehir"],
+  ["al hilal riyadh", "al hilal"],
+  ["al nassr riyadh", "al nassr"],
+  ["al ittihad jeddah", "al ittihad"],
+  ["al ahli jeddah", "al ahli"],
+] as const;
+
+const teamAliasIndex = new Map<string, string>();
+const teamAliasSearch = new Map<string, string[]>();
+for (const group of TEAM_ALIAS_GROUPS) {
+  const canonical = normalize(group[0]);
+  const values = group.map(normalize);
+  for (const alias of values) {
+    teamAliasIndex.set(alias, canonical);
+    teamAliasSearch.set(alias, [...group]);
+  }
+}
+
+function canonicalTeam(value: string) {
+  const normalized = normalize(value);
+  return teamAliasIndex.get(normalized) ?? normalized;
+}
+
+function teamSearchTerms(value: string) {
+  const normalized = normalize(value);
+  return [value, ...(teamAliasSearch.get(normalized) ?? [])].filter((item, index, rows) => rows.findIndex((row) => normalize(row) === normalize(item)) === index);
+}
+
 function tokenScore(left: string, right: string) {
-  const a = new Set(normalize(left).split(" ").filter(Boolean));
-  const b = new Set(normalize(right).split(" ").filter(Boolean));
+  const canonicalLeft = canonicalTeam(left);
+  const canonicalRight = canonicalTeam(right);
+  if (canonicalLeft && canonicalLeft === canonicalRight) return 1;
+  const a = new Set(canonicalLeft.split(" ").filter(Boolean));
+  const b = new Set(canonicalRight.split(" ").filter(Boolean));
   if (!a.size || !b.size) return 0;
   const intersection = [...a].filter((item) => b.has(item)).length;
   const union = new Set([...a, ...b]).size;
@@ -156,6 +229,10 @@ function marketRule(input: SportyBetSelectionInput): MarketRule {
   if (key === "MATCH_HOME") return { marketId: "1", outcomeId: "1", outcomeText: ["home"] };
   if (key === "MATCH_DRAW") return { marketId: "1", outcomeId: "2", outcomeText: ["draw"] };
   if (key === "MATCH_AWAY") return { marketId: "1", outcomeId: "3", outcomeText: ["away"] };
+  if (key === "ONE_UP_HOME") return { marketId: "60200", outcomeId: "1", outcomeText: ["home"] };
+  if (key === "ONE_UP_AWAY") return { marketId: "60200", outcomeId: "3", outcomeText: ["away"] };
+  if (key === "TWO_UP_HOME") return { marketId: "60100", outcomeId: "1", outcomeText: ["home"] };
+  if (key === "TWO_UP_AWAY") return { marketId: "60100", outcomeId: "3", outcomeText: ["away"] };
   if (key === "DC_1X") return { marketId: "10", outcomeId: "9", outcomeText: ["home or draw"] };
   if (key === "DC_12") return { marketId: "10", outcomeId: "10", outcomeText: ["home or away"] };
   if (key === "DC_X2") return { marketId: "10", outcomeId: "11", outcomeText: ["draw or away"] };
@@ -221,10 +298,14 @@ function rankEvents(events: JsonRecord[], input: SportyBetSelectionInput) {
     const teams = eventTeams(event);
     const directNameScore = (tokenScore(input.homeTeam, teams.home) + tokenScore(input.awayTeam, teams.away)) / 2;
     const reversedNameScore = (tokenScore(input.homeTeam, teams.away) + tokenScore(input.awayTeam, teams.home)) / 2;
-    const nameScore = Math.max(directNameScore, reversedNameScore * .85);
     const eventTime = eventKickoff(event);
+    const timeDelta = kickoff && eventTime ? Math.abs(kickoff - eventTime) : null;
+    const kickoffBackstop = timeDelta != null && timeDelta <= 8 * 60 * 60_000 && (tokenScore(input.homeTeam, teams.home) >= .9 || tokenScore(input.awayTeam, teams.away) >= .9)
+      ? .78 + Math.max(tokenScore(input.homeTeam, teams.home), tokenScore(input.awayTeam, teams.away)) * .08
+      : 0;
+    const nameScore = Math.max(directNameScore, reversedNameScore * .85, kickoffBackstop);
     const timeScore = !kickoff || !eventTime ? .5 : Math.max(0, 1 - Math.abs(kickoff - eventTime) / 86_400_000);
-    return { event, score: nameScore * .84 + timeScore * .16, nameScore, timeDelta: kickoff && eventTime ? Math.abs(kickoff - eventTime) : null };
+    return { event, score: nameScore * .84 + timeScore * .16, nameScore, timeDelta };
   }).sort((a, b) => b.score - a.score);
 }
 
@@ -289,11 +370,14 @@ async function findEvent(fetcher: FetchLike, input: SportyBetSelectionInput) {
   const key = cacheKey(input);
   const cached = eventCache.get(key);
   if (cached && cached.expiresAt > Date.now()) return cached.event;
-  let events = await searchEvents(fetcher, input.homeTeam);
-  let ranked = rankEvents(events, input);
-  if (!ranked[0] || ranked[0].nameScore < .7) {
-    events = [...events, ...await searchEvents(fetcher, input.awayTeam)];
-    ranked = rankEvents(events, input);
+  let events: JsonRecord[] = [];
+  let ranked: ReturnType<typeof rankEvents> = [];
+  const searchTerms = [...teamSearchTerms(input.homeTeam), ...teamSearchTerms(input.awayTeam)].slice(0, 6);
+  for (const term of searchTerms) {
+    events = [...events, ...await searchEvents(fetcher, term)];
+    ranked = rankEvents([...new Map(events.map((event) => [stringValue(event.eventId || event.id), event])).values()], input);
+    const top = ranked[0];
+    if (top && top.nameScore >= .9 && (top.timeDelta == null || top.timeDelta <= 8 * 60 * 60_000)) break;
   }
   const match = ranked[0];
   if (!match || match.nameScore < .7 || (match.timeDelta != null && match.timeDelta > 3 * 86_400_000)) {
@@ -350,14 +434,34 @@ function safeDeepLink(value: unknown, code: string) {
   return `${SPORTY_ORIGIN}/ng/?shareCode=${encodeURIComponent(code)}`;
 }
 
-export async function createSportyBetCode(selections: SportyBetSelectionInput[], fetcher: FetchLike = fetch): Promise<SportyBetCodeResult> {
+export async function createSportyBetCode(selections: SportyBetSelectionInput[], fetcher: FetchLike = fetch, allowPartial = false): Promise<SportyBetCodeResult> {
   if (!Array.isArray(selections) || selections.length < 1 || selections.length > 50) throw new SportyBetIntegrationError("Choose between 1 and 50 selections.", 400);
-  const resolved = await mapLimit(selections, 4, async (input) => {
-    if (input.providerEventId && input.providerMarketId && input.providerOutcomeId) return directSelection(input);
-    return resolveFromEvent(await findEvent(fetcher, input), input);
+  const attempts = await mapLimit(selections, 4, async (input) => {
+    try {
+      const resolved = input.providerEventId && input.providerMarketId && input.providerOutcomeId
+        ? directSelection(input)
+        : resolveFromEvent(await findEvent(fetcher, input), input);
+      return { input, resolved, error: null };
+    } catch (error) {
+      if (!allowPartial) throw error;
+      return { input, resolved: null, error: error instanceof Error ? error.message : "SportyBet could not match this selection." };
+    }
   });
-  if (new Set(resolved.map((item) => item.eventId)).size !== resolved.length) {
-    throw new SportyBetIntegrationError("Choose only one prediction from each SportyBet match.", 422);
+  const resolved: SportyBetResolvedSelection[] = [];
+  const unmatched = attempts.flatMap((attempt) => attempt.error ? [{ fixtureId: attempt.input.fixtureId, homeTeam: attempt.input.homeTeam, awayTeam: attempt.input.awayTeam, reason: attempt.error }] : []);
+  const usedEvents = new Set<string>();
+  for (const attempt of attempts) {
+    if (!attempt.resolved) continue;
+    if (usedEvents.has(attempt.resolved.eventId)) {
+      if (!allowPartial) throw new SportyBetIntegrationError("Choose only one prediction from each SportyBet match.", 422);
+      unmatched.push({ fixtureId: attempt.input.fixtureId, homeTeam: attempt.input.homeTeam, awayTeam: attempt.input.awayTeam, reason: "Another selected prediction already uses this SportyBet match." });
+      continue;
+    }
+    usedEvents.add(attempt.resolved.eventId);
+    resolved.push(attempt.resolved);
+  }
+  if (!resolved.length) {
+    throw new SportyBetIntegrationError(unmatched[0]?.reason || "None of these selections are currently available on SportyBet.", 422, { unmatched });
   }
   const payload = await sportyRequest(fetcher, `${API_BASE}/orders/share?throwInvalidEvent=true`, {
     method: "POST",
@@ -369,5 +473,5 @@ export async function createSportyBetCode(selections: SportyBetSelectionInput[],
   const verification = await sportyRequest(fetcher, `${API_BASE}/orders/share/${encodeURIComponent(code)}`, { method: "GET" }, "SportyBet created a code but did not confirm it. Please try again.");
   const confirmed = verifiedSelectionCount(verification);
   if (confirmed !== resolved.length) throw new SportyBetIntegrationError("SportyBet did not confirm every selection in the generated code.", 502, { code, expected: resolved.length, confirmed });
-  return { code, deepLink: safeDeepLink(data.shareURL, code), resolved };
+  return { code, deepLink: safeDeepLink(data.shareURL, code), resolved, partial: unmatched.length > 0, unmatched };
 }

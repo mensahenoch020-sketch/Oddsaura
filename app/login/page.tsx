@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export default async function LoginPage() {
   const user = await getChatGPTUser();
   return <main className="auth-page">
-    <header><Link href="/" className="auth-brand"><span>↗</span>Odds<i>Aura</i></Link><Link href="/builder">Browse predictions</Link></header>
+    <header><Link href="/" className="auth-brand"><span>↗</span>Odds<i>Aura</i></Link><Link href="/signup">Create account</Link></header>
     <section className="auth-card">
       <span className="auth-kicker">OddsAura account</span>
       {user ? <>
@@ -16,9 +16,9 @@ export default async function LoginPage() {
         <div className="auth-actions"><Link className="primary" href="/account">Open my account</Link><a href={chatGPTSignOutPath("/")}>Sign out</a></div>
       </> : <>
         <h1>Keep your slips.<br /><i>Come back anytime.</i></h1>
-        <p>Create or access your free OddsAura account securely with ChatGPT. Browsing predictions remains available without signing in.</p>
-        <div className="auth-actions"><a className="primary" href={chatGPTSignInPath("/account")}>Create account / Sign in</a><Link href="/builder">Continue as guest</Link></div>
-        <small>OddsAura never receives your ChatGPT password. Authentication is handled by the sign-in provider.</small>
+        <p>Sign in to save slips, reopen booking codes and keep your ticket history together across devices.</p>
+        <div className="auth-actions"><a className="primary" href={chatGPTSignInPath("/account")}>Sign in securely</a><Link href="/signup">Create a free account</Link></div>
+        <small>Your password is handled by the secure identity provider and is never visible to OddsAura.</small>
       </>}
     </section>
   </main>;

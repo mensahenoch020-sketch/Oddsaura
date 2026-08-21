@@ -35,6 +35,8 @@ export type SportyBetCodeResponse = {
   code: string;
   deepLink: string;
   resolved: Array<{ fixtureId: string; odds: number | null }>;
+  partial: boolean;
+  unmatched: Array<{ fixtureId: string; homeTeam: string; awayTeam: string; reason: string }>;
 };
 
 export async function generateSportyBetCode(selections: Array<{
@@ -50,11 +52,11 @@ export async function generateSportyBetCode(selections: Array<{
   providerMarketId?: string | null;
   providerOutcomeId?: string | null;
   providerSpecifier?: string | null;
-}>) {
+}>, allowPartial = true) {
   const response = await fetch("/api/sportybet/code", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ selections }),
+    body: JSON.stringify({ selections, allowPartial }),
   });
   const payload = await response.json() as SportyBetCodeResponse & { error?: string };
   if (!response.ok || !payload.verified || !payload.code) throw new Error(payload.error || "SportyBet could not create this code.");

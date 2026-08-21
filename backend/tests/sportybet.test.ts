@@ -22,10 +22,10 @@ test("creates and verifies a SportyBet code from provider identifiers", async ()
   assert.match(requests[1]?.url ?? "", /\/api\/ng\/orders\/share\/PB3CFX$/);
 });
 
-test("searches the fixture, loads exact markets, and maps an away result", async () => {
+test("matches provider-wide team aliases and maps an away result", async () => {
   const requests: string[] = [];
   const event = {
-    eventId: "sr:match:1", homeTeamName: "FC Juarez", awayTeamName: "America", estimateStartTime: Date.parse("2026-08-22T03:00:00Z"),
+    eventId: "sr:match:1", homeTeamName: "Sheffield Wednesday", awayTeamName: "Wolves", estimateStartTime: Date.parse("2026-08-25T18:45:00Z"),
     markets: [{ id: "1", desc: "1X2", status: 0, outcomes: [{ id: "1", desc: "Home", odds: "4.10", isActive: 1 }, { id: "2", desc: "Draw", odds: "3.50", isActive: 1 }, { id: "3", desc: "Away", odds: "1.80", isActive: 1 }] }],
   };
   const fakeFetch = async (input: string | URL | Request) => {
@@ -36,8 +36,8 @@ test("searches the fixture, loads exact markets, and maps an away result", async
     return Response.json({ bizCode: 10000, data: { ticket: { selections: [{}] } } });
   };
   const result = await createSportyBetCode([{
-    fixtureId: "espn-1", homeTeam: "FC Juárez", awayTeam: "América", kickoff: "2026-08-22T03:00:00Z",
-    marketKey: "MATCH_AWAY", marketName: "Match result", selection: "América",
+    fixtureId: "espn-1", homeTeam: "Sheffield Wednesday", awayTeam: "Wolverhampton Wanderers", kickoff: "2026-08-25T18:45:00Z",
+    marketKey: "MATCH_AWAY", marketName: "Match result", selection: "Wolverhampton Wanderers",
   }], fakeFetch as typeof fetch);
   assert.equal(result.resolved[0]?.eventId, "sr:match:1");
   assert.equal(result.resolved[0]?.outcomeId, "3");
@@ -77,4 +77,28 @@ test("maps double chance and total-goals selections to SportyBet identifiers", a
     { eventId: "sr:match:2", marketId: "10", outcomeId: "9", specifier: "" },
     { eventId: "sr:match:3", marketId: "18", outcomeId: "13", specifier: "total=2.5" },
   ] });
+});
+
+test("creates a partial code and reports legs SportyBet cannot list", async () => {
+  const fakeFetch = async (input: string | URL | Request) => {
+    const url = String(input);
+    if (url.includes("firstSearch")) return Response.json({ bizCode: 10000, data: { preMatch: [], live: [] } });
+    if (url.includes("/orders/share?")) return Response.json({ bizCode: 10000, data: { shareCode: "PART12" } });
+    return Response.json({ bizCode: 10000, data: { ticket: { selections: [{}] } } });
+  };
+  const result = await createSportyBetCode([
+    {
+      fixtureId: "listed", homeTeam: "Arsenal", awayTeam: "Coventry City", kickoff: "2026-08-21T19:00:00Z",
+      marketKey: "MATCH_HOME", marketName: "Match result", selection: "Arsenal",
+      providerEventId: "sr:match:72221154", providerMarketId: "1", providerOutcomeId: "1",
+    },
+    {
+      fixtureId: "missing", homeTeam: "Imaginary FC", awayTeam: "Unknown United", kickoff: "2026-08-22T19:00:00Z",
+      marketKey: "MATCH_HOME", marketName: "Match result", selection: "Imaginary FC",
+    },
+  ], fakeFetch as typeof fetch, true);
+  assert.equal(result.partial, true);
+  assert.equal(result.resolved.length, 1);
+  assert.equal(result.unmatched.length, 1);
+  assert.equal(result.unmatched[0]?.fixtureId, "missing");
 });

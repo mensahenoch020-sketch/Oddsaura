@@ -4,7 +4,7 @@ const BASE = "https://site.api.espn.com/apis/site/v2/sports/soccer";
 const DEFAULT_LEAGUES = [
   "eng.1", "esp.1", "ger.1", "ita.1", "fra.1", "uefa.champions",
   "uefa.europa", "uefa.europa.conf", "ned.1", "por.1", "sco.1",
-  "bel.1", "tur.1", "usa.1", "mex.1", "bra.1", "arg.1",
+  "bel.1", "tur.1", "ksa.1", "usa.1", "mex.1", "bra.1", "arg.1",
 ];
 
 const compactDate = (date) => date.toISOString().slice(0, 10).replaceAll("-", "");
