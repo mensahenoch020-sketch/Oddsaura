@@ -44,11 +44,12 @@ test("the ESPN fallback normalizes fixtures and available moneyline prices", () 
         { homeAway: "home", team: { id: "1", displayName: "Alpha", abbreviation: "ALP", logo: "https://example.com/a.png" } },
         { homeAway: "away", team: { id: "2", displayName: "Beta", abbreviation: "BET", logo: "https://example.com/b.png" } },
       ],
-      odds: [{ provider: { name: "Example" }, homeTeamOdds: { moneyLine: -150 }, drawOdds: { moneyLine: 240 }, awayTeamOdds: { moneyLine: 330 } }],
+      odds: [{ provider: { name: "Example" }, overUnder: 2.5, moneyline: { home: { close: { odds: "-150" } }, draw: { close: { odds: "+240" } }, away: { close: { odds: "+330" } } }, total: { over: { close: { line: "o2.5", odds: "-120" } }, under: { close: { line: "u2.5", odds: "+100" } } } }],
     }],
   }, { id: "eng.1", name: "Premier League" });
   assert.equal(event.status, "SCHEDULED");
   assert.equal(event.homeTeam.name, "Alpha");
-  assert.equal(event.odds.length, 3);
+  assert.equal(event.odds.length, 5);
   assert.equal(event.odds[0].odds, 1.67);
+  assert.equal(event.odds.find((odd) => odd.selection === "Over 2.5").odds, 1.83);
 });

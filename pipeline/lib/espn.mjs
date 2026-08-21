@@ -20,29 +20,52 @@ function scoreValue(competitor) {
   return Number.isFinite(value) ? value : null;
 }
 
+function lastPrice(side) {
+  return side?.close?.odds ?? side?.open?.odds ?? side?.moneyLine ?? side?.value ?? null;
+}
+
+function lastLine(side, fallback = null) {
+  const raw = side?.close?.line ?? side?.open?.line ?? fallback;
+  const value = Number(String(raw ?? "").replace(/^[a-z]/i, ""));
+  return Number.isFinite(value) ? value : null;
+}
+
+function lastLink(side, fallback = null) {
+  return side?.close?.link?.href ?? side?.open?.link?.href ?? side?.link?.href ?? fallback;
+}
+
 function normalizeOdds(competition, home, away) {
   const quotes = Array.isArray(competition?.odds) ? competition.odds : [];
   const rows = [];
   for (const quote of quotes) {
     const source = `espn-${quote?.provider?.name ?? "odds"}`.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    const provider = quote?.provider?.displayName ?? quote?.provider?.name ?? "Odds";
+    const fallbackLink = quote?.link?.href ?? null;
     const outcomes = [
-      [home?.team?.displayName, quote?.homeTeamOdds?.moneyLine ?? quote?.homeTeamOdds?.value, "home"],
-      ["Draw", quote?.drawOdds?.moneyLine ?? quote?.drawOdds?.value, "draw"],
-      [away?.team?.displayName, quote?.awayTeamOdds?.moneyLine ?? quote?.awayTeamOdds?.value, "away"],
+      [home?.team?.displayName, lastPrice(quote?.moneyline?.home) ?? lastPrice(quote?.homeTeamOdds), "home", lastLink(quote?.moneyline?.home, fallbackLink)],
+      ["Draw", lastPrice(quote?.moneyline?.draw) ?? lastPrice(quote?.drawOdds), "draw", lastLink(quote?.moneyline?.draw ?? quote?.drawOdds, fallbackLink)],
+      [away?.team?.displayName, lastPrice(quote?.moneyline?.away) ?? lastPrice(quote?.awayTeamOdds), "away", lastLink(quote?.moneyline?.away, fallbackLink)],
     ];
-    for (const [selection, price, id] of outcomes) {
+    for (const [selection, price, id, deepLink] of outcomes) {
       const odds = decimalFromAmerican(price);
       if (!selection || !odds) continue;
-      rows.push({ marketId: `${competition.id}-moneyline`, market: "Match result", selectionId: id, selection, line: null, odds, source });
+      rows.push({ marketId: `${competition.id}-moneyline`, market: "Match result", selectionId: id, selection, line: null, odds, source, provider, deepLink });
     }
-    const line = Number(quote?.overUnder);
-    for (const [selection, price, id] of [
-      [`Over ${line}`, quote?.overOdds, "over"],
-      [`Under ${line}`, quote?.underOdds, "under"],
+    const line = lastLine(quote?.total?.over, quote?.overUnder);
+    for (const [selection, price, id, deepLink] of [
+      [`Over ${line}`, lastPrice(quote?.total?.over) ?? quote?.overOdds, "over", lastLink(quote?.total?.over, fallbackLink)],
+      [`Under ${line}`, lastPrice(quote?.total?.under) ?? quote?.underOdds, "under", lastLink(quote?.total?.under, fallbackLink)],
     ]) {
       const odds = decimalFromAmerican(price);
       if (!Number.isFinite(line) || !odds) continue;
-      rows.push({ marketId: `${competition.id}-total`, market: "Total goals", selectionId: id, selection, line, odds, source });
+      rows.push({ marketId: `${competition.id}-total`, market: "Total goals", selectionId: id, selection, line, odds, source, provider, deepLink });
+    }
+    for (const [team, side, id] of [[home, quote?.pointSpread?.home, "home"], [away, quote?.pointSpread?.away, "away"]]) {
+      const handicap = lastLine(side);
+      const odds = decimalFromAmerican(lastPrice(side));
+      if (!team?.team?.displayName || handicap == null || !odds) continue;
+      const signed = handicap > 0 ? `+${handicap}` : String(handicap);
+      rows.push({ marketId: `${competition.id}-handicap`, market: "Handicap", selectionId: id, selection: `${team.team.displayName} ${signed}`, line: handicap, odds, source, provider, deepLink: lastLink(side, fallbackLink) });
     }
   }
   return rows;
