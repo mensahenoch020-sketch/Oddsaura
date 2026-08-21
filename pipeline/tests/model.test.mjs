@@ -19,6 +19,14 @@ test("the keyless model exposes many flexible markets", () => {
   assert.ok(predictions.find((item) => item.key === "MATCH_HOME").probability > predictions.find((item) => item.key === "MATCH_AWAY").probability);
 });
 
+test("fixtures with no team history still receive cautious model probabilities", () => {
+  const predictions = scoreEvent(fixture, []);
+  assert.ok(predictions.length > 30);
+  assert.equal(predictions[0].factors.homePlayed, 0);
+  assert.ok(predictions.every((item) => item.dataQuality < 0.2));
+  assert.ok(predictions.some((item) => item.key === "OVER_1_5"));
+});
+
 test("quoted odds keep the provider mapping needed for future booking codes", () => {
   const predictions = scoreEvent(fixture, history);
   const priced = attachOdds(predictions, [{ market: "Match winner", selection: "1", odds: 1.6, source: "public-json", marketId: "m1", selectionId: "s1", provider: "Example", deepLink: "https://example.com/bet" }]);

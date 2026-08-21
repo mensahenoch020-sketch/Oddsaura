@@ -29,7 +29,7 @@ export default function Home() {
     <header className="oa-header">
       <Link className="oa-brand" href="/" aria-label="OddsAura home"><span className="oa-mark">↗</span><span>Odds<i>Aura</i></span></Link>
       <div className={`oa-status oa-status-${snapshot.status}`}><span /> {refreshing ? "Checking GitHub data…" : statusLabel(snapshot.status)}</div>
-      <div className="oa-header-actions"><a className="oa-matches-link" href="/matches">Matches</a><a className="oa-builder-link" href="/builder">Choose predictions</a><a className="oa-admin-link" href="/admin">System</a></div>
+      <div className="oa-header-actions"><a className="oa-matches-link" href="/matches">Matches</a><a className="oa-matches-link" href="/convert">Convert</a><a className="oa-builder-link" href="/builder">Choose predictions</a><a className="oa-admin-link" href="/login">Account</a></div>
     </header>
 
     <section className="oa-intro">

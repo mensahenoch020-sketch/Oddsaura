@@ -22,9 +22,11 @@ export type WatchlistPick = Omit<TicketSelection, "odds" | "edge"> & {
   quotedOdds?: number | null;
 };
 export type PredictedPick = Omit<TicketSelection, "odds"> & {
-  quotedOdds: number;
+  quotedOdds: number | null;
   fairOdds: number;
   tier: "SAFE" | "BALANCED" | "HIGH_RISK";
+  dataQuality?: "LOW" | "MEDIUM" | "HIGH";
+  historyMatches?: number;
   reasoning: string;
   oddsProvider?: string | null;
   providerMarketId?: string | null;
