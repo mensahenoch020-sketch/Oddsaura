@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { fallbackSnapshot, loadSnapshot, type Snapshot } from "../data";
 import "./admin.css";
 
@@ -16,10 +17,14 @@ export default function AdminPage() {
     finally { setBusy(false); }
   }
 
-  useEffect(() => { void refresh(); }, []);
+  useEffect(() => {
+    let active = true;
+    loadSnapshot().then((data) => { if (active) setSnapshot(data); }).catch(() => { if (active) setMessage("The live GitHub snapshot could not be reached. The last bundled snapshot is still shown."); }).finally(() => { if (active) setBusy(false); });
+    return () => { active = false; };
+  }, []);
 
   return <main className="adm-app">
-    <aside className="adm-sidebar"><a href="/" className="adm-brand">Odds<span>Aura</span></a><nav><a href="#overview">Pipeline</a><a href="#tickets">Published tickets</a><a href="#markets">Market coverage</a></nav><a className="adm-repo" href="https://github.com/mensahenoch020-sketch/Oddsaura/actions" target="_blank" rel="noreferrer">Automation runs ↗</a></aside>
+    <aside className="adm-sidebar"><Link href="/" className="adm-brand">Odds<span>Aura</span></Link><nav><a href="#overview">Pipeline</a><a href="#tickets">Published tickets</a><a href="#markets">Market coverage</a></nav><a className="adm-repo" href="https://github.com/mensahenoch020-sketch/Oddsaura/actions" target="_blank" rel="noreferrer">Automation runs ↗</a></aside>
     <section className="adm-content">
       <header><div><span className="adm-kicker">Zero-key operations</span><h1>Automation monitor</h1></div><div className="adm-actions"><button className="adm-primary" disabled={busy} onClick={refresh}>{busy ? "Checking…" : "Refresh snapshot"}</button></div></header>
       {message && <div className="adm-message">{message}</div>}

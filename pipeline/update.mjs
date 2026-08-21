@@ -9,6 +9,8 @@ import { buildTicket } from "./lib/tickets.mjs";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const output = resolve(root, "data/public/snapshot.json");
 const now = new Date();
+const futureDays = Number(process.env.FUTURE_DAYS ?? 7);
+const horizon = now.getTime() + futureDays * 24 * 60 * 60 * 1000;
 const previous = JSON.parse(await readFile(output, "utf8"));
 
 let events = [];
@@ -19,29 +21,29 @@ const sources = [];
 try {
   const collected = await collectSofaScore({
     historyDays: Number(process.env.HISTORY_DAYS ?? 10),
-    futureDays: Number(process.env.FUTURE_DAYS ?? 3),
-    oddsLimit: Number(process.env.ODDS_MATCH_LIMIT ?? 28),
+    futureDays,
+    oddsLimit: Number(process.env.ODDS_MATCH_LIMIT ?? 45),
   });
   events = collected.events;
   warnings = collected.warnings;
-  if (!events.length) throw new Error(collected.warnings[0] ?? "The source returned no football events");
+  if (!events.length) throw new Error(`${collected.blocked ? "SOFASCORE_BLOCKED: " : ""}${collected.warnings[0] ?? "The source returned no football events"}`);
   sourceStatus = warnings.length ? "partial" : "healthy";
   message = warnings.length ? "Updated with partial source coverage." : "Fixtures, odds and predictions updated automatically.";
   sources.push({ id: "sofascore-public-json", label: "SofaScore public JSON", status: sourceStatus, lastSuccessAt: now.toISOString(), records: events.length, warnings: warnings.slice(0, 8) });
 } catch (error) {
   const reason = error instanceof Error ? error.message : "SofaScore collection failed";
   console.error(reason);
-  sources.push({ id: "sofascore-public-json", label: "SofaScore public JSON", status: "error", lastSuccessAt: null, records: 0, warnings: [reason].slice(0, 8) });
+  sources.push({ id: "sofascore-public-json", label: "SofaScore public JSON", status: reason.startsWith("SOFASCORE_BLOCKED:") ? "blocked" : "error", lastSuccessAt: null, records: 0, warnings: [reason.replace("SOFASCORE_BLOCKED: ", "")].slice(0, 8) });
   try {
     const collected = await collectEspn({
       historyDays: Number(process.env.ESPN_HISTORY_DAYS ?? 35),
-      futureDays: Number(process.env.FUTURE_DAYS ?? 3),
+      futureDays,
     });
     events = collected.events;
     warnings = collected.warnings;
     if (!events.length) throw new Error("The fallback returned no football events");
     sourceStatus = warnings.length ? "partial" : "healthy";
-    message = "SofaScore was unavailable, so OddsAura switched to its keyless ESPN fixture fallback.";
+    message = "The keyless ESPN feed is supplying live, current and upcoming football data. SofaScore is optional and presently blocked at its network edge.";
     sources.push({ id: "espn-public-json", label: "ESPN public JSON fallback", status: sourceStatus, lastSuccessAt: now.toISOString(), records: events.length, warnings: warnings.slice(0, 8) });
   } catch (fallbackError) {
     const fallbackReason = fallbackError instanceof Error ? fallbackError.message : "ESPN fallback failed";
@@ -56,7 +58,8 @@ if (!events.length) {
   process.exit(0);
 }
 
-const upcoming = events.filter((event) => event.status === "SCHEDULED" && new Date(event.kickoff) > now && new Date(event.kickoff).getTime() < now.getTime() + 72 * 60 * 60 * 1000);
+const upcoming = events.filter((event) => event.status === "SCHEDULED" && new Date(event.kickoff) > now && new Date(event.kickoff).getTime() < horizon);
+const liveFixtures = events.filter((event) => event.status === "LIVE").sort((a, b) => a.kickoff.localeCompare(b.kickoff));
 const predictions = upcoming.flatMap((event) => attachOdds(scoreEvent(event, events), event.odds));
 const tickets = ["SAFE", "BALANCED", "HIGH_RISK"].map((category) => buildTicket(predictions, category, upcoming)).filter(Boolean);
 const fixtureMap = new Map(upcoming.map((fixture) => [fixture.id, fixture]));
@@ -89,7 +92,7 @@ const marketCatalog = [...new Set([
   "Corners", "Cards", "Shots and player props",
 ])].sort();
 const snapshot = {
-  version: 2,
+  version: 3,
   generatedAt: now.toISOString(),
   stale: false,
   status: sourceStatus,
@@ -103,7 +106,8 @@ const snapshot = {
     predictions: predictions.length,
     publishedTickets: tickets.length,
   },
-  fixtures: upcoming.slice(0, 80),
+  fixtures: upcoming.slice(0, 240),
+  liveFixtures: liveFixtures.slice(0, 120),
   recentResults: events.filter((event) => event.status === "FINISHED").slice(-1000),
   marketCatalog,
   watchlist,

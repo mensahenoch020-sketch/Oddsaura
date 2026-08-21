@@ -33,6 +33,7 @@ export type Snapshot = {
   sources: Array<{ id: string; label: string; status: string; lastSuccessAt: string | null; records: number; warnings?: string[] }>;
   metrics: { fixtures: number; live: number; completed: number; pricedMarkets: number; predictions: number; publishedTickets: number };
   fixtures?: Fixture[];
+  liveFixtures?: Fixture[];
   marketCatalog: string[];
   watchlist?: WatchlistPick[];
   tickets: Ticket[];

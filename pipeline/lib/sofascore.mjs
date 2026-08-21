@@ -94,15 +94,29 @@ export function normalizeOdds(payload) {
   return rows;
 }
 
-export async function collectSofaScore({ historyDays = 10, futureDays = 3, oddsLimit = 28 } = {}) {
+export async function collectSofaScore({ historyDays = 10, futureDays = 7, oddsLimit = 45 } = {}) {
   const now = new Date();
   const events = new Map();
   const warnings = [];
+  const today = isoDate(now);
+  let todayPayload;
+  try {
+    todayPayload = await sofaJson(`/sport/football/scheduled-events/${today}`);
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "fetch failed";
+    const blocked = /\b403\b/.test(reason);
+    return {
+      events: [],
+      warnings: [blocked ? "SofaScore rejected this collector at its network edge (403); the fallback feed was activated." : `${today}: ${reason}`],
+      blocked,
+    };
+  }
+
   for (let offset = -historyDays; offset <= futureDays; offset += 1) {
     const date = new Date(now);
     date.setUTCDate(date.getUTCDate() + offset);
     try {
-      const payload = await sofaJson(`/sport/football/scheduled-events/${isoDate(date)}`);
+      const payload = offset === 0 ? todayPayload : await sofaJson(`/sport/football/scheduled-events/${isoDate(date)}`);
       for (const raw of payload?.events ?? []) {
         const event = normalizeEvent(raw);
         if (event.id) events.set(event.id, event);
@@ -114,7 +128,7 @@ export async function collectSofaScore({ historyDays = 10, futureDays = 3, oddsL
   }
 
   const upcoming = [...events.values()]
-    .filter((event) => event.status === "SCHEDULED" && new Date(event.kickoff).getTime() < Date.now() + 72 * 60 * 60 * 1000)
+    .filter((event) => event.status === "SCHEDULED" && new Date(event.kickoff).getTime() < Date.now() + futureDays * 24 * 60 * 60 * 1000)
     .sort((a, b) => a.kickoff.localeCompare(b.kickoff))
     .slice(0, oddsLimit);
 
@@ -128,5 +142,5 @@ export async function collectSofaScore({ historyDays = 10, futureDays = 3, oddsL
     await wait(240);
   }
 
-  return { events: [...events.values()].sort((a, b) => a.kickoff.localeCompare(b.kickoff)), warnings };
+  return { events: [...events.values()].sort((a, b) => a.kickoff.localeCompare(b.kickoff)), warnings, blocked: false };
 }
