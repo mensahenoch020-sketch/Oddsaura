@@ -13,6 +13,7 @@ const passwordIterations = 210_000;
 const encoder = new TextEncoder();
 const protectedPages = ["/dashboard", "/matches", "/builder", "/results", "/account", "/admin"];
 const protectedApis = ["/api/sportybet/code", "/api/account", "/api/slips"];
+const edgeOrigin = (process.env.ODDSAURA_EDGE_ORIGIN || "https://oddsaura.chipsofrio.chatgpt.site").replace(/\/$/, "");
 
 const pool = process.env.DATABASE_URL ? new Pool({ connectionString: process.env.DATABASE_URL }) : null;
 
@@ -96,12 +97,37 @@ function proxy(req, res, user) {
   req.pipe(upstream);
 }
 
+async function proxyEdge(req, res) {
+  const target = new URL(req.url || "/", edgeOrigin);
+  const headers = new Headers();
+  for (const [name, value] of Object.entries(req.headers)) {
+    if (name === "host" || value == null || name.startsWith("x-oddsaura-")) continue;
+    headers.set(name, Array.isArray(value) ? value.join(", ") : value);
+  }
+  headers.set("accept-encoding", "identity");
+  headers.set("x-forwarded-host", req.headers.host || "");
+  const init = { method: req.method, headers, redirect: "manual" };
+  if (req.method !== "GET" && req.method !== "HEAD") { init.body = req; init.duplex = "half"; }
+  const response = await fetch(target, init);
+  const body = Buffer.from(await response.arrayBuffer());
+  const responseHeaders = {};
+  response.headers.forEach((value, name) => { if (name !== "content-length" && name !== "content-encoding" && name !== "set-cookie") responseHeaders[name] = value; });
+  const cookies = typeof response.headers.getSetCookie === "function" ? response.headers.getSetCookie() : [];
+  if (cookies.length) responseHeaders["set-cookie"] = cookies;
+  const location = response.headers.get("location");
+  if (location) responseHeaders.location = location.startsWith(edgeOrigin) ? `https://${req.headers.host}${location.slice(edgeOrigin.length)}` : location;
+  responseHeaders["content-length"] = String(body.length);
+  res.writeHead(response.status, responseHeaders);
+  res.end(body);
+}
+
 await ensureTables();
 const vinext = spawn(resolve("node_modules/.bin/vinext"), ["start", "--port", String(appPort), "--hostname", "127.0.0.1"], { stdio: "inherit", env: { ...process.env, PORT: String(appPort) } });
 vinext.on("exit", (code) => { if (code) process.exit(code); });
 
 createServer(async (req, res) => {
   try {
+    if (!pool) return await proxyEdge(req, res);
     const url = new URL(req.url || "/", `https://${req.headers.host || "oddsaura.local"}`);
     if (url.pathname.startsWith("/api/auth/")) return await authApi(req, res, url);
     const pageProtected = protectedPages.some((path) => url.pathname === path || url.pathname.startsWith(`${path}/`));
