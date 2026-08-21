@@ -9,7 +9,7 @@ const port = Number(process.env.PORT || 3000);
 const appPort = Number(process.env.INTERNAL_APP_PORT || (port === 3001 ? 3002 : 3001));
 const cookieName = "oa_session";
 const sessionSeconds = 60 * 60 * 24 * 30;
-const passwordIterations = 210_000;
+const passwordIterations = 100_000;
 const encoder = new TextEncoder();
 const protectedPages = ["/dashboard", "/matches", "/builder", "/results", "/account", "/admin"];
 const protectedApis = ["/api/sportybet/code", "/api/account", "/api/slips"];
