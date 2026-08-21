@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "generatedAt": "2026-08-21T07:09:07.497Z",
+  "generatedAt": "2026-08-21T08:59:17.231Z",
   "stale": false,
   "status": "healthy",
   "message": "Global fixtures, team badges, recent results and model-ready history are updating without paid API keys.",
@@ -9,7 +9,7 @@
       "id": "espn-league-history",
       "label": "ESPN league history",
       "status": "healthy",
-      "lastSuccessAt": "2026-08-21T07:09:07.497Z",
+      "lastSuccessAt": "2026-08-21T08:59:17.231Z",
       "records": 461,
       "warnings": []
     },
@@ -17,50 +17,21 @@
       "id": "espn-global-json",
       "label": "ESPN global match board",
       "status": "healthy",
-      "lastSuccessAt": "2026-08-21T07:09:07.497Z",
+      "lastSuccessAt": "2026-08-21T08:59:17.231Z",
       "records": 3699,
       "warnings": []
     }
   ],
   "metrics": {
-    "fixtures": 1312,
+    "fixtures": 1311,
     "live": 0,
     "completed": 2350,
-    "pricedMarkets": 3018,
-    "predictions": 69536,
-    "selectablePredictions": 1316,
+    "pricedMarkets": 3020,
+    "predictions": 69483,
+    "selectablePredictions": 1315,
     "publishedTickets": 1
   },
   "fixtures": [
-    {
-      "id": "espn-401913090",
-      "providerId": "401913090",
-      "source": "espn-global-json",
-      "league": {
-        "id": "19834",
-        "name": "Club Friendly",
-        "country": "",
-        "season": "2026"
-      },
-      "round": "",
-      "kickoff": "2026-08-21T08:30:00.000Z",
-      "status": "SCHEDULED",
-      "homeTeam": {
-        "id": "espn-133155",
-        "name": "Cádiz II",
-        "shortName": "CAD",
-        "logo": ""
-      },
-      "awayTeam": {
-        "id": "espn-8040",
-        "name": "Lion City Sailors FC",
-        "shortName": "LCS",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/8040.png"
-      },
-      "homeScore": 0,
-      "awayScore": 0,
-      "odds": []
-    },
     {
       "id": "espn-401913089",
       "providerId": "401913089",
@@ -124,7 +95,7 @@
           "selectionId": "home",
           "selection": "Kashiwa Reysol",
           "line": null,
-          "odds": 1.48,
+          "odds": 1.47,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34526681%3Foutcomes%3D0ML85891341_1"
@@ -135,7 +106,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 4.4,
+          "odds": 4.5,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34526681%3Foutcomes%3D0ML85891341_2"
@@ -157,7 +128,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 1.71,
+          "odds": 1.67,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34526681%3Foutcomes%3D0OU85891452O250_1"
@@ -168,7 +139,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 2.05,
+          "odds": 2.1,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34526681%3Foutcomes%3D0OU85891452U250_3"
@@ -179,7 +150,7 @@
           "selectionId": "home",
           "selection": "Kashiwa Reysol -1.5",
           "line": -1.5,
-          "odds": 2.25,
+          "odds": 2.2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34526681%3Foutcomes%3D0HC85891457N150_1"
@@ -190,7 +161,7 @@
           "selectionId": "away",
           "selection": "V-Varen Nagasaki +1.5",
           "line": 1.5,
-          "odds": 1.57,
+          "odds": 1.61,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34526681%3Foutcomes%3D0HC85891457P150_3"
@@ -231,7 +202,7 @@
           "selectionId": "home",
           "selection": "FC Tokyo",
           "line": null,
-          "odds": 1.53,
+          "odds": 1.56,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34526693%3Foutcomes%3D0ML85891357_1"
@@ -253,7 +224,7 @@
           "selectionId": "away",
           "selection": "JEF United Ichihara-Chiba",
           "line": null,
-          "odds": 6,
+          "odds": 5.75,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34526693%3Foutcomes%3D0ML85891357_3"
@@ -264,7 +235,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 1.77,
+          "odds": 1.69,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34526693%3Foutcomes%3D0OU85891573O250_1"
@@ -275,7 +246,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 2,
+          "odds": 2.1,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34526693%3Foutcomes%3D0OU85891573U250_3"
@@ -284,23 +255,23 @@
           "marketId": "401877665-handicap",
           "market": "Handicap",
           "selectionId": "home",
-          "selection": "FC Tokyo -1.5",
-          "line": -1.5,
-          "odds": 2.45,
+          "selection": "FC Tokyo -0.5",
+          "line": -0.5,
+          "odds": 1.53,
           "source": "espn-draftkings",
           "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34526693%3Foutcomes%3D0HC85891578N150_1"
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34526693%3Foutcomes%3D0HC85891578N50_1"
         },
         {
           "marketId": "401877665-handicap",
           "market": "Handicap",
           "selectionId": "away",
-          "selection": "JEF United Ichihara-Chiba +1.5",
-          "line": 1.5,
-          "odds": 1.5,
+          "selection": "JEF United Ichihara-Chiba +0.5",
+          "line": 0.5,
+          "odds": 2.35,
           "source": "espn-draftkings",
           "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34526693%3Foutcomes%3D0HC85891578P150_3"
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34526693%3Foutcomes%3D0HC85891578P50_3"
         }
       ]
     },
@@ -338,7 +309,7 @@
           "selectionId": "home",
           "selection": "Power Dynamos",
           "line": null,
-          "odds": 1.91,
+          "odds": 2.1,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34551140%3Foutcomes%3D0ML85961934_1"
@@ -360,7 +331,7 @@
           "selectionId": "away",
           "selection": "ZESCO United",
           "line": null,
-          "odds": 3.9,
+          "odds": 3.4,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34551140%3Foutcomes%3D0ML85961934_3"
@@ -371,7 +342,7 @@
           "selectionId": "over",
           "selection": "Over 1.5",
           "line": 1.5,
-          "odds": 1.49,
+          "odds": 1.51,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34551140%3Foutcomes%3D0OU85961974O150_1"
@@ -393,7 +364,7 @@
           "selectionId": "home",
           "selection": "Power Dynamos -0.5",
           "line": -0.5,
-          "odds": 1.87,
+          "odds": 2.05,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34551140%3Foutcomes%3D0HC85961977N50_1"
@@ -404,7 +375,7 @@
           "selectionId": "away",
           "selection": "ZESCO United +0.5",
           "line": 0.5,
-          "odds": 1.8,
+          "odds": 1.69,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34551140%3Foutcomes%3D0HC85961977P50_3"
@@ -474,7 +445,7 @@
           "selectionId": "home",
           "selection": "Preußen Münster",
           "line": null,
-          "odds": 3.3,
+          "odds": 3.6,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537098%3Foutcomes%3D0ML85919584_1"
@@ -485,7 +456,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.75,
+          "odds": 3.9,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537098%3Foutcomes%3D0ML85919584_2"
@@ -496,7 +467,7 @@
           "selectionId": "away",
           "selection": "Karlsruher SC",
           "line": null,
-          "odds": 2.05,
+          "odds": 1.87,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537098%3Foutcomes%3D0ML85919584_3"
@@ -505,23 +476,23 @@
           "marketId": "401874895-total",
           "market": "Total goals",
           "selectionId": "over",
-          "selection": "Over 3.5",
-          "line": 3.5,
-          "odds": 2.35,
+          "selection": "Over 2.5",
+          "line": 2.5,
+          "odds": 1.54,
           "source": "espn-draftkings",
           "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537098%3Foutcomes%3D0OU85919882O350_1"
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537098%3Foutcomes%3D0OU85919882O250_1"
         },
         {
           "marketId": "401874895-total",
           "market": "Total goals",
           "selectionId": "under",
-          "selection": "Under 3.5",
-          "line": 3.5,
-          "odds": 1.56,
+          "selection": "Under 2.5",
+          "line": 2.5,
+          "odds": 2.35,
           "source": "espn-draftkings",
           "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537098%3Foutcomes%3D0OU85919882U350_3"
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537098%3Foutcomes%3D0OU85919882U250_3"
         },
         {
           "marketId": "401874895-handicap",
@@ -529,7 +500,7 @@
           "selectionId": "home",
           "selection": "Preußen Münster +0.5",
           "line": 0.5,
-          "odds": 1.74,
+          "odds": 1.91,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537098%3Foutcomes%3D0HC85919887P50_1"
@@ -540,7 +511,7 @@
           "selectionId": "away",
           "selection": "Karlsruher SC -0.5",
           "line": -0.5,
-          "odds": 1.95,
+          "odds": 1.8,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537098%3Foutcomes%3D0HC85919887N50_3"
@@ -610,7 +581,7 @@
           "selectionId": "home",
           "selection": "SV Waldhof Mannheim",
           "line": null,
-          "odds": 3,
+          "odds": 3.05,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537097%3Foutcomes%3D0ML85919583_1"
@@ -621,7 +592,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.9,
+          "odds": 4,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537097%3Foutcomes%3D0ML85919583_2"
@@ -632,7 +603,7 @@
           "selectionId": "away",
           "selection": "Kaiserslautern",
           "line": null,
-          "odds": 2.15,
+          "odds": 2.1,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537097%3Foutcomes%3D0ML85919583_3"
@@ -643,7 +614,7 @@
           "selectionId": "over",
           "selection": "Over 3.5",
           "line": 3.5,
-          "odds": 2.25,
+          "odds": 2.3,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537097%3Foutcomes%3D0OU85919854O350_1"
@@ -654,7 +625,7 @@
           "selectionId": "under",
           "selection": "Under 3.5",
           "line": 3.5,
-          "odds": 1.61,
+          "odds": 1.59,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537097%3Foutcomes%3D0OU85919854U350_3"
@@ -665,7 +636,7 @@
           "selectionId": "home",
           "selection": "SV Waldhof Mannheim +0.5",
           "line": 0.5,
-          "odds": 1.69,
+          "odds": 1.71,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537097%3Foutcomes%3D0HC85919859P50_1"
@@ -676,7 +647,7 @@
           "selectionId": "away",
           "selection": "Kaiserslautern -0.5",
           "line": -0.5,
-          "odds": 2.05,
+          "odds": 2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537097%3Foutcomes%3D0HC85919859N50_3"
@@ -746,7 +717,7 @@
           "selectionId": "home",
           "selection": "Al Riyadh",
           "line": null,
-          "odds": 9.5,
+          "odds": 10,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34528246%3Foutcomes%3D0ML85896478_1"
@@ -768,7 +739,7 @@
           "selectionId": "away",
           "selection": "Al Nassr",
           "line": null,
-          "odds": 1.26,
+          "odds": 1.25,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34528246%3Foutcomes%3D0ML85896478_3"
@@ -1047,7 +1018,7 @@
           "selectionId": "home",
           "selection": "IK Sirius",
           "line": null,
-          "odds": 1.77,
+          "odds": 1.83,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537256%3Foutcomes%3D0ML85919991_1"
@@ -1058,7 +1029,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 4.2,
+          "odds": 4.1,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537256%3Foutcomes%3D0ML85919991_2"
@@ -1069,7 +1040,7 @@
           "selectionId": "away",
           "selection": "BK Häcken",
           "line": null,
-          "odds": 3.9,
+          "odds": 3.8,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537256%3Foutcomes%3D0ML85919991_3"
@@ -1102,7 +1073,7 @@
           "selectionId": "home",
           "selection": "IK Sirius -0.5",
           "line": -0.5,
-          "odds": 1.74,
+          "odds": 1.77,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537256%3Foutcomes%3D0HC85920005N50_1"
@@ -1261,7 +1232,7 @@
           "selectionId": "home",
           "selection": "Aldosivi",
           "line": null,
-          "odds": 3.2,
+          "odds": 3,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34527507%3Foutcomes%3D0ML85894371_1"
@@ -1283,7 +1254,7 @@
           "selectionId": "away",
           "selection": "Unión (Santa Fe)",
           "line": null,
-          "odds": 2.45,
+          "odds": 2.55,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34527507%3Foutcomes%3D0ML85894371_3"
@@ -1294,7 +1265,7 @@
           "selectionId": "over",
           "selection": "Over 1.5",
           "line": 1.5,
-          "odds": 1.54,
+          "odds": 1.53,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34527507%3Foutcomes%3D0OU85894396O150_1"
@@ -1316,7 +1287,7 @@
           "selectionId": "home",
           "selection": "Aldosivi +0.5",
           "line": 0.5,
-          "odds": 1.54,
+          "odds": 1.5,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34527507%3Foutcomes%3D0HC85894401P50_1"
@@ -1327,7 +1298,7 @@
           "selectionId": "away",
           "selection": "Unión (Santa Fe) -0.5",
           "line": -0.5,
-          "odds": 2.3,
+          "odds": 2.45,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34527507%3Foutcomes%3D0HC85894401N50_3"
@@ -2139,7 +2110,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 2.05,
+          "odds": 2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34535874%3Foutcomes%3D0OU85916784O250_1"
@@ -2150,7 +2121,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 1.71,
+          "odds": 1.77,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34535874%3Foutcomes%3D0OU85916784U250_3"
@@ -2353,7 +2324,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 1.59,
+          "odds": 1.63,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34526502%3Foutcomes%3D0OU85890986O250_1"
@@ -2364,7 +2335,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 2.3,
+          "odds": 2.2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34526502%3Foutcomes%3D0OU85890986U250_3"
@@ -2460,7 +2431,7 @@
           "selectionId": "over",
           "selection": "Over 3.5",
           "line": 3.5,
-          "odds": 2.1,
+          "odds": 2.05,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537292%3Foutcomes%3D0OU85920096O350_1"
@@ -2471,7 +2442,7 @@
           "selectionId": "under",
           "selection": "Under 3.5",
           "line": 3.5,
-          "odds": 1.69,
+          "odds": 1.71,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537292%3Foutcomes%3D0OU85920096U350_3"
@@ -2641,7 +2612,7 @@
           "selectionId": "home",
           "selection": "MVV Maastricht",
           "line": null,
-          "odds": 3.65,
+          "odds": 3.55,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34535953%3Foutcomes%3D0ML85917027_1"
@@ -2652,7 +2623,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.95,
+          "odds": 3.85,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34535953%3Foutcomes%3D0ML85917027_2"
@@ -2663,7 +2634,7 @@
           "selectionId": "away",
           "selection": "FC Volendam",
           "line": null,
-          "odds": 1.91,
+          "odds": 1.95,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34535953%3Foutcomes%3D0ML85917027_3"
@@ -2696,7 +2667,7 @@
           "selectionId": "home",
           "selection": "MVV Maastricht +0.5",
           "line": 0.5,
-          "odds": 1.87,
+          "odds": 1.83,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34535953%3Foutcomes%3D0HC85917034P50_1"
@@ -2707,7 +2678,7 @@
           "selectionId": "away",
           "selection": "FC Volendam -0.5",
           "line": -0.5,
-          "odds": 1.83,
+          "odds": 1.87,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34535953%3Foutcomes%3D0HC85917034N50_3"
@@ -2855,7 +2826,7 @@
           "selectionId": "home",
           "selection": "Acassuso",
           "line": null,
-          "odds": 3.45,
+          "odds": 3.4,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34530845%3Foutcomes%3D0ML85903087_1"
@@ -2866,7 +2837,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.1,
+          "odds": 3,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34530845%3Foutcomes%3D0ML85903087_2"
@@ -2877,7 +2848,7 @@
           "selectionId": "away",
           "selection": "Godoy Cruz Antonio Tomba",
           "line": null,
-          "odds": 2.1,
+          "odds": 2.15,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34530845%3Foutcomes%3D0ML85903087_3"
@@ -2910,7 +2881,7 @@
           "selectionId": "home",
           "selection": "Acassuso +0.5",
           "line": 0.5,
-          "odds": 1.69,
+          "odds": 1.65,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34530845%3Foutcomes%3D0HC85903293P50_1"
@@ -2921,7 +2892,7 @@
           "selectionId": "away",
           "selection": "Godoy Cruz Antonio Tomba -0.5",
           "line": -0.5,
-          "odds": 2.05,
+          "odds": 2.1,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34530845%3Foutcomes%3D0HC85903293N50_3"
@@ -2962,7 +2933,7 @@
           "selectionId": "home",
           "selection": "Erzurum BB",
           "line": null,
-          "odds": 7,
+          "odds": 6.5,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537361%3Foutcomes%3D0ML85920261_1"
@@ -2984,7 +2955,7 @@
           "selectionId": "away",
           "selection": "Galatasaray",
           "line": null,
-          "odds": 1.45,
+          "odds": 1.48,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537361%3Foutcomes%3D0ML85920261_3"
@@ -3017,7 +2988,7 @@
           "selectionId": "home",
           "selection": "Erzurum BB +1.5",
           "line": 1.5,
-          "odds": 1.61,
+          "odds": 1.56,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537361%3Foutcomes%3D0HC85920310P150_1"
@@ -3028,7 +2999,7 @@
           "selectionId": "away",
           "selection": "Galatasaray -1.5",
           "line": -1.5,
-          "odds": 2.2,
+          "odds": 2.3,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537361%3Foutcomes%3D0HC85920310N150_3"
@@ -3069,7 +3040,7 @@
           "selectionId": "home",
           "selection": "Vicenza",
           "line": null,
-          "odds": 2.6,
+          "odds": 2.65,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34507933%3Foutcomes%3D0ML85834471_1"
@@ -3080,7 +3051,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.15,
+          "odds": 3.2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34507933%3Foutcomes%3D0ML85834471_2"
@@ -3091,7 +3062,7 @@
           "selectionId": "away",
           "selection": "Catanzaro",
           "line": null,
-          "odds": 2.85,
+          "odds": 2.75,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34507933%3Foutcomes%3D0ML85834471_3"
@@ -3102,7 +3073,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 2.1,
+          "odds": 2.05,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34507933%3Foutcomes%3D0OU85834717O250_1"
@@ -3113,7 +3084,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 1.69,
+          "odds": 1.71,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34507933%3Foutcomes%3D0OU85834717U250_3"
@@ -3124,7 +3095,7 @@
           "selectionId": "home",
           "selection": "Vicenza -0.5",
           "line": -0.5,
-          "odds": 2.45,
+          "odds": 2.5,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34507933%3Foutcomes%3D0HC85834722N50_1"
@@ -3135,7 +3106,7 @@
           "selectionId": "away",
           "selection": "Catanzaro +0.5",
           "line": 0.5,
-          "odds": 1.49,
+          "odds": 1.48,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34507933%3Foutcomes%3D0HC85834722P50_3"
@@ -3283,7 +3254,7 @@
           "selectionId": "home",
           "selection": "San Telmo",
           "line": null,
-          "odds": 3,
+          "odds": 2.9,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34530846%3Foutcomes%3D0ML85903089_1"
@@ -3305,7 +3276,7 @@
           "selectionId": "away",
           "selection": "Deportivo Morón",
           "line": null,
-          "odds": 2.5,
+          "odds": 2.6,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34530846%3Foutcomes%3D0ML85903089_3"
@@ -3338,7 +3309,7 @@
           "selectionId": "home",
           "selection": "San Telmo +0.5",
           "line": 0.5,
-          "odds": 1.5,
+          "odds": 1.48,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34530846%3Foutcomes%3D0HC85903300P50_1"
@@ -3349,7 +3320,7 @@
           "selectionId": "away",
           "selection": "Deportivo Morón -0.5",
           "line": -0.5,
-          "odds": 2.4,
+          "odds": 2.45,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34530846%3Foutcomes%3D0HC85903300N50_3"
@@ -3390,7 +3361,7 @@
           "selectionId": "home",
           "selection": "Comunicaciones",
           "line": null,
-          "odds": 2.8,
+          "odds": 2.7,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34550406%3Foutcomes%3D0ML85959776_1"
@@ -3412,7 +3383,7 @@
           "selectionId": "away",
           "selection": "Sportivo Italiano",
           "line": null,
-          "odds": 2.55,
+          "odds": 2.7,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34550406%3Foutcomes%3D0ML85959776_3"
@@ -3423,7 +3394,7 @@
           "selectionId": "over",
           "selection": "Over 1.5",
           "line": 1.5,
-          "odds": 1.54,
+          "odds": 1.53,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34550406%3Foutcomes%3D0OU85959786O150_1"
@@ -3434,7 +3405,7 @@
           "selectionId": "under",
           "selection": "Under 1.5",
           "line": 1.5,
-          "odds": 2.25,
+          "odds": 2.3,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34550406%3Foutcomes%3D0OU85959786U150_3"
@@ -3445,7 +3416,7 @@
           "selectionId": "home",
           "selection": "Comunicaciones +0.5",
           "line": 0.5,
-          "odds": 1.45,
+          "odds": 1.43,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34550406%3Foutcomes%3D0HC85959789P50_1"
@@ -3456,7 +3427,7 @@
           "selectionId": "away",
           "selection": "Sportivo Italiano -0.5",
           "line": -0.5,
-          "odds": 2.45,
+          "odds": 2.55,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34550406%3Foutcomes%3D0HC85959789N50_3"
@@ -3733,7 +3704,7 @@
           "selectionId": "away",
           "selection": "RAAL La Louvière",
           "line": null,
-          "odds": 3.75,
+          "odds": 3.85,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532652%3Foutcomes%3D0ML85907990_3"
@@ -3744,7 +3715,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 2.05,
+          "odds": 2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532652%3Foutcomes%3D0OU85908065O250_1"
@@ -3777,7 +3748,7 @@
           "selectionId": "away",
           "selection": "RAAL La Louvière +0.5",
           "line": 0.5,
-          "odds": 1.8,
+          "odds": 1.83,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532652%3Foutcomes%3D0HC85908070P50_3"
@@ -3862,7 +3833,7 @@
           "selectionId": "under",
           "selection": "Under 3.5",
           "line": 3.5,
-          "odds": 1.74,
+          "odds": 1.71,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537100%3Foutcomes%3D0OU85919938U350_3"
@@ -4181,7 +4152,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 1.8,
+          "odds": 1.83,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34521984%3Foutcomes%3D0OU85876779O250_1"
@@ -4192,7 +4163,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 2,
+          "odds": 1.95,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34521984%3Foutcomes%3D0OU85876779U250_3"
@@ -4203,7 +4174,7 @@
           "selectionId": "home",
           "selection": "Real Betis -0.5",
           "line": -0.5,
-          "odds": 1.95,
+          "odds": 2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34521984%3Foutcomes%3D0HC85876784N50_1"
@@ -4420,7 +4391,7 @@
           "selectionId": "home",
           "selection": "Alianza Atlético",
           "line": null,
-          "odds": 2.75,
+          "odds": 2.8,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532233%3Foutcomes%3D0ML85906861_1"
@@ -4431,7 +4402,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.05,
+          "odds": 3.1,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532233%3Foutcomes%3D0ML85906861_2"
@@ -4442,7 +4413,7 @@
           "selectionId": "away",
           "selection": "Sporting Cristal",
           "line": null,
-          "odds": 2.4,
+          "odds": 2.45,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532233%3Foutcomes%3D0ML85906861_3"
@@ -4453,7 +4424,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 1.77,
+          "odds": 1.8,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532233%3Foutcomes%3D0OU85907326O250_1"
@@ -4464,7 +4435,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 1.83,
+          "odds": 1.87,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532233%3Foutcomes%3D0OU85907326U250_3"
@@ -4475,7 +4446,7 @@
           "selectionId": "home",
           "selection": "Alianza Atlético +0.5",
           "line": 0.5,
-          "odds": 1.49,
+          "odds": 1.5,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532233%3Foutcomes%3D0HC85907329P50_1"
@@ -4486,7 +4457,7 @@
           "selectionId": "away",
           "selection": "Sporting Cristal -0.5",
           "line": -0.5,
-          "odds": 2.3,
+          "odds": 2.35,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532233%3Foutcomes%3D0HC85907329N50_3"
@@ -5374,7 +5345,7 @@
           "selectionId": "over",
           "selection": "Over 3.5",
           "line": 3.5,
-          "odds": 1.91,
+          "odds": 1.95,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34551138%3Foutcomes%3D0OU85961960O350_1"
@@ -5385,7 +5356,7 @@
           "selectionId": "under",
           "selection": "Under 3.5",
           "line": 3.5,
-          "odds": 1.77,
+          "odds": 1.74,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34551138%3Foutcomes%3D0OU85961960U350_3"
@@ -5396,7 +5367,7 @@
           "selectionId": "home",
           "selection": "The Strongest -1.5",
           "line": -1.5,
-          "odds": 1.67,
+          "odds": 1.69,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34551138%3Foutcomes%3D0HC85961963N150_1"
@@ -5407,7 +5378,7 @@
           "selectionId": "away",
           "selection": "Universitario de Vinto +1.5",
           "line": 1.5,
-          "odds": 2,
+          "odds": 1.95,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34551138%3Foutcomes%3D0HC85961963P150_3"
@@ -5566,7 +5537,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.2,
+          "odds": 3.25,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547399%3Foutcomes%3D0ML85950475_2"
@@ -5588,7 +5559,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 2.15,
+          "odds": 2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547399%3Foutcomes%3D0OU85950503O250_1"
@@ -5599,7 +5570,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 1.57,
+          "odds": 1.65,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547399%3Foutcomes%3D0OU85950503U250_3"
@@ -6349,7 +6320,7 @@
           "selectionId": "home",
           "selection": "León",
           "line": null,
-          "odds": 3.2,
+          "odds": 3.1,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34538720%3Foutcomes%3D0ML85924143_1"
@@ -6360,7 +6331,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.75,
+          "odds": 3.65,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34538720%3Foutcomes%3D0ML85924143_2"
@@ -6371,7 +6342,7 @@
           "selectionId": "away",
           "selection": "Monterrey",
           "line": null,
-          "odds": 2.1,
+          "odds": 2.15,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34538720%3Foutcomes%3D0ML85924143_3"
@@ -6382,7 +6353,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 1.57,
+          "odds": 1.59,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34538720%3Foutcomes%3D0OU85924437O250_1"
@@ -6393,7 +6364,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 2.3,
+          "odds": 2.25,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34538720%3Foutcomes%3D0OU85924437U250_3"
@@ -6404,7 +6375,7 @@
           "selectionId": "home",
           "selection": "León +0.5",
           "line": 0.5,
-          "odds": 1.71,
+          "odds": 1.67,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34538720%3Foutcomes%3D0HC85924442P50_1"
@@ -6415,7 +6386,7 @@
           "selectionId": "away",
           "selection": "Monterrey -0.5",
           "line": -0.5,
-          "odds": 2,
+          "odds": 2.1,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34538720%3Foutcomes%3D0HC85924442N50_3"
@@ -6456,7 +6427,7 @@
           "selectionId": "home",
           "selection": "Tigres UANL",
           "line": null,
-          "odds": 1.48,
+          "odds": 1.49,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532068%3Foutcomes%3D0ML85906478_1"
@@ -6467,7 +6438,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 4.7,
+          "odds": 4.6,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532068%3Foutcomes%3D0ML85906478_2"
@@ -6478,7 +6449,7 @@
           "selectionId": "away",
           "selection": "Atlante",
           "line": null,
-          "odds": 6,
+          "odds": 5.75,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532068%3Foutcomes%3D0ML85906478_3"
@@ -6757,7 +6728,7 @@
           "selectionId": "home",
           "selection": "San Diego Wave FC",
           "line": null,
-          "odds": 2.1,
+          "odds": 2.2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547410%3Foutcomes%3D0ML85950508_1"
@@ -6779,7 +6750,7 @@
           "selectionId": "away",
           "selection": "Utah Royals",
           "line": null,
-          "odds": 3.15,
+          "odds": 3,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547410%3Foutcomes%3D0ML85950508_3"
@@ -6812,7 +6783,7 @@
           "selectionId": "home",
           "selection": "San Diego Wave FC -0.5",
           "line": -0.5,
-          "odds": 2.05,
+          "odds": 2.1,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547410%3Foutcomes%3D0HC85950528N50_1"
@@ -6823,7 +6794,7 @@
           "selectionId": "away",
           "selection": "Utah Royals +0.5",
           "line": 0.5,
-          "odds": 1.63,
+          "odds": 1.59,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547410%3Foutcomes%3D0HC85950528P50_3"
@@ -6955,7 +6926,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 1.71,
+          "odds": 1.74,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34534378%3Foutcomes%3D0OU85912223O250_1"
@@ -7062,7 +7033,7 @@
           "selectionId": "over",
           "selection": "Over 3.5",
           "line": 3.5,
-          "odds": 2.2,
+          "odds": 2.1,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537556%3Foutcomes%3D0OU85920807O350_1"
@@ -7073,7 +7044,7 @@
           "selectionId": "under",
           "selection": "Under 3.5",
           "line": 3.5,
-          "odds": 1.56,
+          "odds": 1.59,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537556%3Foutcomes%3D0OU85920807U350_3"
@@ -7084,7 +7055,7 @@
           "selectionId": "home",
           "selection": "Club Atlético La Paz -1.5",
           "line": -1.5,
-          "odds": 2.2,
+          "odds": 2.15,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537556%3Foutcomes%3D0HC85920810N150_1"
@@ -7095,7 +7066,7 @@
           "selectionId": "away",
           "selection": "Cruz Azul Hidalgo +1.5",
           "line": 1.5,
-          "odds": 1.56,
+          "odds": 1.57,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537556%3Foutcomes%3D0HC85920810P150_3"
@@ -7490,7 +7461,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 1.54,
+          "odds": 1.56,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34526696%3Foutcomes%3D0OU85891625U250_3"
@@ -7501,7 +7472,7 @@
           "selectionId": "home",
           "selection": "Kashima Antlers -0.5",
           "line": -0.5,
-          "odds": 1.67,
+          "odds": 1.65,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34526696%3Foutcomes%3D0HC85891630N50_1"
@@ -7512,7 +7483,7 @@
           "selectionId": "away",
           "selection": "Avispa Fukuoka +0.5",
           "line": 0.5,
-          "odds": 2,
+          "odds": 2.05,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34526696%3Foutcomes%3D0HC85891630P50_3"
@@ -7798,7 +7769,7 @@
           "selectionId": "away",
           "selection": "Shimizu S-Pulse",
           "line": null,
-          "odds": 3.05,
+          "odds": 3,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34526678%3Foutcomes%3D0ML85891338_3"
@@ -7842,7 +7813,7 @@
           "selectionId": "away",
           "selection": "Shimizu S-Pulse +0.5",
           "line": 0.5,
-          "odds": 1.61,
+          "odds": 1.59,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34526678%3Foutcomes%3D0HC85891378P50_3"
@@ -8248,7 +8219,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 1.74,
+          "odds": 1.71,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34528217%3Foutcomes%3D0OU85896509U250_3"
@@ -9550,7 +9521,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 2.05,
+          "odds": 2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34527580%3Foutcomes%3D0OU85894958O250_1"
@@ -9561,7 +9532,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 1.69,
+          "odds": 1.71,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34527580%3Foutcomes%3D0OU85894958U250_3"
@@ -10801,7 +10772,7 @@
           "selectionId": "home",
           "selection": "Yeovil Town",
           "line": null,
-          "odds": 2.1,
+          "odds": 1.95,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34528198%3Foutcomes%3D0ML85896328_1"
@@ -10812,7 +10783,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.25,
+          "odds": 3.35,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34528198%3Foutcomes%3D0ML85896328_2"
@@ -10823,7 +10794,7 @@
           "selectionId": "away",
           "selection": "Gateshead",
           "line": null,
-          "odds": 3.15,
+          "odds": 3.45,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34528198%3Foutcomes%3D0ML85896328_3"
@@ -10856,7 +10827,7 @@
           "selectionId": "home",
           "selection": "Yeovil Town -0.5",
           "line": -0.5,
-          "odds": 2.05,
+          "odds": 1.91,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34528198%3Foutcomes%3D0HC85896422N50_1"
@@ -10867,7 +10838,7 @@
           "selectionId": "away",
           "selection": "Gateshead +0.5",
           "line": 0.5,
-          "odds": 1.65,
+          "odds": 1.74,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34528198%3Foutcomes%3D0HC85896422P50_3"
@@ -10908,7 +10879,7 @@
           "selectionId": "home",
           "selection": "Chengdu Rongcheng",
           "line": null,
-          "odds": 1.87,
+          "odds": 1.83,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34540020%3Foutcomes%3D0ML85928158_1"
@@ -10919,7 +10890,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 4,
+          "odds": 4.1,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34540020%3Foutcomes%3D0ML85928158_2"
@@ -10930,7 +10901,7 @@
           "selectionId": "away",
           "selection": "Shanghai Shenhua",
           "line": null,
-          "odds": 3.45,
+          "odds": 3.55,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34540020%3Foutcomes%3D0ML85928158_3"
@@ -11717,7 +11688,7 @@
           "selectionId": "away",
           "selection": "Halmstads BK",
           "line": null,
-          "odds": 3.3,
+          "odds": 3.35,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537257%3Foutcomes%3D0ML85919992_3"
@@ -13144,7 +13115,7 @@
           "selectionId": "home",
           "selection": "Southampton",
           "line": null,
-          "odds": 1.65,
+          "odds": 1.61,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34535146%3Foutcomes%3D0ML85914319_1"
@@ -13166,7 +13137,7 @@
           "selectionId": "away",
           "selection": "Stoke City",
           "line": null,
-          "odds": 5,
+          "odds": 5.25,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34535146%3Foutcomes%3D0ML85914319_3"
@@ -13199,7 +13170,7 @@
           "selectionId": "home",
           "selection": "Southampton -0.5",
           "line": -0.5,
-          "odds": 1.59,
+          "odds": 1.56,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34535146%3Foutcomes%3D0HC85914561N50_1"
@@ -13210,7 +13181,7 @@
           "selectionId": "away",
           "selection": "Stoke City +0.5",
           "line": 0.5,
-          "odds": 2.2,
+          "odds": 2.3,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34535146%3Foutcomes%3D0HC85914561P50_3"
@@ -14033,7 +14004,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 1.59,
+          "odds": 1.61,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34527555%3Foutcomes%3D0OU85894762O250_1"
@@ -14247,7 +14218,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 1.77,
+          "odds": 1.74,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34527551%3Foutcomes%3D0OU85894650O250_1"
@@ -14258,7 +14229,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 1.95,
+          "odds": 2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34527551%3Foutcomes%3D0OU85894650U250_3"
@@ -14321,7 +14292,7 @@
           "selectionId": "home",
           "selection": "Wigan Athletic",
           "line": null,
-          "odds": 2.25,
+          "odds": 2.2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34527559%3Foutcomes%3D0ML85894482_1"
@@ -14343,7 +14314,7 @@
           "selectionId": "away",
           "selection": "Leyton Orient",
           "line": null,
-          "odds": 3.2,
+          "odds": 3.25,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34527559%3Foutcomes%3D0ML85894482_3"
@@ -14376,7 +14347,7 @@
           "selectionId": "home",
           "selection": "Wigan Athletic -0.5",
           "line": -0.5,
-          "odds": 2.15,
+          "odds": 2.1,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34527559%3Foutcomes%3D0HC85894879N50_1"
@@ -14387,7 +14358,7 @@
           "selectionId": "away",
           "selection": "Leyton Orient +0.5",
           "line": 0.5,
-          "odds": 1.59,
+          "odds": 1.63,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34527559%3Foutcomes%3D0HC85894879P50_3"
@@ -15328,7 +15299,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 1.8,
+          "odds": 1.83,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34527583%3Foutcomes%3D0OU85895049U250_3"
@@ -19239,7 +19210,7 @@
           "selectionId": "home",
           "selection": "Greenock Morton",
           "line": null,
-          "odds": 3.35,
+          "odds": 3.4,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34521976%3Foutcomes%3D0ML85876381_1"
@@ -19250,7 +19221,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.25,
+          "odds": 3.35,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34521976%3Foutcomes%3D0ML85876381_2"
@@ -19261,7 +19232,7 @@
           "selectionId": "away",
           "selection": "Arbroath",
           "line": null,
-          "odds": 2.15,
+          "odds": 2.05,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34521976%3Foutcomes%3D0ML85876381_3"
@@ -19294,7 +19265,7 @@
           "selectionId": "home",
           "selection": "Greenock Morton +0.5",
           "line": 0.5,
-          "odds": 1.65,
+          "odds": 1.69,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34521976%3Foutcomes%3D0HC85876564P50_1"
@@ -19305,7 +19276,7 @@
           "selectionId": "away",
           "selection": "Arbroath -0.5",
           "line": -0.5,
-          "odds": 2.05,
+          "odds": 2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34521976%3Foutcomes%3D0HC85876564N50_3"
@@ -20302,7 +20273,7 @@
           "selectionId": "home",
           "selection": "Fortuna Sittard +0.5",
           "line": 0.5,
-          "odds": 2.25,
+          "odds": 2.3,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34527594%3Foutcomes%3D0HC85895260P50_1"
@@ -20313,7 +20284,7 @@
           "selectionId": "away",
           "selection": "AZ Alkmaar -0.5",
           "line": -0.5,
-          "odds": 1.54,
+          "odds": 1.53,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34527594%3Foutcomes%3D0HC85895260N50_3"
@@ -20692,7 +20663,7 @@
           "selectionId": "away",
           "selection": "Sevilla +0.5",
           "line": 0.5,
-          "odds": 2.1,
+          "odds": 2.05,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34521987%3Foutcomes%3D0HC85876886P50_3"
@@ -20902,7 +20873,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 1.87,
+          "odds": 1.83,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532071%3Foutcomes%3D0OU85906775O250_1"
@@ -20924,7 +20895,7 @@
           "selectionId": "home",
           "selection": "SC Rheindorf Altach -0.5",
           "line": -0.5,
-          "odds": 1.8,
+          "odds": 1.83,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532071%3Foutcomes%3D0HC85906780N50_1"
@@ -20935,7 +20906,7 @@
           "selectionId": "away",
           "selection": "TSV Hartberg +0.5",
           "line": 0.5,
-          "odds": 1.87,
+          "odds": 1.83,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532071%3Foutcomes%3D0HC85906780P50_3"
@@ -22090,7 +22061,7 @@
           "selectionId": "home",
           "selection": "Royal Charleroi SC -0.5",
           "line": -0.5,
-          "odds": 1.69,
+          "odds": 1.67,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532653%3Foutcomes%3D0HC85908098N50_1"
@@ -22282,7 +22253,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 1.61,
+          "odds": 1.59,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34333925%3Foutcomes%3D0OU85318427O250_1"
@@ -22616,7 +22587,7 @@
           "selectionId": "away",
           "selection": "FC Utrecht +0.5",
           "line": 0.5,
-          "odds": 1.48,
+          "odds": 1.49,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34527597%3Foutcomes%3D0HC85895339P50_3"
@@ -23009,7 +22980,7 @@
           "selectionId": "away",
           "selection": "Real Sociedad II",
           "line": null,
-          "odds": 3.95,
+          "odds": 4.1,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34535472%3Foutcomes%3D0ML85915170_3"
@@ -23020,7 +22991,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 1.83,
+          "odds": 1.8,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34535472%3Foutcomes%3D0OU85915209O250_1"
@@ -23042,7 +23013,7 @@
           "selectionId": "home",
           "selection": "Albacete -0.5",
           "line": -0.5,
-          "odds": 1.77,
+          "odds": 1.74,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34535472%3Foutcomes%3D0HC85915214N50_1"
@@ -23138,7 +23109,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 1.71,
+          "odds": 1.74,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34535473%3Foutcomes%3D0OU85915237U250_3"
@@ -23149,7 +23120,7 @@
           "selectionId": "home",
           "selection": "Ceuta +0.5",
           "line": 0.5,
-          "odds": 1.56,
+          "odds": 1.54,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34535473%3Foutcomes%3D0HC85915242P50_1"
@@ -23774,7 +23745,7 @@
           "selectionId": "home",
           "selection": "Valencia",
           "line": null,
-          "odds": 2.35,
+          "odds": 2.4,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34521980%3Foutcomes%3D0ML85876385_1"
@@ -23796,7 +23767,7 @@
           "selectionId": "away",
           "selection": "Celta Vigo",
           "line": null,
-          "odds": 3.2,
+          "odds": 3.15,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34521980%3Foutcomes%3D0ML85876385_3"
@@ -23807,7 +23778,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 2.25,
+          "odds": 2.2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34521980%3Foutcomes%3D0OU85876654O250_1"
@@ -23818,7 +23789,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 1.65,
+          "odds": 1.67,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34521980%3Foutcomes%3D0OU85876654U250_3"
@@ -24166,7 +24137,7 @@
           "selectionId": "over",
           "selection": "Over 3.5",
           "line": 3.5,
-          "odds": 1.95,
+          "odds": 2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34540623%3Foutcomes%3D0OU85930228O350_1"
@@ -24177,7 +24148,7 @@
           "selectionId": "under",
           "selection": "Under 3.5",
           "line": 3.5,
-          "odds": 1.74,
+          "odds": 1.71,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34540623%3Foutcomes%3D0OU85930228U350_3"
@@ -24188,7 +24159,7 @@
           "selectionId": "home",
           "selection": "Al Ahli -1.5",
           "line": -1.5,
-          "odds": 1.56,
+          "odds": 1.57,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34540623%3Foutcomes%3D0HC85930231N150_1"
@@ -24842,7 +24813,7 @@
           "selectionId": "home",
           "selection": "Fenerbahce",
           "line": null,
-          "odds": 1.28,
+          "odds": 1.29,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34528253%3Foutcomes%3D0ML85896494_1"
@@ -24853,7 +24824,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 5.75,
+          "odds": 5.5,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34528253%3Foutcomes%3D0ML85896494_2"
@@ -24864,7 +24835,7 @@
           "selectionId": "away",
           "selection": "Konyaspor",
           "line": null,
-          "odds": 9,
+          "odds": 8.5,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34528253%3Foutcomes%3D0ML85896494_3"
@@ -24875,7 +24846,7 @@
           "selectionId": "over",
           "selection": "Over 3.5",
           "line": 3.5,
-          "odds": 2.2,
+          "odds": 2.25,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34528253%3Foutcomes%3D0OU85896701O350_1"
@@ -24886,7 +24857,7 @@
           "selectionId": "under",
           "selection": "Under 3.5",
           "line": 3.5,
-          "odds": 1.59,
+          "odds": 1.57,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34528253%3Foutcomes%3D0OU85896701U350_3"
@@ -24897,7 +24868,7 @@
           "selectionId": "home",
           "selection": "Fenerbahce -1.5",
           "line": -1.5,
-          "odds": 1.74,
+          "odds": 1.77,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34528253%3Foutcomes%3D0HC85896706N150_1"
@@ -24908,7 +24879,7 @@
           "selectionId": "away",
           "selection": "Konyaspor +1.5",
           "line": 1.5,
-          "odds": 1.95,
+          "odds": 1.91,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34528253%3Foutcomes%3D0HC85896706P150_3"
@@ -26048,7 +26019,7 @@
           "selectionId": "home",
           "selection": "Le Mans",
           "line": null,
-          "odds": 2.55,
+          "odds": 2.5,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34363612%3Foutcomes%3D0ML85403876_1"
@@ -26070,7 +26041,7 @@
           "selectionId": "away",
           "selection": "Brest",
           "line": null,
-          "odds": 2.7,
+          "odds": 2.8,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34363612%3Foutcomes%3D0ML85403876_3"
@@ -26103,7 +26074,7 @@
           "selectionId": "home",
           "selection": "Le Mans -0.5",
           "line": -0.5,
-          "odds": 2.4,
+          "odds": 2.35,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34363612%3Foutcomes%3D0HC85404103N50_1"
@@ -26114,7 +26085,7 @@
           "selectionId": "away",
           "selection": "Brest +0.5",
           "line": 0.5,
-          "odds": 1.51,
+          "odds": 1.53,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34363612%3Foutcomes%3D0HC85404103P50_3"
@@ -26369,7 +26340,7 @@
           "selectionId": "home",
           "selection": "Troyes",
           "line": null,
-          "odds": 3.05,
+          "odds": 2.95,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34363609%3Foutcomes%3D0ML85403874_1"
@@ -26380,7 +26351,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.55,
+          "odds": 3.5,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34363609%3Foutcomes%3D0ML85403874_2"
@@ -26391,7 +26362,7 @@
           "selectionId": "away",
           "selection": "Paris FC",
           "line": null,
-          "odds": 2.3,
+          "odds": 2.35,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34363609%3Foutcomes%3D0ML85403874_3"
@@ -26531,7 +26502,7 @@
           "selectionId": "home",
           "selection": "Antwerp +0.5",
           "line": 0.5,
-          "odds": 1.65,
+          "odds": 1.67,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34528117%3Foutcomes%3D0HC85896195P50_1"
@@ -26627,7 +26598,7 @@
           "selectionId": "under",
           "selection": "Under 3.5",
           "line": 3.5,
-          "odds": 1.65,
+          "odds": 1.67,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532081%3Foutcomes%3D0OU85906973U350_3"
@@ -27737,7 +27708,7 @@
           "selectionId": "home",
           "selection": "Universidad Católica (Quito) -1.5",
           "line": -1.5,
-          "odds": 1.87,
+          "odds": 1.83,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34539019%3Foutcomes%3D0HC85924919N150_1"
@@ -27748,7 +27719,7 @@
           "selectionId": "away",
           "selection": "Manta F.C. +1.5",
           "line": 1.5,
-          "odds": 1.77,
+          "odds": 1.8,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34539019%3Foutcomes%3D0HC85924919P150_3"
@@ -28038,7 +28009,7 @@
           "selectionId": "home",
           "selection": "Sporting CP -1.5",
           "line": -1.5,
-          "odds": 1.63,
+          "odds": 1.59,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34528254%3Foutcomes%3D0HC85896734N150_1"
@@ -28049,7 +28020,7 @@
           "selectionId": "away",
           "selection": "Alverca +1.5",
           "line": 1.5,
-          "odds": 2.1,
+          "odds": 2.15,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34528254%3Foutcomes%3D0HC85896734P150_3"
@@ -28197,7 +28168,7 @@
           "selectionId": "home",
           "selection": "Rayo Zuliano",
           "line": null,
-          "odds": 5,
+          "odds": 4.9,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34551391%3Foutcomes%3D0ML85962935_1"
@@ -28208,7 +28179,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.45,
+          "odds": 3.4,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34551391%3Foutcomes%3D0ML85962935_2"
@@ -28219,7 +28190,7 @@
           "selectionId": "away",
           "selection": "Deportivo La Guaira",
           "line": null,
-          "odds": 1.63,
+          "odds": 1.65,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34551391%3Foutcomes%3D0ML85962935_3"
@@ -28230,7 +28201,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 2.05,
+          "odds": 2.1,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34551391%3Foutcomes%3D0OU85962957O250_1"
@@ -28241,7 +28212,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 1.63,
+          "odds": 1.61,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34551391%3Foutcomes%3D0OU85962957U250_3"
@@ -28429,7 +28400,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 1.91,
+          "odds": 1.95,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34551386%3Foutcomes%3D0OU85962946O250_1"
@@ -28440,7 +28411,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 1.71,
+          "odds": 1.69,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34551386%3Foutcomes%3D0OU85962946U250_3"
@@ -29048,7 +29019,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 2.8,
+          "odds": 2.9,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34535152%3Foutcomes%3D0ML85914340_2"
@@ -29059,7 +29030,7 @@
           "selectionId": "away",
           "selection": "Atlético Bucaramanga",
           "line": null,
-          "odds": 3.4,
+          "odds": 3.25,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34535152%3Foutcomes%3D0ML85914340_3"
@@ -29280,7 +29251,7 @@
           "selectionId": "home",
           "selection": "Independiente",
           "line": null,
-          "odds": 1.91,
+          "odds": 1.95,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537598%3Foutcomes%3D0ML85920896_1"
@@ -29291,7 +29262,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.25,
+          "odds": 3.2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537598%3Foutcomes%3D0ML85920896_2"
@@ -29302,7 +29273,7 @@
           "selectionId": "away",
           "selection": "Independiente Rivadavia",
           "line": null,
-          "odds": 4.1,
+          "odds": 4,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537598%3Foutcomes%3D0ML85920896_3"
@@ -29324,7 +29295,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 1.56,
+          "odds": 1.54,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537598%3Foutcomes%3D0OU85920933U250_3"
@@ -29346,7 +29317,7 @@
           "selectionId": "away",
           "selection": "Independiente Rivadavia +0.5",
           "line": 0.5,
-          "odds": 1.8,
+          "odds": 1.77,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537598%3Foutcomes%3D0HC85920938P50_3"
@@ -29398,7 +29369,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 2.9,
+          "odds": 2.95,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34546904%3Foutcomes%3D0ML85949018_2"
@@ -29420,7 +29391,7 @@
           "selectionId": "over",
           "selection": "Over 1.5",
           "line": 1.5,
-          "odds": 1.53,
+          "odds": 1.5,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34546904%3Foutcomes%3D0OU85949097O150_1"
@@ -29431,7 +29402,7 @@
           "selectionId": "under",
           "selection": "Under 1.5",
           "line": 1.5,
-          "odds": 2.35,
+          "odds": 2.4,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34546904%3Foutcomes%3D0OU85949097U150_3"
@@ -29442,7 +29413,7 @@
           "selectionId": "home",
           "selection": "Cuiabá -0.5",
           "line": -0.5,
-          "odds": 2.15,
+          "odds": 2.1,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34546904%3Foutcomes%3D0HC85949100N50_1"
@@ -29453,7 +29424,7 @@
           "selectionId": "away",
           "selection": "Goiás +0.5",
           "line": 0.5,
-          "odds": 1.59,
+          "odds": 1.61,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34546904%3Foutcomes%3D0HC85949100P50_3"
@@ -29494,7 +29465,7 @@
           "selectionId": "home",
           "selection": "Huachipato",
           "line": null,
-          "odds": 2.3,
+          "odds": 2.35,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34538733%3Foutcomes%3D0ML85924134_1"
@@ -29549,7 +29520,7 @@
           "selectionId": "home",
           "selection": "Huachipato -0.5",
           "line": -0.5,
-          "odds": 2.2,
+          "odds": 2.25,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34538733%3Foutcomes%3D0HC85924750N50_1"
@@ -29560,7 +29531,7 @@
           "selectionId": "away",
           "selection": "Deportes Limache +0.5",
           "line": 0.5,
-          "odds": 1.56,
+          "odds": 1.54,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34538733%3Foutcomes%3D0HC85924750P50_3"
@@ -29888,7 +29859,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 1.57,
+          "odds": 1.54,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34551388%3Foutcomes%3D0OU85962954U250_3"
@@ -30983,7 +30954,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 2.35,
+          "odds": 2.3,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547019%3Foutcomes%3D0OU85949438U250_3"
@@ -31090,7 +31061,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 2.4,
+          "odds": 2.35,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547024%3Foutcomes%3D0OU85949608U250_3"
@@ -31293,7 +31264,7 @@
           "selectionId": "over",
           "selection": "Over 3.5",
           "line": 3.5,
-          "odds": 1.71,
+          "odds": 1.69,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547026%3Foutcomes%3D0OU85949676O350_1"
@@ -31304,7 +31275,7 @@
           "selectionId": "under",
           "selection": "Under 3.5",
           "line": 3.5,
-          "odds": 2.1,
+          "odds": 2.15,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547026%3Foutcomes%3D0OU85949676U350_3"
@@ -31529,7 +31500,7 @@
           "selectionId": "home",
           "selection": "Red Bull New York +0.5",
           "line": 0.5,
-          "odds": 1.61,
+          "odds": 1.59,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547027%3Foutcomes%3D0HC85949715P50_1"
@@ -31688,7 +31659,7 @@
           "selectionId": "home",
           "selection": "North Carolina Courage",
           "line": null,
-          "odds": 1.83,
+          "odds": 1.8,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547415%3Foutcomes%3D0ML85950512_1"
@@ -31710,7 +31681,7 @@
           "selectionId": "away",
           "selection": "Boston Legacy FC",
           "line": null,
-          "odds": 3.4,
+          "odds": 3.55,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547415%3Foutcomes%3D0ML85950512_3"
@@ -31743,7 +31714,7 @@
           "selectionId": "home",
           "selection": "North Carolina Courage -0.5",
           "line": -0.5,
-          "odds": 1.77,
+          "odds": 1.74,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547415%3Foutcomes%3D0HC85950563N50_1"
@@ -31754,7 +31725,7 @@
           "selectionId": "away",
           "selection": "Boston Legacy FC +0.5",
           "line": 0.5,
-          "odds": 1.83,
+          "odds": 1.87,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547415%3Foutcomes%3D0HC85950563P50_3"
@@ -32240,7 +32211,7 @@
           "selectionId": "away",
           "selection": "Banfield +0.5",
           "line": 0.5,
-          "odds": 1.63,
+          "odds": 1.61,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34530408%3Foutcomes%3D0HC85901963P50_3"
@@ -33191,7 +33162,7 @@
         "id": "espn-131454",
         "name": "Carolina Ascent FC",
         "shortName": "CAR",
-        "logo": ""
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/131454.png"
       },
       "homeScore": 0,
       "awayScore": 0,
@@ -33260,7 +33231,7 @@
           "selectionId": "home",
           "selection": "Portland Thorns FC",
           "line": null,
-          "odds": 2.25,
+          "odds": 2.3,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547411%3Foutcomes%3D0ML85950507_1"
@@ -33271,7 +33242,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.55,
+          "odds": 3.5,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547411%3Foutcomes%3D0ML85950507_2"
@@ -33282,7 +33253,7 @@
           "selectionId": "away",
           "selection": "Denver Summit FC",
           "line": null,
-          "odds": 2.65,
+          "odds": 2.6,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547411%3Foutcomes%3D0ML85950507_3"
@@ -33293,7 +33264,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 1.56,
+          "odds": 1.57,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547411%3Foutcomes%3D0OU85950532O250_1"
@@ -33315,7 +33286,7 @@
           "selectionId": "home",
           "selection": "Portland Thorns FC -0.5",
           "line": -0.5,
-          "odds": 2.15,
+          "odds": 2.2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547411%3Foutcomes%3D0HC85950535N50_1"
@@ -33326,7 +33297,7 @@
           "selectionId": "away",
           "selection": "Denver Summit FC +0.5",
           "line": 0.5,
-          "odds": 1.57,
+          "odds": 1.54,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547411%3Foutcomes%3D0HC85950535P50_3"
@@ -33367,7 +33338,7 @@
           "selectionId": "home",
           "selection": "Puebla",
           "line": null,
-          "odds": 1.91,
+          "odds": 2.05,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34538721%3Foutcomes%3D0ML85924121_1"
@@ -33411,7 +33382,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 2.25,
+          "odds": 2.2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34538721%3Foutcomes%3D0OU85924465U250_3"
@@ -33688,7 +33659,7 @@
           "selectionId": "home",
           "selection": "Club Jaiba Brava",
           "line": null,
-          "odds": 1.95,
+          "odds": 1.91,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34535155%3Foutcomes%3D0ML85914326_1"
@@ -33699,7 +33670,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.25,
+          "odds": 3.3,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34535155%3Foutcomes%3D0ML85914326_2"
@@ -33710,7 +33681,7 @@
           "selectionId": "away",
           "selection": "Alebrijes de Oaxaca",
           "line": null,
-          "odds": 3.45,
+          "odds": 3.65,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34535155%3Foutcomes%3D0ML85914326_3"
@@ -33721,7 +33692,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 1.83,
+          "odds": 1.87,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34535155%3Foutcomes%3D0OU85914676O250_1"
@@ -33732,7 +33703,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 1.8,
+          "odds": 1.77,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34535155%3Foutcomes%3D0OU85914676U250_3"
@@ -33743,7 +33714,7 @@
           "selectionId": "home",
           "selection": "Club Jaiba Brava -0.5",
           "line": -0.5,
-          "odds": 1.91,
+          "odds": 1.87,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34535155%3Foutcomes%3D0HC85914679N50_1"
@@ -33754,7 +33725,7 @@
           "selectionId": "away",
           "selection": "Alebrijes de Oaxaca +0.5",
           "line": 0.5,
-          "odds": 1.71,
+          "odds": 1.74,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34535155%3Foutcomes%3D0HC85914679P50_3"
@@ -33795,7 +33766,7 @@
           "selectionId": "home",
           "selection": "Durango",
           "line": null,
-          "odds": 2.1,
+          "odds": 1.95,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537557%3Foutcomes%3D0ML85920774_1"
@@ -33806,7 +33777,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.05,
+          "odds": 3.2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537557%3Foutcomes%3D0ML85920774_2"
@@ -33817,7 +33788,7 @@
           "selectionId": "away",
           "selection": "Leones Negros",
           "line": null,
-          "odds": 3.35,
+          "odds": 3.65,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537557%3Foutcomes%3D0ML85920774_3"
@@ -33850,7 +33821,7 @@
           "selectionId": "home",
           "selection": "Durango -0.5",
           "line": -0.5,
-          "odds": 2,
+          "odds": 1.87,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537557%3Foutcomes%3D0HC85920817N50_1"
@@ -33861,7 +33832,7 @@
           "selectionId": "away",
           "selection": "Leones Negros +0.5",
           "line": 0.5,
-          "odds": 1.65,
+          "odds": 1.74,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537557%3Foutcomes%3D0HC85920817P50_3"
@@ -35554,7 +35525,7 @@
           "selectionId": "under",
           "selection": "Under 3.5",
           "line": 3.5,
-          "odds": 1.69,
+          "odds": 1.67,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537634%3Foutcomes%3D0OU85921021U350_3"
@@ -35782,7 +35753,7 @@
           "selectionId": "home",
           "selection": "Machida Zelvia",
           "line": null,
-          "odds": 1.77,
+          "odds": 1.8,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532496%3Foutcomes%3D0ML85907533_1"
@@ -35793,7 +35764,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.5,
+          "odds": 3.45,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532496%3Foutcomes%3D0ML85907533_2"
@@ -35804,7 +35775,7 @@
           "selectionId": "away",
           "selection": "Urawa Red Diamonds",
           "line": null,
-          "odds": 4.5,
+          "odds": 4.4,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532496%3Foutcomes%3D0ML85907533_3"
@@ -35826,7 +35797,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 1.67,
+          "odds": 1.65,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532496%3Foutcomes%3D0OU85907548U250_3"
@@ -35837,7 +35808,7 @@
           "selectionId": "home",
           "selection": "Machida Zelvia -0.5",
           "line": -0.5,
-          "odds": 1.71,
+          "odds": 1.74,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532496%3Foutcomes%3D0HC85907553N50_1"
@@ -35848,7 +35819,7 @@
           "selectionId": "away",
           "selection": "Urawa Red Diamonds +0.5",
           "line": 0.5,
-          "odds": 1.95,
+          "odds": 1.91,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532496%3Foutcomes%3D0HC85907553P50_3"
@@ -36869,7 +36840,7 @@
           "selectionId": "away",
           "selection": "Randers FC +1.5",
           "line": 1.5,
-          "odds": 1.61,
+          "odds": 1.59,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532450%3Foutcomes%3D0HC85907513P150_3"
@@ -36961,7 +36932,7 @@
           "selectionId": "away",
           "selection": "FC Groningen",
           "line": null,
-          "odds": 6.5,
+          "odds": 7,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532084%3Foutcomes%3D0ML85906494_3"
@@ -37005,7 +36976,7 @@
           "selectionId": "away",
           "selection": "FC Groningen +1.5",
           "line": 1.5,
-          "odds": 1.83,
+          "odds": 1.87,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34532084%3Foutcomes%3D0HC85907057P150_3"
@@ -39041,7 +39012,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 1.57,
+          "odds": 1.59,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34363605%3Foutcomes%3D0OU85404128O250_1"
@@ -41217,7 +41188,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 2.3,
+          "odds": 2.35,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537704%3Foutcomes%3D0OU85921260O250_1"
@@ -46014,7 +45985,7 @@
           "selectionId": "home",
           "selection": "Universidad de Chile",
           "line": null,
-          "odds": 2.35,
+          "odds": 2.3,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34541967%3Foutcomes%3D0ML85933427_1"
@@ -46025,7 +45996,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.35,
+          "odds": 3.4,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34541967%3Foutcomes%3D0ML85933427_2"
@@ -46047,7 +46018,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 1.91,
+          "odds": 1.8,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34541967%3Foutcomes%3D0OU85933450O250_1"
@@ -46058,7 +46029,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 1.8,
+          "odds": 1.87,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34541967%3Foutcomes%3D0OU85933450U250_3"
@@ -46069,7 +46040,7 @@
           "selectionId": "home",
           "selection": "Universidad de Chile -0.5",
           "line": -0.5,
-          "odds": 2.25,
+          "odds": 2.2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34541967%3Foutcomes%3D0HC85933453N50_1"
@@ -46080,7 +46051,7 @@
           "selectionId": "away",
           "selection": "Colo Colo +0.5",
           "line": 0.5,
-          "odds": 1.54,
+          "odds": 1.56,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34541967%3Foutcomes%3D0HC85933453P50_3"
@@ -46770,7 +46741,7 @@
           "selectionId": "home",
           "selection": "Elche",
           "line": null,
-          "odds": 8,
+          "odds": 8.5,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34521985%3Foutcomes%3D0ML85876390_1"
@@ -46781,7 +46752,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 6,
+          "odds": 5.75,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34521985%3Foutcomes%3D0ML85876390_2"
@@ -46792,7 +46763,7 @@
           "selectionId": "away",
           "selection": "Barcelona",
           "line": null,
-          "odds": 1.33,
+          "odds": 1.32,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34521985%3Foutcomes%3D0ML85876390_3"
@@ -46814,7 +46785,7 @@
           "selectionId": "under",
           "selection": "Under 3.5",
           "line": 3.5,
-          "odds": 1.69,
+          "odds": 1.71,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34521985%3Foutcomes%3D0OU85876813U350_3"
@@ -46825,7 +46796,7 @@
           "selectionId": "home",
           "selection": "Elche +1.5",
           "line": 1.5,
-          "odds": 1.87,
+          "odds": 1.91,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34521985%3Foutcomes%3D0HC85876818P150_1"
@@ -47715,7 +47686,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 1.67,
+          "odds": 1.69,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547031%3Foutcomes%3D0OU85949846O250_1"
@@ -49999,7 +49970,7 @@
           "selectionId": "over",
           "selection": "Over 1.5",
           "line": 1.5,
-          "odds": 1.49,
+          "odds": 1.5,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34533844%3Foutcomes%3D0OU85910500O150_1"
@@ -50010,7 +49981,7 @@
           "selectionId": "under",
           "selection": "Under 1.5",
           "line": 1.5,
-          "odds": 2.45,
+          "odds": 2.4,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34533844%3Foutcomes%3D0OU85910500U150_3"
@@ -50180,10 +50151,32 @@
           "selectionId": "home",
           "selection": "Atlético de San Luis",
           "line": null,
-          "odds": 3.1,
+          "odds": 3.05,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34538731%3Foutcomes%3D0ML85924132_1"
+        },
+        {
+          "marketId": "401877002-moneyline",
+          "market": "Match result",
+          "selectionId": "draw",
+          "selection": "Draw",
+          "line": null,
+          "odds": 3.45,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34538731%3Foutcomes%3D0ML85924132_2"
+        },
+        {
+          "marketId": "401877002-moneyline",
+          "market": "Match result",
+          "selectionId": "away",
+          "selection": "Pachuca",
+          "line": null,
+          "odds": 2.2,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34538731%3Foutcomes%3D0ML85924132_3"
         },
         {
           "marketId": "401877002-total",
@@ -50213,7 +50206,7 @@
           "selectionId": "home",
           "selection": "Atlético de San Luis +0.5",
           "line": 0.5,
-          "odds": 1.65,
+          "odds": 1.63,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34538731%3Foutcomes%3D0HC85924711P50_1"
@@ -50224,7 +50217,7 @@
           "selectionId": "away",
           "selection": "Pachuca -0.5",
           "line": -0.5,
-          "odds": 2.05,
+          "odds": 2.1,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34538731%3Foutcomes%3D0HC85924711N50_3"
@@ -52363,7 +52356,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 2,
+          "odds": 1.95,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34538734%3Foutcomes%3D0OU85924771U250_3"
@@ -55492,7 +55485,7 @@
           "selectionId": "home",
           "selection": "Athletic",
           "line": null,
-          "odds": 2.95,
+          "odds": 2.9,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34551419%3Foutcomes%3D0ML85963063_1"
@@ -55503,7 +55496,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 2.9,
+          "odds": 2.95,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34551419%3Foutcomes%3D0ML85963063_2"
@@ -55514,7 +55507,7 @@
           "selectionId": "away",
           "selection": "Novorizontino",
           "line": null,
-          "odds": 2.55,
+          "odds": 2.5,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34551419%3Foutcomes%3D0ML85963063_3"
@@ -55599,7 +55592,7 @@
           "selectionId": "home",
           "selection": "Sport",
           "line": null,
-          "odds": 1.67,
+          "odds": 1.69,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34551420%3Foutcomes%3D0ML85963064_1"
@@ -55621,7 +55614,7 @@
           "selectionId": "away",
           "selection": "América Mineiro",
           "line": null,
-          "odds": 5,
+          "odds": 4.9,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34551420%3Foutcomes%3D0ML85963064_3"
@@ -58921,23 +58914,23 @@
           "marketId": "401907949-total",
           "market": "Total goals",
           "selectionId": "over",
-          "selection": "Over 3.5",
-          "line": 3.5,
-          "odds": 2.35,
+          "selection": "Over 2.5",
+          "line": 2.5,
+          "odds": 1.56,
           "source": "espn-draftkings",
           "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512111%3Foutcomes%3D0OU85847545O350_1"
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512111%3Foutcomes%3D0OU85847545O250_1"
         },
         {
           "marketId": "401907949-total",
           "market": "Total goals",
           "selectionId": "under",
-          "selection": "Under 3.5",
-          "line": 3.5,
-          "odds": 1.56,
+          "selection": "Under 2.5",
+          "line": 2.5,
+          "odds": 2.35,
           "source": "espn-draftkings",
           "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512111%3Foutcomes%3D0OU85847545U350_3"
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512111%3Foutcomes%3D0OU85847545U250_3"
         },
         {
           "marketId": "401907949-handicap",
@@ -58956,7 +58949,7 @@
           "selectionId": "away",
           "selection": "Peterborough United +1.5",
           "line": 1.5,
-          "odds": 1.53,
+          "odds": 1.51,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512111%3Foutcomes%3D0HC85847550P150_3"
@@ -59909,7 +59902,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 4.7,
+          "odds": 4.8,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547615%3Foutcomes%3D0ML85951316_2"
@@ -59953,7 +59946,7 @@
           "selectionId": "home",
           "selection": "Bodo/Glimt -1.5",
           "line": -1.5,
-          "odds": 2.05,
+          "odds": 2.1,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547615%3Foutcomes%3D0HC85951374N150_1"
@@ -59964,7 +59957,7 @@
           "selectionId": "away",
           "selection": "NEC Nijmegen +1.5",
           "line": 1.5,
-          "odds": 1.63,
+          "odds": 1.61,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547615%3Foutcomes%3D0HC85951374P150_3"
@@ -86142,46 +86135,6 @@
   ],
   "predictedPicks": [
     {
-      "id": "espn-401913090-UNDER_3_5",
-      "fixtureId": "espn-401913090",
-      "league": {
-        "id": "19834",
-        "name": "Club Friendly",
-        "country": "",
-        "season": "2026"
-      },
-      "kickoff": "2026-08-21T08:30:00.000Z",
-      "homeTeam": {
-        "id": "espn-133155",
-        "name": "Cádiz II",
-        "shortName": "CAD",
-        "logo": ""
-      },
-      "awayTeam": {
-        "id": "espn-8040",
-        "name": "Lion City Sailors FC",
-        "shortName": "LCS",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/8040.png"
-      },
-      "market": {
-        "key": "UNDER_3_5",
-        "name": "Total goals",
-        "category": "Goals",
-        "line": 3.5
-      },
-      "selection": "Under 3.5",
-      "probability": 0.7596277816936776,
-      "confidence": 0.4661076068472405,
-      "fairOdds": 1.32,
-      "quotedOdds": null,
-      "edge": null,
-      "tier": "HIGH_RISK",
-      "dataQuality": "LOW",
-      "historyMatches": 1,
-      "oddsSource": null,
-      "reasoning": "Limited team history · cautious estimate uses league scoring priors"
-    },
-    {
       "id": "espn-401913089-UNDER_3_5",
       "fixtureId": "espn-401913089",
       "league": {
@@ -86413,17 +86366,13 @@
       "probability": 0.7922634523649625,
       "confidence": 0.4927878673710067,
       "fairOdds": 1.26,
-      "quotedOdds": 1.56,
-      "edge": 0.15123781133932157,
+      "quotedOdds": null,
+      "edge": null,
       "tier": "HIGH_RISK",
       "dataQuality": "LOW",
       "historyMatches": 2,
-      "oddsSource": "espn-draftkings",
-      "oddsProvider": "DraftKings",
-      "providerMarketId": "401874895-total",
-      "providerSelectionId": "under",
-      "providerDeepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34537098%3Foutcomes%3D0OU85919882U350_3",
-      "reasoning": "Limited team history · cautious estimate uses league scoring priors and the available market price"
+      "oddsSource": null,
+      "reasoning": "Limited team history · cautious estimate uses league scoring priors"
     },
     {
       "id": "espn-401875189-OVER_1_5",
@@ -86497,8 +86446,8 @@
       "probability": 0.8390214403303609,
       "confidence": 0.5218713358854844,
       "fairOdds": 1.19,
-      "quotedOdds": 1.61,
-      "edge": 0.21790342790800066,
+      "quotedOdds": 1.59,
+      "edge": 0.210090622720298,
       "tier": "HIGH_RISK",
       "dataQuality": "LOW",
       "historyMatches": 2,
@@ -86865,8 +86814,8 @@
       "probability": 0.6652841702433461,
       "confidence": 0.5255744944922434,
       "fairOdds": 1.5,
-      "quotedOdds": 1.54,
-      "edge": 0.01593352089269673,
+      "quotedOdds": 1.53,
+      "edge": 0.011689399001515999,
       "tier": "HIGH_RISK",
       "dataQuality": "MEDIUM",
       "historyMatches": 10,
@@ -87889,8 +87838,8 @@
       "probability": 0.7082945927598038,
       "confidence": 0.47030760959250967,
       "fairOdds": 1.41,
-      "quotedOdds": 1.54,
-      "edge": 0.05894394340915443,
+      "quotedOdds": 1.53,
+      "edge": 0.0546998215179737,
       "tier": "HIGH_RISK",
       "dataQuality": "LOW",
       "historyMatches": 4,
@@ -88057,8 +88006,8 @@
       "probability": 0.7608503159010915,
       "confidence": 0.4732488964904789,
       "fairOdds": 1.31,
-      "quotedOdds": 1.74,
-      "edge": 0.18613767222293065,
+      "quotedOdds": 1.71,
+      "edge": 0.17605499426366467,
       "tier": "HIGH_RISK",
       "dataQuality": "LOW",
       "historyMatches": 2,
@@ -88909,8 +88858,8 @@
       "probability": 0.7267172252144012,
       "confidence": 0.5130623610013673,
       "fairOdds": 1.38,
-      "quotedOdds": 1.77,
-      "edge": 0.1617454738019718,
+      "quotedOdds": 1.74,
+      "edge": 0.1520045815362403,
       "tier": "HIGH_RISK",
       "dataQuality": "MEDIUM",
       "historyMatches": 6,
@@ -89481,8 +89430,8 @@
       "probability": 0.588705863235706,
       "confidence": 0.48980327821210734,
       "fairOdds": 1.7,
-      "quotedOdds": 1.57,
-      "edge": -0.04823681192352969,
+      "quotedOdds": 1.59,
+      "edge": -0.040224954374356914,
       "tier": "HIGH_RISK",
       "dataQuality": "MEDIUM",
       "historyMatches": 12,
@@ -89889,8 +89838,8 @@
       "probability": 0.7070643652945361,
       "confidence": 0.4694907385555719,
       "fairOdds": 1.41,
-      "quotedOdds": 1.56,
-      "edge": 0.06603872426889512,
+      "quotedOdds": 1.59,
+      "edge": 0.07813354768447323,
       "tier": "HIGH_RISK",
       "dataQuality": "LOW",
       "historyMatches": 4,
@@ -102041,8 +101990,8 @@
       "probability": 0.8076995261431963,
       "confidence": 0.5363124853590823,
       "fairOdds": 1.24,
-      "quotedOdds": 1.74,
-      "edge": 0.2329868824650354,
+      "quotedOdds": 1.71,
+      "edge": 0.22290420450576942,
       "tier": "HIGH_RISK",
       "dataQuality": "LOW",
       "historyMatches": 4,
@@ -102489,8 +102438,8 @@
       "probability": 0.8151916199822663,
       "confidence": 0.5412872356682248,
       "fairOdds": 1.23,
-      "quotedOdds": 1.59,
-      "edge": 0.18626080237220344,
+      "quotedOdds": 1.57,
+      "edge": 0.17824894482303066,
       "tier": "HIGH_RISK",
       "dataQuality": "LOW",
       "historyMatches": 4,
@@ -103189,8 +103138,8 @@
       "probability": 0.7550151494781131,
       "confidence": 0.5013300592534671,
       "fairOdds": 1.32,
-      "quotedOdds": 1.65,
-      "edge": 0.14895454341750702,
+      "quotedOdds": 1.67,
+      "edge": 0.1562127542685322,
       "tier": "HIGH_RISK",
       "dataQuality": "LOW",
       "historyMatches": 4,
@@ -104545,8 +104494,8 @@
       "probability": 0.6239040019843411,
       "confidence": 0.532190113692643,
       "fairOdds": 1.6,
-      "quotedOdds": 1.56,
-      "edge": -0.01712163904129982,
+      "quotedOdds": 1.54,
+      "edge": -0.025446647366308195,
       "tier": "HIGH_RISK",
       "dataQuality": "MEDIUM",
       "historyMatches": 13,
@@ -104589,8 +104538,8 @@
       "probability": 0.6390460025026024,
       "confidence": 0.4511664777668372,
       "fairOdds": 1.56,
-      "quotedOdds": 1.53,
-      "edge": -0.014548768739227724,
+      "quotedOdds": 1.5,
+      "edge": -0.02762066416406428,
       "tier": "HIGH_RISK",
       "dataQuality": "MEDIUM",
       "historyMatches": 6,
@@ -105481,8 +105430,8 @@
       "probability": 0.6270197492876306,
       "confidence": 0.5085130166722683,
       "fairOdds": 1.59,
-      "quotedOdds": 2.35,
-      "edge": 0.20148783439401358,
+      "quotedOdds": 2.3,
+      "edge": 0.19223714059197838,
       "tier": "HIGH_RISK",
       "dataQuality": "MEDIUM",
       "historyMatches": 11,
@@ -105609,8 +105558,8 @@
       "probability": 0.6641902056205222,
       "confidence": 0.5526062510762745,
       "fairOdds": 1.51,
-      "quotedOdds": 2.1,
-      "edge": 0.18799972943004606,
+      "quotedOdds": 2.15,
+      "edge": 0.1990739265507548,
       "tier": "HIGH_RISK",
       "dataQuality": "MEDIUM",
       "historyMatches": 12,
@@ -106521,7 +106470,7 @@
         "id": "espn-131454",
         "name": "Carolina Ascent FC",
         "shortName": "CAR",
-        "logo": ""
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/131454.png"
       },
       "market": {
         "key": "UNDER_3_5",
@@ -107753,8 +107702,8 @@
       "probability": 0.7571722548331209,
       "confidence": 0.5186629945606878,
       "fairOdds": 1.32,
-      "quotedOdds": 1.69,
-      "edge": 0.16545627850175992,
+      "quotedOdds": 1.67,
+      "edge": 0.15836985962354,
       "tier": "HIGH_RISK",
       "dataQuality": "LOW",
       "historyMatches": 5,
@@ -115645,8 +115594,8 @@
       "probability": 0.6632134231118141,
       "confidence": 0.4403737129462445,
       "fairOdds": 1.51,
-      "quotedOdds": 1.69,
-      "edge": 0.07149744678045311,
+      "quotedOdds": 1.71,
+      "edge": 0.07841810147438721,
       "tier": "HIGH_RISK",
       "dataQuality": "LOW",
       "historyMatches": 4,
@@ -116373,8 +116322,8 @@
       "probability": 0.533553859576017,
       "confidence": 0.45512144221834244,
       "fairOdds": 1.87,
-      "quotedOdds": 1.67,
-      "edge": -0.06524853563356392,
+      "quotedOdds": 1.69,
+      "edge": -0.058162116755343996,
       "tier": "HIGH_RISK",
       "dataQuality": "MEDIUM",
       "historyMatches": 13,
@@ -118309,8 +118258,8 @@
       "probability": 0.6225671587383379,
       "confidence": 0.5179758760702972,
       "fairOdds": 1.61,
-      "quotedOdds": 1.49,
-      "edge": -0.04857378085897757,
+      "quotedOdds": 1.5,
+      "edge": -0.04409950792832873,
       "tier": "HIGH_RISK",
       "dataQuality": "MEDIUM",
       "historyMatches": 12,
@@ -124925,17 +124874,13 @@
       "probability": 0.8076988636114505,
       "confidence": 0.536312045438003,
       "fairOdds": 1.24,
-      "quotedOdds": 1.56,
-      "edge": 0.16667322258580952,
+      "quotedOdds": null,
+      "edge": null,
       "tier": "HIGH_RISK",
       "dataQuality": "LOW",
       "historyMatches": 4,
-      "oddsSource": "espn-draftkings",
-      "oddsProvider": "DraftKings",
-      "providerMarketId": "401907949-total",
-      "providerSelectionId": "under",
-      "providerDeepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512111%3Foutcomes%3D0OU85847545U350_3",
-      "reasoning": "Limited team history · cautious estimate uses league scoring priors and the available market price"
+      "oddsSource": null,
+      "reasoning": "Limited team history · cautious estimate uses league scoring priors"
     },
     {
       "id": "espn-401896352-OVER_1_5",
@@ -139189,8 +139134,8 @@
       "probability": 0.6817172282443205,
       "confidence": 0.45266023955422874,
       "fairOdds": 1.47,
-      "quotedOdds": 1.77,
-      "edge": 0.11674547683189107,
+      "quotedOdds": 1.8,
+      "edge": 0.12616167268876488,
       "tier": "HIGH_RISK",
       "dataQuality": "LOW",
       "historyMatches": 4,
@@ -139784,9 +139729,9 @@
       "title": "High Risk",
       "category": "HIGH_RISK",
       "status": "PUBLISHED",
-      "totalOdds": 16.48,
+      "totalOdds": 16.87,
       "confidence": 0.6301870461611702,
-      "publishedAt": "2026-08-21T07:09:13.193Z",
+      "publishedAt": "2026-08-21T08:59:22.619Z",
       "bookingCodes": [],
       "selections": [
         {
@@ -139958,10 +139903,10 @@
             "line": 3.5
           },
           "selection": "Under 3.5",
-          "odds": 2.1,
+          "odds": 2.15,
           "probability": 0.6641902056205222,
           "confidence": 0.5526062510762745,
-          "edge": 0.18799972943004606,
+          "edge": 0.1990739265507548,
           "oddsSource": "espn-draftkings"
         }
       ]
