@@ -24,7 +24,7 @@ export default function AdminPage() {
   }, []);
 
   return <main className="adm-app">
-    <aside className="adm-sidebar"><Link href="/" className="adm-brand">Odds<span>Aura</span></Link><nav><a href="#overview">Pipeline</a><a href="#tickets">Published tickets</a><a href="#markets">Market coverage</a></nav><a className="adm-repo" href="https://github.com/mensahenoch020-sketch/Oddsaura/actions" target="_blank" rel="noreferrer">Automation runs ↗</a></aside>
+    <aside className="adm-sidebar"><Link href="/dashboard" className="adm-brand">Odds<span>Aura</span></Link><nav><a href="#overview">Pipeline</a><a href="#tickets">Published tickets</a><a href="#markets">Market coverage</a></nav><a className="adm-repo" href="https://github.com/mensahenoch020-sketch/Oddsaura/actions" target="_blank" rel="noreferrer">Automation runs ↗</a></aside>
     <section className="adm-content">
       <header><div><span className="adm-kicker">Zero-key operations</span><h1>Automation monitor</h1></div><div className="adm-actions"><button className="adm-primary" disabled={busy} onClick={refresh}>{busy ? "Checking…" : "Refresh snapshot"}</button></div></header>
       {message && <div className="adm-message">{message}</div>}

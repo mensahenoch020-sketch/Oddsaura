@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import Brand from "../brand";
 import { fallbackSnapshot, loadSnapshot, type PredictedPick, type Snapshot, type Team } from "../data";
 import { LEAGUE_FILTERS, leagueMatches, type LeagueFilter } from "../leagues";
 import { generateSportyBetCode, inspectProviderSlip, providerAdapters, type ProviderId, type SportyBetCodeResponse } from "./providers";
@@ -164,7 +165,7 @@ export default function BuilderPage() {
   const providerAdapter = providerAdapters.find((item) => item.id === provider) ?? providerAdapters[0];
 
   return <main className="build-app">
-    <header className="build-header"><Link href="/" className="build-brand"><span>↗</span>Odds<i>Aura</i></Link><div><span>{predictions.length} selectable predictions</span><Link href="/results">Results</Link><Link href="/login">Account</Link><Link href="/matches">Matches</Link></div></header>
+    <header className="build-header"><Brand href="/dashboard" className="build-brand" /><div><span>{predictions.length} selectable predictions</span><Link href="/results">Results</Link><Link href="/account">Account</Link><Link href="/matches">Matches</Link></div></header>
     <section className="build-hero"><div><span>Predicted ticket builder</span><h1>Choose our picks.<br /><i>Build your own ticket.</i></h1></div><p>Every option below has already passed through OddsAura’s probability model. Pick one prediction per match, then save it, share it, export a JPEG or prepare it for SportyBet mapping.</p></section>
     <section className="build-layout">
       <div className="build-board">

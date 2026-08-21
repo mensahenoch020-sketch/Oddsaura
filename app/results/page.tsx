@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import Brand from "../brand";
 import { fallbackSnapshot, loadSnapshot, type Snapshot } from "../data";
 import "./results.css";
 
@@ -21,7 +22,7 @@ export default function ResultsPage() {
   }), [tickets]);
 
   return <main className="results-app">
-    <header className="results-header"><Link href="/" className="results-brand"><span>↗</span>Odds<i>Aura</i></Link><nav><Link href="/builder">Build a slip</Link><Link href="/matches">Matches</Link></nav></header>
+    <header className="results-header"><Brand href="/dashboard" className="results-brand" /><nav><Link href="/builder">Build a slip</Link><Link href="/matches">Matches</Link><Link href="/account">Account</Link></nav></header>
     <section className="results-hero"><div><span>Ticket tracker</span><h1>Results without<br /><i>the guesswork.</i></h1></div><p>OddsAura settles supported markets from final scores. Always confirm early-payout markets, voids and official settlement inside your bookmaker account.</p></section>
     <section className="results-summary"><article><span>Won</span><strong>{summary.won}</strong></article><article><span>Lost</span><strong>{summary.lost}</strong></article><article><span>Pending</span><strong>{summary.pending}</strong></article><label><span>Stake calculator</span><div>₦<input type="number" min="0" step="100" value={stake} onChange={(event) => setStake(Math.max(0, Number(event.target.value) || 0))} /></div></label></section>
     <section className="results-board">

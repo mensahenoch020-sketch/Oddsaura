@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import Brand from "../brand";
 import { fallbackSnapshot, loadSnapshot, type Fixture, type Snapshot, type Team } from "../data";
 import { LEAGUE_FILTERS, leagueMatches, type LeagueFilter } from "../leagues";
 import "./matches.css";
@@ -84,8 +85,8 @@ export default function MatchesPage() {
 
   return <main className="matches-app">
     <header className="matches-header">
-      <Link className="matches-brand" href="/" aria-label="OddsAura home"><span>↗</span>Odds<i>Aura</i></Link>
-      <nav aria-label="Main navigation"><Link href="/builder">Build a slip</Link><Link href="/results">Results</Link><Link href="/">Predictions</Link></nav>
+      <Brand className="matches-brand" href="/dashboard" />
+      <nav aria-label="Main navigation"><Link href="/builder">Build a slip</Link><Link href="/results">Results</Link><Link href="/dashboard">Predictions</Link><Link href="/account">Account</Link></nav>
     </header>
 
     <section className="matches-hero">
