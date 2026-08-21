@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { fallbackSnapshot, loadSnapshot, type PredictedPick, type Snapshot, type Team } from "../data";
-import { inspectProviderSlip, providerAdapters, type ProviderId } from "./providers";
+import { generateSportyBetCode, inspectProviderSlip, providerAdapters, type ProviderId, type SportyBetCodeResponse } from "./providers";
 import "./builder.css";
 import "./predictions.css";
 
@@ -44,6 +44,8 @@ export default function BuilderPage() {
   const [tier, setTier] = useState<Tier>("ALL");
   const [provider, setProvider] = useState<ProviderId>("sportybet");
   const [notice, setNotice] = useState("");
+  const [sportyCode, setSportyCode] = useState<SportyBetCodeResponse | null>(null);
+  const [creatingCode, setCreatingCode] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -77,6 +79,7 @@ export default function BuilderPage() {
   function choose(pick: PredictedPick) {
     setPicks((current) => [...current.filter((item) => item.fixtureId !== pick.fixtureId), pick]);
     setNotice("");
+    setSportyCode(null);
   }
 
   function save() {
@@ -116,8 +119,35 @@ export default function BuilderPage() {
     setNotice("Prediction slip saved as a JPEG.");
   }
 
-  function requestCode() {
-    setNotice(inspectProviderSlip(provider, picks.map((pick) => ({ provider: pick.oddsProvider ?? undefined, deepLink: pick.providerDeepLink }))));
+  async function requestCode() {
+    if (provider !== "sportybet") {
+      setNotice(inspectProviderSlip(provider, picks.map((pick) => ({ provider: pick.oddsProvider ?? undefined, deepLink: pick.providerDeepLink }))));
+      return;
+    }
+    setCreatingCode(true);
+    setNotice("Matching every pick against SportyBet’s current markets…");
+    setSportyCode(null);
+    try {
+      const result = await generateSportyBetCode(picks.map((pick) => ({
+        fixtureId: pick.fixtureId,
+        homeTeam: pick.homeTeam.name,
+        awayTeam: pick.awayTeam.name,
+        kickoff: pick.kickoff,
+        marketKey: pick.market.key,
+        marketName: pick.market.name,
+        selection: pick.selection,
+        line: pick.market.line,
+        providerEventId: pick.fixtureId.startsWith("sr:match:") ? pick.fixtureId : null,
+        providerMarketId: pick.fixtureId.startsWith("sr:match:") ? pick.providerMarketId : null,
+        providerOutcomeId: pick.fixtureId.startsWith("sr:match:") ? pick.providerSelectionId : null,
+      })));
+      setSportyCode(result);
+      setNotice(`Verified by SportyBet · ${result.resolved.length} selections matched.`);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "SportyBet could not create this code.");
+    } finally {
+      setCreatingCode(false);
+    }
   }
 
   const providerAdapter = providerAdapters.find((item) => item.id === provider) ?? providerAdapters[0];
@@ -139,10 +169,11 @@ export default function BuilderPage() {
         <div className="build-picks">{picks.map((pick) => <div key={pick.fixtureId}><button type="button" aria-label={`Remove ${pick.homeTeam.name} versus ${pick.awayTeam.name}`} onClick={() => setPicks((rows) => rows.filter((row) => row.fixtureId !== pick.fixtureId))}>×</button><span>{pick.homeTeam.name} vs {pick.awayTeam.name}</span><strong>{pick.market.name}: {pick.selection}</strong><b>{pick.quotedOdds.toFixed(2)} · {Math.round(pick.confidence * 100)}%</b></div>)}{!picks.length && <p>Choose one of OddsAura’s predicted selections to start your ticket.</p>}</div>
         <div className="build-total"><span>Total odds</span><strong>{totalOdds.toFixed(2)}</strong></div>
         <label className="build-provider">Convert for<select value={provider} onChange={(event) => setProvider(event.target.value as ProviderId)}>{providerAdapters.map((item) => <option value={item.id} key={item.id}>{item.label}</option>)}</select></label>
-        <button className="build-code" type="button" disabled={!picks.length} onClick={requestCode}>Prepare {providerAdapter.label} {providerAdapter.capability === "booking-code" ? "code" : "links"} <span>→</span></button>
+        <button className="build-code" type="button" disabled={!picks.length || creatingCode} onClick={() => void requestCode()}>{creatingCode ? "Creating real SportyBet code…" : `${provider === "sportybet" ? "Create" : "Prepare"} ${providerAdapter.label} ${providerAdapter.capability === "booking-code" ? "code" : "links"}`} <span>→</span></button>
+        {sportyCode && <div className="build-real-code"><span>SportyBet booking code</span><strong>{sportyCode.code}</strong><div><button type="button" onClick={() => void navigator.clipboard.writeText(sportyCode.code)}>Copy code</button><a href={sportyCode.deepLink} target="_blank" rel="noreferrer">Load on SportyBet ↗</a></div></div>}
         <div className="build-share"><button type="button" disabled={!picks.length} onClick={save}>Save</button><button type="button" disabled={!picks.length} onClick={() => void share()}>Share link</button><button type="button" disabled={!picks.length} onClick={jpeg}>JPEG</button></div>
         {notice && <p className="build-notice">{notice}</p>}
-        <small>Only model-scored predictions appear here. A real provider code will only be returned after every selection is matched to that bookmaker’s current event and market IDs.</small>
+        <small>Only model-scored predictions appear here. SportyBet codes are returned only after every selection is matched and the new code is loaded back from SportyBet for verification.</small>
       </aside>
     </section>
   </main>;
