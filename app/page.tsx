@@ -44,6 +44,11 @@ export default function Home() {
 
     <nav className="oa-filters" aria-label="Ticket categories"><a href="#safe">Safe 2–3 Odds</a><a href="#balanced">Balanced 5–10 Odds</a><a href="#high-risk">High Risk</a><a href="#markets">All markets</a></nav>
 
+    {(snapshot.watchlist?.length ?? 0) > 0 && <section className="oa-watchlist" aria-label="Model watchlist">
+      <div className="oa-section-title"><div><span className="oa-kicker">Model watchlist</span><h2>Strong signals awaiting verified prices.</h2></div><p>Fair odds are calculated by OddsAura’s model. They are not bookmaker odds and cannot create a betting ticket until a public price is matched.</p></div>
+      <div className="oa-watch-grid">{snapshot.watchlist?.map((item) => <article key={item.id}><span>{item.league.name} · {new Date(item.kickoff).toLocaleString()}</span><h3>{item.homeTeam.name} vs {item.awayTeam.name}</h3><p>{item.market.name}: <strong>{item.selection}</strong></p><div><span>Confidence <b>{Math.round(item.confidence * 100)}%</b></span><span>{item.quotedOdds ? `Quoted ${item.quotedOdds.toFixed(2)}` : `Model fair ${item.fairOdds.toFixed(2)}`}</span></div></article>)}</div>
+    </section>}
+
     {!snapshot.tickets.length && <div className="oa-empty"><strong>{snapshot.status === "waiting" ? "The automated collector is ready." : "No ticket passed every rule yet."}</strong><span>{snapshot.message}</span><small>OddsAura will publish automatically when current prices and enough recent form are available.</small></div>}
 
     <section className="oa-ticket-grid">

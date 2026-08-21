@@ -1,8 +1,31 @@
 import { fetchJson, wait } from "./http.mjs";
 
-const BASE = process.env.SOFASCORE_BASE_URL ?? "https://www.sofascore.com/api/v1";
+const BASES = [...new Set([
+  process.env.SOFASCORE_BASE_URL,
+  "https://api.sofascore.com/api/v1",
+  "https://www.sofascore.com/api/v1",
+].filter(Boolean))];
 const image = (teamId) => `https://api.sofascore.app/api/v1/team/${teamId}/image`;
 const isoDate = (date) => date.toISOString().slice(0, 10);
+
+async function sofaJson(path, options = {}) {
+  const failures = [];
+  for (const base of BASES) {
+    try {
+      return await fetchJson(`${base}${path}`, {
+        ...options,
+        headers: {
+          origin: "https://www.sofascore.com",
+          referer: "https://www.sofascore.com/",
+          ...options.headers,
+        },
+      });
+    } catch (error) {
+      failures.push(`${new URL(base).hostname}: ${error instanceof Error ? error.message : "fetch failed"}`);
+    }
+  }
+  throw new Error(failures.join(" | "));
+}
 
 function scoreValue(score) {
   if (!score || typeof score !== "object") return null;
@@ -79,7 +102,7 @@ export async function collectSofaScore({ historyDays = 10, futureDays = 3, oddsL
     const date = new Date(now);
     date.setUTCDate(date.getUTCDate() + offset);
     try {
-      const payload = await fetchJson(`${BASE}/sport/football/scheduled-events/${isoDate(date)}`);
+      const payload = await sofaJson(`/sport/football/scheduled-events/${isoDate(date)}`);
       for (const raw of payload?.events ?? []) {
         const event = normalizeEvent(raw);
         if (event.id) events.set(event.id, event);
@@ -97,7 +120,7 @@ export async function collectSofaScore({ historyDays = 10, futureDays = 3, oddsL
 
   for (const event of upcoming) {
     try {
-      const payload = await fetchJson(`${BASE}/event/${event.providerId}/odds/1/all`, { retries: 1 });
+      const payload = await sofaJson(`/event/${event.providerId}/odds/1/all`, { retries: 1 });
       event.odds = normalizeOdds(payload);
     } catch (error) {
       warnings.push(`odds ${event.id}: ${error instanceof Error ? error.message : "fetch failed"}`);

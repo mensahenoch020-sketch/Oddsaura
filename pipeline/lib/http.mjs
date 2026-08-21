@@ -1,6 +1,6 @@
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export async function fetchJson(url, { retries = 2, timeoutMs = 12_000 } = {}) {
+export async function fetchJson(url, { retries = 2, timeoutMs = 12_000, headers = {} } = {}) {
   let lastError;
   for (let attempt = 0; attempt <= retries; attempt += 1) {
     const controller = new AbortController();
@@ -11,7 +11,9 @@ export async function fetchJson(url, { retries = 2, timeoutMs = 12_000 } = {}) {
         headers: {
           accept: "application/json,text/plain,*/*",
           "accept-language": "en-GB,en;q=0.8",
-          "user-agent": "OddsAura/0.2 public-football-data collector",
+          "cache-control": "no-cache",
+          "user-agent": "Mozilla/5.0 (compatible; OddsAuraData/0.3; +https://github.com/mensahenoch020-sketch/Oddsaura)",
+          ...headers,
         },
       });
       if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);

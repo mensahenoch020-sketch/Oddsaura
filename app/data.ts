@@ -17,6 +17,10 @@ export type TicketSelection = {
   edge?: number | null;
   oddsSource?: string | null;
 };
+export type WatchlistPick = Omit<TicketSelection, "odds" | "edge"> & {
+  fairOdds: number;
+  quotedOdds?: number | null;
+};
 export type Ticket = { id: string; title: string; category: string; status: string; totalOdds: number; confidence: number; publishedAt?: string; bookingCodes: Array<{ provider: string; code: string; deepLink?: string }>; selections: TicketSelection[] };
 export type Snapshot = {
   version: number;
@@ -27,6 +31,7 @@ export type Snapshot = {
   sources: Array<{ id: string; label: string; status: string; lastSuccessAt: string | null; records: number; warnings?: string[] }>;
   metrics: { fixtures: number; live: number; completed: number; pricedMarkets: number; predictions: number; publishedTickets: number };
   marketCatalog: string[];
+  watchlist?: WatchlistPick[];
   tickets: Ticket[];
 };
 
