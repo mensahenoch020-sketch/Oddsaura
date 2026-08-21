@@ -26,7 +26,10 @@ type AccountIdentity = { email: string; name: string };
 
 const SESSION_COOKIE = "oa_session";
 const SESSION_SECONDS = 60 * 60 * 24 * 30;
-const PASSWORD_ITERATIONS = 210_000;
+// Cloudflare Workers currently caps Web Crypto PBKDF2 at 100,000 rounds.
+// Store the iteration count in the hash so existing hashes remain verifiable
+// if this value changes in a future runtime.
+const PASSWORD_ITERATIONS = 100_000;
 const encoder = new TextEncoder();
 
 function toBase64Url(bytes: Uint8Array) {
@@ -251,7 +254,17 @@ const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
-    if (url.pathname.startsWith("/api/auth/")) return authApi(request, env, url);
+    if (url.pathname.startsWith("/api/auth/")) {
+      try {
+        return await authApi(request, env, url);
+      } catch (error) {
+        console.error("OddsAura account service failed", error);
+        return Response.json(
+          { error: "The account service could not complete that request. Please try again." },
+          { status: 500, headers: { "cache-control": "no-store" } },
+        );
+      }
+    }
 
     const protectedPages = ["/dashboard", "/matches", "/builder", "/results", "/account", "/admin"];
     const isProtectedPage = protectedPages.some((path) => url.pathname === path || url.pathname.startsWith(`${path}/`));
