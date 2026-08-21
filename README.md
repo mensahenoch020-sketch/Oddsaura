@@ -1,4 +1,13 @@
-# vinext-starter
+# OddsAura
+
+OddsAura is now structured as a real football-prediction product:
+
+- `app/` — public tickets interface and administrator dashboard.
+- `backend/` — Railway-ready Fastify service with PostgreSQL, Prisma, scheduled football data, probability scoring and ticket generation.
+
+See [backend/README.md](backend/README.md) for Railway variables and deployment steps.
+
+## Web app
 
 A clean full-stack starter running on
 [vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
