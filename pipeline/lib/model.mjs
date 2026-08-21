@@ -106,7 +106,7 @@ export function scoreEvent(event, allEvents) {
     expectedHomeGoals: Number(homeLambda.toFixed(2)),
     expectedAwayGoals: Number(awayLambda.toFixed(2)),
     dataQuality: quality,
-    confidence: clamp(item.probability * 0.82 + quality * 0.18, 0, 0.99),
+    confidence: clamp(item.probability * (0.7 + quality * 0.3), 0, 0.99),
     fairOdds: Number((1 / item.probability).toFixed(2)),
     quotedOdds: null,
     oddsSource: null,
@@ -131,6 +131,6 @@ export function attachOdds(predictions, odds) {
     });
     if (!quote) return prediction;
     const implied = 1 / quote.odds;
-    return { ...prediction, quotedOdds: quote.odds, oddsSource: quote.source, edge: prediction.probability - implied, impliedProbability: implied, providerMarketId: quote.marketId, providerSelectionId: quote.selectionId };
+    return { ...prediction, quotedOdds: quote.odds, oddsSource: quote.source, oddsProvider: quote.provider ?? null, providerDeepLink: quote.deepLink ?? null, edge: prediction.probability - implied, impliedProbability: implied, providerMarketId: quote.marketId, providerSelectionId: quote.selectionId };
   });
 }

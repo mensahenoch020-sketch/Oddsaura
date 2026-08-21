@@ -8,6 +8,24 @@ const DEFAULT_LEAGUES = [
 ];
 
 const compactDate = (date) => date.toISOString().slice(0, 10).replaceAll("-", "");
+const displayName = (value) => String(value ?? "").split("-").filter(Boolean).map((part) => part.length <= 3 ? part.toUpperCase() : `${part[0].toUpperCase()}${part.slice(1)}`).join(" ");
+
+function globalLeague(raw) {
+  const leagueId = String(raw?.uid ?? "").match(/~l:(\d+)/)?.[1] ?? "";
+  const rawSlug = String(raw?.season?.slug ?? "").replace(/^\d{4}(?:-\d{2})?-/, "");
+  const generic = ["", "regular-season", "first-round", "second-round", "group-stage", "tournament", "apertura", "clausura", "torneo-apertura", "torneo-clausura"].includes(rawSlug);
+  const country = raw?.competitions?.[0]?.venue?.address?.country ?? raw?.venue?.address?.country ?? "";
+  return {
+    id: leagueId,
+    slug: rawSlug || leagueId,
+    name: generic ? (country ? `${country} Football` : "International Football") : displayName(rawSlug),
+    country,
+  };
+}
+
+export function normalizeEspnGlobalEvent(raw) {
+  return normalizeEspnEvent(raw, globalLeague(raw), "espn-global-json");
+}
 
 function decimalFromAmerican(value) {
   const american = Number(value);
@@ -71,7 +89,7 @@ function normalizeOdds(competition, home, away) {
   return rows;
 }
 
-export function normalizeEspnEvent(raw, leagueFallback = {}) {
+export function normalizeEspnEvent(raw, leagueFallback = {}, source = "espn-public-json") {
   const competition = raw?.competitions?.[0] ?? {};
   const competitors = competition?.competitors ?? [];
   const home = competitors.find((item) => item.homeAway === "home") ?? competitors[0];
@@ -85,7 +103,7 @@ export function normalizeEspnEvent(raw, leagueFallback = {}) {
   return {
     id: eventId ? `espn-${eventId}` : "",
     providerId: eventId,
-    source: "espn-public-json",
+    source,
     league: {
       id: String(league?.id ?? league?.slug ?? ""),
       name: league?.name ?? league?.abbreviation ?? "Football",
@@ -103,7 +121,7 @@ export function normalizeEspnEvent(raw, leagueFallback = {}) {
   };
 }
 
-export async function collectEspn({ historyDays = 35, futureDays = 3, leagues = DEFAULT_LEAGUES } = {}) {
+export async function collectEspn({ historyDays = 35, futureDays = 7, leagues = DEFAULT_LEAGUES } = {}) {
   const end = new Date();
   end.setUTCDate(end.getUTCDate() + futureDays);
   const start = new Date();
@@ -124,6 +142,30 @@ export async function collectEspn({ historyDays = 35, futureDays = 3, leagues = 
       warnings.push(`${league}: ${error instanceof Error ? error.message : "fetch failed"}`);
     }
     await wait(100);
+  }
+  return { events: [...events.values()].sort((a, b) => a.kickoff.localeCompare(b.kickoff)), warnings };
+}
+
+export async function collectEspnGlobal({ historyDays = 14, futureDays = 7 } = {}) {
+  const now = new Date();
+  const events = new Map();
+  const warnings = [];
+  for (let offset = -historyDays; offset <= futureDays; offset += 1) {
+    const date = new Date(now);
+    date.setUTCDate(date.getUTCDate() + offset);
+    const day = compactDate(date);
+    try {
+      const payload = await fetchJson(`${BASE}/all/scoreboard?dates=${day}&limit=1000`, { timeoutMs: 20_000 });
+      const rows = Array.isArray(payload?.events) ? payload.events : [];
+      for (const raw of rows) {
+        const event = normalizeEspnGlobalEvent(raw);
+        if (event.id && Number.isFinite(new Date(event.kickoff).getTime())) events.set(event.id, event);
+      }
+      if (rows.length >= 1000) warnings.push(`${day}: the source reached its 1,000-match daily limit`);
+    } catch (error) {
+      warnings.push(`${day}: ${error instanceof Error ? error.message : "fetch failed"}`);
+    }
+    await wait(120);
   }
   return { events: [...events.values()].sort((a, b) => a.kickoff.localeCompare(b.kickoff)), warnings };
 }
