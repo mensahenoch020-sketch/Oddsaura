@@ -57,9 +57,10 @@ const fixtureMap = new Map(upcoming.map((fixture) => [fixture.id, fixture]));
 const predictedPicks = [];
 const predictionKeys = new Set();
 const fixturePickCounts = new Map();
+const maxSelectablePicks = Math.max(2000, upcoming.length);
 function publishPick(pick, fixture) {
   const identity = `${pick.fixtureId}-${pick.providerMarketId ?? pick.key}-${pick.providerSelectionId ?? pick.selection}`;
-  if (predictionKeys.has(identity) || (fixturePickCounts.get(pick.fixtureId) ?? 0) >= 5 || predictedPicks.length >= 800) return false;
+  if (predictionKeys.has(identity) || (fixturePickCounts.get(pick.fixtureId) ?? 0) >= 5 || predictedPicks.length >= maxSelectablePicks) return false;
   const historyMatches = (pick.factors?.homePlayed ?? 0) + (pick.factors?.awayPlayed ?? 0);
   const dataQuality = historyMatches >= 14 ? "HIGH" : historyMatches >= 6 ? "MEDIUM" : "LOW";
   const tier = dataQuality === "LOW" ? "HIGH_RISK" : pick.confidence >= 0.72 && (pick.quotedOdds ?? 99) <= 1.8 ? "SAFE" : pick.confidence >= 0.62 ? "BALANCED" : "HIGH_RISK";
@@ -94,18 +95,28 @@ function publishPick(pick, fixture) {
   return true;
 }
 
-for (const pick of [...predictions].filter((item) => item.quotedOdds && item.confidence >= 0.44 && (item.edge == null || item.edge >= -0.08)).sort((a, b) => (b.confidence + Math.max(0, b.edge ?? 0)) - (a.confidence + Math.max(0, a.edge ?? 0)))) {
-  const fixture = fixtureMap.get(pick.fixtureId);
-  if (fixture) publishPick(pick, fixture);
+const fallbackKeys = new Set(["DC_1X", "DC_X2", "OVER_1_5", "UNDER_3_5", "MATCH_HOME", "MATCH_AWAY"]);
+const eligiblePicks = [...predictions]
+  .filter((item) => item.quotedOdds && item.confidence >= 0.44 && (item.edge == null || item.edge >= -0.08))
+  .sort((a, b) => (b.confidence + Math.max(0, b.edge ?? 0)) - (a.confidence + Math.max(0, a.edge ?? 0)));
+const bestEligibleByFixture = new Map();
+for (const pick of eligiblePicks) {
+  if (!bestEligibleByFixture.has(pick.fixtureId)) bestEligibleByFixture.set(pick.fixtureId, pick);
 }
 
-// Every upcoming fixture receives at least one clearly labelled model pick,
-// even when the public feeds have no team history or bookmaker price yet.
-const fallbackKeys = new Set(["DC_1X", "DC_X2", "OVER_1_5", "UNDER_3_5", "MATCH_HOME", "MATCH_AWAY"]);
+// Coverage comes first: every upcoming fixture receives one selectable model
+// pick before extra markets are added. Fixtures without history or a public
+// bookmaker price use a cautious, clearly-labelled probability-only pick.
 for (const fixture of upcoming) {
-  if ((fixturePickCounts.get(fixture.id) ?? 0) > 0) continue;
-  const fallback = predictions.filter((item) => item.fixtureId === fixture.id && fallbackKeys.has(item.key)).sort((a, b) => b.confidence - a.confidence)[0];
-  if (fallback) publishPick(fallback, fixture);
+  const primary = bestEligibleByFixture.get(fixture.id)
+    ?? predictions.filter((item) => item.fixtureId === fixture.id && fallbackKeys.has(item.key)).sort((a, b) => b.confidence - a.confidence)[0];
+  if (primary) publishPick(primary, fixture);
+}
+
+// After universal fixture coverage, publish the strongest additional markets.
+for (const pick of eligiblePicks) {
+  const fixture = fixtureMap.get(pick.fixtureId);
+  if (fixture) publishPick(pick, fixture);
 }
 const watchlist = [];
 const usedFixtures = new Set();
