@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { fallbackSnapshot, loadSnapshot, type Fixture, type Snapshot, type Team } from "../data";
+import { LEAGUE_FILTERS, leagueMatches, type LeagueFilter } from "../leagues";
 import "./matches.css";
 import "./matches-more.css";
 
@@ -43,6 +44,7 @@ export default function MatchesPage() {
   const [snapshot, setSnapshot] = useState<Snapshot>(fallbackSnapshot);
   const [view, setView] = useState<View>("today");
   const [search, setSearch] = useState("");
+  const [league, setLeague] = useState<LeagueFilter>("ALL");
   const [limit, setLimit] = useState(120);
   const [loading, setLoading] = useState(true);
 
@@ -65,10 +67,11 @@ export default function MatchesPage() {
   const visible = useMemo(() => allFixtures.filter((fixture) => {
     const text = `${fixture.homeTeam.name} ${fixture.awayTeam.name} ${fixture.league.name} ${fixture.league.country ?? ""}`.toLowerCase();
     if (!text.includes(search.trim().toLowerCase())) return false;
+    if (!leagueMatches(fixture.league, league)) return false;
     if (view === "live") return fixture.status === "LIVE";
     if (view === "today") return dayKey(fixture.kickoff) === dayKey(new Date());
     return fixture.status === "SCHEDULED" && dayKey(fixture.kickoff) !== dayKey(new Date());
-  }).sort((a, b) => a.kickoff.localeCompare(b.kickoff)), [allFixtures, search, view]);
+  }).sort((a, b) => a.kickoff.localeCompare(b.kickoff)), [allFixtures, search, view, league]);
 
   const groups = useMemo(() => {
     const result = new Map<string, Fixture[]>();
@@ -82,7 +85,7 @@ export default function MatchesPage() {
   return <main className="matches-app">
     <header className="matches-header">
       <Link className="matches-brand" href="/" aria-label="OddsAura home"><span>↗</span>Odds<i>Aura</i></Link>
-      <nav aria-label="Main navigation"><Link href="/builder">Build a slip</Link><Link href="/">Predictions</Link></nav>
+      <nav aria-label="Main navigation"><Link href="/builder">Build a slip</Link><Link href="/results">Results</Link><Link href="/">Predictions</Link></nav>
     </header>
 
     <section className="matches-hero">
@@ -98,6 +101,7 @@ export default function MatchesPage() {
       </div>
       <label className="matches-search"><span>Search</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Team or league" /></label>
     </section>
+    <div className="matches-league-tabs" aria-label="League filter">{LEAGUE_FILTERS.map((item) => <button type="button" key={item.id} className={league === item.id ? "active" : ""} onClick={() => { setLeague(item.id); setLimit(120); }}>{item.label}</button>)}</div>
 
     <div className="matches-summary"><span>{loading ? "Refreshing match data…" : `Showing ${Math.min(limit, visible.length)} of ${visible.length} ${visible.length === 1 ? "match" : "matches"}`}</span><small>{snapshot.message}</small></div>
 

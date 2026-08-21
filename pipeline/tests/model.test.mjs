@@ -50,9 +50,9 @@ test("the global board normalizes broad fixtures and team badges", () => {
 });
 
 test("ticket construction does not repeat a fixture", () => {
-  const candidates = Array.from({ length: 5 }, (_, index) => ({ fixtureId: `f${index}`, key: `k${index}`, name: "Double chance", category: "Result", selection: "1X", probability: 0.8, confidence: 0.8, quotedOdds: 1.35, edge: 0.05, oddsSource: "public-json", factors: { homePlayed: 8, awayPlayed: 8 } }));
+  const candidates = Array.from({ length: 5 }, (_, index) => ({ fixtureId: `f${index}`, key: "DC_1X", name: "Double chance", category: "Result", selection: "1X", probability: 0.8, confidence: 0.8, quotedOdds: 1.35, fairOdds: 1.25, edge: 0.05, oddsSource: "public-json", factors: { homePlayed: 8, awayPlayed: 8 } }));
   const fixtures = candidates.map((item) => ({ id: item.fixtureId, status: "SCHEDULED", kickoff: new Date(Date.now() + 86_400_000).toISOString(), league: { name: "League" }, homeTeam: { name: "Home" }, awayTeam: { name: "Away" } }));
-  const ticket = buildTicket(candidates, "SAFE", fixtures);
+  const ticket = buildTicket(candidates, "SAFE_2", fixtures);
   assert.ok(ticket);
   assert.equal(new Set(ticket.selections.map((item) => item.fixtureId)).size, ticket.selections.length);
 });

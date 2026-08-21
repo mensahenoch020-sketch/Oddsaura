@@ -1,1 +1,2 @@
 .matches-more{justify-self:center;border:0;background:#0b1426;color:#fff;border-radius:999px;padding:13px 18px;font-weight:800}
+.matches-league-tabs{display:flex;gap:7px;padding:13px 2px 2px;overflow-x:auto;scrollbar-width:thin}.matches-league-tabs button{border:0;background:#e6eae3;color:#5d6876;border-radius:999px;padding:9px 12px;font-size:9px;white-space:nowrap}.matches-league-tabs button.active{background:#c7fa45;color:#0b1426;font-weight:800}

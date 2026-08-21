@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { fallbackSnapshot, loadSnapshot, type Snapshot } from "./data";
+import TicketSportyCode from "./ticket-sporty-code";
 import "./product.css";
 import "./product-nav.css";
 
@@ -29,7 +30,7 @@ export default function Home() {
     <header className="oa-header">
       <Link className="oa-brand" href="/" aria-label="OddsAura home"><span className="oa-mark">↗</span><span>Odds<i>Aura</i></span></Link>
       <div className={`oa-status oa-status-${snapshot.status}`}><span /> {refreshing ? "Checking GitHub data…" : statusLabel(snapshot.status)}</div>
-      <div className="oa-header-actions"><a className="oa-matches-link" href="/matches">Matches</a><a className="oa-builder-link" href="/builder">Choose predictions</a><a className="oa-admin-link" href="/login">Account</a></div>
+      <div className="oa-header-actions"><a className="oa-matches-link" href="/matches">Matches</a><a className="oa-matches-link" href="/results">Results</a><a className="oa-builder-link" href="/builder">Choose predictions</a><a className="oa-admin-link" href="/login">Account</a></div>
     </header>
 
     <section className="oa-intro">
@@ -44,7 +45,7 @@ export default function Home() {
       <article><span>Model scores</span><strong>{snapshot.metrics.predictions}</strong></article>
     </section>
 
-    <nav className="oa-filters" aria-label="Ticket categories"><a className="oa-matches-cta" href="/matches">Live & upcoming</a><a className="oa-build-cta" href="/builder">Build from our predictions</a><a href="#safe">Safe 2–3 Odds</a><a href="#balanced">Balanced 5–10 Odds</a><a href="#high-risk">High Risk</a><a href="#markets">All markets</a></nav>
+    <nav className="oa-filters" aria-label="Ticket categories"><a className="oa-matches-cta" href="/matches">Live & upcoming</a><a className="oa-build-cta" href="/builder">Build from our predictions</a><a href="#safe-2">2 Odds</a><a href="#value-5">5 Odds</a><a href="#balanced-10">10 Odds</a><a href="#longshot-21">21-leg longshot</a><a href="/results">Track results</a><a href="#markets">All markets</a></nav>
 
     {(snapshot.watchlist?.length ?? 0) > 0 && <section className="oa-watchlist" aria-label="Model watchlist">
       <div className="oa-section-title"><div><span className="oa-kicker">Model watchlist</span><h2>Strong signals awaiting verified prices.</h2></div><p>Fair odds are calculated by OddsAura’s model. They are not bookmaker odds and cannot create a betting ticket until a public price is matched.</p></div>
@@ -57,7 +58,7 @@ export default function Home() {
       {snapshot.tickets.map((ticket) => <article id={ticket.category.toLowerCase().replace("_", "-")} className="oa-ticket" key={ticket.id}>
         <div className="oa-ticket-head"><div><span>{ticket.category.replace("_", " ")} · AUTO-PUBLISHED</span><h2>{ticket.title}</h2></div><strong>{ticket.totalOdds.toFixed(2)}<small>Total odds</small></strong></div>
         <div className="oa-selections">{ticket.selections.map((item) => <div className="oa-selection" key={item.id}><div><span>{item.league.name} · {new Date(item.kickoff).toLocaleString()}</span><h3>{item.homeTeam.name} vs {item.awayTeam.name}</h3><p>{item.market.name}: {item.selection}</p></div><div className="oa-numbers"><strong>{item.odds.toFixed(2)}</strong><span>{Math.round(item.confidence * 100)}%</span></div></div>)}</div>
-        <div className="oa-ticket-foot"><div><span>Average confidence</span><strong>{Math.round(ticket.confidence * 100)}%</strong></div>{ticket.bookingCodes.length ? <div className="oa-codes">{ticket.bookingCodes.map((booking) => <button type="button" key={`${ticket.id}-${booking.provider}`} onClick={() => copyCode(booking.code)}><span>{booking.provider}</span><strong>{copied === booking.code ? "Copied" : booking.code}</strong></button>)}</div> : <span className="oa-awaiting">Selections published · bookmaker code automation is the next integration</span>}</div>
+        <div className="oa-ticket-foot"><div><span>Average confidence</span><strong>{Math.round(ticket.confidence * 100)}%</strong></div>{ticket.priceStatus === "MODEL_ESTIMATE" ? <span className="oa-awaiting">Displayed total uses model fair odds. SportyBet confirms the live prices when creating the code.</span> : null}{ticket.bookingCodes.length ? <div className="oa-codes">{ticket.bookingCodes.map((booking) => <button type="button" key={`${ticket.id}-${booking.provider}`} onClick={() => copyCode(booking.code)}><span>{booking.provider}</span><strong>{copied === booking.code ? "Copied" : booking.code}</strong></button>)}</div> : <TicketSportyCode ticket={ticket} />}</div>
       </article>)}
     </section>
 

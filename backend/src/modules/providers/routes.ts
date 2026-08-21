@@ -19,9 +19,9 @@ const selection = z.object({
 
 export async function providerRoutes(app: FastifyInstance) {
   app.post("/api/providers/sportybet/code", async (request, reply) => {
-    const body = z.object({ selections: z.array(selection).min(1).max(50) }).parse(request.body);
+    const body = z.object({ selections: z.array(selection).min(1).max(50), allowPartial: z.boolean().optional() }).parse(request.body);
     try {
-      return { provider: "sportybet", verified: true, ...await createSportyBetCode(body.selections) };
+      return { provider: "sportybet", verified: true, ...await createSportyBetCode(body.selections, fetch, body.allowPartial ?? false) };
     } catch (error) {
       if (error instanceof SportyBetIntegrationError) return reply.code(error.status).send({ error: error.message, details: error.details });
       throw error;

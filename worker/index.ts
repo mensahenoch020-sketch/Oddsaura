@@ -90,8 +90,8 @@ const worker = {
     if (url.pathname === "/api/sportybet/code") {
       if (request.method !== "POST") return Response.json({ error: "Method not allowed" }, { status: 405, headers: { allow: "POST" } });
       try {
-        const body = await request.json() as { selections?: SportyBetSelectionInput[] };
-        const result = await createSportyBetCode(body.selections ?? []);
+        const body = await request.json() as { selections?: SportyBetSelectionInput[]; allowPartial?: boolean };
+        const result = await createSportyBetCode(body.selections ?? [], fetch, body.allowPartial ?? false);
         return Response.json({ provider: "sportybet", verified: true, ...result }, { headers: { "cache-control": "no-store" } });
       } catch (error) {
         const typed = error instanceof SportyBetIntegrationError ? error : new SportyBetIntegrationError("SportyBet code creation failed.", 502);
