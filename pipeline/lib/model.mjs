@@ -36,13 +36,15 @@ const market = (key, name, category, selection, probability, extra = {}) => ({ k
 export function scoreEvent(event, allEvents) {
   const home = buildForm(event.homeTeam.id, allEvents, event.kickoff);
   const away = buildForm(event.awayTeam.id, allEvents, event.kickoff);
-  if (home.played < 3 || away.played < 3) return [];
-  const homeGF = home.goalsFor / home.played;
-  const homeGA = home.goalsAgainst / home.played;
-  const awayGF = away.goalsFor / away.played;
-  const awayGA = away.goalsAgainst / away.played;
-  const homePPG = home.points / home.played;
-  const awayPPG = away.points / away.played;
+  // Bayesian league priors keep every scheduled fixture modelled without
+  // pretending that a team with little history has high-confidence evidence.
+  const priorMatches = 4;
+  const homeGF = (home.goalsFor + 1.38 * priorMatches) / (home.played + priorMatches);
+  const homeGA = (home.goalsAgainst + 1.08 * priorMatches) / (home.played + priorMatches);
+  const awayGF = (away.goalsFor + 1.08 * priorMatches) / (away.played + priorMatches);
+  const awayGA = (away.goalsAgainst + 1.38 * priorMatches) / (away.played + priorMatches);
+  const homePPG = (home.points + 1.45 * priorMatches) / (home.played + priorMatches);
+  const awayPPG = (away.points + 1.10 * priorMatches) / (away.played + priorMatches);
   const formDelta = clamp((homePPG - awayPPG) / 8, -0.18, 0.18);
   const homeLambda = clamp(0.52 * homeGF + 0.38 * awayGA + 0.1 * 1.38 + formDelta, 0.25, 3.8);
   const awayLambda = clamp(0.52 * awayGF + 0.38 * homeGA + 0.1 * 1.08 - formDelta, 0.2, 3.5);
@@ -51,7 +53,7 @@ export function scoreEvent(event, allEvents) {
   const draw = sum(rows, (r) => r.home === r.away);
   const awayWin = sum(rows, (r) => r.home < r.away);
   const btts = sum(rows, (r) => r.home > 0 && r.away > 0);
-  const quality = clamp((home.played + away.played) / 20, 0.3, 1);
+  const quality = clamp((home.played + away.played) / 20, 0.08, 1);
   const predictions = [
     market("MATCH_HOME", "Match result", "Result", event.homeTeam.name, homeWin),
     market("MATCH_DRAW", "Match result", "Result", "Draw", draw),
@@ -106,7 +108,7 @@ export function scoreEvent(event, allEvents) {
     expectedHomeGoals: Number(homeLambda.toFixed(2)),
     expectedAwayGoals: Number(awayLambda.toFixed(2)),
     dataQuality: quality,
-    confidence: clamp(item.probability * (0.7 + quality * 0.3), 0, 0.99),
+    confidence: clamp(item.probability * (0.58 + quality * 0.42), 0, 0.99),
     fairOdds: Number((1 / item.probability).toFixed(2)),
     quotedOdds: null,
     oddsSource: null,

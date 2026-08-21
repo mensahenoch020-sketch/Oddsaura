@@ -57,11 +57,12 @@ const fixtureMap = new Map(upcoming.map((fixture) => [fixture.id, fixture]));
 const predictedPicks = [];
 const predictionKeys = new Set();
 const fixturePickCounts = new Map();
-for (const pick of [...predictions].filter((item) => item.quotedOdds && item.factors?.homePlayed >= 5 && item.factors?.awayPlayed >= 5 && item.confidence >= 0.52 && (item.edge == null || item.edge >= -0.04)).sort((a, b) => (b.confidence + Math.max(0, b.edge ?? 0)) - (a.confidence + Math.max(0, a.edge ?? 0)))) {
-  const fixture = fixtureMap.get(pick.fixtureId);
-  const identity = `${pick.fixtureId}-${pick.providerMarketId}-${pick.providerSelectionId}`;
-  if (!fixture || predictionKeys.has(identity) || (fixturePickCounts.get(pick.fixtureId) ?? 0) >= 5 || predictedPicks.length >= 600) continue;
-  const tier = pick.confidence >= 0.72 && pick.quotedOdds <= 1.8 ? "SAFE" : pick.confidence >= 0.62 ? "BALANCED" : "HIGH_RISK";
+function publishPick(pick, fixture) {
+  const identity = `${pick.fixtureId}-${pick.providerMarketId ?? pick.key}-${pick.providerSelectionId ?? pick.selection}`;
+  if (predictionKeys.has(identity) || (fixturePickCounts.get(pick.fixtureId) ?? 0) >= 5 || predictedPicks.length >= 800) return false;
+  const historyMatches = (pick.factors?.homePlayed ?? 0) + (pick.factors?.awayPlayed ?? 0);
+  const dataQuality = historyMatches >= 14 ? "HIGH" : historyMatches >= 6 ? "MEDIUM" : "LOW";
+  const tier = dataQuality === "LOW" ? "HIGH_RISK" : pick.confidence >= 0.72 && (pick.quotedOdds ?? 99) <= 1.8 ? "SAFE" : pick.confidence >= 0.62 ? "BALANCED" : "HIGH_RISK";
   predictedPicks.push({
     id: `${pick.fixtureId}-${pick.key}`,
     fixtureId: pick.fixtureId,
@@ -77,15 +78,34 @@ for (const pick of [...predictions].filter((item) => item.quotedOdds && item.fac
     quotedOdds: pick.quotedOdds,
     edge: pick.edge,
     tier,
+    dataQuality,
+    historyMatches,
     oddsSource: pick.oddsSource,
     oddsProvider: pick.oddsProvider,
     providerMarketId: pick.providerMarketId,
     providerSelectionId: pick.providerSelectionId,
     providerDeepLink: pick.providerDeepLink,
-    reasoning: `Modelled from ${pick.factors.homePlayed + pick.factors.awayPlayed} recent team performances · expected goals ${pick.expectedHomeGoals}-${pick.expectedAwayGoals}`,
+    reasoning: dataQuality === "LOW"
+      ? `Limited team history · cautious estimate uses league scoring priors${pick.quotedOdds ? " and the available market price" : ""}`
+      : `Modelled from ${historyMatches} recent team performances · expected goals ${pick.expectedHomeGoals}-${pick.expectedAwayGoals}`,
   });
   predictionKeys.add(identity);
   fixturePickCounts.set(pick.fixtureId, (fixturePickCounts.get(pick.fixtureId) ?? 0) + 1);
+  return true;
+}
+
+for (const pick of [...predictions].filter((item) => item.quotedOdds && item.confidence >= 0.44 && (item.edge == null || item.edge >= -0.08)).sort((a, b) => (b.confidence + Math.max(0, b.edge ?? 0)) - (a.confidence + Math.max(0, a.edge ?? 0)))) {
+  const fixture = fixtureMap.get(pick.fixtureId);
+  if (fixture) publishPick(pick, fixture);
+}
+
+// Every upcoming fixture receives at least one clearly labelled model pick,
+// even when the public feeds have no team history or bookmaker price yet.
+const fallbackKeys = new Set(["DC_1X", "DC_X2", "OVER_1_5", "UNDER_3_5", "MATCH_HOME", "MATCH_AWAY"]);
+for (const fixture of upcoming) {
+  if ((fixturePickCounts.get(fixture.id) ?? 0) > 0) continue;
+  const fallback = predictions.filter((item) => item.fixtureId === fixture.id && fallbackKeys.has(item.key)).sort((a, b) => b.confidence - a.confidence)[0];
+  if (fallback) publishPick(fallback, fixture);
 }
 const watchlist = [];
 const usedFixtures = new Set();

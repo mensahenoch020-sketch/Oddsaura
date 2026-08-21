@@ -1,5 +1,13 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1787294229422,
+      "tag": "0000_hot_nighthawk",
+      "breakpoints": true
+    }
+  ]
 }
