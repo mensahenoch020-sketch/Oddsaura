@@ -1,0 +1,20 @@
+html,body,main{overflow-x:clip}
+
+@media (max-width:800px){
+  .hero{min-height:0;grid-template-columns:1fr;gap:42px;padding:52px 0 66px}
+  .hero-visual{height:420px;width:100%;overflow:hidden;border-radius:10px}
+  .ticket-card{left:20px;top:38px;width:calc(100% - 54px);transform:none}
+  .float-score{right:13px;top:31px;transform:scale(.82) rotate(4deg);transform-origin:top right}
+  .float-code{right:8px;bottom:22px;transform:scale(.78) rotate(-2deg);transform-origin:bottom right}
+}
+
+@media (max-width:420px){
+  .hero-visual{height:370px}
+  .ticket-card{left:16px;top:35px;width:calc(100% - 32px);padding:13px;transform:none}
+  .ticket-heading{padding:14px 0 11px}
+  .ticket-game{padding:9px 0}
+  .ticket-game strong{font-size:10px}
+  .ticket-footer{padding-top:10px}
+  .float-score{display:none}
+  .float-code{right:0;bottom:15px;transform:scale(.7) rotate(-2deg);transform-origin:bottom right}
+}
