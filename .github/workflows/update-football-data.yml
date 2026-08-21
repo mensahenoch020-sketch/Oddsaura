@@ -31,6 +31,7 @@ jobs:
         run: node pipeline/update.mjs
         env:
           HISTORY_DAYS: "10"
+          ESPN_HISTORY_DAYS: "35"
           FUTURE_DAYS: "3"
           ODDS_MATCH_LIMIT: "28"
       - name: Commit changed public snapshots

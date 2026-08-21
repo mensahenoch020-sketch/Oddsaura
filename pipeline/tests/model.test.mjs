@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { attachOdds, scoreEvent } from "../lib/model.mjs";
 import { buildTicket } from "../lib/tickets.mjs";
+import { normalizeEspnEvent } from "../lib/espn.mjs";
 
 const finished = (id, days, homeId, awayId, homeScore, awayScore) => ({ id, kickoff: new Date(Date.now() - days * 86_400_000).toISOString(), status: "FINISHED", homeTeam: { id: homeId, name: homeId }, awayTeam: { id: awayId, name: awayId }, homeScore, awayScore });
 const history = [
@@ -30,4 +31,24 @@ test("ticket construction does not repeat a fixture", () => {
   const ticket = buildTicket(candidates, "SAFE", fixtures);
   assert.ok(ticket);
   assert.equal(new Set(ticket.selections.map((item) => item.fixtureId)).size, ticket.selections.length);
+});
+
+test("the ESPN fallback normalizes fixtures and available moneyline prices", () => {
+  const event = normalizeEspnEvent({
+    id: "401",
+    date: "2026-08-22T15:00:00Z",
+    status: { type: { state: "pre", completed: false, name: "STATUS_SCHEDULED" } },
+    competitions: [{
+      id: "401",
+      competitors: [
+        { homeAway: "home", team: { id: "1", displayName: "Alpha", abbreviation: "ALP", logo: "https://example.com/a.png" } },
+        { homeAway: "away", team: { id: "2", displayName: "Beta", abbreviation: "BET", logo: "https://example.com/b.png" } },
+      ],
+      odds: [{ provider: { name: "Example" }, homeTeamOdds: { moneyLine: -150 }, drawOdds: { moneyLine: 240 }, awayTeamOdds: { moneyLine: 330 } }],
+    }],
+  }, { id: "eng.1", name: "Premier League" });
+  assert.equal(event.status, "SCHEDULED");
+  assert.equal(event.homeTeam.name, "Alpha");
+  assert.equal(event.odds.length, 3);
+  assert.equal(event.odds[0].odds, 1.67);
 });
