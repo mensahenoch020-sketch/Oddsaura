@@ -1,0 +1,199 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole { USER ADMIN }
+enum SubscriptionStatus { TRIAL ACTIVE PAST_DUE CANCELLED EXPIRED }
+enum FixtureStatus { SCHEDULED LIVE FINISHED POSTPONED CANCELLED }
+enum MarketType { HOME_WIN DRAW AWAY_WIN HOME_OR_DRAW AWAY_OR_DRAW OVER_1_5 OVER_2_5 UNDER_2_5 BTTS_YES BTTS_NO }
+enum PredictionStatus { CANDIDATE SELECTED REJECTED SETTLED }
+enum TicketCategory { SAFE BALANCED HIGH_RISK }
+enum TicketStatus { DRAFT PUBLISHED EXPIRED ARCHIVED }
+enum SelectionResult { PENDING WON LOST VOID }
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  passwordHash String
+  name         String?
+  role         UserRole      @default(USER)
+  subscription Subscription?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Subscription {
+  id               String             @id @default(cuid())
+  userId           String             @unique
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan             String
+  status           SubscriptionStatus @default(TRIAL)
+  provider         String?
+  providerRef      String?
+  currentPeriodEnd DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+}
+
+model League {
+  id         String    @id @default(cuid())
+  providerId Int
+  name       String
+  country    String
+  season     Int
+  logoUrl    String?
+  fixtures   Fixture[]
+  @@unique([providerId, season])
+}
+
+model Team {
+  id             String             @id @default(cuid())
+  providerId     Int                @unique
+  name           String
+  shortName      String?
+  country        String?
+  logoUrl        String?
+  homeFixtures   Fixture[]          @relation("HomeTeam")
+  awayFixtures   Fixture[]          @relation("AwayTeam")
+  formSnapshots  TeamFormSnapshot[]
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+}
+
+model Fixture {
+  id           String         @id @default(cuid())
+  providerId   Int            @unique
+  leagueId     String
+  league       League         @relation(fields: [leagueId], references: [id])
+  homeTeamId   String
+  homeTeam     Team           @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeamId   String
+  awayTeam     Team           @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  kickoff      DateTime
+  status       FixtureStatus  @default(SCHEDULED)
+  round        String?
+  venue        String?
+  homeScore    Int?
+  awayScore    Int?
+  odds         MarketOdd[]
+  predictions  Prediction[]
+  result       FixtureResult?
+  capturedForm TeamFormSnapshot[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  @@index([kickoff, status])
+  @@index([leagueId, kickoff])
+}
+
+model FixtureResult {
+  id        String   @id @default(cuid())
+  fixtureId String   @unique
+  fixture   Fixture  @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  homeScore Int
+  awayScore Int
+  source    String
+  settledAt DateTime @default(now())
+}
+
+model TeamFormSnapshot {
+  id           String   @id @default(cuid())
+  teamId       String
+  team         Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  fixtureId    String?
+  fixture      Fixture? @relation(fields: [fixtureId], references: [id], onDelete: SetNull)
+  scope        String
+  played       Int
+  wins         Int
+  draws        Int
+  losses       Int
+  goalsFor     Int
+  goalsAgainst Int
+  formPoints   Float
+  lastFive     Json
+  capturedAt   DateTime @default(now())
+  @@index([teamId, capturedAt])
+}
+
+model MarketOdd {
+  id                 String     @id @default(cuid())
+  fixtureId          String
+  fixture            Fixture    @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  provider            String
+  bookmaker           String
+  market              MarketType
+  selection           String
+  decimal             Float
+  impliedProbability  Float
+  collectedAt         DateTime   @default(now())
+  @@index([fixtureId, market, collectedAt])
+}
+
+model Prediction {
+  id                  String           @id @default(cuid())
+  fixtureId           String
+  fixture             Fixture          @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  market              MarketType
+  selection           String
+  modelProbability    Float
+  impliedProbability  Float?
+  edge                 Float?
+  confidenceScore     Float
+  expectedHomeGoals   Float
+  expectedAwayGoals   Float
+  recommendedOdds     Float?
+  factors             Json
+  status              PredictionStatus @default(CANDIDATE)
+  ticketSelections    TicketSelection[]
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  @@unique([fixtureId, market, selection])
+  @@index([confidenceScore, status])
+}
+
+model Ticket {
+  id          String            @id @default(cuid())
+  title       String
+  category    TicketCategory
+  status      TicketStatus      @default(DRAFT)
+  totalOdds   Float
+  confidence  Float
+  publishAt   DateTime?
+  publishedAt DateTime?
+  expiresAt   DateTime
+  selections  TicketSelection[]
+  bookingCodes BookingCode[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  @@index([status, publishedAt])
+}
+
+model TicketSelection {
+  id           String          @id @default(cuid())
+  ticketId     String
+  ticket       Ticket          @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  predictionId String
+  prediction   Prediction      @relation(fields: [predictionId], references: [id])
+  oddsSnapshot Float
+  position     Int
+  result       SelectionResult @default(PENDING)
+  @@unique([ticketId, predictionId])
+  @@index([ticketId, position])
+}
+
+model BookingCode {
+  id        String   @id @default(cuid())
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  provider  String
+  code      String
+  deepLink  String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  @@unique([ticketId, provider])
+  @@index([provider, code])
+}
