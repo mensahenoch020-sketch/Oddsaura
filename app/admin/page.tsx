@@ -1,64 +1,33 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { fallbackSnapshot, loadSnapshot, type Snapshot } from "../data";
 import "./admin.css";
 
-type Overview = { fixtures: number; predictions: number; draftTickets: number; publishedTickets: number; users: number };
-type Ticket = { id: string; title: string; category: string; status: string; totalOdds: number; confidence: number; bookingCodes: Array<{ provider: string; code: string }>; selections: Array<{ id: string; prediction: { selection: string; fixture: { homeTeam: { name: string }; awayTeam: { name: string } } } }> };
-const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
-
 export default function AdminPage() {
-  const [token, setToken] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [overview, setOverview] = useState<Overview | null>(null);
-  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [snapshot, setSnapshot] = useState<Snapshot>(fallbackSnapshot);
+  const [busy, setBusy] = useState(true);
   const [message, setMessage] = useState("");
-  const [busy, setBusy] = useState(false);
 
-  useEffect(() => { setToken(localStorage.getItem("oddsaura_admin_token") ?? ""); }, []);
-  useEffect(() => { if (token) void refresh(token); }, [token]);
-
-  async function request(path: string, options: RequestInit = {}, authToken = token) {
-    const response = await fetch(`${apiUrl}${path}`, { ...options, headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}`, ...(options.headers ?? {}) } });
-    if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error ?? "Request failed");
-    return response.status === 204 ? null : response.json();
-  }
-
-  async function refresh(authToken = token) {
-    try {
-      const [overviewData, ticketData] = await Promise.all([request("/api/admin/overview", {}, authToken), request("/api/admin/tickets", {}, authToken)]);
-      setOverview(overviewData); setTickets(ticketData.tickets); setMessage("");
-    } catch (error) { setMessage(error instanceof Error ? error.message : "Could not load admin dashboard"); }
-  }
-
-  async function login(event: FormEvent) {
-    event.preventDefault(); setBusy(true); setMessage("");
-    try {
-      const response = await fetch(`${apiUrl}/api/auth/login`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) });
-      const data = await response.json(); if (!response.ok) throw new Error(data.error ?? "Login failed");
-      localStorage.setItem("oddsaura_admin_token", data.token); setToken(data.token);
-    } catch (error) { setMessage(error instanceof Error ? error.message : "Login failed"); } finally { setBusy(false); }
-  }
-
-  async function action(path: string, options: RequestInit = { method: "POST" }) {
+  async function refresh() {
     setBusy(true); setMessage("");
-    try { await request(path, options); await refresh(); setMessage("Done"); }
-    catch (error) { setMessage(error instanceof Error ? error.message : "Action failed"); }
+    try { setSnapshot(await loadSnapshot()); }
+    catch { setMessage("The live GitHub snapshot could not be reached. The last bundled snapshot is still shown."); }
     finally { setBusy(false); }
   }
 
-  function logout() { localStorage.removeItem("oddsaura_admin_token"); setToken(""); setTickets([]); setOverview(null); }
-
-  if (!token) return <main className="adm-login"><form onSubmit={login}><a href="/" className="adm-brand">Odds<span>Aura</span></a><span className="adm-kicker">Administrator</span><h1>Review and publish today’s tickets.</h1><label>Email<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required /></label><label>Password<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} required minLength={8} /></label>{message && <p className="adm-error">{message}</p>}<button disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button></form></main>;
+  useEffect(() => { void refresh(); }, []);
 
   return <main className="adm-app">
-    <aside className="adm-sidebar"><a href="/" className="adm-brand">Odds<span>Aura</span></a><nav><a href="#overview">Overview</a><a href="#tickets">Tickets</a></nav><button onClick={logout}>Sign out</button></aside>
+    <aside className="adm-sidebar"><a href="/" className="adm-brand">Odds<span>Aura</span></a><nav><a href="#overview">Pipeline</a><a href="#tickets">Published tickets</a><a href="#markets">Market coverage</a></nav><a className="adm-repo" href="https://github.com/mensahenoch020-sketch/Oddsaura/actions" target="_blank" rel="noreferrer">Automation runs ↗</a></aside>
     <section className="adm-content">
-      <header><div><span className="adm-kicker">Operations</span><h1>Daily ticket control</h1></div><div className="adm-actions"><button disabled={busy} onClick={() => action("/api/admin/sync")}>Sync football data</button><button disabled={busy} onClick={() => action("/api/admin/predictions/run")}>Run predictions</button><button className="adm-primary" disabled={busy} onClick={() => action("/api/admin/tickets/generate")}>Generate tickets</button></div></header>
+      <header><div><span className="adm-kicker">Zero-key operations</span><h1>Automation monitor</h1></div><div className="adm-actions"><button className="adm-primary" disabled={busy} onClick={refresh}>{busy ? "Checking…" : "Refresh snapshot"}</button></div></header>
       {message && <div className="adm-message">{message}</div>}
-      <section id="overview" className="adm-metrics">{overview && Object.entries(overview).map(([label, value]) => <article key={label}><span>{label.replace(/([A-Z])/g, " $1")}</span><strong>{value}</strong></article>)}</section>
-      <section id="tickets"><div className="adm-section-head"><h2>Tickets</h2><button onClick={() => refresh()} disabled={busy}>Refresh</button></div><div className="adm-ticket-list">{tickets.map((ticket) => <article className="adm-ticket" key={ticket.id}><div className="adm-ticket-top"><div><span>{ticket.category.replace("_", " ")} · {ticket.status}</span><h3>{ticket.title}</h3></div><strong>{ticket.totalOdds.toFixed(2)}</strong></div><div className="adm-ticket-selections">{ticket.selections.map((item) => <p key={item.id}><span>{item.prediction.fixture.homeTeam.name} vs {item.prediction.fixture.awayTeam.name}</span><strong>{item.prediction.selection}</strong></p>)}</div><div className="adm-ticket-bottom"><span>Confidence {Math.round(ticket.confidence * 100)}%</span><span>{ticket.bookingCodes.length ? ticket.bookingCodes.map((code) => `${code.provider}: ${code.code}`).join(" · ") : "No booking code"}</span><div>{ticket.status === "PUBLISHED" ? <button onClick={() => action(`/api/admin/tickets/${ticket.id}/unpublish`)}>Unpublish</button> : <button className="adm-primary" onClick={() => action(`/api/admin/tickets/${ticket.id}/publish`)}>Publish</button>}<button className="adm-danger" onClick={() => action(`/api/admin/tickets/${ticket.id}`, { method: "DELETE" })}>Remove</button></div></div></article>)}{!tickets.length && <div className="adm-empty">No tickets yet. Sync data, run predictions, then generate tickets.</div>}</div></section>
+      <section id="overview" className="adm-pipeline-status"><div><span className={`adm-dot adm-dot-${snapshot.status}`} /> <strong>{snapshot.status.toUpperCase()}</strong><p>{snapshot.message}</p></div><small>{snapshot.generatedAt ? `Last run ${new Date(snapshot.generatedAt).toLocaleString()}` : "First scheduled run pending"}</small></section>
+      <section className="adm-metrics">{Object.entries(snapshot.metrics).map(([label, value]) => <article key={label}><span>{label.replace(/([A-Z])/g, " $1")}</span><strong>{value}</strong></article>)}</section>
+      <section className="adm-sources"><div className="adm-section-head"><h2>Sources</h2></div>{snapshot.sources.map((source) => <article key={source.id}><div><strong>{source.label}</strong><span>{source.status}</span></div><p>{source.records} records · {source.lastSuccessAt ? new Date(source.lastSuccessAt).toLocaleString() : "Waiting"}</p>{source.warnings?.length ? <small>{source.warnings.length} non-blocking source warnings</small> : null}</article>)}</section>
+      <section id="tickets"><div className="adm-section-head"><h2>Auto-published tickets</h2><span>{snapshot.tickets.length} live</span></div><div className="adm-ticket-list">{snapshot.tickets.map((ticket) => <article className="adm-ticket" key={ticket.id}><div className="adm-ticket-top"><div><span>{ticket.category.replace("_", " ")} · {ticket.status}</span><h3>{ticket.title}</h3></div><strong>{ticket.totalOdds.toFixed(2)}</strong></div><div className="adm-ticket-selections">{ticket.selections.map((item) => <p key={item.id}><span>{item.homeTeam.name} vs {item.awayTeam.name}</span><strong>{item.market.name}: {item.selection}</strong></p>)}</div><div className="adm-ticket-bottom"><span>Confidence {Math.round(ticket.confidence * 100)}%</span><span>{ticket.bookingCodes.length ? ticket.bookingCodes.map((code) => `${code.provider}: ${code.code}`).join(" · ") : "Booking code pending integration"}</span></div></article>)}{!snapshot.tickets.length && <div className="adm-empty">Nothing has passed the publishing gates yet. This is expected before the first successful priced-data run.</div>}</div></section>
+      <section id="markets" className="adm-market-list"><div className="adm-section-head"><h2>Market coverage</h2><span>{snapshot.marketCatalog.length} families detected</span></div><div>{snapshot.marketCatalog.map((market) => <span key={market}>{market}</span>)}</div></section>
     </section>
   </main>;
 }

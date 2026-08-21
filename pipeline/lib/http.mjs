@@ -1,0 +1,29 @@
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export async function fetchJson(url, { retries = 2, timeoutMs = 12_000 } = {}) {
+  let lastError;
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetch(url, {
+        signal: controller.signal,
+        headers: {
+          accept: "application/json,text/plain,*/*",
+          "accept-language": "en-GB,en;q=0.8",
+          "user-agent": "OddsAura/0.2 public-football-data collector",
+        },
+      });
+      if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+      return await response.json();
+    } catch (error) {
+      lastError = error;
+      if (attempt < retries) await wait(500 * (attempt + 1));
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  throw new Error(`Could not fetch ${url}: ${lastError instanceof Error ? lastError.message : "unknown error"}`);
+}
+
+export { wait };

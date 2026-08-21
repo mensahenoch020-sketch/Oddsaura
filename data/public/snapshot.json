@@ -1,0 +1,42 @@
+{
+  "version": 2,
+  "generatedAt": null,
+  "stale": true,
+  "status": "waiting",
+  "message": "The zero-key collector is waiting for its first scheduled run.",
+  "sources": [
+    {
+      "id": "sofascore-public-json",
+      "label": "SofaScore public JSON",
+      "status": "waiting",
+      "lastSuccessAt": null,
+      "records": 0
+    }
+  ],
+  "metrics": {
+    "fixtures": 0,
+    "live": 0,
+    "completed": 0,
+    "pricedMarkets": 0,
+    "predictions": 0,
+    "publishedTickets": 0
+  },
+  "fixtures": [],
+  "marketCatalog": [
+    "Match result",
+    "Double chance",
+    "Draw no bet",
+    "Goal totals",
+    "Team goal totals",
+    "Both teams to score",
+    "Correct score",
+    "Half markets",
+    "Odd or even goals",
+    "Win to nil",
+    "Result and goals",
+    "Corners",
+    "Cards",
+    "Shots and player props"
+  ],
+  "tickets": []
+}
