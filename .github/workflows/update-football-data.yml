@@ -1,6 +1,12 @@
 name: Update football data
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "pipeline/**"
+      - ".github/workflows/update-football-data.yml"
+      - "package.json"
   schedule:
     - cron: "17 */2 * * *"
   workflow_dispatch:
