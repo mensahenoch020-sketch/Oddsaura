@@ -7,6 +7,7 @@ import { authRoutes } from "./modules/auth/routes.js";
 import { fixtureRoutes } from "./modules/fixtures/routes.js";
 import { ticketRoutes } from "./modules/tickets/routes.js";
 import { adminRoutes } from "./modules/admin/routes.js";
+import { providerRoutes } from "./modules/providers/routes.js";
 
 export async function buildApp() {
   const app = Fastify({ logger: true });
@@ -26,5 +27,6 @@ export async function buildApp() {
   await app.register(fixtureRoutes);
   await app.register(ticketRoutes);
   await app.register(adminRoutes);
+  await app.register(providerRoutes);
   return app;
 }

@@ -1,0 +1,30 @@
+import type { FastifyInstance } from "fastify";
+import { z } from "zod";
+import { createSportyBetCode, SportyBetIntegrationError } from "./sportybet.js";
+
+const selection = z.object({
+  fixtureId: z.string().min(1),
+  homeTeam: z.string().min(1),
+  awayTeam: z.string().min(1),
+  kickoff: z.string().min(1),
+  marketKey: z.string().min(1),
+  marketName: z.string().min(1),
+  selection: z.string().min(1),
+  line: z.number().nullable().optional(),
+  providerEventId: z.string().nullable().optional(),
+  providerMarketId: z.string().nullable().optional(),
+  providerOutcomeId: z.string().nullable().optional(),
+  providerSpecifier: z.string().nullable().optional(),
+});
+
+export async function providerRoutes(app: FastifyInstance) {
+  app.post("/api/providers/sportybet/code", async (request, reply) => {
+    const body = z.object({ selections: z.array(selection).min(1).max(50) }).parse(request.body);
+    try {
+      return { provider: "sportybet", verified: true, ...await createSportyBetCode(body.selections) };
+    } catch (error) {
+      if (error instanceof SportyBetIntegrationError) return reply.code(error.status).send({ error: error.message, details: error.details });
+      throw error;
+    }
+  });
+}
