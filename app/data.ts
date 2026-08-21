@@ -2,6 +2,8 @@ import initialSnapshot from "@/data/public/snapshot.json";
 
 export type Team = { id?: string; name: string; shortName?: string; logo?: string | null };
 export type League = { id?: string; name: string; country?: string; season?: string };
+export type FixtureOdd = { marketId: string; market: string; selectionId: string; selection: string; line?: number | null; odds: number; source: string; provider?: string; deepLink?: string | null };
+export type Fixture = { id: string; providerId?: string; source?: string; league: League; kickoff: string; status: string; homeTeam: Team; awayTeam: Team; homeScore?: number | null; awayScore?: number | null; odds: FixtureOdd[] };
 export type TicketSelection = {
   id: string;
   fixtureId: string;
@@ -30,6 +32,7 @@ export type Snapshot = {
   message: string;
   sources: Array<{ id: string; label: string; status: string; lastSuccessAt: string | null; records: number; warnings?: string[] }>;
   metrics: { fixtures: number; live: number; completed: number; pricedMarkets: number; predictions: number; publishedTickets: number };
+  fixtures?: Fixture[];
   marketCatalog: string[];
   watchlist?: WatchlistPick[];
   tickets: Ticket[];

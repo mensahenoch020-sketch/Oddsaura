@@ -27,7 +27,7 @@ export default function Home() {
     <header className="oa-header">
       <a className="oa-brand" href="/" aria-label="OddsAura home"><span className="oa-mark">↗</span><span>Odds<i>Aura</i></span></a>
       <div className={`oa-status oa-status-${snapshot.status}`}><span /> {refreshing ? "Checking GitHub data…" : statusLabel(snapshot.status)}</div>
-      <a className="oa-admin-link" href="/admin">System</a>
+      <div className="oa-header-actions"><a className="oa-builder-link" href="/builder">Build a slip</a><a className="oa-admin-link" href="/admin">System</a></div>
     </header>
 
     <section className="oa-intro">
@@ -42,7 +42,7 @@ export default function Home() {
       <article><span>Model scores</span><strong>{snapshot.metrics.predictions}</strong></article>
     </section>
 
-    <nav className="oa-filters" aria-label="Ticket categories"><a href="#safe">Safe 2–3 Odds</a><a href="#balanced">Balanced 5–10 Odds</a><a href="#high-risk">High Risk</a><a href="#markets">All markets</a></nav>
+    <nav className="oa-filters" aria-label="Ticket categories"><a className="oa-build-cta" href="/builder">Pick your own matches</a><a href="#safe">Safe 2–3 Odds</a><a href="#balanced">Balanced 5–10 Odds</a><a href="#high-risk">High Risk</a><a href="#markets">All markets</a></nav>
 
     {(snapshot.watchlist?.length ?? 0) > 0 && <section className="oa-watchlist" aria-label="Model watchlist">
       <div className="oa-section-title"><div><span className="oa-kicker">Model watchlist</span><h2>Strong signals awaiting verified prices.</h2></div><p>Fair odds are calculated by OddsAura’s model. They are not bookmaker odds and cannot create a betting ticket until a public price is matched.</p></div>
