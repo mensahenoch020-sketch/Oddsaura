@@ -11,6 +11,11 @@ function safeNextPath() {
   return value.startsWith("/") && !value.startsWith("//") ? value : "/dashboard";
 }
 
+function sameOriginUrl(path: string) {
+  if (typeof window === "undefined") return path;
+  return `${window.location.origin}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
 export default function AuthForm({ mode }: { mode: AuthMode }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -26,16 +31,30 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
     if (mode === "reset") body.token = typeof window === "undefined" ? "" : new URLSearchParams(window.location.search).get("token") || "";
     if (mode === "signup") body.acceptedTerms = form.get("acceptedTerms") === "on";
     const endpoint = mode === "forgot" ? "/api/auth/forgot-password" : mode === "reset" ? "/api/auth/reset-password" : `/api/auth/${mode}`;
+    let destination = "";
     try {
-      const response = await fetch(endpoint, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
-      const payload = await response.json() as { error?: string; message?: string };
+      // Use an absolute same-origin URL. Some iOS in-app browsers reject relative
+      // fetch/navigation URLs with a DOMException before the request is sent.
+      const response = await fetch(sameOriginUrl(endpoint), { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+      const responseText = await response.text();
+      let payload: { error?: string; message?: string } = {};
+      try { payload = responseText ? JSON.parse(responseText) as typeof payload : {}; }
+      catch { payload = { error: response.ok ? undefined : "The account service returned an invalid response. Please try again." }; }
       if (!response.ok) throw new Error(payload.error || "Please check your details and try again.");
-      if (mode === "login" || mode === "signup") window.location.assign(safeNextPath());
-      else if (mode === "reset") { setMessage(payload.message || "Password updated. You can now log in."); setTimeout(() => window.location.assign("/login"), 1200); }
+      if (mode === "login" || mode === "signup") {
+        destination = sameOriginUrl(safeNextPath());
+        setMessage(mode === "signup" ? "Account created. Opening your dashboard…" : "Signed in. Opening your dashboard…");
+      }
+      else if (mode === "reset") { setMessage(payload.message || "Password updated. You can now log in."); destination = sameOriginUrl("/login"); }
       else setMessage(payload.message || "If that email is registered, a reset link is on its way.");
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Something went wrong. Please try again.");
     } finally { setBusy(false); }
+    if (destination) {
+      // Keep navigation outside the request error handler so a browser-specific
+      // redirect failure can never be presented as a failed signup.
+      window.setTimeout(() => { window.location.href = destination; }, mode === "reset" ? 1200 : 0);
+    }
   }
 
   const needsPassword = mode === "login" || mode === "signup" || mode === "reset";
