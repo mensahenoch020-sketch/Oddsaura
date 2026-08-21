@@ -1,0 +1,40 @@
+name: Update football data
+
+on:
+  schedule:
+    - cron: "17 */2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: football-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Collect, score and publish
+        run: node pipeline/update.mjs
+        env:
+          HISTORY_DAYS: "10"
+          FUTURE_DAYS: "3"
+          ODDS_MATCH_LIMIT: "28"
+      - name: Commit changed public snapshots
+        run: |
+          if git diff --quiet -- data/public; then
+            echo "No public data changes"
+            exit 0
+          fi
+          git config user.name "OddsAura Data Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -- data/public
+          git commit -m "data: refresh football snapshot"
+          git push
