@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "generatedAt": "2026-08-25T09:01:27.034Z",
+  "generatedAt": "2026-08-25T10:50:50.317Z",
   "stale": false,
   "status": "healthy",
   "message": "Global fixtures, team badges, recent results and model-ready history are updating without paid API keys.",
@@ -9,7 +9,7 @@
       "id": "espn-league-history",
       "label": "ESPN league history",
       "status": "healthy",
-      "lastSuccessAt": "2026-08-25T09:01:27.034Z",
+      "lastSuccessAt": "2026-08-25T10:50:50.317Z",
       "records": 606,
       "warnings": []
     },
@@ -17,18 +17,18 @@
       "id": "espn-global-json",
       "label": "ESPN global match board",
       "status": "healthy",
-      "lastSuccessAt": "2026-08-25T09:01:27.034Z",
-      "records": 3721,
+      "lastSuccessAt": "2026-08-25T10:50:50.317Z",
+      "records": 3728,
       "warnings": []
     }
   ],
   "metrics": {
-    "fixtures": 1221,
+    "fixtures": 1228,
     "live": 0,
     "completed": 2566,
-    "pricedMarkets": 3322,
-    "predictions": 69597,
-    "selectablePredictions": 1420,
+    "pricedMarkets": 3385,
+    "predictions": 69996,
+    "selectablePredictions": 1427,
     "publishedTickets": 5
   },
   "fixtures": [
@@ -124,7 +124,7 @@
           "selectionId": "home",
           "selection": "SK Brann",
           "line": null,
-          "odds": 1.19,
+          "odds": 1.2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34570867%3Foutcomes%3D0ML86015420_1"
@@ -135,7 +135,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 6,
+          "odds": 6.5,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34570867%3Foutcomes%3D0ML86015420_2"
@@ -157,7 +157,7 @@
           "selectionId": "over",
           "selection": "Over 3.5",
           "line": 3.5,
-          "odds": 1.8,
+          "odds": 1.83,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34570867%3Foutcomes%3D0OU86015498O350_1"
@@ -168,7 +168,7 @@
           "selectionId": "under",
           "selection": "Under 3.5",
           "line": 3.5,
-          "odds": 1.8,
+          "odds": 1.83,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34570867%3Foutcomes%3D0OU86015498U350_3"
@@ -1765,7 +1765,7 @@
           "selectionId": "home",
           "selection": "UAI Urquiza",
           "line": null,
-          "odds": 3.45,
+          "odds": 3.6,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34569361%3Foutcomes%3D0ML86011007_1"
@@ -1787,7 +1787,7 @@
           "selectionId": "away",
           "selection": "Deportivo Laferrere",
           "line": null,
-          "odds": 2.3,
+          "odds": 2.2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34569361%3Foutcomes%3D0ML86011007_3"
@@ -1820,7 +1820,7 @@
           "selectionId": "home",
           "selection": "UAI Urquiza +0.5",
           "line": 0.5,
-          "odds": 1.57,
+          "odds": 1.61,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34569361%3Foutcomes%3D0HC86011089P50_1"
@@ -1831,7 +1831,7 @@
           "selectionId": "away",
           "selection": "Deportivo Laferrere -0.5",
           "line": -0.5,
-          "odds": 2.2,
+          "odds": 2.15,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34569361%3Foutcomes%3D0HC86011089N50_3"
@@ -2222,7 +2222,7 @@
           "selectionId": "home",
           "selection": "Barnsley",
           "line": null,
-          "odds": 1.63,
+          "odds": 1.65,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512105%3Foutcomes%3D0ML85847051_1"
@@ -2233,7 +2233,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 4.1,
+          "odds": 4,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512105%3Foutcomes%3D0ML85847051_2"
@@ -2244,7 +2244,7 @@
           "selectionId": "away",
           "selection": "Crewe Alexandra",
           "line": null,
-          "odds": 4.6,
+          "odds": 4.4,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512105%3Foutcomes%3D0ML85847051_3"
@@ -2277,7 +2277,7 @@
           "selectionId": "home",
           "selection": "Barnsley -0.5",
           "line": -0.5,
-          "odds": 1.61,
+          "odds": 1.63,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512105%3Foutcomes%3D0HC85847380N50_1"
@@ -2288,7 +2288,7 @@
           "selectionId": "away",
           "selection": "Crewe Alexandra +0.5",
           "line": 0.5,
-          "odds": 2.25,
+          "odds": 2.15,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512105%3Foutcomes%3D0HC85847380P50_3"
@@ -2436,7 +2436,7 @@
           "selectionId": "home",
           "selection": "Blackpool",
           "line": null,
-          "odds": 3.35,
+          "odds": 3.25,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34521700%3Foutcomes%3D0ML85875681_1"
@@ -2447,7 +2447,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.55,
+          "odds": 3.5,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34521700%3Foutcomes%3D0ML85875681_2"
@@ -2458,7 +2458,7 @@
           "selectionId": "away",
           "selection": "Lincoln City",
           "line": null,
-          "odds": 2,
+          "odds": 2.05,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34521700%3Foutcomes%3D0ML85875681_3"
@@ -2491,7 +2491,7 @@
           "selectionId": "home",
           "selection": "Blackpool +0.5",
           "line": 0.5,
-          "odds": 1.74,
+          "odds": 1.71,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34521700%3Foutcomes%3D0HC85875845P50_1"
@@ -2502,7 +2502,7 @@
           "selectionId": "away",
           "selection": "Lincoln City -0.5",
           "line": -0.5,
-          "odds": 1.95,
+          "odds": 2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34521700%3Foutcomes%3D0HC85875845N50_3"
@@ -2993,7 +2993,7 @@
           "selectionId": "away",
           "selection": "Wolverhampton Wanderers",
           "line": null,
-          "odds": 1.61,
+          "odds": 1.59,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512103%3Foutcomes%3D0ML85847047_3"
@@ -3004,7 +3004,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 1.8,
+          "odds": 1.77,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512103%3Foutcomes%3D0OU85847319O250_1"
@@ -3506,7 +3506,7 @@
           "selectionId": "home",
           "selection": "Watford",
           "line": null,
-          "odds": 1.56,
+          "odds": 1.65,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512111%3Foutcomes%3D0ML85847049_1"
@@ -3517,7 +3517,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 4.2,
+          "odds": 4,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512111%3Foutcomes%3D0ML85847049_2"
@@ -3528,7 +3528,7 @@
           "selectionId": "away",
           "selection": "Peterborough United",
           "line": null,
-          "odds": 5,
+          "odds": 4.6,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512111%3Foutcomes%3D0ML85847049_3"
@@ -3539,7 +3539,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 1.56,
+          "odds": 1.59,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512111%3Foutcomes%3D0OU85847545O250_1"
@@ -3550,7 +3550,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 2.4,
+          "odds": 2.3,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512111%3Foutcomes%3D0OU85847545U250_3"
@@ -3559,23 +3559,23 @@
           "marketId": "401907949-handicap",
           "market": "Handicap",
           "selectionId": "home",
-          "selection": "Watford -1.5",
-          "line": -1.5,
-          "odds": 2.35,
+          "selection": "Watford -0.5",
+          "line": -0.5,
+          "odds": 1.61,
           "source": "espn-draftkings",
           "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512111%3Foutcomes%3D0HC85847550N150_1"
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512111%3Foutcomes%3D0HC85847550N50_1"
         },
         {
           "marketId": "401907949-handicap",
           "market": "Handicap",
           "selectionId": "away",
-          "selection": "Peterborough United +1.5",
-          "line": 1.5,
-          "odds": 1.53,
+          "selection": "Peterborough United +0.5",
+          "line": 0.5,
+          "odds": 2.2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512111%3Foutcomes%3D0HC85847550P150_3"
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512111%3Foutcomes%3D0HC85847550P50_3"
         }
       ]
     },
@@ -4251,7 +4251,7 @@
           "selectionId": "home",
           "selection": "Airdrieonians",
           "line": null,
-          "odds": 1.51,
+          "odds": 1.49,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567544%3Foutcomes%3D0ML86006358_1"
@@ -4317,7 +4317,7 @@
           "selectionId": "away",
           "selection": "Stirling Albion +1.5",
           "line": 1.5,
-          "odds": 1.61,
+          "odds": 1.59,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567544%3Foutcomes%3D0HC86006435P150_3"
@@ -4572,7 +4572,7 @@
           "selectionId": "home",
           "selection": "Bonnyrigg Rose",
           "line": null,
-          "odds": 2.75,
+          "odds": 3.15,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567553%3Foutcomes%3D0ML86006366_1"
@@ -4583,7 +4583,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 4.2,
+          "odds": 4,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567553%3Foutcomes%3D0ML86006366_2"
@@ -4594,7 +4594,7 @@
           "selectionId": "away",
           "selection": "Rangers B",
           "line": null,
-          "odds": 2.05,
+          "odds": 1.87,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567553%3Foutcomes%3D0ML86006366_3"
@@ -4605,7 +4605,7 @@
           "selectionId": "over",
           "selection": "Over 3.5",
           "line": 3.5,
-          "odds": 1.87,
+          "odds": 1.91,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567553%3Foutcomes%3D0OU86006495O350_1"
@@ -4627,7 +4627,7 @@
           "selectionId": "home",
           "selection": "Bonnyrigg Rose +0.5",
           "line": 0.5,
-          "odds": 1.69,
+          "odds": 1.83,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567553%3Foutcomes%3D0HC86006498P50_1"
@@ -4638,7 +4638,7 @@
           "selectionId": "away",
           "selection": "Rangers B -0.5",
           "line": -0.5,
-          "odds": 2,
+          "odds": 1.83,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567553%3Foutcomes%3D0HC86006498N50_3"
@@ -4679,7 +4679,7 @@
           "selectionId": "home",
           "selection": "Clachnacuddin",
           "line": null,
-          "odds": 3.45,
+          "odds": 4.1,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567538%3Foutcomes%3D0ML86006349_1"
@@ -4701,7 +4701,7 @@
           "selectionId": "away",
           "selection": "Elgin City",
           "line": null,
-          "odds": 1.87,
+          "odds": 1.71,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567538%3Foutcomes%3D0ML86006349_3"
@@ -4734,7 +4734,7 @@
           "selectionId": "home",
           "selection": "Clachnacuddin +0.5",
           "line": 0.5,
-          "odds": 1.83,
+          "odds": 2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567538%3Foutcomes%3D0HC86006372P50_1"
@@ -4745,7 +4745,7 @@
           "selectionId": "away",
           "selection": "Elgin City -0.5",
           "line": -0.5,
-          "odds": 1.83,
+          "odds": 1.69,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567538%3Foutcomes%3D0HC86006372N50_3"
@@ -4797,7 +4797,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 9,
+          "odds": 8.5,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567554%3Foutcomes%3D0ML86006355_2"
@@ -4808,7 +4808,7 @@
           "selectionId": "away",
           "selection": "Dundee United B",
           "line": null,
-          "odds": 14,
+          "odds": 15,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567554%3Foutcomes%3D0ML86006355_3"
@@ -4841,7 +4841,7 @@
           "selectionId": "home",
           "selection": "Cove Rangers -2.5",
           "line": -2.5,
-          "odds": 1.91,
+          "odds": 1.87,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567554%3Foutcomes%3D0HC86006505N250_1"
@@ -4852,7 +4852,7 @@
           "selectionId": "away",
           "selection": "Dundee United B +2.5",
           "line": 2.5,
-          "odds": 1.77,
+          "odds": 1.8,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567554%3Foutcomes%3D0HC86006505P250_3"
@@ -4893,7 +4893,7 @@
           "selectionId": "home",
           "selection": "Cowdenbeath",
           "line": null,
-          "odds": 6.5,
+          "odds": 8,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567547%3Foutcomes%3D0ML86006361_1"
@@ -4904,7 +4904,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 5.25,
+          "odds": 5.75,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567547%3Foutcomes%3D0ML86006361_2"
@@ -4915,7 +4915,7 @@
           "selectionId": "away",
           "selection": "East Kilbride",
           "line": null,
-          "odds": 1.32,
+          "odds": 1.26,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567547%3Foutcomes%3D0ML86006361_3"
@@ -5118,7 +5118,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.75,
+          "odds": 3.85,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567539%3Foutcomes%3D0ML86006350_2"
@@ -5129,7 +5129,7 @@
           "selectionId": "away",
           "selection": "Celtic B",
           "line": null,
-          "odds": 2.25,
+          "odds": 2.2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567539%3Foutcomes%3D0ML86006350_3"
@@ -5140,7 +5140,7 @@
           "selectionId": "over",
           "selection": "Over 3.5",
           "line": 3.5,
-          "odds": 1.8,
+          "odds": 1.77,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567539%3Foutcomes%3D0OU86006376O350_1"
@@ -5151,7 +5151,7 @@
           "selectionId": "under",
           "selection": "Under 3.5",
           "line": 3.5,
-          "odds": 1.87,
+          "odds": 1.91,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567539%3Foutcomes%3D0OU86006376U350_3"
@@ -5162,7 +5162,7 @@
           "selectionId": "home",
           "selection": "Dumbarton +0.5",
           "line": 0.5,
-          "odds": 1.59,
+          "odds": 1.63,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567539%3Foutcomes%3D0HC86006379P50_1"
@@ -5173,7 +5173,7 @@
           "selectionId": "away",
           "selection": "Celtic B -0.5",
           "line": -0.5,
-          "odds": 2.15,
+          "odds": 2.1,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567539%3Foutcomes%3D0HC86006379N50_3"
@@ -5992,7 +5992,7 @@
           "selectionId": "home",
           "selection": "Ross County",
           "line": null,
-          "odds": 1.15,
+          "odds": 1.14,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567550%3Foutcomes%3D0ML86006363_1"
@@ -6003,7 +6003,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 7.5,
+          "odds": 8,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567550%3Foutcomes%3D0ML86006363_2"
@@ -6025,7 +6025,7 @@
           "selectionId": "over",
           "selection": "Over 3.5",
           "line": 3.5,
-          "odds": 1.59,
+          "odds": 1.56,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567550%3Foutcomes%3D0OU86006474O350_1"
@@ -6036,7 +6036,7 @@
           "selectionId": "under",
           "selection": "Under 3.5",
           "line": 3.5,
-          "odds": 2.15,
+          "odds": 2.25,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567550%3Foutcomes%3D0OU86006474U350_3"
@@ -6047,7 +6047,7 @@
           "selectionId": "home",
           "selection": "Ross County -2.5",
           "line": -2.5,
-          "odds": 1.95,
+          "odds": 1.91,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567550%3Foutcomes%3D0HC86006477N250_1"
@@ -6058,7 +6058,7 @@
           "selectionId": "away",
           "selection": "Banks O'Dee +2.5",
           "line": 2.5,
-          "odds": 1.71,
+          "odds": 1.77,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567550%3Foutcomes%3D0HC86006477P250_3"
@@ -6099,7 +6099,7 @@
           "selectionId": "home",
           "selection": "Spartans FC",
           "line": null,
-          "odds": 1.3,
+          "odds": 1.21,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567548%3Foutcomes%3D0ML86006362_1"
@@ -6110,7 +6110,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 5.25,
+          "odds": 5.75,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567548%3Foutcomes%3D0ML86006362_2"
@@ -6121,7 +6121,7 @@
           "selectionId": "away",
           "selection": "Heart of Midlothian B",
           "line": null,
-          "odds": 7.5,
+          "odds": 10,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567548%3Foutcomes%3D0ML86006362_3"
@@ -6132,7 +6132,7 @@
           "selectionId": "over",
           "selection": "Over 3.5",
           "line": 3.5,
-          "odds": 2.15,
+          "odds": 2.1,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567548%3Foutcomes%3D0OU86006460O350_1"
@@ -6143,7 +6143,7 @@
           "selectionId": "under",
           "selection": "Under 3.5",
           "line": 3.5,
-          "odds": 1.59,
+          "odds": 1.63,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567548%3Foutcomes%3D0OU86006460U350_3"
@@ -6154,7 +6154,7 @@
           "selectionId": "home",
           "selection": "Spartans FC -1.5",
           "line": -1.5,
-          "odds": 1.8,
+          "odds": 1.77,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567548%3Foutcomes%3D0HC86006463N150_1"
@@ -6165,7 +6165,7 @@
           "selectionId": "away",
           "selection": "Heart of Midlothian B +1.5",
           "line": 1.5,
-          "odds": 1.87,
+          "odds": 1.91,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567548%3Foutcomes%3D0HC86006463P150_3"
@@ -6420,7 +6420,7 @@
           "selectionId": "home",
           "selection": "Birmingham City",
           "line": null,
-          "odds": 3.8,
+          "odds": 3.9,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512099%3Foutcomes%3D0ML85847041_1"
@@ -6431,7 +6431,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.7,
+          "odds": 3.75,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512099%3Foutcomes%3D0ML85847041_2"
@@ -6442,7 +6442,7 @@
           "selectionId": "away",
           "selection": "Brentford",
           "line": null,
-          "odds": 1.83,
+          "odds": 1.8,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512099%3Foutcomes%3D0ML85847041_3"
@@ -6475,7 +6475,7 @@
           "selectionId": "home",
           "selection": "Birmingham City +0.5",
           "line": 0.5,
-          "odds": 1.91,
+          "odds": 1.95,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512099%3Foutcomes%3D0HC85847212P50_1"
@@ -6486,7 +6486,7 @@
           "selectionId": "away",
           "selection": "Brentford -0.5",
           "line": -0.5,
-          "odds": 1.8,
+          "odds": 1.77,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512099%3Foutcomes%3D0HC85847212N50_3"
@@ -6741,7 +6741,7 @@
           "selectionId": "home",
           "selection": "LASK Linz",
           "line": null,
-          "odds": 2,
+          "odds": 1.95,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547614%3Foutcomes%3D0ML85951314_1"
@@ -6752,7 +6752,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.9,
+          "odds": 3.95,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547614%3Foutcomes%3D0ML85951314_2"
@@ -6763,7 +6763,7 @@
           "selectionId": "away",
           "selection": "Celtic",
           "line": null,
-          "odds": 3.35,
+          "odds": 3.45,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547614%3Foutcomes%3D0ML85951314_3"
@@ -6774,7 +6774,7 @@
           "selectionId": "over",
           "selection": "Over 3.5",
           "line": 3.5,
-          "odds": 2.3,
+          "odds": 2.25,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547614%3Foutcomes%3D0OU85951348O350_1"
@@ -6785,7 +6785,7 @@
           "selectionId": "under",
           "selection": "Under 3.5",
           "line": 3.5,
-          "odds": 1.59,
+          "odds": 1.61,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547614%3Foutcomes%3D0OU85951348U350_3"
@@ -6796,7 +6796,7 @@
           "selectionId": "home",
           "selection": "LASK Linz -0.5",
           "line": -0.5,
-          "odds": 1.91,
+          "odds": 1.87,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547614%3Foutcomes%3D0HC85951351N50_1"
@@ -6807,7 +6807,7 @@
           "selectionId": "away",
           "selection": "Celtic +0.5",
           "line": 0.5,
-          "odds": 1.8,
+          "odds": 1.83,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547614%3Foutcomes%3D0HC85951351P50_3"
@@ -6848,7 +6848,7 @@
           "selectionId": "home",
           "selection": "GV San José",
           "line": null,
-          "odds": 1.95,
+          "odds": 1.8,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34569501%3Foutcomes%3D0ML86011510_1"
@@ -6859,7 +6859,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.8,
+          "odds": 3.85,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34569501%3Foutcomes%3D0ML86011510_2"
@@ -6870,7 +6870,7 @@
           "selectionId": "away",
           "selection": "Oriente Petrolero",
           "line": null,
-          "odds": 3.25,
+          "odds": 3.7,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34569501%3Foutcomes%3D0ML86011510_3"
@@ -6892,7 +6892,7 @@
           "selectionId": "under",
           "selection": "Under 3.5",
           "line": 3.5,
-          "odds": 1.61,
+          "odds": 1.63,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34569501%3Foutcomes%3D0OU86011536U350_3"
@@ -6903,7 +6903,7 @@
           "selectionId": "home",
           "selection": "GV San José -0.5",
           "line": -0.5,
-          "odds": 1.83,
+          "odds": 1.77,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34569501%3Foutcomes%3D0HC86011539N50_1"
@@ -6914,7 +6914,7 @@
           "selectionId": "away",
           "selection": "Oriente Petrolero +0.5",
           "line": 0.5,
-          "odds": 1.8,
+          "odds": 1.91,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34569501%3Foutcomes%3D0HC86011539P50_3"
@@ -7013,7 +7013,7 @@
           "selectionId": "home",
           "selection": "2 de Mayo",
           "line": null,
-          "odds": 2.8,
+          "odds": 2.7,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547227%3Foutcomes%3D0ML85949876_1"
@@ -7024,7 +7024,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 2.85,
+          "odds": 2.9,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547227%3Foutcomes%3D0ML85949876_2"
@@ -7035,7 +7035,7 @@
           "selectionId": "away",
           "selection": "Guaraní",
           "line": null,
-          "odds": 2.5,
+          "odds": 2.65,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547227%3Foutcomes%3D0ML85949876_3"
@@ -7046,7 +7046,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 2.35,
+          "odds": 2.4,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547227%3Foutcomes%3D0OU85949988O250_1"
@@ -7068,7 +7068,7 @@
           "selectionId": "home",
           "selection": "2 de Mayo +0.5",
           "line": 0.5,
-          "odds": 1.47,
+          "odds": 1.43,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547227%3Foutcomes%3D0HC85949991P50_1"
@@ -7079,7 +7079,7 @@
           "selectionId": "away",
           "selection": "Guaraní -0.5",
           "line": -0.5,
-          "odds": 2.4,
+          "odds": 2.55,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34547227%3Foutcomes%3D0HC85949991N50_3"
@@ -7120,7 +7120,7 @@
           "selectionId": "home",
           "selection": "Deportivo Madryn",
           "line": null,
-          "odds": 2.25,
+          "odds": 2.15,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34557206%3Foutcomes%3D0ML85978294_1"
@@ -7131,7 +7131,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 2.75,
+          "odds": 2.9,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34557206%3Foutcomes%3D0ML85978294_2"
@@ -7153,7 +7153,7 @@
           "selectionId": "over",
           "selection": "Over 1.5",
           "line": 1.5,
-          "odds": 1.54,
+          "odds": 1.56,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34557206%3Foutcomes%3D0OU85978376O150_1"
@@ -7164,7 +7164,7 @@
           "selectionId": "under",
           "selection": "Under 1.5",
           "line": 1.5,
-          "odds": 2.3,
+          "odds": 2.35,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34557206%3Foutcomes%3D0OU85978376U150_3"
@@ -7186,7 +7186,7 @@
           "selectionId": "away",
           "selection": "Godoy Cruz Antonio Tomba +0.5",
           "line": 0.5,
-          "odds": 1.57,
+          "odds": 1.61,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34557206%3Foutcomes%3D0HC85978379P50_3"
@@ -7227,7 +7227,7 @@
           "selectionId": "home",
           "selection": "Atlético Goianiense",
           "line": null,
-          "odds": 2.1,
+          "odds": 2.15,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34546902%3Foutcomes%3D0ML85949016_1"
@@ -7238,7 +7238,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.1,
+          "odds": 3.15,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34546902%3Foutcomes%3D0ML85949016_2"
@@ -7249,7 +7249,7 @@
           "selectionId": "away",
           "selection": "Botafogo-SP",
           "line": null,
-          "odds": 3.85,
+          "odds": 3.65,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34546902%3Foutcomes%3D0ML85949016_3"
@@ -7260,7 +7260,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 2.5,
+          "odds": 2.45,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34546902%3Foutcomes%3D0OU85949051O250_1"
@@ -7271,7 +7271,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 1.5,
+          "odds": 1.51,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34546902%3Foutcomes%3D0OU85949051U250_3"
@@ -7282,7 +7282,7 @@
           "selectionId": "home",
           "selection": "Atlético Goianiense -0.5",
           "line": -0.5,
-          "odds": 2,
+          "odds": 2.05,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34546902%3Foutcomes%3D0HC85949054N50_1"
@@ -7293,7 +7293,7 @@
           "selectionId": "away",
           "selection": "Botafogo-SP +0.5",
           "line": 0.5,
-          "odds": 1.71,
+          "odds": 1.69,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34546902%3Foutcomes%3D0HC85949054P50_3"
@@ -7713,7 +7713,7 @@
           "selectionId": "home",
           "selection": "Cruzeiro",
           "line": null,
-          "odds": 2,
+          "odds": 2.05,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34542657%3Foutcomes%3D0ML85935203_1"
@@ -7735,7 +7735,7 @@
           "selectionId": "away",
           "selection": "Atlético-MG",
           "line": null,
-          "odds": 3.9,
+          "odds": 3.8,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34542657%3Foutcomes%3D0ML85935203_3"
@@ -7768,7 +7768,7 @@
           "selectionId": "home",
           "selection": "Cruzeiro -0.5",
           "line": -0.5,
-          "odds": 1.95,
+          "odds": 2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34542657%3Foutcomes%3D0HC85935233N50_1"
@@ -7779,7 +7779,7 @@
           "selectionId": "away",
           "selection": "Atlético-MG +0.5",
           "line": 0.5,
-          "odds": 1.77,
+          "odds": 1.74,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34542657%3Foutcomes%3D0HC85935233P50_3"
@@ -8232,7 +8232,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 1.65,
+          "odds": 1.67,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34568624%3Foutcomes%3D0OU86008864O250_1"
@@ -11068,7 +11068,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 1.91,
+          "odds": 1.95,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34546503%3Foutcomes%3D0OU85947662U250_3"
@@ -11271,7 +11271,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 1.56,
+          "odds": 1.54,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34546504%3Foutcomes%3D0OU85947685O250_1"
@@ -11282,7 +11282,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 2.2,
+          "odds": 2.3,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34546504%3Foutcomes%3D0OU85947685U250_3"
@@ -15099,7 +15099,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 1.77,
+          "odds": 1.74,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567126%3Foutcomes%3D0OU86005290O250_1"
@@ -15121,7 +15121,7 @@
           "selectionId": "home",
           "selection": "Inter D'Escaldes -0.5",
           "line": -0.5,
-          "odds": 1.83,
+          "odds": 1.8,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567126%3Foutcomes%3D0HC86005293N50_1"
@@ -15173,7 +15173,7 @@
           "selectionId": "home",
           "selection": "Pafos",
           "line": null,
-          "odds": 1.36,
+          "odds": 1.35,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567135%3Foutcomes%3D0ML86005246_1"
@@ -15217,7 +15217,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 1.91,
+          "odds": 1.95,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567135%3Foutcomes%3D0OU86005353U250_3"
@@ -15228,7 +15228,7 @@
           "selectionId": "home",
           "selection": "Pafos -1.5",
           "line": -1.5,
-          "odds": 2,
+          "odds": 1.95,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567135%3Foutcomes%3D0HC86005356N150_1"
@@ -15239,7 +15239,7 @@
           "selectionId": "away",
           "selection": "Dinamo City +1.5",
           "line": 1.5,
-          "odds": 1.65,
+          "odds": 1.69,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567135%3Foutcomes%3D0HC86005356P150_3"
@@ -15313,7 +15313,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 2,
+          "odds": 1.95,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567130%3Foutcomes%3D0OU86005318O250_1"
@@ -15324,7 +15324,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 1.67,
+          "odds": 1.69,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567130%3Foutcomes%3D0OU86005318U250_3"
@@ -16981,7 +16981,7 @@
           "selectionId": "home",
           "selection": "Borac Banja Luka",
           "line": null,
-          "odds": 2.05,
+          "odds": 2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567133%3Foutcomes%3D0ML86005245_1"
@@ -16992,7 +16992,7 @@
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.55,
+          "odds": 3.65,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567133%3Foutcomes%3D0ML86005245_2"
@@ -17003,7 +17003,7 @@
           "selectionId": "away",
           "selection": "Vikingur Reykjavik",
           "line": null,
-          "odds": 2.95,
+          "odds": 3,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567133%3Foutcomes%3D0ML86005245_3"
@@ -17014,7 +17014,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 1.59,
+          "odds": 1.57,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567133%3Foutcomes%3D0OU86005339O250_1"
@@ -17025,7 +17025,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 2.1,
+          "odds": 2.15,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567133%3Foutcomes%3D0OU86005339U250_3"
@@ -24085,6 +24085,35 @@
       ]
     },
     {
+      "id": "espn-401914109",
+      "providerId": "401914109",
+      "source": "espn-global-json",
+      "league": {
+        "id": "19834",
+        "name": "Club Friendly",
+        "country": "",
+        "season": "2026"
+      },
+      "round": "",
+      "kickoff": "2026-08-28T15:00:00.000Z",
+      "status": "SCHEDULED",
+      "homeTeam": {
+        "id": "espn-18990",
+        "name": "Dreams F.C.",
+        "shortName": "DFC",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/18990.png"
+      },
+      "awayTeam": {
+        "id": "espn-21167",
+        "name": "Bibiani Gold Stars",
+        "shortName": "BGS",
+        "logo": ""
+      },
+      "homeScore": 0,
+      "awayScore": 0,
+      "odds": []
+    },
+    {
       "id": "espn-401879873",
       "providerId": "401879873",
       "source": "espn-global-json",
@@ -24166,6 +24195,35 @@
         "name": "Abha",
         "shortName": "ABH",
         "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/21833.png"
+      },
+      "homeScore": 0,
+      "awayScore": 0,
+      "odds": []
+    },
+    {
+      "id": "espn-401914108",
+      "providerId": "401914108",
+      "source": "espn-global-json",
+      "league": {
+        "id": "19834",
+        "name": "Club Friendly",
+        "country": "",
+        "season": "2026"
+      },
+      "round": "",
+      "kickoff": "2026-08-28T16:00:00.000Z",
+      "status": "SCHEDULED",
+      "homeTeam": {
+        "id": "espn-131556",
+        "name": "TBD Home",
+        "shortName": "TBD Home",
+        "logo": ""
+      },
+      "awayTeam": {
+        "id": "espn-131554",
+        "name": "TBD Away",
+        "shortName": "TBD Away",
+        "logo": ""
       },
       "homeScore": 0,
       "awayScore": 0,
@@ -24493,6 +24551,64 @@
       ]
     },
     {
+      "id": "espn-401914096",
+      "providerId": "401914096",
+      "source": "espn-global-json",
+      "league": {
+        "id": "19834",
+        "name": "Club Friendly",
+        "country": "",
+        "season": "2026"
+      },
+      "round": "",
+      "kickoff": "2026-08-28T17:00:00.000Z",
+      "status": "SCHEDULED",
+      "homeTeam": {
+        "id": "espn-133266",
+        "name": "Santomera",
+        "shortName": "SAN",
+        "logo": ""
+      },
+      "awayTeam": {
+        "id": "espn-133296",
+        "name": "Torrellano",
+        "shortName": "TOR",
+        "logo": ""
+      },
+      "homeScore": 0,
+      "awayScore": 0,
+      "odds": []
+    },
+    {
+      "id": "espn-401914097",
+      "providerId": "401914097",
+      "source": "espn-global-json",
+      "league": {
+        "id": "19834",
+        "name": "Club Friendly",
+        "country": "",
+        "season": "2026"
+      },
+      "round": "",
+      "kickoff": "2026-08-28T17:00:00.000Z",
+      "status": "SCHEDULED",
+      "homeTeam": {
+        "id": "espn-17892",
+        "name": "SD Compostela",
+        "shortName": "SDC",
+        "logo": ""
+      },
+      "awayTeam": {
+        "id": "espn-131554",
+        "name": "TBD Away",
+        "shortName": "TBD Away",
+        "logo": ""
+      },
+      "homeScore": 0,
+      "awayScore": 0,
+      "odds": []
+    },
+    {
       "id": "espn-401874526",
       "providerId": "401874526",
       "source": "espn-global-json",
@@ -24598,6 +24714,35 @@
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567824%3Foutcomes%3D0HC86007294N50_3"
         }
       ]
+    },
+    {
+      "id": "espn-401914095",
+      "providerId": "401914095",
+      "source": "espn-global-json",
+      "league": {
+        "id": "19834",
+        "name": "Club Friendly",
+        "country": "",
+        "season": "2026"
+      },
+      "round": "",
+      "kickoff": "2026-08-28T17:30:00.000Z",
+      "status": "SCHEDULED",
+      "homeTeam": {
+        "id": "espn-133291",
+        "name": "CD Utiel",
+        "shortName": "CDU",
+        "logo": ""
+      },
+      "awayTeam": {
+        "id": "espn-131554",
+        "name": "TBD Away",
+        "shortName": "TBD Away",
+        "logo": ""
+      },
+      "homeScore": 0,
+      "awayScore": 0,
+      "odds": []
     },
     {
       "id": "espn-401881797",
@@ -24866,6 +25011,35 @@
         "name": "Al Taawoun",
         "shortName": "TAA",
         "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/18459.png"
+      },
+      "homeScore": 0,
+      "awayScore": 0,
+      "odds": []
+    },
+    {
+      "id": "espn-401914094",
+      "providerId": "401914094",
+      "source": "espn-global-json",
+      "league": {
+        "id": "19834",
+        "name": "Club Friendly",
+        "country": "",
+        "season": "2026"
+      },
+      "round": "",
+      "kickoff": "2026-08-28T18:00:00.000Z",
+      "status": "SCHEDULED",
+      "homeTeam": {
+        "id": "espn-18601",
+        "name": "Medeama",
+        "shortName": "MED",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/18601.png"
+      },
+      "awayTeam": {
+        "id": "espn-21647",
+        "name": "Samartex",
+        "shortName": "SMR",
+        "logo": ""
       },
       "homeScore": 0,
       "awayScore": 0,
@@ -26397,6 +26571,35 @@
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571435%3Foutcomes%3D0HC86017638P50_3"
         }
       ]
+    },
+    {
+      "id": "espn-401914093",
+      "providerId": "401914093",
+      "source": "espn-global-json",
+      "league": {
+        "id": "19834",
+        "name": "Club Friendly",
+        "country": "",
+        "season": "2026"
+      },
+      "round": "",
+      "kickoff": "2026-08-28T18:30:00.000Z",
+      "status": "SCHEDULED",
+      "homeTeam": {
+        "id": "espn-18339",
+        "name": "Atlético Sanluqueño CF",
+        "shortName": "SNL",
+        "logo": ""
+      },
+      "awayTeam": {
+        "id": "espn-133164",
+        "name": "Betis Deportivo",
+        "shortName": "BDB",
+        "logo": ""
+      },
+      "homeScore": 0,
+      "awayScore": 0,
+      "odds": []
     },
     {
       "id": "espn-401899645",
@@ -28409,7 +28612,85 @@
       },
       "homeScore": 0,
       "awayScore": 0,
-      "odds": []
+      "odds": [
+        {
+          "marketId": "401888611-moneyline",
+          "market": "Match result",
+          "selectionId": "home",
+          "selection": "Sportivo Luqueño",
+          "line": null,
+          "odds": 2.3,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571985%3Foutcomes%3D0ML86019443_1"
+        },
+        {
+          "marketId": "401888611-moneyline",
+          "market": "Match result",
+          "selectionId": "draw",
+          "selection": "Draw",
+          "line": null,
+          "odds": 3,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571985%3Foutcomes%3D0ML86019443_2"
+        },
+        {
+          "marketId": "401888611-moneyline",
+          "market": "Match result",
+          "selectionId": "away",
+          "selection": "Rubio Ñú",
+          "line": null,
+          "odds": 2.95,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571985%3Foutcomes%3D0ML86019443_3"
+        },
+        {
+          "marketId": "401888611-total",
+          "market": "Total goals",
+          "selectionId": "over",
+          "selection": "Over 2.5",
+          "line": 2.5,
+          "odds": 2.1,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571985%3Foutcomes%3D0OU86019448O250_1"
+        },
+        {
+          "marketId": "401888611-total",
+          "market": "Total goals",
+          "selectionId": "under",
+          "selection": "Under 2.5",
+          "line": 2.5,
+          "odds": 1.59,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571985%3Foutcomes%3D0OU86019448U250_3"
+        },
+        {
+          "marketId": "401888611-handicap",
+          "market": "Handicap",
+          "selectionId": "home",
+          "selection": "Sportivo Luqueño -0.5",
+          "line": -0.5,
+          "odds": 2.2,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571985%3Foutcomes%3D0HC86019451N50_1"
+        },
+        {
+          "marketId": "401888611-handicap",
+          "market": "Handicap",
+          "selectionId": "away",
+          "selection": "Rubio Ñú +0.5",
+          "line": 0.5,
+          "odds": 1.53,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571985%3Foutcomes%3D0HC86019451P50_3"
+        }
+      ]
     },
     {
       "id": "espn-401885458",
@@ -28866,7 +29147,85 @@
       },
       "homeScore": 0,
       "awayScore": 0,
-      "odds": []
+      "odds": [
+        {
+          "marketId": "401888612-moneyline",
+          "market": "Match result",
+          "selectionId": "home",
+          "selection": "Sportivo San Lorenzo",
+          "line": null,
+          "odds": 4.5,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571986%3Foutcomes%3D0ML86019444_1"
+        },
+        {
+          "marketId": "401888612-moneyline",
+          "market": "Match result",
+          "selectionId": "draw",
+          "selection": "Draw",
+          "line": null,
+          "odds": 3.25,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571986%3Foutcomes%3D0ML86019444_2"
+        },
+        {
+          "marketId": "401888612-moneyline",
+          "market": "Match result",
+          "selectionId": "away",
+          "selection": "Nacional Asunción",
+          "line": null,
+          "odds": 1.74,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571986%3Foutcomes%3D0ML86019444_3"
+        },
+        {
+          "marketId": "401888612-total",
+          "market": "Total goals",
+          "selectionId": "over",
+          "selection": "Over 2.5",
+          "line": 2.5,
+          "odds": 2.2,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571986%3Foutcomes%3D0OU86019455O250_1"
+        },
+        {
+          "marketId": "401888612-total",
+          "market": "Total goals",
+          "selectionId": "under",
+          "selection": "Under 2.5",
+          "line": 2.5,
+          "odds": 1.54,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571986%3Foutcomes%3D0OU86019455U250_3"
+        },
+        {
+          "marketId": "401888612-handicap",
+          "market": "Handicap",
+          "selectionId": "home",
+          "selection": "Sportivo San Lorenzo +0.5",
+          "line": 0.5,
+          "odds": 1.95,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571986%3Foutcomes%3D0HC86019458P50_1"
+        },
+        {
+          "marketId": "401888612-handicap",
+          "market": "Handicap",
+          "selectionId": "away",
+          "selection": "Nacional Asunción -0.5",
+          "line": -0.5,
+          "odds": 1.69,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571986%3Foutcomes%3D0HC86019458N50_3"
+        }
+      ]
     },
     {
       "id": "espn-401841525",
@@ -30231,7 +30590,85 @@
       },
       "homeScore": 0,
       "awayScore": 0,
-      "odds": []
+      "odds": [
+        {
+          "marketId": "401860310-moneyline",
+          "market": "Match result",
+          "selectionId": "home",
+          "selection": "Náutico",
+          "line": null,
+          "odds": 2,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571994%3Foutcomes%3D0ML86019475_1"
+        },
+        {
+          "marketId": "401860310-moneyline",
+          "market": "Match result",
+          "selectionId": "draw",
+          "selection": "Draw",
+          "line": null,
+          "odds": 3.05,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571994%3Foutcomes%3D0ML86019475_2"
+        },
+        {
+          "marketId": "401860310-moneyline",
+          "market": "Match result",
+          "selectionId": "away",
+          "selection": "Athletic",
+          "line": null,
+          "odds": 3.85,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571994%3Foutcomes%3D0ML86019475_3"
+        },
+        {
+          "marketId": "401860310-total",
+          "market": "Total goals",
+          "selectionId": "over",
+          "selection": "Over 2.5",
+          "line": 2.5,
+          "odds": 2.1,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571994%3Foutcomes%3D0OU86019507O250_1"
+        },
+        {
+          "marketId": "401860310-total",
+          "market": "Total goals",
+          "selectionId": "under",
+          "selection": "Under 2.5",
+          "line": 2.5,
+          "odds": 1.63,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571994%3Foutcomes%3D0OU86019507U250_3"
+        },
+        {
+          "marketId": "401860310-handicap",
+          "market": "Handicap",
+          "selectionId": "home",
+          "selection": "Náutico -0.5",
+          "line": -0.5,
+          "odds": 1.95,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571994%3Foutcomes%3D0HC86019510N50_1"
+        },
+        {
+          "marketId": "401860310-handicap",
+          "market": "Handicap",
+          "selectionId": "away",
+          "selection": "Athletic +0.5",
+          "line": 0.5,
+          "odds": 1.71,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571994%3Foutcomes%3D0HC86019510P50_3"
+        }
+      ]
     },
     {
       "id": "espn-401860309",
@@ -30260,7 +30697,85 @@
       },
       "homeScore": 0,
       "awayScore": 0,
-      "odds": []
+      "odds": [
+        {
+          "marketId": "401860309-moneyline",
+          "market": "Match result",
+          "selectionId": "home",
+          "selection": "Novorizontino",
+          "line": null,
+          "odds": 1.65,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571993%3Foutcomes%3D0ML86019476_1"
+        },
+        {
+          "marketId": "401860309-moneyline",
+          "market": "Match result",
+          "selectionId": "draw",
+          "selection": "Draw",
+          "line": null,
+          "odds": 3.35,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571993%3Foutcomes%3D0ML86019476_2"
+        },
+        {
+          "marketId": "401860309-moneyline",
+          "market": "Match result",
+          "selectionId": "away",
+          "selection": "Sport",
+          "line": null,
+          "odds": 5.5,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571993%3Foutcomes%3D0ML86019476_3"
+        },
+        {
+          "marketId": "401860309-total",
+          "market": "Total goals",
+          "selectionId": "over",
+          "selection": "Over 2.5",
+          "line": 2.5,
+          "odds": 2,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571993%3Foutcomes%3D0OU86019484O250_1"
+        },
+        {
+          "marketId": "401860309-total",
+          "market": "Total goals",
+          "selectionId": "under",
+          "selection": "Under 2.5",
+          "line": 2.5,
+          "odds": 1.69,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571993%3Foutcomes%3D0OU86019484U250_3"
+        },
+        {
+          "marketId": "401860309-handicap",
+          "market": "Handicap",
+          "selectionId": "home",
+          "selection": "Novorizontino -0.5",
+          "line": -0.5,
+          "odds": 1.59,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571993%3Foutcomes%3D0HC86019487N50_1"
+        },
+        {
+          "marketId": "401860309-handicap",
+          "market": "Handicap",
+          "selectionId": "away",
+          "selection": "Sport +0.5",
+          "line": 0.5,
+          "odds": 2.1,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571993%3Foutcomes%3D0HC86019487P50_3"
+        }
+      ]
     },
     {
       "id": "espn-401891946",
@@ -41931,7 +42446,7 @@
           "selectionId": "home",
           "selection": "Albacete",
           "line": null,
-          "odds": 2.35,
+          "odds": 2.4,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34570438%3Foutcomes%3D0ML86014134_1"
@@ -41953,7 +42468,7 @@
           "selectionId": "away",
           "selection": "Real Oviedo",
           "line": null,
-          "odds": 3.05,
+          "odds": 3,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34570438%3Foutcomes%3D0ML86014134_3"
@@ -41986,7 +42501,7 @@
           "selectionId": "home",
           "selection": "Albacete -0.5",
           "line": -0.5,
-          "odds": 2.25,
+          "odds": 2.3,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34570438%3Foutcomes%3D0HC86014151N50_1"
@@ -41997,7 +42512,7 @@
           "selectionId": "away",
           "selection": "Real Oviedo +0.5",
           "line": 0.5,
-          "odds": 1.53,
+          "odds": 1.5,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34570438%3Foutcomes%3D0HC86014151P50_3"
@@ -43084,35 +43599,6 @@
       ]
     },
     {
-      "id": "espn-401845065",
-      "providerId": "401845065",
-      "source": "espn-global-json",
-      "league": {
-        "id": "3904",
-        "name": "Argentina Football",
-        "country": "Argentina",
-        "season": "2026"
-      },
-      "round": "",
-      "kickoff": "2026-08-29T18:00:00.000Z",
-      "status": "SCHEDULED",
-      "homeTeam": {
-        "id": "espn-17700",
-        "name": "Argentino de Merlo",
-        "shortName": "ADM",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/17700.png"
-      },
-      "awayTeam": {
-        "id": "espn-10064",
-        "name": "Villa Dálmine",
-        "shortName": "VIL",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/10064.png"
-      },
-      "homeScore": 0,
-      "awayScore": 0,
-      "odds": []
-    },
-    {
       "id": "espn-401845074",
       "providerId": "401845074",
       "source": "espn-global-json",
@@ -43200,35 +43686,6 @@
       "odds": []
     },
     {
-      "id": "espn-401845071",
-      "providerId": "401845071",
-      "source": "espn-global-json",
-      "league": {
-        "id": "3904",
-        "name": "Argentina Football",
-        "country": "Argentina",
-        "season": "2026"
-      },
-      "round": "",
-      "kickoff": "2026-08-29T18:00:00.000Z",
-      "status": "SCHEDULED",
-      "homeTeam": {
-        "id": "espn-14074",
-        "name": "Comunicaciones",
-        "shortName": "COM",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/14074.png"
-      },
-      "awayTeam": {
-        "id": "espn-17704",
-        "name": "Deportivo Merlo",
-        "shortName": "MER",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/17704.png"
-      },
-      "homeScore": 0,
-      "awayScore": 0,
-      "odds": []
-    },
-    {
       "id": "espn-401845066",
       "providerId": "401845066",
       "source": "espn-global-json",
@@ -43258,35 +43715,6 @@
       "odds": []
     },
     {
-      "id": "espn-401845067",
-      "providerId": "401845067",
-      "source": "espn-global-json",
-      "league": {
-        "id": "3904",
-        "name": "Argentina Football",
-        "country": "Argentina",
-        "season": "2026"
-      },
-      "round": "",
-      "kickoff": "2026-08-29T18:00:00.000Z",
-      "status": "SCHEDULED",
-      "homeTeam": {
-        "id": "espn-10152",
-        "name": "Deportivo Armenio",
-        "shortName": "ARM",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/10152.png"
-      },
-      "awayTeam": {
-        "id": "espn-10052",
-        "name": "Villa San Carlos",
-        "shortName": "VSC",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/10052.png"
-      },
-      "homeScore": 0,
-      "awayScore": 0,
-      "odds": []
-    },
-    {
       "id": "espn-401845068",
       "providerId": "401845068",
       "source": "espn-global-json",
@@ -43310,35 +43738,6 @@
         "name": "Real Pilar",
         "shortName": "PIL",
         "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/18844.png"
-      },
-      "homeScore": 0,
-      "awayScore": 0,
-      "odds": []
-    },
-    {
-      "id": "espn-401845069",
-      "providerId": "401845069",
-      "source": "espn-global-json",
-      "league": {
-        "id": "3904",
-        "name": "Argentina Football",
-        "country": "Argentina",
-        "season": "2026"
-      },
-      "round": "",
-      "kickoff": "2026-08-29T18:00:00.000Z",
-      "status": "SCHEDULED",
-      "homeTeam": {
-        "id": "espn-10156",
-        "name": "Flandria",
-        "shortName": "FLA",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/10156.png"
-      },
-      "awayTeam": {
-        "id": "espn-17692",
-        "name": "San Martín (Burzaco)",
-        "shortName": "BUR",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/17692.png"
       },
       "homeScore": 0,
       "awayScore": 0,
@@ -52434,7 +52833,7 @@
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 1.57,
+          "odds": 1.59,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34562063%3Foutcomes%3D0OU85991583O250_1"
@@ -52445,7 +52844,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 2.2,
+          "odds": 2.15,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34562063%3Foutcomes%3D0OU85991583U250_3"
@@ -56267,6 +56666,35 @@
       ]
     },
     {
+      "id": "espn-401845067",
+      "providerId": "401845067",
+      "source": "espn-global-json",
+      "league": {
+        "id": "3904",
+        "name": "Argentina Football",
+        "country": "Argentina",
+        "season": "2026"
+      },
+      "round": "",
+      "kickoff": "2026-08-30T15:30:00.000Z",
+      "status": "SCHEDULED",
+      "homeTeam": {
+        "id": "espn-10152",
+        "name": "Deportivo Armenio",
+        "shortName": "ARM",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/10152.png"
+      },
+      "awayTeam": {
+        "id": "espn-10052",
+        "name": "Villa San Carlos",
+        "shortName": "VSC",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/10052.png"
+      },
+      "homeScore": 0,
+      "awayScore": 0,
+      "odds": []
+    },
+    {
       "id": "espn-401888311",
       "providerId": "401888311",
       "source": "espn-public-json",
@@ -58612,7 +59040,7 @@
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 1.56,
+          "odds": 1.54,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567867%3Foutcomes%3D0OU86007517U250_3"
@@ -61263,6 +61691,64 @@
         "name": "Central Norte",
         "shortName": "CNO",
         "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/11993.png"
+      },
+      "homeScore": 0,
+      "awayScore": 0,
+      "odds": []
+    },
+    {
+      "id": "espn-401845065",
+      "providerId": "401845065",
+      "source": "espn-global-json",
+      "league": {
+        "id": "3904",
+        "name": "Argentina Football",
+        "country": "Argentina",
+        "season": "2026"
+      },
+      "round": "",
+      "kickoff": "2026-08-30T18:00:00.000Z",
+      "status": "SCHEDULED",
+      "homeTeam": {
+        "id": "espn-17700",
+        "name": "Argentino de Merlo",
+        "shortName": "ADM",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/17700.png"
+      },
+      "awayTeam": {
+        "id": "espn-10064",
+        "name": "Villa Dálmine",
+        "shortName": "VIL",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/10064.png"
+      },
+      "homeScore": 0,
+      "awayScore": 0,
+      "odds": []
+    },
+    {
+      "id": "espn-401845069",
+      "providerId": "401845069",
+      "source": "espn-global-json",
+      "league": {
+        "id": "3904",
+        "name": "Argentina Football",
+        "country": "Argentina",
+        "season": "2026"
+      },
+      "round": "",
+      "kickoff": "2026-08-30T18:00:00.000Z",
+      "status": "SCHEDULED",
+      "homeTeam": {
+        "id": "espn-10156",
+        "name": "Flandria",
+        "shortName": "FLA",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/10156.png"
+      },
+      "awayTeam": {
+        "id": "espn-17692",
+        "name": "San Martín (Burzaco)",
+        "shortName": "BUR",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/17692.png"
       },
       "homeScore": 0,
       "awayScore": 0,
@@ -69787,7 +70273,85 @@
       },
       "homeScore": 0,
       "awayScore": 0,
-      "odds": []
+      "odds": [
+        {
+          "marketId": "401896770-moneyline",
+          "market": "Match result",
+          "selectionId": "home",
+          "selection": "Levadiakos",
+          "line": null,
+          "odds": 3.9,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572248%3Foutcomes%3D0ML86020156_1"
+        },
+        {
+          "marketId": "401896770-moneyline",
+          "market": "Match result",
+          "selectionId": "draw",
+          "selection": "Draw",
+          "line": null,
+          "odds": 3.45,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572248%3Foutcomes%3D0ML86020156_2"
+        },
+        {
+          "marketId": "401896770-moneyline",
+          "market": "Match result",
+          "selectionId": "away",
+          "selection": "Panathinaikos",
+          "line": null,
+          "odds": 1.87,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572248%3Foutcomes%3D0ML86020156_3"
+        },
+        {
+          "marketId": "401896770-total",
+          "market": "Total goals",
+          "selectionId": "over",
+          "selection": "Over 2.5",
+          "line": 2.5,
+          "odds": 1.83,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572248%3Foutcomes%3D0OU86020161O250_1"
+        },
+        {
+          "marketId": "401896770-total",
+          "market": "Total goals",
+          "selectionId": "under",
+          "selection": "Under 2.5",
+          "line": 2.5,
+          "odds": 1.83,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572248%3Foutcomes%3D0OU86020161U250_3"
+        },
+        {
+          "marketId": "401896770-handicap",
+          "market": "Handicap",
+          "selectionId": "home",
+          "selection": "Levadiakos +0.5",
+          "line": 0.5,
+          "odds": 1.83,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572248%3Foutcomes%3D0HC86020164P50_1"
+        },
+        {
+          "marketId": "401896770-handicap",
+          "market": "Handicap",
+          "selectionId": "away",
+          "selection": "Panathinaikos -0.5",
+          "line": -0.5,
+          "odds": 1.8,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572248%3Foutcomes%3D0HC86020164N50_3"
+        }
+      ]
     },
     {
       "id": "espn-401883247",
@@ -69952,7 +70516,85 @@
       },
       "homeScore": 0,
       "awayScore": 0,
-      "odds": []
+      "odds": [
+        {
+          "marketId": "401873991-moneyline",
+          "market": "Match result",
+          "selectionId": "home",
+          "selection": "GAIS",
+          "line": null,
+          "odds": 1.59,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572258%3Foutcomes%3D0ML86020181_1"
+        },
+        {
+          "marketId": "401873991-moneyline",
+          "market": "Match result",
+          "selectionId": "draw",
+          "selection": "Draw",
+          "line": null,
+          "odds": 4,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572258%3Foutcomes%3D0ML86020181_2"
+        },
+        {
+          "marketId": "401873991-moneyline",
+          "market": "Match result",
+          "selectionId": "away",
+          "selection": "IF Brommapojkarna",
+          "line": null,
+          "odds": 5,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572258%3Foutcomes%3D0ML86020181_3"
+        },
+        {
+          "marketId": "401873991-total",
+          "market": "Total goals",
+          "selectionId": "over",
+          "selection": "Over 2.5",
+          "line": 2.5,
+          "odds": 1.63,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572258%3Foutcomes%3D0OU86020189O250_1"
+        },
+        {
+          "marketId": "401873991-total",
+          "market": "Total goals",
+          "selectionId": "under",
+          "selection": "Under 2.5",
+          "line": 2.5,
+          "odds": 2.1,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572258%3Foutcomes%3D0OU86020189U250_3"
+        },
+        {
+          "marketId": "401873991-handicap",
+          "market": "Handicap",
+          "selectionId": "home",
+          "selection": "GAIS -0.5",
+          "line": -0.5,
+          "odds": 1.54,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572258%3Foutcomes%3D0HC86020194N50_1"
+        },
+        {
+          "marketId": "401873991-handicap",
+          "market": "Handicap",
+          "selectionId": "away",
+          "selection": "IF Brommapojkarna +0.5",
+          "line": 0.5,
+          "odds": 2.2,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572258%3Foutcomes%3D0HC86020194P50_3"
+        }
+      ]
     },
     {
       "id": "espn-401874012",
@@ -69981,7 +70623,85 @@
       },
       "homeScore": 0,
       "awayScore": 0,
-      "odds": []
+      "odds": [
+        {
+          "marketId": "401874012-moneyline",
+          "market": "Match result",
+          "selectionId": "home",
+          "selection": "IK Sirius",
+          "line": null,
+          "odds": 1.77,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572259%3Foutcomes%3D0ML86020182_1"
+        },
+        {
+          "marketId": "401874012-moneyline",
+          "market": "Match result",
+          "selectionId": "draw",
+          "selection": "Draw",
+          "line": null,
+          "odds": 4.1,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572259%3Foutcomes%3D0ML86020182_2"
+        },
+        {
+          "marketId": "401874012-moneyline",
+          "market": "Match result",
+          "selectionId": "away",
+          "selection": "Malmö FF",
+          "line": null,
+          "odds": 3.6,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572259%3Foutcomes%3D0ML86020182_3"
+        },
+        {
+          "marketId": "401874012-total",
+          "market": "Total goals",
+          "selectionId": "over",
+          "selection": "Over 3.5",
+          "line": 3.5,
+          "odds": 2.2,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572259%3Foutcomes%3D0OU86020217O350_1"
+        },
+        {
+          "marketId": "401874012-total",
+          "market": "Total goals",
+          "selectionId": "under",
+          "selection": "Under 3.5",
+          "line": 3.5,
+          "odds": 1.57,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572259%3Foutcomes%3D0OU86020217U350_3"
+        },
+        {
+          "marketId": "401874012-handicap",
+          "market": "Handicap",
+          "selectionId": "home",
+          "selection": "IK Sirius -0.5",
+          "line": -0.5,
+          "odds": 1.71,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572259%3Foutcomes%3D0HC86020222N50_1"
+        },
+        {
+          "marketId": "401874012-handicap",
+          "market": "Handicap",
+          "selectionId": "away",
+          "selection": "Malmö FF +0.5",
+          "line": 0.5,
+          "odds": 1.91,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572259%3Foutcomes%3D0HC86020222P50_3"
+        }
+      ]
     },
     {
       "id": "espn-401874513",
@@ -70748,7 +71468,85 @@
       },
       "homeScore": 0,
       "awayScore": 0,
-      "odds": []
+      "odds": [
+        {
+          "marketId": "401876770-moneyline",
+          "market": "Match result",
+          "selectionId": "home",
+          "selection": "Dijon FCO",
+          "line": null,
+          "odds": 3.8,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572293%3Foutcomes%3D0ML86020265_1"
+        },
+        {
+          "marketId": "401876770-moneyline",
+          "market": "Match result",
+          "selectionId": "draw",
+          "selection": "Draw",
+          "line": null,
+          "odds": 3.45,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572293%3Foutcomes%3D0ML86020265_2"
+        },
+        {
+          "marketId": "401876770-moneyline",
+          "market": "Match result",
+          "selectionId": "away",
+          "selection": "Saint-Étienne",
+          "line": null,
+          "odds": 1.91,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572293%3Foutcomes%3D0ML86020265_3"
+        },
+        {
+          "marketId": "401876770-total",
+          "market": "Total goals",
+          "selectionId": "over",
+          "selection": "Over 2.5",
+          "line": 2.5,
+          "odds": 1.91,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572293%3Foutcomes%3D0OU86020272O250_1"
+        },
+        {
+          "marketId": "401876770-total",
+          "market": "Total goals",
+          "selectionId": "under",
+          "selection": "Under 2.5",
+          "line": 2.5,
+          "odds": 1.77,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572293%3Foutcomes%3D0OU86020272U250_3"
+        },
+        {
+          "marketId": "401876770-handicap",
+          "market": "Handicap",
+          "selectionId": "home",
+          "selection": "Dijon FCO +0.5",
+          "line": 0.5,
+          "odds": 1.8,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572293%3Foutcomes%3D0HC86020277P50_1"
+        },
+        {
+          "marketId": "401876770-handicap",
+          "market": "Handicap",
+          "selectionId": "away",
+          "selection": "Saint-Étienne -0.5",
+          "line": -0.5,
+          "odds": 1.8,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572293%3Foutcomes%3D0HC86020277N50_3"
+        }
+      ]
     },
     {
       "id": "espn-401879295",
@@ -71367,6 +72165,35 @@
       "odds": []
     },
     {
+      "id": "espn-401845071",
+      "providerId": "401845071",
+      "source": "espn-global-json",
+      "league": {
+        "id": "3904",
+        "name": "Argentina Football",
+        "country": "Argentina",
+        "season": "2026"
+      },
+      "round": "",
+      "kickoff": "2026-08-31T22:00:00.000Z",
+      "status": "SCHEDULED",
+      "homeTeam": {
+        "id": "espn-14074",
+        "name": "Comunicaciones",
+        "shortName": "COM",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/14074.png"
+      },
+      "awayTeam": {
+        "id": "espn-17704",
+        "name": "Deportivo Merlo",
+        "shortName": "MER",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/17704.png"
+      },
+      "homeScore": 0,
+      "awayScore": 0,
+      "odds": []
+    },
+    {
       "id": "espn-401898128",
       "providerId": "401898128",
       "source": "espn-global-json",
@@ -71596,7 +72423,85 @@
       },
       "homeScore": 0,
       "awayScore": 0,
-      "odds": []
+      "odds": [
+        {
+          "marketId": "401860311-moneyline",
+          "market": "Match result",
+          "selectionId": "home",
+          "selection": "Fortaleza",
+          "line": null,
+          "odds": 1.69,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571995%3Foutcomes%3D0ML86019477_1"
+        },
+        {
+          "marketId": "401860311-moneyline",
+          "market": "Match result",
+          "selectionId": "draw",
+          "selection": "Draw",
+          "line": null,
+          "odds": 3.5,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571995%3Foutcomes%3D0ML86019477_2"
+        },
+        {
+          "marketId": "401860311-moneyline",
+          "market": "Match result",
+          "selectionId": "away",
+          "selection": "Operário PR",
+          "line": null,
+          "odds": 5,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571995%3Foutcomes%3D0ML86019477_3"
+        },
+        {
+          "marketId": "401860311-total",
+          "market": "Total goals",
+          "selectionId": "over",
+          "selection": "Over 2.5",
+          "line": 2.5,
+          "odds": 2,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571995%3Foutcomes%3D0OU86019530O250_1"
+        },
+        {
+          "marketId": "401860311-total",
+          "market": "Total goals",
+          "selectionId": "under",
+          "selection": "Under 2.5",
+          "line": 2.5,
+          "odds": 1.69,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571995%3Foutcomes%3D0OU86019530U250_3"
+        },
+        {
+          "marketId": "401860311-handicap",
+          "market": "Handicap",
+          "selectionId": "home",
+          "selection": "Fortaleza -0.5",
+          "line": -0.5,
+          "odds": 1.63,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571995%3Foutcomes%3D0HC86019533N50_1"
+        },
+        {
+          "marketId": "401860311-handicap",
+          "market": "Handicap",
+          "selectionId": "away",
+          "selection": "Operário PR +0.5",
+          "line": 0.5,
+          "odds": 2.05,
+          "source": "espn-draftkings",
+          "provider": "DraftKings",
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571995%3Foutcomes%3D0HC86019533P50_3"
+        }
+      ]
     },
     {
       "id": "espn-401903369",
@@ -87076,8 +87981,8 @@
       "probability": 0.7660935592366347,
       "confidence": 0.470075007947599,
       "fairOdds": 1.31,
-      "quotedOdds": 1.8,
-      "edge": 0.2105380036810791,
+      "quotedOdds": 1.83,
+      "edge": 0.21964547180494076,
       "tier": "HIGH_RISK",
       "dataQuality": "LOW",
       "historyMatches": 0,
@@ -90068,8 +90973,8 @@
       "probability": 0.686584522239216,
       "confidence": 0.44147384779981586,
       "fairOdds": 1.46,
-      "quotedOdds": 2.15,
-      "edge": 0.22146824316944852,
+      "quotedOdds": 2.25,
+      "edge": 0.24214007779477154,
       "tier": "HIGH_RISK",
       "dataQuality": "LOW",
       "historyMatches": 3,
@@ -90360,8 +91265,8 @@
       "probability": 0.6397418061179929,
       "confidence": 0.45165771511930297,
       "fairOdds": 1.56,
-      "quotedOdds": 1.59,
-      "edge": 0.010810988507930053,
+      "quotedOdds": 1.61,
+      "edge": 0.018623793695632718,
       "tier": "HIGH_RISK",
       "dataQuality": "MEDIUM",
       "historyMatches": 6,
@@ -90404,8 +91309,8 @@
       "probability": 0.6934243153846495,
       "confidence": 0.4749956560384849,
       "fairOdds": 1.44,
-      "quotedOdds": 1.61,
-      "edge": 0.07230630296228935,
+      "quotedOdds": 1.63,
+      "edge": 0.07992738286931211,
       "tier": "HIGH_RISK",
       "dataQuality": "LOW",
       "historyMatches": 5,
@@ -90568,8 +91473,8 @@
       "probability": 0.7455951400446522,
       "confidence": 0.49507517298964904,
       "fairOdds": 1.34,
-      "quotedOdds": 1.54,
-      "edge": 0.09624449069400287,
+      "quotedOdds": 1.56,
+      "edge": 0.10456949901901125,
       "tier": "HIGH_RISK",
       "dataQuality": "LOW",
       "historyMatches": 4,
@@ -104117,6 +105022,46 @@
       "reasoning": "Limited team history · cautious estimate uses league scoring priors and the available market price"
     },
     {
+      "id": "espn-401914109-OVER_1_5",
+      "fixtureId": "espn-401914109",
+      "league": {
+        "id": "19834",
+        "name": "Club Friendly",
+        "country": "",
+        "season": "2026"
+      },
+      "kickoff": "2026-08-28T15:00:00.000Z",
+      "homeTeam": {
+        "id": "espn-18990",
+        "name": "Dreams F.C.",
+        "shortName": "DFC",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/18990.png"
+      },
+      "awayTeam": {
+        "id": "espn-21167",
+        "name": "Bibiani Gold Stars",
+        "shortName": "BGS",
+        "logo": ""
+      },
+      "market": {
+        "key": "OVER_1_5",
+        "name": "Total goals",
+        "category": "Goals",
+        "line": 1.5
+      },
+      "selection": "Over 1.5",
+      "probability": 0.7437653709283382,
+      "confidence": 0.4563744316016282,
+      "fairOdds": 1.34,
+      "quotedOdds": null,
+      "edge": null,
+      "tier": "HIGH_RISK",
+      "dataQuality": "LOW",
+      "historyMatches": 1,
+      "oddsSource": null,
+      "reasoning": "Limited team history · cautious estimate uses league scoring priors"
+    },
+    {
       "id": "espn-401879873-OVER_1_5",
       "fixtureId": "espn-401879873",
       "league": {
@@ -104235,6 +105180,46 @@
       "historyMatches": 6,
       "oddsSource": null,
       "reasoning": "Modelled from 6 recent team performances · expected goals 1.46-0.95"
+    },
+    {
+      "id": "espn-401914108-UNDER_3_5",
+      "fixtureId": "espn-401914108",
+      "league": {
+        "id": "19834",
+        "name": "Club Friendly",
+        "country": "",
+        "season": "2026"
+      },
+      "kickoff": "2026-08-28T16:00:00.000Z",
+      "homeTeam": {
+        "id": "espn-131556",
+        "name": "TBD Home",
+        "shortName": "TBD Home",
+        "logo": ""
+      },
+      "awayTeam": {
+        "id": "espn-131554",
+        "name": "TBD Away",
+        "shortName": "TBD Away",
+        "logo": ""
+      },
+      "market": {
+        "key": "UNDER_3_5",
+        "name": "Total goals",
+        "category": "Goals",
+        "line": 3.5
+      },
+      "selection": "Under 3.5",
+      "probability": 0.7660935592366347,
+      "confidence": 0.470075007947599,
+      "fairOdds": 1.31,
+      "quotedOdds": null,
+      "edge": null,
+      "tier": "HIGH_RISK",
+      "dataQuality": "LOW",
+      "historyMatches": 0,
+      "oddsSource": null,
+      "reasoning": "Limited team history · cautious estimate uses league scoring priors"
     },
     {
       "id": "espn-401885130-OVER_1_5",
@@ -104357,6 +105342,86 @@
       "reasoning": "Limited team history · cautious estimate uses league scoring priors"
     },
     {
+      "id": "espn-401914096-UNDER_3_5",
+      "fixtureId": "espn-401914096",
+      "league": {
+        "id": "19834",
+        "name": "Club Friendly",
+        "country": "",
+        "season": "2026"
+      },
+      "kickoff": "2026-08-28T17:00:00.000Z",
+      "homeTeam": {
+        "id": "espn-133266",
+        "name": "Santomera",
+        "shortName": "SAN",
+        "logo": ""
+      },
+      "awayTeam": {
+        "id": "espn-133296",
+        "name": "Torrellano",
+        "shortName": "TOR",
+        "logo": ""
+      },
+      "market": {
+        "key": "UNDER_3_5",
+        "name": "Total goals",
+        "category": "Goals",
+        "line": 3.5
+      },
+      "selection": "Under 3.5",
+      "probability": 0.7524068568115784,
+      "confidence": 0.4837976089298449,
+      "fairOdds": 1.33,
+      "quotedOdds": null,
+      "edge": null,
+      "tier": "HIGH_RISK",
+      "dataQuality": "LOW",
+      "historyMatches": 3,
+      "oddsSource": null,
+      "reasoning": "Limited team history · cautious estimate uses league scoring priors"
+    },
+    {
+      "id": "espn-401914097-UNDER_3_5",
+      "fixtureId": "espn-401914097",
+      "league": {
+        "id": "19834",
+        "name": "Club Friendly",
+        "country": "",
+        "season": "2026"
+      },
+      "kickoff": "2026-08-28T17:00:00.000Z",
+      "homeTeam": {
+        "id": "espn-17892",
+        "name": "SD Compostela",
+        "shortName": "SDC",
+        "logo": ""
+      },
+      "awayTeam": {
+        "id": "espn-131554",
+        "name": "TBD Away",
+        "shortName": "TBD Away",
+        "logo": ""
+      },
+      "market": {
+        "key": "UNDER_3_5",
+        "name": "Total goals",
+        "category": "Goals",
+        "line": 3.5
+      },
+      "selection": "Under 3.5",
+      "probability": 0.7757093326323218,
+      "confidence": 0.47597524650319256,
+      "fairOdds": 1.29,
+      "quotedOdds": null,
+      "edge": null,
+      "tier": "HIGH_RISK",
+      "dataQuality": "LOW",
+      "historyMatches": 1,
+      "oddsSource": null,
+      "reasoning": "Limited team history · cautious estimate uses league scoring priors"
+    },
+    {
       "id": "espn-401874526-OVER_1_5",
       "fixtureId": "espn-401874526",
       "league": {
@@ -104393,6 +105458,46 @@
       "tier": "HIGH_RISK",
       "dataQuality": "LOW",
       "historyMatches": 4,
+      "oddsSource": null,
+      "reasoning": "Limited team history · cautious estimate uses league scoring priors"
+    },
+    {
+      "id": "espn-401914095-UNDER_3_5",
+      "fixtureId": "espn-401914095",
+      "league": {
+        "id": "19834",
+        "name": "Club Friendly",
+        "country": "",
+        "season": "2026"
+      },
+      "kickoff": "2026-08-28T17:30:00.000Z",
+      "homeTeam": {
+        "id": "espn-133291",
+        "name": "CD Utiel",
+        "shortName": "CDU",
+        "logo": ""
+      },
+      "awayTeam": {
+        "id": "espn-131554",
+        "name": "TBD Away",
+        "shortName": "TBD Away",
+        "logo": ""
+      },
+      "market": {
+        "key": "UNDER_3_5",
+        "name": "Total goals",
+        "category": "Goals",
+        "line": 3.5
+      },
+      "selection": "Under 3.5",
+      "probability": 0.7757093326323218,
+      "confidence": 0.47597524650319256,
+      "fairOdds": 1.29,
+      "quotedOdds": null,
+      "edge": null,
+      "tier": "HIGH_RISK",
+      "dataQuality": "LOW",
+      "historyMatches": 1,
       "oddsSource": null,
       "reasoning": "Limited team history · cautious estimate uses league scoring priors"
     },
@@ -104555,6 +105660,46 @@
       "historyMatches": 6,
       "oddsSource": null,
       "reasoning": "Modelled from 6 recent team performances · expected goals 1.94-0.97"
+    },
+    {
+      "id": "espn-401914094-UNDER_3_5",
+      "fixtureId": "espn-401914094",
+      "league": {
+        "id": "19834",
+        "name": "Club Friendly",
+        "country": "",
+        "season": "2026"
+      },
+      "kickoff": "2026-08-28T18:00:00.000Z",
+      "homeTeam": {
+        "id": "espn-18601",
+        "name": "Medeama",
+        "shortName": "MED",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/18601.png"
+      },
+      "awayTeam": {
+        "id": "espn-21647",
+        "name": "Samartex",
+        "shortName": "SMR",
+        "logo": ""
+      },
+      "market": {
+        "key": "UNDER_3_5",
+        "name": "Total goals",
+        "category": "Goals",
+        "line": 3.5
+      },
+      "selection": "Under 3.5",
+      "probability": 0.7660935592366347,
+      "confidence": 0.470075007947599,
+      "fairOdds": 1.31,
+      "quotedOdds": null,
+      "edge": null,
+      "tier": "HIGH_RISK",
+      "dataQuality": "LOW",
+      "historyMatches": 0,
+      "oddsSource": null,
+      "reasoning": "Limited team history · cautious estimate uses league scoring priors"
     },
     {
       "id": "espn-401876766-UNDER_3_5",
@@ -105169,6 +106314,46 @@
       "tier": "HIGH_RISK",
       "dataQuality": "LOW",
       "historyMatches": 4,
+      "oddsSource": null,
+      "reasoning": "Limited team history · cautious estimate uses league scoring priors"
+    },
+    {
+      "id": "espn-401914093-OVER_1_5",
+      "fixtureId": "espn-401914093",
+      "league": {
+        "id": "19834",
+        "name": "Club Friendly",
+        "country": "",
+        "season": "2026"
+      },
+      "kickoff": "2026-08-28T18:30:00.000Z",
+      "homeTeam": {
+        "id": "espn-18339",
+        "name": "Atlético Sanluqueño CF",
+        "shortName": "SNL",
+        "logo": ""
+      },
+      "awayTeam": {
+        "id": "espn-133164",
+        "name": "Betis Deportivo",
+        "shortName": "BDB",
+        "logo": ""
+      },
+      "market": {
+        "key": "OVER_1_5",
+        "name": "Total goals",
+        "category": "Goals",
+        "line": 1.5
+      },
+      "selection": "Over 1.5",
+      "probability": 0.7731509430367207,
+      "confidence": 0.5296083959801536,
+      "fairOdds": 1.29,
+      "quotedOdds": null,
+      "edge": null,
+      "tier": "HIGH_RISK",
+      "dataQuality": "LOW",
+      "historyMatches": 5,
       "oddsSource": null,
       "reasoning": "Limited team history · cautious estimate uses league scoring priors"
     },
@@ -113769,46 +114954,6 @@
       "reasoning": "Limited team history · cautious estimate uses league scoring priors"
     },
     {
-      "id": "espn-401845065-UNDER_3_5",
-      "fixtureId": "espn-401845065",
-      "league": {
-        "id": "3904",
-        "name": "Argentina Football",
-        "country": "Argentina",
-        "season": "2026"
-      },
-      "kickoff": "2026-08-29T18:00:00.000Z",
-      "homeTeam": {
-        "id": "espn-17700",
-        "name": "Argentino de Merlo",
-        "shortName": "ADM",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/17700.png"
-      },
-      "awayTeam": {
-        "id": "espn-10064",
-        "name": "Villa Dálmine",
-        "shortName": "VIL",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/10064.png"
-      },
-      "market": {
-        "key": "UNDER_3_5",
-        "name": "Total goals",
-        "category": "Goals",
-        "line": 3.5
-      },
-      "selection": "Under 3.5",
-      "probability": 0.8325538997454823,
-      "confidence": 0.5528157894310002,
-      "fairOdds": 1.2,
-      "quotedOdds": null,
-      "edge": null,
-      "tier": "HIGH_RISK",
-      "dataQuality": "LOW",
-      "historyMatches": 4,
-      "oddsSource": null,
-      "reasoning": "Limited team history · cautious estimate uses league scoring priors"
-    },
-    {
       "id": "espn-401845074-UNDER_3_5",
       "fixtureId": "espn-401845074",
       "league": {
@@ -113929,46 +115074,6 @@
       "reasoning": "Limited team history · cautious estimate uses league scoring priors"
     },
     {
-      "id": "espn-401845071-UNDER_3_5",
-      "fixtureId": "espn-401845071",
-      "league": {
-        "id": "3904",
-        "name": "Argentina Football",
-        "country": "Argentina",
-        "season": "2026"
-      },
-      "kickoff": "2026-08-29T18:00:00.000Z",
-      "homeTeam": {
-        "id": "espn-14074",
-        "name": "Comunicaciones",
-        "shortName": "COM",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/14074.png"
-      },
-      "awayTeam": {
-        "id": "espn-17704",
-        "name": "Deportivo Merlo",
-        "shortName": "MER",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/17704.png"
-      },
-      "market": {
-        "key": "UNDER_3_5",
-        "name": "Total goals",
-        "category": "Goals",
-        "line": 3.5
-      },
-      "selection": "Under 3.5",
-      "probability": 0.8898954004192047,
-      "confidence": 0.5908905458783519,
-      "fairOdds": 1.12,
-      "quotedOdds": null,
-      "edge": null,
-      "tier": "HIGH_RISK",
-      "dataQuality": "LOW",
-      "historyMatches": 4,
-      "oddsSource": null,
-      "reasoning": "Limited team history · cautious estimate uses league scoring priors"
-    },
-    {
       "id": "espn-401845066-UNDER_3_5",
       "fixtureId": "espn-401845066",
       "league": {
@@ -114009,46 +115114,6 @@
       "reasoning": "Limited team history · cautious estimate uses league scoring priors"
     },
     {
-      "id": "espn-401845067-UNDER_3_5",
-      "fixtureId": "espn-401845067",
-      "league": {
-        "id": "3904",
-        "name": "Argentina Football",
-        "country": "Argentina",
-        "season": "2026"
-      },
-      "kickoff": "2026-08-29T18:00:00.000Z",
-      "homeTeam": {
-        "id": "espn-10152",
-        "name": "Deportivo Armenio",
-        "shortName": "ARM",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/10152.png"
-      },
-      "awayTeam": {
-        "id": "espn-10052",
-        "name": "Villa San Carlos",
-        "shortName": "VSC",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/10052.png"
-      },
-      "market": {
-        "key": "UNDER_3_5",
-        "name": "Total goals",
-        "category": "Goals",
-        "line": 3.5
-      },
-      "selection": "Under 3.5",
-      "probability": 0.8325538744131303,
-      "confidence": 0.5528157726103184,
-      "fairOdds": 1.2,
-      "quotedOdds": null,
-      "edge": null,
-      "tier": "HIGH_RISK",
-      "dataQuality": "LOW",
-      "historyMatches": 4,
-      "oddsSource": null,
-      "reasoning": "Limited team history · cautious estimate uses league scoring priors"
-    },
-    {
       "id": "espn-401845068-UNDER_3_5",
       "fixtureId": "espn-401845068",
       "league": {
@@ -114080,46 +115145,6 @@
       "probability": 0.7550094351148916,
       "confidence": 0.501326264916288,
       "fairOdds": 1.32,
-      "quotedOdds": null,
-      "edge": null,
-      "tier": "HIGH_RISK",
-      "dataQuality": "LOW",
-      "historyMatches": 4,
-      "oddsSource": null,
-      "reasoning": "Limited team history · cautious estimate uses league scoring priors"
-    },
-    {
-      "id": "espn-401845069-UNDER_3_5",
-      "fixtureId": "espn-401845069",
-      "league": {
-        "id": "3904",
-        "name": "Argentina Football",
-        "country": "Argentina",
-        "season": "2026"
-      },
-      "kickoff": "2026-08-29T18:00:00.000Z",
-      "homeTeam": {
-        "id": "espn-10156",
-        "name": "Flandria",
-        "shortName": "FLA",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/10156.png"
-      },
-      "awayTeam": {
-        "id": "espn-17692",
-        "name": "San Martín (Burzaco)",
-        "shortName": "BUR",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/17692.png"
-      },
-      "market": {
-        "key": "UNDER_3_5",
-        "name": "Total goals",
-        "category": "Goals",
-        "line": 3.5
-      },
-      "selection": "Under 3.5",
-      "probability": 0.8686005265619332,
-      "confidence": 0.5767507496371236,
-      "fairOdds": 1.15,
       "quotedOdds": null,
       "edge": null,
       "tier": "HIGH_RISK",
@@ -121133,6 +122158,46 @@
       "reasoning": "Limited team history · cautious estimate uses league scoring priors"
     },
     {
+      "id": "espn-401845067-UNDER_3_5",
+      "fixtureId": "espn-401845067",
+      "league": {
+        "id": "3904",
+        "name": "Argentina Football",
+        "country": "Argentina",
+        "season": "2026"
+      },
+      "kickoff": "2026-08-30T15:30:00.000Z",
+      "homeTeam": {
+        "id": "espn-10152",
+        "name": "Deportivo Armenio",
+        "shortName": "ARM",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/10152.png"
+      },
+      "awayTeam": {
+        "id": "espn-10052",
+        "name": "Villa San Carlos",
+        "shortName": "VSC",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/10052.png"
+      },
+      "market": {
+        "key": "UNDER_3_5",
+        "name": "Total goals",
+        "category": "Goals",
+        "line": 3.5
+      },
+      "selection": "Under 3.5",
+      "probability": 0.8325538744131303,
+      "confidence": 0.5528157726103184,
+      "fairOdds": 1.2,
+      "quotedOdds": null,
+      "edge": null,
+      "tier": "HIGH_RISK",
+      "dataQuality": "LOW",
+      "historyMatches": 4,
+      "oddsSource": null,
+      "reasoning": "Limited team history · cautious estimate uses league scoring priors"
+    },
+    {
       "id": "espn-401888311-UNDER_3_5",
       "fixtureId": "espn-401888311",
       "league": {
@@ -125780,6 +126845,86 @@
       "probability": 0.7866278255919832,
       "confidence": 0.5223208761930768,
       "fairOdds": 1.27,
+      "quotedOdds": null,
+      "edge": null,
+      "tier": "HIGH_RISK",
+      "dataQuality": "LOW",
+      "historyMatches": 4,
+      "oddsSource": null,
+      "reasoning": "Limited team history · cautious estimate uses league scoring priors"
+    },
+    {
+      "id": "espn-401845065-UNDER_3_5",
+      "fixtureId": "espn-401845065",
+      "league": {
+        "id": "3904",
+        "name": "Argentina Football",
+        "country": "Argentina",
+        "season": "2026"
+      },
+      "kickoff": "2026-08-30T18:00:00.000Z",
+      "homeTeam": {
+        "id": "espn-17700",
+        "name": "Argentino de Merlo",
+        "shortName": "ADM",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/17700.png"
+      },
+      "awayTeam": {
+        "id": "espn-10064",
+        "name": "Villa Dálmine",
+        "shortName": "VIL",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/10064.png"
+      },
+      "market": {
+        "key": "UNDER_3_5",
+        "name": "Total goals",
+        "category": "Goals",
+        "line": 3.5
+      },
+      "selection": "Under 3.5",
+      "probability": 0.8325538997454823,
+      "confidence": 0.5528157894310002,
+      "fairOdds": 1.2,
+      "quotedOdds": null,
+      "edge": null,
+      "tier": "HIGH_RISK",
+      "dataQuality": "LOW",
+      "historyMatches": 4,
+      "oddsSource": null,
+      "reasoning": "Limited team history · cautious estimate uses league scoring priors"
+    },
+    {
+      "id": "espn-401845069-UNDER_3_5",
+      "fixtureId": "espn-401845069",
+      "league": {
+        "id": "3904",
+        "name": "Argentina Football",
+        "country": "Argentina",
+        "season": "2026"
+      },
+      "kickoff": "2026-08-30T18:00:00.000Z",
+      "homeTeam": {
+        "id": "espn-10156",
+        "name": "Flandria",
+        "shortName": "FLA",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/10156.png"
+      },
+      "awayTeam": {
+        "id": "espn-17692",
+        "name": "San Martín (Burzaco)",
+        "shortName": "BUR",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/17692.png"
+      },
+      "market": {
+        "key": "UNDER_3_5",
+        "name": "Total goals",
+        "category": "Goals",
+        "line": 3.5
+      },
+      "selection": "Under 3.5",
+      "probability": 0.8686005265619332,
+      "confidence": 0.5767507496371236,
+      "fairOdds": 1.15,
       "quotedOdds": null,
       "edge": null,
       "tier": "HIGH_RISK",
@@ -133829,7 +134974,7 @@
       "reasoning": "Limited team history · cautious estimate uses league scoring priors"
     },
     {
-      "id": "espn-401874012-OVER_1_5",
+      "id": "espn-401874012-UNDER_3_5",
       "fixtureId": "espn-401874012",
       "league": {
         "id": "3945",
@@ -133851,22 +134996,26 @@
         "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2720.png"
       },
       "market": {
-        "key": "OVER_1_5",
+        "key": "UNDER_3_5",
         "name": "Total goals",
         "category": "Goals",
-        "line": 1.5
+        "line": 3.5
       },
-      "selection": "Over 1.5",
-      "probability": 0.7517014519519514,
-      "confidence": 0.49912976409609566,
-      "fairOdds": 1.33,
-      "quotedOdds": null,
-      "edge": null,
+      "selection": "Under 3.5",
+      "probability": 0.7136535833861934,
+      "confidence": 0.4738659793684324,
+      "fairOdds": 1.4,
+      "quotedOdds": 1.57,
+      "edge": 0.07671090822695781,
       "tier": "HIGH_RISK",
       "dataQuality": "LOW",
       "historyMatches": 4,
-      "oddsSource": null,
-      "reasoning": "Limited team history · cautious estimate uses league scoring priors"
+      "oddsSource": "espn-draftkings",
+      "oddsProvider": "DraftKings",
+      "providerMarketId": "401874012-total",
+      "providerSelectionId": "under",
+      "providerDeepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34572259%3Foutcomes%3D0OU86020217U350_3",
+      "reasoning": "Limited team history · cautious estimate uses league scoring priors and the available market price"
     },
     {
       "id": "espn-401874513-UNDER_3_5",
@@ -134881,6 +136030,46 @@
       "reasoning": "Limited team history · cautious estimate uses league scoring priors"
     },
     {
+      "id": "espn-401845071-UNDER_3_5",
+      "fixtureId": "espn-401845071",
+      "league": {
+        "id": "3904",
+        "name": "Argentina Football",
+        "country": "Argentina",
+        "season": "2026"
+      },
+      "kickoff": "2026-08-31T22:00:00.000Z",
+      "homeTeam": {
+        "id": "espn-14074",
+        "name": "Comunicaciones",
+        "shortName": "COM",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/14074.png"
+      },
+      "awayTeam": {
+        "id": "espn-17704",
+        "name": "Deportivo Merlo",
+        "shortName": "MER",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/17704.png"
+      },
+      "market": {
+        "key": "UNDER_3_5",
+        "name": "Total goals",
+        "category": "Goals",
+        "line": 3.5
+      },
+      "selection": "Under 3.5",
+      "probability": 0.8898954004192047,
+      "confidence": 0.5908905458783519,
+      "fairOdds": 1.12,
+      "quotedOdds": null,
+      "edge": null,
+      "tier": "HIGH_RISK",
+      "dataQuality": "LOW",
+      "historyMatches": 4,
+      "oddsSource": null,
+      "reasoning": "Limited team history · cautious estimate uses league scoring priors"
+    },
+    {
       "id": "espn-401898128-UNDER_3_5",
       "fixtureId": "espn-401898128",
       "league": {
@@ -135161,7 +136350,7 @@
       "reasoning": "Limited team history · cautious estimate uses league scoring priors"
     },
     {
-      "id": "espn-401860311-UNDER_3_5",
+      "id": "espn-401860311-UNDER_2_5",
       "fixtureId": "espn-401860311",
       "league": {
         "id": "4007",
@@ -135183,21 +136372,25 @@
         "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/18187.png"
       },
       "market": {
-        "key": "UNDER_3_5",
+        "key": "UNDER_2_5",
         "name": "Total goals",
         "category": "Goals",
-        "line": 3.5
+        "line": 2.5
       },
-      "selection": "Under 3.5",
-      "probability": 0.8525072525282483,
-      "confidence": 0.6018701202849432,
-      "fairOdds": 1.17,
-      "quotedOdds": null,
-      "edge": null,
+      "selection": "Under 2.5",
+      "probability": 0.6697949808350021,
+      "confidence": 0.47287525646951145,
+      "fairOdds": 1.49,
+      "quotedOdds": 1.69,
+      "edge": 0.07807900450364114,
       "tier": "HIGH_RISK",
       "dataQuality": "MEDIUM",
       "historyMatches": 6,
-      "oddsSource": null,
+      "oddsSource": "espn-draftkings",
+      "oddsProvider": "DraftKings",
+      "providerMarketId": "401860311-total",
+      "providerSelectionId": "under",
+      "providerDeepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571995%3Foutcomes%3D0OU86019530U250_3",
       "reasoning": "Modelled from 6 recent team performances · expected goals 1.33-0.7"
     },
     {
@@ -144756,7 +145949,7 @@
       "totalOdds": 1.95,
       "priceStatus": "MODEL_ESTIMATE",
       "confidence": 0.7290929210394125,
-      "publishedAt": "2026-08-25T09:01:34.188Z",
+      "publishedAt": "2026-08-25T10:50:58.047Z",
       "bookingCodes": [],
       "selections": [
         {
@@ -144841,7 +146034,7 @@
       "totalOdds": 4.74,
       "priceStatus": "MODEL_ESTIMATE",
       "confidence": 0.7130514999082695,
-      "publishedAt": "2026-08-25T09:01:34.196Z",
+      "publishedAt": "2026-08-25T10:50:58.056Z",
       "bookingCodes": [],
       "selections": [
         {
@@ -145070,7 +146263,7 @@
       "totalOdds": 8.88,
       "priceStatus": "MODEL_ESTIMATE",
       "confidence": 0.6928047311382215,
-      "publishedAt": "2026-08-25T09:01:34.204Z",
+      "publishedAt": "2026-08-25T10:50:58.064Z",
       "bookingCodes": [],
       "selections": [
         {
@@ -145335,7 +146528,7 @@
       "totalOdds": 17.33,
       "priceStatus": "QUOTED",
       "confidence": 0.6022814176828752,
-      "publishedAt": "2026-08-25T09:01:34.216Z",
+      "publishedAt": "2026-08-25T10:50:58.077Z",
       "bookingCodes": [],
       "selections": [
         {
@@ -145528,7 +146721,7 @@
       "totalOdds": 71.56,
       "priceStatus": "MODEL_ESTIMATE",
       "confidence": 0.73998909413154,
-      "publishedAt": "2026-08-25T09:01:34.275Z",
+      "publishedAt": "2026-08-25T10:50:58.134Z",
       "bookingCodes": [],
       "selections": [
         {
@@ -146299,7 +147492,7 @@
       "totalOdds": 71.56,
       "priceStatus": "MODEL_ESTIMATE",
       "confidence": 0.73998909413154,
-      "publishedAt": "2026-08-25T09:01:34.275Z",
+      "publishedAt": "2026-08-25T10:50:58.134Z",
       "bookingCodes": [],
       "selections": [
         {
@@ -147093,7 +148286,7 @@
       "totalOdds": 17.33,
       "priceStatus": "QUOTED",
       "confidence": 0.6022814176828752,
-      "publishedAt": "2026-08-25T09:01:34.216Z",
+      "publishedAt": "2026-08-25T10:50:58.077Z",
       "bookingCodes": [],
       "selections": [
         {
@@ -147295,7 +148488,7 @@
       "totalOdds": 8.88,
       "priceStatus": "MODEL_ESTIMATE",
       "confidence": 0.6928047311382215,
-      "publishedAt": "2026-08-25T09:01:34.204Z",
+      "publishedAt": "2026-08-25T10:50:58.064Z",
       "bookingCodes": [],
       "selections": [
         {
@@ -147571,7 +148764,7 @@
       "totalOdds": 4.74,
       "priceStatus": "MODEL_ESTIMATE",
       "confidence": 0.7130514999082695,
-      "publishedAt": "2026-08-25T09:01:34.196Z",
+      "publishedAt": "2026-08-25T10:50:58.056Z",
       "bookingCodes": [],
       "selections": [
         {
@@ -147810,7 +149003,7 @@
       "totalOdds": 1.95,
       "priceStatus": "MODEL_ESTIMATE",
       "confidence": 0.7290929210394125,
-      "publishedAt": "2026-08-25T09:01:34.188Z",
+      "publishedAt": "2026-08-25T10:50:58.047Z",
       "bookingCodes": [],
       "selections": [
         {
@@ -152145,7 +153338,7 @@
           "result": "PENDING"
         }
       ],
-      "settledAt": "2026-08-25T09:01:27.034Z",
+      "settledAt": "2026-08-25T10:50:50.317Z",
       "wonLegs": 10,
       "lostLegs": 2,
       "voidLegs": 0
@@ -152384,7 +153577,7 @@
           "result": "WON"
         }
       ],
-      "settledAt": "2026-08-25T09:01:27.034Z",
+      "settledAt": "2026-08-25T10:50:50.317Z",
       "wonLegs": 3,
       "lostLegs": 1,
       "voidLegs": 0
@@ -152586,7 +153779,7 @@
           "result": "WON"
         }
       ],
-      "settledAt": "2026-08-25T09:01:27.034Z",
+      "settledAt": "2026-08-25T10:50:50.317Z",
       "wonLegs": 4,
       "lostLegs": 1,
       "voidLegs": 0
@@ -152879,7 +154072,7 @@
           "result": "WON"
         }
       ],
-      "settledAt": "2026-08-25T09:01:27.034Z",
+      "settledAt": "2026-08-25T10:50:50.317Z",
       "wonLegs": 2,
       "lostLegs": 0,
       "voidLegs": 0
@@ -153673,7 +154866,7 @@
           "result": "PENDING"
         }
       ],
-      "settledAt": "2026-08-25T09:01:27.034Z",
+      "settledAt": "2026-08-25T10:50:50.317Z",
       "wonLegs": 11,
       "lostLegs": 8,
       "voidLegs": 0
@@ -153875,7 +155068,7 @@
           "result": "WON"
         }
       ],
-      "settledAt": "2026-08-25T09:01:27.034Z",
+      "settledAt": "2026-08-25T10:50:50.317Z",
       "wonLegs": 3,
       "lostLegs": 2,
       "voidLegs": 0
@@ -154077,7 +155270,7 @@
           "result": "WON"
         }
       ],
-      "settledAt": "2026-08-25T09:01:27.034Z",
+      "settledAt": "2026-08-25T10:50:50.317Z",
       "wonLegs": 3,
       "lostLegs": 2,
       "voidLegs": 0
@@ -154279,7 +155472,7 @@
           "result": "WON"
         }
       ],
-      "settledAt": "2026-08-25T09:01:27.034Z",
+      "settledAt": "2026-08-25T10:50:50.317Z",
       "wonLegs": 4,
       "lostLegs": 1,
       "voidLegs": 0
@@ -154407,7 +155600,7 @@
           "result": "WON"
         }
       ],
-      "settledAt": "2026-08-25T09:01:27.034Z",
+      "settledAt": "2026-08-25T10:50:50.317Z",
       "wonLegs": 3,
       "lostLegs": 0,
       "voidLegs": 0
