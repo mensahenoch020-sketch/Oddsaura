@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "generatedAt": "2026-08-26T01:59:30.000Z",
+  "generatedAt": "2026-08-26T03:19:30.938Z",
   "stale": false,
   "status": "healthy",
   "message": "Global fixtures, team badges, recent results and model-ready history are updating without paid API keys.",
@@ -9,7 +9,7 @@
       "id": "espn-league-history",
       "label": "ESPN league history",
       "status": "healthy",
-      "lastSuccessAt": "2026-08-26T01:59:30.000Z",
+      "lastSuccessAt": "2026-08-26T03:19:30.938Z",
       "records": 609,
       "warnings": []
     },
@@ -17,186 +17,21 @@
       "id": "espn-global-json",
       "label": "ESPN global match board",
       "status": "healthy",
-      "lastSuccessAt": "2026-08-26T01:59:30.000Z",
+      "lastSuccessAt": "2026-08-26T03:19:30.938Z",
       "records": 3741,
       "warnings": []
     }
   ],
   "metrics": {
-    "fixtures": 1200,
-    "live": 6,
-    "completed": 2566,
-    "pricedMarkets": 3026,
-    "predictions": 68400,
-    "selectablePredictions": 1400,
+    "fixtures": 1197,
+    "live": 3,
+    "completed": 2572,
+    "pricedMarkets": 2998,
+    "predictions": 68229,
+    "selectablePredictions": 1397,
     "publishedTickets": 5
   },
   "fixtures": [
-    {
-      "id": "espn-401911272",
-      "providerId": "401911272",
-      "source": "espn-global-json",
-      "league": {
-        "id": "19425",
-        "name": "Quarterfinals",
-        "country": "USA",
-        "season": "2026"
-      },
-      "round": "",
-      "kickoff": "2026-08-26T02:30:00.000Z",
-      "status": "SCHEDULED",
-      "homeTeam": {
-        "id": "espn-228",
-        "name": "León",
-        "shortName": "LEO",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/228.png"
-      },
-      "awayTeam": {
-        "id": "espn-4771",
-        "name": "Real Salt Lake",
-        "shortName": "RSL",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/4771.png"
-      },
-      "homeScore": 0,
-      "awayScore": 0,
-      "odds": [
-        {
-          "marketId": "401911272-moneyline",
-          "market": "Match result",
-          "selectionId": "home",
-          "selection": "León",
-          "line": null,
-          "odds": 2.75,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34568624%3Foutcomes%3D0ML86008856_1"
-        },
-        {
-          "marketId": "401911272-moneyline",
-          "market": "Match result",
-          "selectionId": "draw",
-          "selection": "Draw",
-          "line": null,
-          "odds": 3.55,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34568624%3Foutcomes%3D0ML86008856_2"
-        },
-        {
-          "marketId": "401911272-moneyline",
-          "market": "Match result",
-          "selectionId": "away",
-          "selection": "Real Salt Lake",
-          "line": null,
-          "odds": 2.3,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34568624%3Foutcomes%3D0ML86008856_3"
-        },
-        {
-          "marketId": "401911272-total",
-          "market": "Total goals",
-          "selectionId": "over",
-          "selection": "Over 2.5",
-          "line": 2.5,
-          "odds": 1.67,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34568624%3Foutcomes%3D0OU86008864O250_1"
-        },
-        {
-          "marketId": "401911272-total",
-          "market": "Total goals",
-          "selectionId": "under",
-          "selection": "Under 2.5",
-          "line": 2.5,
-          "odds": 2.2,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34568624%3Foutcomes%3D0OU86008864U250_3"
-        },
-        {
-          "marketId": "401911272-handicap",
-          "market": "Handicap",
-          "selectionId": "home",
-          "selection": "León +0.5",
-          "line": 0.5,
-          "odds": 1.57,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34568624%3Foutcomes%3D0HC86008869P50_1"
-        },
-        {
-          "marketId": "401911272-handicap",
-          "market": "Handicap",
-          "selectionId": "away",
-          "selection": "Real Salt Lake -0.5",
-          "line": -0.5,
-          "odds": 2.25,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34568624%3Foutcomes%3D0HC86008869N50_3"
-        }
-      ]
-    },
-    {
-      "id": "espn-401874463",
-      "providerId": "401874463",
-      "source": "espn-global-json",
-      "league": {
-        "id": "22947",
-        "name": "Costa Rica Football",
-        "country": "Costa Rica",
-        "season": "2026"
-      },
-      "round": "",
-      "kickoff": "2026-08-26T02:30:00.000Z",
-      "status": "SCHEDULED",
-      "homeTeam": {
-        "id": "espn-7239",
-        "name": "Cartaginés",
-        "shortName": "CAR",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7239.png"
-      },
-      "awayTeam": {
-        "id": "espn-7229",
-        "name": "CD FAS",
-        "shortName": "FAS",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7229.png"
-      },
-      "homeScore": 0,
-      "awayScore": 0,
-      "odds": []
-    },
-    {
-      "id": "espn-401878113",
-      "providerId": "401878113",
-      "source": "espn-global-json",
-      "league": {
-        "id": "22947",
-        "name": "Guatemala Football",
-        "country": "Guatemala",
-        "season": "2026"
-      },
-      "round": "",
-      "kickoff": "2026-08-26T02:30:00.000Z",
-      "status": "SCHEDULED",
-      "homeTeam": {
-        "id": "espn-7258",
-        "name": "Municipal",
-        "shortName": "MUN",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7258.png"
-      },
-      "awayTeam": {
-        "id": "espn-7242",
-        "name": "FC Motagua",
-        "shortName": "MOT",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7242.png"
-      },
-      "homeScore": 0,
-      "awayScore": 0,
-      "odds": []
-    },
     {
       "id": "espn-401912500",
       "providerId": "401912500",
@@ -2409,7 +2244,7 @@
           "selectionId": "over",
           "selection": "Over 3.5",
           "line": 3.5,
-          "odds": 2.2,
+          "odds": 2.15,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512108%3Foutcomes%3D0OU85847459O350_1"
@@ -2431,7 +2266,7 @@
           "selectionId": "home",
           "selection": "Tottenham Hotspur -1.5",
           "line": -1.5,
-          "odds": 1.65,
+          "odds": 1.61,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34512108%3Foutcomes%3D0HC85847464N150_1"
@@ -34111,7 +33946,7 @@
           "selectionId": "home",
           "selection": "Leganés",
           "line": null,
-          "odds": 1.87,
+          "odds": 1.91,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34570445%3Foutcomes%3D0ML86014141_1"
@@ -34133,7 +33968,7 @@
           "selectionId": "away",
           "selection": "Eldense",
           "line": null,
-          "odds": 3.8,
+          "odds": 3.7,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34570445%3Foutcomes%3D0ML86014141_3"
@@ -34166,7 +34001,7 @@
           "selectionId": "home",
           "selection": "Leganés -0.5",
           "line": -0.5,
-          "odds": 1.8,
+          "odds": 1.83,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34570445%3Foutcomes%3D0HC86014365N50_1"
@@ -34177,7 +34012,7 @@
           "selectionId": "away",
           "selection": "Eldense +0.5",
           "line": 0.5,
-          "odds": 1.83,
+          "odds": 1.8,
           "source": "espn-draftkings",
           "provider": "DraftKings",
           "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34570445%3Foutcomes%3D0HC86014365P50_3"
@@ -67975,144 +67810,8 @@
   ],
   "liveFixtures": [
     {
-      "id": "espn-401909066",
-      "providerId": "401909066",
-      "source": "espn-global-json",
-      "league": {
-        "id": "8306",
-        "name": "Quarterfinals",
-        "country": "Brazil",
-        "season": "2026"
-      },
-      "round": "",
-      "kickoff": "2026-08-26T00:00:00.000Z",
-      "status": "LIVE",
-      "homeTeam": {
-        "id": "espn-2022",
-        "name": "Cruzeiro",
-        "shortName": "CRU",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
-      },
-      "awayTeam": {
-        "id": "espn-7632",
-        "name": "Atlético-MG",
-        "shortName": "CAM",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7632.png"
-      },
-      "homeScore": 1,
-      "awayScore": 1,
-      "odds": [
-        {
-          "marketId": "401909066-moneyline",
-          "market": "Match result",
-          "selectionId": "home",
-          "selection": "Cruzeiro",
-          "line": null,
-          "odds": 2.05,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34542657"
-        },
-        {
-          "marketId": "401909066-moneyline",
-          "market": "Match result",
-          "selectionId": "draw",
-          "selection": "Draw",
-          "line": null,
-          "odds": 3.2,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34542657"
-        },
-        {
-          "marketId": "401909066-moneyline",
-          "market": "Match result",
-          "selectionId": "away",
-          "selection": "Atlético-MG",
-          "line": null,
-          "odds": 3.95,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34542657"
-        },
-        {
-          "marketId": "401909066-total",
-          "market": "Total goals",
-          "selectionId": "over",
-          "selection": "Over 2.5",
-          "line": 2.5,
-          "odds": 2.25,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34542657"
-        },
-        {
-          "marketId": "401909066-total",
-          "market": "Total goals",
-          "selectionId": "under",
-          "selection": "Under 2.5",
-          "line": 2.5,
-          "odds": 1.61,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34542657"
-        },
-        {
-          "marketId": "401909066-handicap",
-          "market": "Handicap",
-          "selectionId": "home",
-          "selection": "Cruzeiro -0.5",
-          "line": -0.5,
-          "odds": 1.95,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34542657"
-        },
-        {
-          "marketId": "401909066-handicap",
-          "market": "Handicap",
-          "selectionId": "away",
-          "selection": "Atlético-MG +0.5",
-          "line": 0.5,
-          "odds": 1.77,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34542657"
-        }
-      ]
-    },
-    {
-      "id": "espn-401899255",
-      "providerId": "401899255",
-      "source": "espn-global-json",
-      "league": {
-        "id": "5487",
-        "name": "Ncaa Division I MEN",
-        "country": "USA",
-        "season": "2026"
-      },
-      "round": "",
-      "kickoff": "2026-08-26T00:00:00.000Z",
-      "status": "LIVE",
-      "homeTeam": {
-        "id": "espn-5671",
-        "name": "UAB",
-        "shortName": "UAB",
-        "logo": "https://a.espncdn.com/i/teamlogos/ncaa/500/5.png"
-      },
-      "awayTeam": {
-        "id": "espn-5719",
-        "name": "Georgia State",
-        "shortName": "GAST",
-        "logo": "https://a.espncdn.com/i/teamlogos/ncaa/500/2247.png"
-      },
-      "homeScore": 0,
-      "awayScore": 1,
-      "odds": []
-    },
-    {
-      "id": "espn-401909652",
-      "providerId": "401909652",
+      "id": "espn-401911272",
+      "providerId": "401911272",
       "source": "espn-global-json",
       "league": {
         "id": "19425",
@@ -68121,521 +67820,162 @@
         "season": "2026"
       },
       "round": "",
-      "kickoff": "2026-08-26T00:30:00.000Z",
+      "kickoff": "2026-08-26T02:30:00.000Z",
       "status": "LIVE",
       "homeTeam": {
-        "id": "espn-220",
-        "name": "Monterrey",
-        "shortName": "MTY",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/220.png"
+        "id": "espn-228",
+        "name": "León",
+        "shortName": "LEO",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/228.png"
       },
       "awayTeam": {
-        "id": "espn-182",
-        "name": "Chicago Fire FC",
-        "shortName": "CHI",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/182.png"
+        "id": "espn-4771",
+        "name": "Real Salt Lake",
+        "shortName": "RSL",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/4771.png"
       },
       "homeScore": 1,
       "awayScore": 0,
       "odds": [
         {
-          "marketId": "401909652-moneyline",
+          "marketId": "401911272-moneyline",
           "market": "Match result",
           "selectionId": "home",
-          "selection": "Monterrey",
+          "selection": "León",
           "line": null,
-          "odds": 2.65,
+          "odds": 2.75,
           "source": "espn-draftkings",
           "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567363"
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34568624"
         },
         {
-          "marketId": "401909652-moneyline",
+          "marketId": "401911272-moneyline",
           "market": "Match result",
           "selectionId": "draw",
           "selection": "Draw",
           "line": null,
-          "odds": 3.65,
+          "odds": 3.5,
           "source": "espn-draftkings",
           "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567363"
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34568624"
         },
         {
-          "marketId": "401909652-moneyline",
+          "marketId": "401911272-moneyline",
           "market": "Match result",
           "selectionId": "away",
-          "selection": "Chicago Fire FC",
-          "line": null,
-          "odds": 2.35,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567363"
-        },
-        {
-          "marketId": "401909652-total",
-          "market": "Total goals",
-          "selectionId": "over",
-          "selection": "Over 2.5",
-          "line": 2.5,
-          "odds": 1.59,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567363"
-        },
-        {
-          "marketId": "401909652-total",
-          "market": "Total goals",
-          "selectionId": "under",
-          "selection": "Under 2.5",
-          "line": 2.5,
-          "odds": 2.35,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567363"
-        },
-        {
-          "marketId": "401909652-handicap",
-          "market": "Handicap",
-          "selectionId": "home",
-          "selection": "Monterrey +0.5",
-          "line": 0.5,
-          "odds": 1.57,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567363"
-        },
-        {
-          "marketId": "401909652-handicap",
-          "market": "Handicap",
-          "selectionId": "away",
-          "selection": "Chicago Fire FC -0.5",
-          "line": -0.5,
-          "odds": 2.25,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34567363"
-        }
-      ]
-    },
-    {
-      "id": "espn-401874147",
-      "providerId": "401874147",
-      "source": "espn-global-json",
-      "league": {
-        "id": "783",
-        "name": "Round OF 16",
-        "country": "Ecuador",
-        "season": "2026"
-      },
-      "round": "",
-      "kickoff": "2026-08-26T00:30:00.000Z",
-      "status": "LIVE",
-      "homeTeam": {
-        "id": "espn-17086",
-        "name": "Independiente del Valle",
-        "shortName": "IDV",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/17086.png"
-      },
-      "awayTeam": {
-        "id": "espn-5489",
-        "name": "Deportes Tolima",
-        "shortName": "TOL",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/5489.png"
-      },
-      "homeScore": 2,
-      "awayScore": 0,
-      "odds": [
-        {
-          "marketId": "401874147-moneyline",
-          "market": "Match result",
-          "selectionId": "home",
-          "selection": "Independiente del Valle",
-          "line": null,
-          "odds": 1.48,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34546988"
-        },
-        {
-          "marketId": "401874147-moneyline",
-          "market": "Match result",
-          "selectionId": "draw",
-          "selection": "Draw",
-          "line": null,
-          "odds": 4.3,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34546988"
-        },
-        {
-          "marketId": "401874147-moneyline",
-          "market": "Match result",
-          "selectionId": "away",
-          "selection": "Deportes Tolima",
-          "line": null,
-          "odds": 6.5,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34546988"
-        },
-        {
-          "marketId": "401874147-total",
-          "market": "Total goals",
-          "selectionId": "over",
-          "selection": "Over 2.5",
-          "line": 2.5,
-          "odds": 2.05,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34546988"
-        },
-        {
-          "marketId": "401874147-total",
-          "market": "Total goals",
-          "selectionId": "under",
-          "selection": "Under 2.5",
-          "line": 2.5,
-          "odds": 1.74,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34546988"
-        },
-        {
-          "marketId": "401874147-handicap",
-          "market": "Handicap",
-          "selectionId": "home",
-          "selection": "Independiente del Valle -1.5",
-          "line": -1.5,
-          "odds": 2.45,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34546988"
-        },
-        {
-          "marketId": "401874147-handicap",
-          "market": "Handicap",
-          "selectionId": "away",
-          "selection": "Deportes Tolima +1.5",
-          "line": 1.5,
-          "odds": 1.49,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34546988"
-        }
-      ]
-    },
-    {
-      "id": "espn-401899170",
-      "providerId": "401899170",
-      "source": "espn-global-json",
-      "league": {
-        "id": "5487",
-        "name": "Ncaa Division I MEN",
-        "country": "USA",
-        "season": "2026"
-      },
-      "round": "",
-      "kickoff": "2026-08-26T00:30:00.000Z",
-      "status": "LIVE",
-      "homeTeam": {
-        "id": "espn-5626",
-        "name": "Kansas City",
-        "shortName": "KC",
-        "logo": "https://a.espncdn.com/i/teamlogos/ncaa/500/140.png"
-      },
-      "awayTeam": {
-        "id": "espn-5653",
-        "name": "UNLV",
-        "shortName": "UNLV",
-        "logo": "https://a.espncdn.com/i/teamlogos/ncaa/500/2439.png"
-      },
-      "homeScore": 1,
-      "awayScore": 0,
-      "odds": []
-    },
-    {
-      "id": "espn-401878054",
-      "providerId": "401878054",
-      "source": "espn-global-json",
-      "league": {
-        "id": "650",
-        "name": "Colombia Football",
-        "country": "Colombia",
-        "season": "2026"
-      },
-      "round": "",
-      "kickoff": "2026-08-26T01:00:00.000Z",
-      "status": "LIVE",
-      "homeTeam": {
-        "id": "espn-6101",
-        "name": "Cúcuta Deportivo",
-        "shortName": "CUC",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/6101.png"
-      },
-      "awayTeam": {
-        "id": "espn-9761",
-        "name": "Alianza FC",
-        "shortName": "AFC",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/9761.png"
-      },
-      "homeScore": 0,
-      "awayScore": 0,
-      "odds": [
-        {
-          "marketId": "401878054-moneyline",
-          "market": "Match result",
-          "selectionId": "home",
-          "selection": "Cúcuta Deportivo",
+          "selection": "Real Salt Lake",
           "line": null,
           "odds": 2.3,
           "source": "espn-draftkings",
           "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34569397"
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34568624"
         },
         {
-          "marketId": "401878054-moneyline",
-          "market": "Match result",
-          "selectionId": "draw",
-          "selection": "Draw",
-          "line": null,
-          "odds": 3,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34569397"
-        },
-        {
-          "marketId": "401878054-moneyline",
-          "market": "Match result",
-          "selectionId": "away",
-          "selection": "Alianza FC",
-          "line": null,
-          "odds": 3.15,
-          "source": "espn-draftkings",
-          "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34569397"
-        },
-        {
-          "marketId": "401878054-total",
+          "marketId": "401911272-total",
           "market": "Total goals",
           "selectionId": "over",
           "selection": "Over 2.5",
           "line": 2.5,
-          "odds": 2.35,
+          "odds": 1.67,
           "source": "espn-draftkings",
           "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34569397"
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34568624"
         },
         {
-          "marketId": "401878054-total",
+          "marketId": "401911272-total",
           "market": "Total goals",
           "selectionId": "under",
           "selection": "Under 2.5",
           "line": 2.5,
-          "odds": 1.56,
+          "odds": 2.2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34569397"
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34568624"
         },
         {
-          "marketId": "401878054-handicap",
+          "marketId": "401911272-handicap",
           "market": "Handicap",
           "selectionId": "home",
-          "selection": "Cúcuta Deportivo -0.5",
-          "line": -0.5,
-          "odds": 2.25,
+          "selection": "León +0.5",
+          "line": 0.5,
+          "odds": 1.59,
           "source": "espn-draftkings",
           "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34569397"
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34568624"
         },
         {
-          "marketId": "401878054-handicap",
+          "marketId": "401911272-handicap",
           "market": "Handicap",
           "selectionId": "away",
-          "selection": "Alianza FC +0.5",
-          "line": 0.5,
-          "odds": 1.57,
+          "selection": "Real Salt Lake -0.5",
+          "line": -0.5,
+          "odds": 2.2,
           "source": "espn-draftkings",
           "provider": "DraftKings",
-          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34569397"
+          "deepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34568624"
         }
       ]
-    }
-  ],
-  "recentResults": [
+    },
     {
-      "id": "espn-401899743",
-      "providerId": "401899743",
+      "id": "espn-401874463",
+      "providerId": "401874463",
       "source": "espn-global-json",
       "league": {
-        "id": "3943",
-        "name": "Torneo Apertura 2026",
-        "country": "El Salvador",
+        "id": "22947",
+        "name": "Costa Rica Football",
+        "country": "Costa Rica",
         "season": "2026"
       },
       "round": "",
-      "kickoff": "2026-08-23T02:00:00.000Z",
-      "status": "FINISHED",
+      "kickoff": "2026-08-26T02:30:00.000Z",
+      "status": "LIVE",
       "homeTeam": {
+        "id": "espn-7239",
+        "name": "Cartaginés",
+        "shortName": "CAR",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7239.png"
+      },
+      "awayTeam": {
         "id": "espn-7229",
         "name": "CD FAS",
         "shortName": "FAS",
         "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7229.png"
       },
-      "awayTeam": {
-        "id": "espn-7226",
-        "name": "Águila",
-        "shortName": "AGU",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7226.png"
-      },
-      "homeScore": 1,
-      "awayScore": 0,
-      "odds": []
-    },
-    {
-      "id": "espn-761751",
-      "providerId": "761751",
-      "source": "espn-public-json",
-      "league": {
-        "id": "770",
-        "name": "MLS",
-        "country": "",
-        "season": "2026"
-      },
-      "round": "",
-      "kickoff": "2026-08-23T02:30:00.000Z",
-      "status": "FINISHED",
-      "homeTeam": {
-        "id": "espn-18966",
-        "name": "LAFC",
-        "shortName": "LAFC",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/18966.png"
-      },
-      "awayTeam": {
-        "id": "espn-9723",
-        "name": "Portland Timbers",
-        "shortName": "POR",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/9723.png"
-      },
-      "homeScore": 1,
-      "awayScore": 1,
-      "odds": []
-    },
-    {
-      "id": "espn-761750",
-      "providerId": "761750",
-      "source": "espn-public-json",
-      "league": {
-        "id": "770",
-        "name": "MLS",
-        "country": "",
-        "season": "2026"
-      },
-      "round": "",
-      "kickoff": "2026-08-23T02:30:00.000Z",
-      "status": "FINISHED",
-      "homeTeam": {
-        "id": "espn-22529",
-        "name": "San Diego FC",
-        "shortName": "SD",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/22529.png"
-      },
-      "awayTeam": {
-        "id": "espn-184",
-        "name": "Colorado Rapids",
-        "shortName": "COL",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/184.png"
-      },
-      "homeScore": 3,
-      "awayScore": 0,
-      "odds": []
-    },
-    {
-      "id": "espn-761752",
-      "providerId": "761752",
-      "source": "espn-public-json",
-      "league": {
-        "id": "770",
-        "name": "MLS",
-        "country": "",
-        "season": "2026"
-      },
-      "round": "",
-      "kickoff": "2026-08-23T02:30:00.000Z",
-      "status": "FINISHED",
-      "homeTeam": {
-        "id": "espn-191",
-        "name": "San Jose Earthquakes",
-        "shortName": "SJ",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/191.png"
-      },
-      "awayTeam": {
-        "id": "espn-17362",
-        "name": "Minnesota United FC",
-        "shortName": "MIN",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/17362.png"
-      },
-      "homeScore": 1,
-      "awayScore": 5,
-      "odds": []
-    },
-    {
-      "id": "espn-401877003",
-      "providerId": "401877003",
-      "source": "espn-public-json",
-      "league": {
-        "id": "760",
-        "name": "Mexican Liga BBVA MX",
-        "country": "",
-        "season": "2026"
-      },
-      "round": "",
-      "kickoff": "2026-08-23T03:00:00.000Z",
-      "status": "FINISHED",
-      "homeTeam": {
-        "id": "espn-218",
-        "name": "Cruz Azul",
-        "shortName": "CAZ",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/218.png"
-      },
-      "awayTeam": {
-        "id": "espn-216",
-        "name": "Atlas",
-        "shortName": "ATS",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/216.png"
-      },
       "homeScore": 0,
-      "awayScore": 2,
+      "awayScore": 0,
       "odds": []
     },
     {
-      "id": "espn-401842127",
-      "providerId": "401842127",
+      "id": "espn-401878113",
+      "providerId": "401878113",
       "source": "espn-global-json",
       "league": {
-        "id": "4002",
-        "name": "USA Football",
-        "country": "USA",
+        "id": "22947",
+        "name": "Guatemala Football",
+        "country": "Guatemala",
         "season": "2026"
       },
       "round": "",
-      "kickoff": "2026-08-23T03:00:00.000Z",
-      "status": "FINISHED",
+      "kickoff": "2026-08-26T02:30:00.000Z",
+      "status": "LIVE",
       "homeTeam": {
-        "id": "espn-17828",
-        "name": "Sacramento Republic FC",
-        "shortName": "SAC",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/17828.png"
+        "id": "espn-7258",
+        "name": "Municipal",
+        "shortName": "MUN",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7258.png"
       },
       "awayTeam": {
-        "id": "espn-17850",
-        "name": "Phoenix Rising FC",
-        "shortName": "PHX",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/17850.png"
+        "id": "espn-7242",
+        "name": "FC Motagua",
+        "shortName": "MOT",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7242.png"
       },
-      "homeScore": 2,
-      "awayScore": 2,
+      "homeScore": 0,
+      "awayScore": 1,
       "odds": []
-    },
+    }
+  ],
+  "recentResults": [
     {
       "id": "espn-401842042",
       "providerId": "401842042",
@@ -82934,6 +82274,180 @@
       "odds": []
     },
     {
+      "id": "espn-401909066",
+      "providerId": "401909066",
+      "source": "espn-global-json",
+      "league": {
+        "id": "8306",
+        "name": "Quarterfinals",
+        "country": "Brazil",
+        "season": "2026"
+      },
+      "round": "",
+      "kickoff": "2026-08-26T00:00:00.000Z",
+      "status": "FINISHED",
+      "homeTeam": {
+        "id": "espn-2022",
+        "name": "Cruzeiro",
+        "shortName": "CRU",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
+      },
+      "awayTeam": {
+        "id": "espn-7632",
+        "name": "Atlético-MG",
+        "shortName": "CAM",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7632.png"
+      },
+      "homeScore": 1,
+      "awayScore": 1,
+      "odds": []
+    },
+    {
+      "id": "espn-401899255",
+      "providerId": "401899255",
+      "source": "espn-global-json",
+      "league": {
+        "id": "5487",
+        "name": "Ncaa Division I MEN",
+        "country": "USA",
+        "season": "2026"
+      },
+      "round": "",
+      "kickoff": "2026-08-26T00:00:00.000Z",
+      "status": "FINISHED",
+      "homeTeam": {
+        "id": "espn-5671",
+        "name": "UAB",
+        "shortName": "UAB",
+        "logo": "https://a.espncdn.com/i/teamlogos/ncaa/500/5.png"
+      },
+      "awayTeam": {
+        "id": "espn-5719",
+        "name": "Georgia State",
+        "shortName": "GAST",
+        "logo": "https://a.espncdn.com/i/teamlogos/ncaa/500/2247.png"
+      },
+      "homeScore": 0,
+      "awayScore": 1,
+      "odds": []
+    },
+    {
+      "id": "espn-401909652",
+      "providerId": "401909652",
+      "source": "espn-global-json",
+      "league": {
+        "id": "19425",
+        "name": "Quarterfinals",
+        "country": "USA",
+        "season": "2026"
+      },
+      "round": "",
+      "kickoff": "2026-08-26T00:30:00.000Z",
+      "status": "FINISHED",
+      "homeTeam": {
+        "id": "espn-220",
+        "name": "Monterrey",
+        "shortName": "MTY",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/220.png"
+      },
+      "awayTeam": {
+        "id": "espn-182",
+        "name": "Chicago Fire FC",
+        "shortName": "CHI",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/182.png"
+      },
+      "homeScore": 2,
+      "awayScore": 1,
+      "odds": []
+    },
+    {
+      "id": "espn-401874147",
+      "providerId": "401874147",
+      "source": "espn-global-json",
+      "league": {
+        "id": "783",
+        "name": "Round OF 16",
+        "country": "Ecuador",
+        "season": "2026"
+      },
+      "round": "",
+      "kickoff": "2026-08-26T00:30:00.000Z",
+      "status": "FINISHED",
+      "homeTeam": {
+        "id": "espn-17086",
+        "name": "Independiente del Valle",
+        "shortName": "IDV",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/17086.png"
+      },
+      "awayTeam": {
+        "id": "espn-5489",
+        "name": "Deportes Tolima",
+        "shortName": "TOL",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/5489.png"
+      },
+      "homeScore": 3,
+      "awayScore": 1,
+      "odds": []
+    },
+    {
+      "id": "espn-401899170",
+      "providerId": "401899170",
+      "source": "espn-global-json",
+      "league": {
+        "id": "5487",
+        "name": "Ncaa Division I MEN",
+        "country": "USA",
+        "season": "2026"
+      },
+      "round": "",
+      "kickoff": "2026-08-26T00:30:00.000Z",
+      "status": "FINISHED",
+      "homeTeam": {
+        "id": "espn-5626",
+        "name": "Kansas City",
+        "shortName": "KC",
+        "logo": "https://a.espncdn.com/i/teamlogos/ncaa/500/140.png"
+      },
+      "awayTeam": {
+        "id": "espn-5653",
+        "name": "UNLV",
+        "shortName": "UNLV",
+        "logo": "https://a.espncdn.com/i/teamlogos/ncaa/500/2439.png"
+      },
+      "homeScore": 1,
+      "awayScore": 0,
+      "odds": []
+    },
+    {
+      "id": "espn-401878054",
+      "providerId": "401878054",
+      "source": "espn-global-json",
+      "league": {
+        "id": "650",
+        "name": "Colombia Football",
+        "country": "Colombia",
+        "season": "2026"
+      },
+      "round": "",
+      "kickoff": "2026-08-26T01:00:00.000Z",
+      "status": "FINISHED",
+      "homeTeam": {
+        "id": "espn-6101",
+        "name": "Cúcuta Deportivo",
+        "shortName": "CUC",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/6101.png"
+      },
+      "awayTeam": {
+        "id": "espn-9761",
+        "name": "Alianza FC",
+        "shortName": "AFC",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/9761.png"
+      },
+      "homeScore": 1,
+      "awayScore": 0,
+      "odds": []
+    },
+    {
       "id": "espn-401843916",
       "providerId": "401843916",
       "source": "espn-global-json",
@@ -82964,130 +82478,6 @@
     }
   ],
   "predictedPicks": [
-    {
-      "id": "espn-401911272-MATCH_HOME",
-      "fixtureId": "espn-401911272",
-      "league": {
-        "id": "19425",
-        "name": "Quarterfinals",
-        "country": "USA",
-        "season": "2026"
-      },
-      "kickoff": "2026-08-26T02:30:00.000Z",
-      "homeTeam": {
-        "id": "espn-228",
-        "name": "León",
-        "shortName": "LEO",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/228.png"
-      },
-      "awayTeam": {
-        "id": "espn-4771",
-        "name": "Real Salt Lake",
-        "shortName": "RSL",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/4771.png"
-      },
-      "market": {
-        "key": "MATCH_HOME",
-        "name": "Match result",
-        "category": "Result",
-        "line": null
-      },
-      "selection": "León",
-      "probability": 0.5756775350750377,
-      "confidence": 0.46687448094585554,
-      "fairOdds": 1.74,
-      "quotedOdds": 2.75,
-      "edge": 0.21204117143867407,
-      "tier": "HIGH_RISK",
-      "dataQuality": "MEDIUM",
-      "historyMatches": 11,
-      "oddsSource": "espn-draftkings",
-      "oddsProvider": "DraftKings",
-      "providerMarketId": "401911272-moneyline",
-      "providerSelectionId": "home",
-      "providerDeepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34568624%3Foutcomes%3D0ML86008856_1",
-      "reasoning": "Modelled from 11 recent team performances · expected goals 1.79-0.93"
-    },
-    {
-      "id": "espn-401874463-OVER_1_5",
-      "fixtureId": "espn-401874463",
-      "league": {
-        "id": "22947",
-        "name": "Costa Rica Football",
-        "country": "Costa Rica",
-        "season": "2026"
-      },
-      "kickoff": "2026-08-26T02:30:00.000Z",
-      "homeTeam": {
-        "id": "espn-7239",
-        "name": "Cartaginés",
-        "shortName": "CAR",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7239.png"
-      },
-      "awayTeam": {
-        "id": "espn-7229",
-        "name": "CD FAS",
-        "shortName": "FAS",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7229.png"
-      },
-      "market": {
-        "key": "OVER_1_5",
-        "name": "Total goals",
-        "category": "Goals",
-        "line": 1.5
-      },
-      "selection": "Over 1.5",
-      "probability": 0.7933328546853082,
-      "confidence": 0.5934129753046106,
-      "fairOdds": 1.26,
-      "quotedOdds": null,
-      "edge": null,
-      "tier": "HIGH_RISK",
-      "dataQuality": "MEDIUM",
-      "historyMatches": 8,
-      "oddsSource": null,
-      "reasoning": "Modelled from 8 recent team performances · expected goals 1.69-1.26"
-    },
-    {
-      "id": "espn-401878113-UNDER_3_5",
-      "fixtureId": "espn-401878113",
-      "league": {
-        "id": "22947",
-        "name": "Guatemala Football",
-        "country": "Guatemala",
-        "season": "2026"
-      },
-      "kickoff": "2026-08-26T02:30:00.000Z",
-      "homeTeam": {
-        "id": "espn-7258",
-        "name": "Municipal",
-        "shortName": "MUN",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7258.png"
-      },
-      "awayTeam": {
-        "id": "espn-7242",
-        "name": "FC Motagua",
-        "shortName": "MOT",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7242.png"
-      },
-      "market": {
-        "key": "UNDER_3_5",
-        "name": "Total goals",
-        "category": "Goals",
-        "line": 3.5
-      },
-      "selection": "Under 3.5",
-      "probability": 0.7447402945111017,
-      "confidence": 0.5257866479248378,
-      "fairOdds": 1.34,
-      "quotedOdds": null,
-      "edge": null,
-      "tier": "HIGH_RISK",
-      "dataQuality": "MEDIUM",
-      "historyMatches": 6,
-      "oddsSource": null,
-      "reasoning": "Modelled from 6 recent team performances · expected goals 1.37-1.19"
-    },
     {
       "id": "espn-401912500-DC_1X",
       "fixtureId": "espn-401912500",
@@ -106373,16 +105763,16 @@
         "line": 1.5
       },
       "selection": "Over 1.5",
-      "probability": 0.80060771329863,
-      "confidence": 0.5484162836095615,
-      "fairOdds": 1.25,
+      "probability": 0.8108015927172504,
+      "confidence": 0.5724259244583787,
+      "fairOdds": 1.23,
       "quotedOdds": null,
       "edge": null,
       "tier": "HIGH_RISK",
-      "dataQuality": "LOW",
-      "historyMatches": 5,
+      "dataQuality": "MEDIUM",
+      "historyMatches": 6,
       "oddsSource": null,
-      "reasoning": "Limited team history · cautious estimate uses league scoring priors"
+      "reasoning": "Modelled from 6 recent team performances · expected goals 1.73-1.34"
     },
     {
       "id": "espn-401888307-DC_1X",
@@ -107545,20 +106935,20 @@
         "line": 3.5
       },
       "selection": "Under 3.5",
-      "probability": 0.717661720908588,
-      "confidence": 0.6272363440741059,
+      "probability": 0.7188008032330842,
+      "confidence": 0.6433267188936104,
       "fairOdds": 1.39,
       "quotedOdds": 1.57,
-      "edge": 0.0807190457493524,
+      "edge": 0.08185812807384851,
       "tier": "BALANCED",
       "dataQuality": "HIGH",
-      "historyMatches": 14,
+      "historyMatches": 15,
       "oddsSource": "espn-draftkings",
       "oddsProvider": "DraftKings",
       "providerMarketId": "761755-total",
       "providerSelectionId": "under",
       "providerDeepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34562244%3Foutcomes%3D0OU85992170U350_3",
-      "reasoning": "Modelled from 14 recent team performances · expected goals 1.09-1.6"
+      "reasoning": "Modelled from 15 recent team performances · expected goals 1.12-1.56"
     },
     {
       "id": "espn-401886211-OVER_1_5",
@@ -107869,16 +107259,16 @@
         "line": 2.5
       },
       "selection": "Under 2.5",
-      "probability": 0.9747283058697966,
-      "confidence": 0.8109739504836707,
+      "probability": 0.9735511773177572,
+      "confidence": 0.8304391542520468,
       "fairOdds": 1.03,
       "quotedOdds": null,
       "edge": null,
       "tier": "BALANCED",
       "dataQuality": "MEDIUM",
-      "historyMatches": 12,
+      "historyMatches": 13,
       "oddsSource": null,
-      "reasoning": "Modelled from 12 recent team performances · expected goals 1.65-0.62"
+      "reasoning": "Modelled from 13 recent team performances · expected goals 1.62-0.63"
     },
     {
       "id": "espn-401860304-UNDER_3_5",
@@ -109977,16 +109367,16 @@
         "line": 0.5
       },
       "selection": "Over 0.5",
-      "probability": 0.9168019197158324,
-      "confidence": 0.8012848778316374,
+      "probability": 0.9152821278372922,
+      "confidence": 0.8191775044143765,
       "fairOdds": 1.09,
       "quotedOdds": null,
       "edge": null,
       "tier": "BALANCED",
       "dataQuality": "HIGH",
-      "historyMatches": 14,
+      "historyMatches": 15,
       "oddsSource": null,
-      "reasoning": "Modelled from 14 recent team performances · expected goals 1.1-1.39"
+      "reasoning": "Modelled from 15 recent team performances · expected goals 1.1-1.37"
     },
     {
       "id": "espn-761765-UNDER_3_5",
@@ -110685,14 +110075,14 @@
         "line": 3.5
       },
       "selection": "Under 3.5",
-      "probability": 0.7991036988595861,
-      "confidence": 0.4970425006906625,
-      "fairOdds": 1.25,
+      "probability": 0.8165666419460754,
+      "confidence": 0.5250523507713265,
+      "fairOdds": 1.22,
       "quotedOdds": null,
       "edge": null,
       "tier": "HIGH_RISK",
       "dataQuality": "LOW",
-      "historyMatches": 2,
+      "historyMatches": 3,
       "oddsSource": null,
       "reasoning": "Limited team history · cautious estimate uses league scoring priors"
     },
@@ -110849,14 +110239,14 @@
         "line": 3.5
       },
       "selection": "Under 3.5",
-      "probability": 0.7813395429887026,
-      "confidence": 0.5024013261417357,
-      "fairOdds": 1.28,
+      "probability": 0.8076975737490244,
+      "confidence": 0.5363111889693521,
+      "fairOdds": 1.24,
       "quotedOdds": null,
       "edge": null,
       "tier": "HIGH_RISK",
       "dataQuality": "LOW",
-      "historyMatches": 3,
+      "historyMatches": 4,
       "oddsSource": null,
       "reasoning": "Limited team history · cautious estimate uses league scoring priors"
     },
@@ -115585,14 +114975,14 @@
         "line": null
       },
       "selection": "Georgia State or draw",
-      "probability": 0.7847905164039048,
-      "confidence": 0.5046203020477108,
-      "fairOdds": 1.27,
+      "probability": 0.804134080822288,
+      "confidence": 0.5339450296659992,
+      "fairOdds": 1.24,
       "quotedOdds": null,
       "edge": null,
       "tier": "HIGH_RISK",
       "dataQuality": "LOW",
-      "historyMatches": 3,
+      "historyMatches": 4,
       "oddsSource": null,
       "reasoning": "Limited team history · cautious estimate uses league scoring priors"
     },
@@ -124429,14 +123819,14 @@
         "line": null
       },
       "selection": "Kansas City or draw",
-      "probability": 0.8370285838930509,
-      "confidence": 0.5382093794432318,
-      "fairOdds": 1.19,
+      "probability": 0.8467577503527566,
+      "confidence": 0.5622471462342303,
+      "fairOdds": 1.18,
       "quotedOdds": null,
       "edge": null,
       "tier": "HIGH_RISK",
       "dataQuality": "LOW",
-      "historyMatches": 3,
+      "historyMatches": 4,
       "oddsSource": null,
       "reasoning": "Limited team history · cautious estimate uses league scoring priors"
     },
@@ -124629,16 +124019,16 @@
         "line": 3.5
       },
       "selection": "Under 3.5",
-      "probability": 0.8531321636674534,
-      "confidence": 0.566479756675189,
-      "fairOdds": 1.17,
+      "probability": 0.8424607539929806,
+      "confidence": 0.5947772923190443,
+      "fairOdds": 1.19,
       "quotedOdds": null,
       "edge": null,
       "tier": "HIGH_RISK",
-      "dataQuality": "LOW",
-      "historyMatches": 4,
+      "dataQuality": "MEDIUM",
+      "historyMatches": 6,
       "oddsSource": null,
-      "reasoning": "Limited team history · cautious estimate uses league scoring priors"
+      "reasoning": "Modelled from 6 recent team performances · expected goals 0.89-1.19"
     },
     {
       "id": "espn-401891292-OVER_1_5",
@@ -124949,20 +124339,20 @@
         "line": 3.5
       },
       "selection": "Under 3.5",
-      "probability": 0.7040355688781474,
-      "confidence": 0.5561880994137365,
+      "probability": 0.703377304034462,
+      "confidence": 0.5704389935719486,
       "fairOdds": 1.42,
       "quotedOdds": 1.56,
-      "edge": 0.06300992785250648,
+      "edge": 0.062351663008821,
       "tier": "HIGH_RISK",
       "dataQuality": "MEDIUM",
-      "historyMatches": 10,
+      "historyMatches": 11,
       "oddsSource": "espn-draftkings",
       "oddsProvider": "DraftKings",
       "providerMarketId": "401876992-total",
       "providerSelectionId": "under",
       "providerDeepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34565685%3Foutcomes%3D0OU86001704U350_3",
-      "reasoning": "Modelled from 10 recent team performances · expected goals 1.75-0.99"
+      "reasoning": "Modelled from 11 recent team performances · expected goals 1.78-0.97"
     },
     {
       "id": "espn-401891209-UNDER_3_5",
@@ -127385,14 +126775,14 @@
         "line": 3.5
       },
       "selection": "Under 3.5",
-      "probability": 0.7814781691534817,
-      "confidence": 0.5024904627656888,
-      "fairOdds": 1.28,
+      "probability": 0.804343576615971,
+      "confidence": 0.5340841348730047,
+      "fairOdds": 1.24,
       "quotedOdds": null,
       "edge": null,
       "tier": "HIGH_RISK",
       "dataQuality": "LOW",
-      "historyMatches": 3,
+      "historyMatches": 4,
       "oddsSource": null,
       "reasoning": "Limited team history · cautious estimate uses league scoring priors"
     },
@@ -131269,16 +130659,16 @@
         "line": 3.5
       },
       "selection": "Under 3.5",
-      "probability": 0.748448441864781,
-      "confidence": 0.6541439381898185,
-      "fairOdds": 1.34,
+      "probability": 0.7574311734376954,
+      "confidence": 0.693806954868929,
+      "fairOdds": 1.32,
       "quotedOdds": null,
       "edge": null,
       "tier": "BALANCED",
       "dataQuality": "HIGH",
-      "historyMatches": 14,
+      "historyMatches": 16,
       "oddsSource": null,
-      "reasoning": "Modelled from 14 recent team performances · expected goals 1.38-1.16"
+      "reasoning": "Modelled from 16 recent team performances · expected goals 1.35-1.15"
     },
     {
       "id": "espn-401859678-UNDER_3_5",
@@ -131401,6 +130791,46 @@
       "reasoning": "Limited team history · cautious estimate uses league scoring priors"
     },
     {
+      "id": "espn-401841216-ONE_UP_HOME",
+      "fixtureId": "espn-401841216",
+      "league": {
+        "id": "630",
+        "name": "Brazilian Serie A",
+        "country": "",
+        "season": "2026"
+      },
+      "kickoff": "2026-08-29T21:30:00.000Z",
+      "homeTeam": {
+        "id": "espn-7632",
+        "name": "Atlético-MG",
+        "shortName": "CAM",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7632.png"
+      },
+      "awayTeam": {
+        "id": "espn-3457",
+        "name": "Vitória",
+        "shortName": "VIT",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3457.png"
+      },
+      "market": {
+        "key": "ONE_UP_HOME",
+        "name": "1UP early payout",
+        "category": "Result",
+        "line": null
+      },
+      "selection": "Atlético-MG",
+      "probability": 0.6127592290565724,
+      "confidence": 0.5226836223852562,
+      "fairOdds": 1.63,
+      "quotedOdds": null,
+      "edge": null,
+      "tier": "HIGH_RISK",
+      "dataQuality": "MEDIUM",
+      "historyMatches": 13,
+      "oddsSource": null,
+      "reasoning": "Early-payout version of the modelled match result · confidence remains based on the full-time result, not a promised early lead"
+    },
+    {
       "id": "espn-401841213-ONE_UP_HOME",
       "fixtureId": "espn-401841213",
       "league": {
@@ -131437,46 +130867,6 @@
       "tier": "HIGH_RISK",
       "dataQuality": "HIGH",
       "historyMatches": 15,
-      "oddsSource": null,
-      "reasoning": "Early-payout version of the modelled match result · confidence remains based on the full-time result, not a promised early lead"
-    },
-    {
-      "id": "espn-401841216-ONE_UP_HOME",
-      "fixtureId": "espn-401841216",
-      "league": {
-        "id": "630",
-        "name": "Brazilian Serie A",
-        "country": "",
-        "season": "2026"
-      },
-      "kickoff": "2026-08-29T21:30:00.000Z",
-      "homeTeam": {
-        "id": "espn-7632",
-        "name": "Atlético-MG",
-        "shortName": "CAM",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7632.png"
-      },
-      "awayTeam": {
-        "id": "espn-3457",
-        "name": "Vitória",
-        "shortName": "VIT",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3457.png"
-      },
-      "market": {
-        "key": "ONE_UP_HOME",
-        "name": "1UP early payout",
-        "category": "Result",
-        "line": null
-      },
-      "selection": "Atlético-MG",
-      "probability": 0.6242750642495151,
-      "confidence": 0.5193968534555965,
-      "fairOdds": 1.6,
-      "quotedOdds": null,
-      "edge": null,
-      "tier": "HIGH_RISK",
-      "dataQuality": "MEDIUM",
-      "historyMatches": 12,
       "oddsSource": null,
       "reasoning": "Early-payout version of the modelled match result · confidence remains based on the full-time result, not a promised early lead"
     },
@@ -132081,37 +131471,37 @@
       "reasoning": "Early-payout version of the modelled match result · confidence remains based on the full-time result, not a promised early lead"
     },
     {
-      "id": "espn-401841213-TWO_UP_HOME",
-      "fixtureId": "espn-401841213",
+      "id": "espn-401841212-ONE_UP_AWAY",
+      "fixtureId": "espn-401841212",
       "league": {
         "id": "630",
         "name": "Brazilian Serie A",
         "country": "",
         "season": "2026"
       },
-      "kickoff": "2026-08-30T19:00:00.000Z",
+      "kickoff": "2026-08-30T00:20:00.000Z",
       "homeTeam": {
-        "id": "espn-819",
-        "name": "Flamengo",
-        "shortName": "FLA",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/819.png"
+        "id": "espn-3454",
+        "name": "Vasco da Gama",
+        "shortName": "VAS",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png"
       },
       "awayTeam": {
-        "id": "espn-6086",
-        "name": "Botafogo",
-        "shortName": "BOT",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/6086.png"
+        "id": "espn-2022",
+        "name": "Cruzeiro",
+        "shortName": "CRU",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
       },
       "market": {
-        "key": "TWO_UP_HOME",
-        "name": "2UP early payout",
+        "key": "ONE_UP_AWAY",
+        "name": "1UP early payout",
         "category": "Result",
         "line": null
       },
-      "selection": "Flamengo",
-      "probability": 0.5822718363281287,
-      "confidence": 0.5211332935136752,
-      "fairOdds": 1.72,
+      "selection": "Cruzeiro",
+      "probability": 0.4279996313721686,
+      "confidence": 0.38305967007809094,
+      "fairOdds": 2.34,
       "quotedOdds": null,
       "edge": null,
       "tier": "HIGH_RISK",
@@ -132149,14 +131539,54 @@
         "line": null
       },
       "selection": "Atlético-MG",
-      "probability": 0.6242750642495151,
-      "confidence": 0.5193968534555965,
-      "fairOdds": 1.6,
+      "probability": 0.6127592290565724,
+      "confidence": 0.5226836223852562,
+      "fairOdds": 1.63,
       "quotedOdds": null,
       "edge": null,
       "tier": "HIGH_RISK",
       "dataQuality": "MEDIUM",
-      "historyMatches": 12,
+      "historyMatches": 13,
+      "oddsSource": null,
+      "reasoning": "Early-payout version of the modelled match result · confidence remains based on the full-time result, not a promised early lead"
+    },
+    {
+      "id": "espn-401841213-TWO_UP_HOME",
+      "fixtureId": "espn-401841213",
+      "league": {
+        "id": "630",
+        "name": "Brazilian Serie A",
+        "country": "",
+        "season": "2026"
+      },
+      "kickoff": "2026-08-30T19:00:00.000Z",
+      "homeTeam": {
+        "id": "espn-819",
+        "name": "Flamengo",
+        "shortName": "FLA",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/819.png"
+      },
+      "awayTeam": {
+        "id": "espn-6086",
+        "name": "Botafogo",
+        "shortName": "BOT",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/6086.png"
+      },
+      "market": {
+        "key": "TWO_UP_HOME",
+        "name": "2UP early payout",
+        "category": "Result",
+        "line": null
+      },
+      "selection": "Flamengo",
+      "probability": 0.5822718363281287,
+      "confidence": 0.5211332935136752,
+      "fairOdds": 1.72,
+      "quotedOdds": null,
+      "edge": null,
+      "tier": "HIGH_RISK",
+      "dataQuality": "HIGH",
+      "historyMatches": 15,
       "oddsSource": null,
       "reasoning": "Early-payout version of the modelled match result · confidence remains based on the full-time result, not a promised early lead"
     },
@@ -132761,6 +132191,86 @@
       "reasoning": "Early-payout version of the modelled match result · confidence remains based on the full-time result, not a promised early lead"
     },
     {
+      "id": "espn-401841212-TWO_UP_AWAY",
+      "fixtureId": "espn-401841212",
+      "league": {
+        "id": "630",
+        "name": "Brazilian Serie A",
+        "country": "",
+        "season": "2026"
+      },
+      "kickoff": "2026-08-30T00:20:00.000Z",
+      "homeTeam": {
+        "id": "espn-3454",
+        "name": "Vasco da Gama",
+        "shortName": "VAS",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png"
+      },
+      "awayTeam": {
+        "id": "espn-2022",
+        "name": "Cruzeiro",
+        "shortName": "CRU",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
+      },
+      "market": {
+        "key": "TWO_UP_AWAY",
+        "name": "2UP early payout",
+        "category": "Result",
+        "line": null
+      },
+      "selection": "Cruzeiro",
+      "probability": 0.4279996313721686,
+      "confidence": 0.38305967007809094,
+      "fairOdds": 2.34,
+      "quotedOdds": null,
+      "edge": null,
+      "tier": "HIGH_RISK",
+      "dataQuality": "HIGH",
+      "historyMatches": 15,
+      "oddsSource": null,
+      "reasoning": "Early-payout version of the modelled match result · confidence remains based on the full-time result, not a promised early lead"
+    },
+    {
+      "id": "espn-401841216-MATCH_HOME",
+      "fixtureId": "espn-401841216",
+      "league": {
+        "id": "630",
+        "name": "Brazilian Serie A",
+        "country": "",
+        "season": "2026"
+      },
+      "kickoff": "2026-08-29T21:30:00.000Z",
+      "homeTeam": {
+        "id": "espn-7632",
+        "name": "Atlético-MG",
+        "shortName": "CAM",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7632.png"
+      },
+      "awayTeam": {
+        "id": "espn-3457",
+        "name": "Vitória",
+        "shortName": "VIT",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3457.png"
+      },
+      "market": {
+        "key": "MATCH_HOME",
+        "name": "Match result",
+        "category": "Result",
+        "line": null
+      },
+      "selection": "Atlético-MG",
+      "probability": 0.6127592290565724,
+      "confidence": 0.5226836223852562,
+      "fairOdds": 1.63,
+      "quotedOdds": null,
+      "edge": null,
+      "tier": "HIGH_RISK",
+      "dataQuality": "MEDIUM",
+      "historyMatches": 13,
+      "oddsSource": null,
+      "reasoning": "Modelled from 13 recent team performances · expected goals 1.62-0.63"
+    },
+    {
       "id": "espn-401841213-MATCH_HOME",
       "fixtureId": "espn-401841213",
       "league": {
@@ -132803,46 +132313,6 @@
       "providerSelectionId": "home",
       "providerDeepLink": "https://sportsbook.draftkings.com/gateway?s=__s__&wpcid=__wpcid__&wpsrc=413&wpcn=ESPN&wpscn=Widget&wpcrn=BetSlipDeepLink&wpscid=__wpscid__&wpcrid=xx&preurl=https%3A%2F%2Fsportsbook.draftkings.com%2Fevent%2F34571442%3Foutcomes%3D0ML86017518_1",
       "reasoning": "Modelled from 15 recent team performances · expected goals 1.76-0.88"
-    },
-    {
-      "id": "espn-401841216-MATCH_HOME",
-      "fixtureId": "espn-401841216",
-      "league": {
-        "id": "630",
-        "name": "Brazilian Serie A",
-        "country": "",
-        "season": "2026"
-      },
-      "kickoff": "2026-08-29T21:30:00.000Z",
-      "homeTeam": {
-        "id": "espn-7632",
-        "name": "Atlético-MG",
-        "shortName": "CAM",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7632.png"
-      },
-      "awayTeam": {
-        "id": "espn-3457",
-        "name": "Vitória",
-        "shortName": "VIT",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3457.png"
-      },
-      "market": {
-        "key": "MATCH_HOME",
-        "name": "Match result",
-        "category": "Result",
-        "line": null
-      },
-      "selection": "Atlético-MG",
-      "probability": 0.6242750642495151,
-      "confidence": 0.5193968534555965,
-      "fairOdds": 1.6,
-      "quotedOdds": null,
-      "edge": null,
-      "tier": "HIGH_RISK",
-      "dataQuality": "MEDIUM",
-      "historyMatches": 12,
-      "oddsSource": null,
-      "reasoning": "Modelled from 12 recent team performances · expected goals 1.65-0.62"
     },
     {
       "id": "espn-401900376-MATCH_HOME",
@@ -132929,6 +132399,46 @@
       "reasoning": "Modelled from 7 recent team performances · expected goals 2.03-0.78"
     },
     {
+      "id": "espn-401841216-DC_1X",
+      "fixtureId": "espn-401841216",
+      "league": {
+        "id": "630",
+        "name": "Brazilian Serie A",
+        "country": "",
+        "season": "2026"
+      },
+      "kickoff": "2026-08-29T21:30:00.000Z",
+      "homeTeam": {
+        "id": "espn-7632",
+        "name": "Atlético-MG",
+        "shortName": "CAM",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7632.png"
+      },
+      "awayTeam": {
+        "id": "espn-3457",
+        "name": "Vitória",
+        "shortName": "VIT",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3457.png"
+      },
+      "market": {
+        "key": "DC_1X",
+        "name": "Double chance",
+        "category": "Result",
+        "line": null
+      },
+      "selection": "Atlético-MG or draw",
+      "probability": 0.8569366101490371,
+      "confidence": 0.7309669284571286,
+      "fairOdds": 1.17,
+      "quotedOdds": null,
+      "edge": null,
+      "tier": "BALANCED",
+      "dataQuality": "MEDIUM",
+      "historyMatches": 13,
+      "oddsSource": null,
+      "reasoning": "Modelled from 13 recent team performances · expected goals 1.62-0.63"
+    },
+    {
       "id": "espn-401841213-DC_1X",
       "fixtureId": "espn-401841213",
       "league": {
@@ -132967,46 +132477,6 @@
       "historyMatches": 15,
       "oddsSource": null,
       "reasoning": "Modelled from 15 recent team performances · expected goals 1.76-0.88"
-    },
-    {
-      "id": "espn-401841216-DC_1X",
-      "fixtureId": "espn-401841216",
-      "league": {
-        "id": "630",
-        "name": "Brazilian Serie A",
-        "country": "",
-        "season": "2026"
-      },
-      "kickoff": "2026-08-29T21:30:00.000Z",
-      "homeTeam": {
-        "id": "espn-7632",
-        "name": "Atlético-MG",
-        "shortName": "CAM",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7632.png"
-      },
-      "awayTeam": {
-        "id": "espn-3457",
-        "name": "Vitória",
-        "shortName": "VIT",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3457.png"
-      },
-      "market": {
-        "key": "DC_1X",
-        "name": "Double chance",
-        "category": "Result",
-        "line": null
-      },
-      "selection": "Atlético-MG or draw",
-      "probability": 0.8633163095272162,
-      "confidence": 0.7182791695266438,
-      "fairOdds": 1.16,
-      "quotedOdds": null,
-      "edge": null,
-      "tier": "BALANCED",
-      "dataQuality": "MEDIUM",
-      "historyMatches": 12,
-      "oddsSource": null,
-      "reasoning": "Modelled from 12 recent team performances · expected goals 1.65-0.62"
     },
     {
       "id": "espn-401841215-DC_1X",
@@ -133477,16 +132947,16 @@
         "line": null
       },
       "selection": "Cruzeiro or draw",
-      "probability": 0.7018743688729743,
-      "confidence": 0.6134381983949795,
-      "fairOdds": 1.42,
+      "probability": 0.6972010248451299,
+      "confidence": 0.6239949172363913,
+      "fairOdds": 1.43,
       "quotedOdds": null,
       "edge": null,
-      "tier": "HIGH_RISK",
+      "tier": "BALANCED",
       "dataQuality": "HIGH",
-      "historyMatches": 14,
+      "historyMatches": 15,
       "oddsSource": null,
-      "reasoning": "Modelled from 14 recent team performances · expected goals 1.1-1.39"
+      "reasoning": "Modelled from 15 recent team performances · expected goals 1.1-1.37"
     },
     {
       "id": "espn-401900378-DC_X2",
@@ -133997,16 +133467,16 @@
         "line": null
       },
       "selection": "Either team to win",
-      "probability": 0.7324866793387592,
-      "confidence": 0.6401933577420754,
+      "probability": 0.7307986065270391,
+      "confidence": 0.6540647528417,
       "fairOdds": 1.37,
       "quotedOdds": null,
       "edge": null,
       "tier": "BALANCED",
       "dataQuality": "HIGH",
-      "historyMatches": 14,
+      "historyMatches": 15,
       "oddsSource": null,
-      "reasoning": "Modelled from 14 recent team performances · expected goals 1.1-1.39"
+      "reasoning": "Modelled from 15 recent team performances · expected goals 1.1-1.37"
     },
     {
       "id": "espn-401841216-DC_12",
@@ -134037,16 +133507,16 @@
         "line": null
       },
       "selection": "Either team to win",
-      "probability": 0.7609587547222993,
-      "confidence": 0.6331176839289531,
-      "fairOdds": 1.31,
+      "probability": 0.7558226189075355,
+      "confidence": 0.6447166939281278,
+      "fairOdds": 1.32,
       "quotedOdds": null,
       "edge": null,
       "tier": "BALANCED",
       "dataQuality": "MEDIUM",
-      "historyMatches": 12,
+      "historyMatches": 13,
       "oddsSource": null,
-      "reasoning": "Modelled from 12 recent team performances · expected goals 1.65-0.62"
+      "reasoning": "Modelled from 13 recent team performances · expected goals 1.62-0.63"
     },
     {
       "id": "espn-401841214-DC_12",
@@ -134409,6 +133879,46 @@
       "reasoning": "Modelled from 15 recent team performances · expected goals 1.11-1.6"
     },
     {
+      "id": "espn-401841212-OVER_1_5",
+      "fixtureId": "espn-401841212",
+      "league": {
+        "id": "630",
+        "name": "Brazilian Serie A",
+        "country": "",
+        "season": "2026"
+      },
+      "kickoff": "2026-08-30T00:20:00.000Z",
+      "homeTeam": {
+        "id": "espn-3454",
+        "name": "Vasco da Gama",
+        "shortName": "VAS",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png"
+      },
+      "awayTeam": {
+        "id": "espn-2022",
+        "name": "Cruzeiro",
+        "shortName": "CRU",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
+      },
+      "market": {
+        "key": "OVER_1_5",
+        "name": "Total goals",
+        "category": "Goals",
+        "line": 1.5
+      },
+      "selection": "Over 1.5",
+      "probability": 0.7061619254871058,
+      "confidence": 0.6320149233109597,
+      "fairOdds": 1.42,
+      "quotedOdds": null,
+      "edge": null,
+      "tier": "BALANCED",
+      "dataQuality": "HIGH",
+      "historyMatches": 15,
+      "oddsSource": null,
+      "reasoning": "Modelled from 15 recent team performances · expected goals 1.1-1.37"
+    },
+    {
       "id": "espn-401884811-OVER_1_5",
       "fixtureId": "espn-401884811",
       "league": {
@@ -134447,46 +133957,6 @@
       "historyMatches": 5,
       "oddsSource": null,
       "reasoning": "Limited team history · cautious estimate uses league scoring priors"
-    },
-    {
-      "id": "espn-401841212-OVER_1_5",
-      "fixtureId": "espn-401841212",
-      "league": {
-        "id": "630",
-        "name": "Brazilian Serie A",
-        "country": "",
-        "season": "2026"
-      },
-      "kickoff": "2026-08-30T00:20:00.000Z",
-      "homeTeam": {
-        "id": "espn-3454",
-        "name": "Vasco da Gama",
-        "shortName": "VAS",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png"
-      },
-      "awayTeam": {
-        "id": "espn-2022",
-        "name": "Cruzeiro",
-        "shortName": "CRU",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
-      },
-      "market": {
-        "key": "OVER_1_5",
-        "name": "Total goals",
-        "category": "Goals",
-        "line": 1.5
-      },
-      "selection": "Over 1.5",
-      "probability": 0.7099271198199067,
-      "confidence": 0.6204763027225985,
-      "fairOdds": 1.41,
-      "quotedOdds": null,
-      "edge": null,
-      "tier": "BALANCED",
-      "dataQuality": "HIGH",
-      "historyMatches": 14,
-      "oddsSource": null,
-      "reasoning": "Modelled from 14 recent team performances · expected goals 1.1-1.39"
     },
     {
       "id": "espn-401879315-OVER_1_5",
@@ -135057,46 +134527,6 @@
       "reasoning": "Modelled from 12 recent team performances · expected goals 1.23-1"
     },
     {
-      "id": "espn-401841212-UNDER_3_5",
-      "fixtureId": "espn-401841212",
-      "league": {
-        "id": "630",
-        "name": "Brazilian Serie A",
-        "country": "",
-        "season": "2026"
-      },
-      "kickoff": "2026-08-30T00:20:00.000Z",
-      "homeTeam": {
-        "id": "espn-3454",
-        "name": "Vasco da Gama",
-        "shortName": "VAS",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png"
-      },
-      "awayTeam": {
-        "id": "espn-2022",
-        "name": "Cruzeiro",
-        "shortName": "CRU",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
-      },
-      "market": {
-        "key": "UNDER_3_5",
-        "name": "Total goals",
-        "category": "Goals",
-        "line": 3.5
-      },
-      "selection": "Under 3.5",
-      "probability": 0.760452664141484,
-      "confidence": 0.664635628459657,
-      "fairOdds": 1.32,
-      "quotedOdds": null,
-      "edge": null,
-      "tier": "BALANCED",
-      "dataQuality": "HIGH",
-      "historyMatches": 14,
-      "oddsSource": null,
-      "reasoning": "Modelled from 14 recent team performances · expected goals 1.1-1.39"
-    },
-    {
       "id": "espn-401841208-UNDER_3_5",
       "fixtureId": "espn-401841208",
       "league": {
@@ -135575,46 +135005,6 @@
       "historyMatches": 5,
       "oddsSource": null,
       "reasoning": "Limited team history · cautious estimate uses league scoring priors"
-    },
-    {
-      "id": "espn-401841212-AWAY_OVER_0_5",
-      "fixtureId": "espn-401841212",
-      "league": {
-        "id": "630",
-        "name": "Brazilian Serie A",
-        "country": "",
-        "season": "2026"
-      },
-      "kickoff": "2026-08-30T00:20:00.000Z",
-      "homeTeam": {
-        "id": "espn-3454",
-        "name": "Vasco da Gama",
-        "shortName": "VAS",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png"
-      },
-      "awayTeam": {
-        "id": "espn-2022",
-        "name": "Cruzeiro",
-        "shortName": "CRU",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
-      },
-      "market": {
-        "key": "AWAY_OVER_0_5",
-        "name": "Away team goals",
-        "category": "Team",
-        "line": 0.5
-      },
-      "selection": "Over 0.5",
-      "probability": 0.7500158932321086,
-      "confidence": 0.6555138906848629,
-      "fairOdds": 1.33,
-      "quotedOdds": null,
-      "edge": null,
-      "tier": "BALANCED",
-      "dataQuality": "HIGH",
-      "historyMatches": 14,
-      "oddsSource": null,
-      "reasoning": "Modelled from 14 recent team performances · expected goals 1.1-1.39"
     },
     {
       "id": "espn-401884811-AWAY_OVER_0_5",
@@ -139514,6 +138904,41 @@
       "oddsSource": null
     },
     {
+      "id": "espn-401909112-OVER_0_5",
+      "fixtureId": "espn-401909112",
+      "league": {
+        "id": "8306",
+        "name": "Quarterfinals",
+        "country": "Brazil",
+        "season": "2026"
+      },
+      "kickoff": "2026-09-02T00:00:00.000Z",
+      "homeTeam": {
+        "id": "espn-7632",
+        "name": "Atlético-MG",
+        "shortName": "CAM",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7632.png"
+      },
+      "awayTeam": {
+        "id": "espn-2022",
+        "name": "Cruzeiro",
+        "shortName": "CRU",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
+      },
+      "market": {
+        "key": "OVER_0_5",
+        "name": "Total goals",
+        "category": "Goals",
+        "line": 0.5
+      },
+      "selection": "Over 0.5",
+      "probability": 0.9179710688082313,
+      "confidence": 0.8408614990283398,
+      "fairOdds": 1.09,
+      "quotedOdds": null,
+      "oddsSource": null
+    },
+    {
       "id": "espn-401841211-OVER_0_5",
       "fixtureId": "espn-401841211",
       "league": {
@@ -139544,6 +138969,41 @@
       "selection": "Over 0.5",
       "probability": 0.9334828622123749,
       "confidence": 0.8354671616800755,
+      "fairOdds": 1.07,
+      "quotedOdds": null,
+      "oddsSource": null
+    },
+    {
+      "id": "espn-761755-OVER_0_5",
+      "fixtureId": "espn-761755",
+      "league": {
+        "id": "770",
+        "name": "MLS",
+        "country": "",
+        "season": "2026"
+      },
+      "kickoff": "2026-08-29T20:30:00.000Z",
+      "homeTeam": {
+        "id": "espn-9726",
+        "name": "Seattle Sounders FC",
+        "shortName": "SEA",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/9726.png"
+      },
+      "awayTeam": {
+        "id": "espn-182",
+        "name": "Chicago Fire FC",
+        "shortName": "CHI",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/182.png"
+      },
+      "market": {
+        "key": "OVER_0_5",
+        "name": "Total goals",
+        "category": "Goals",
+        "line": 0.5
+      },
+      "selection": "Over 0.5",
+      "probability": 0.9313428694870934,
+      "confidence": 0.8335518681909486,
       "fairOdds": 1.07,
       "quotedOdds": null,
       "oddsSource": null
@@ -139580,6 +139040,41 @@
       "probability": 0.9519397110664775,
       "confidence": 0.8319953074721012,
       "fairOdds": 1.05,
+      "quotedOdds": null,
+      "oddsSource": null
+    },
+    {
+      "id": "espn-401841216-AWAY_UNDER_2_5",
+      "fixtureId": "espn-401841216",
+      "league": {
+        "id": "630",
+        "name": "Brazilian Serie A",
+        "country": "",
+        "season": "2026"
+      },
+      "kickoff": "2026-08-29T21:30:00.000Z",
+      "homeTeam": {
+        "id": "espn-7632",
+        "name": "Atlético-MG",
+        "shortName": "CAM",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7632.png"
+      },
+      "awayTeam": {
+        "id": "espn-3457",
+        "name": "Vitória",
+        "shortName": "VIT",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3457.png"
+      },
+      "market": {
+        "key": "AWAY_UNDER_2_5",
+        "name": "Away team goals",
+        "category": "Team",
+        "line": 2.5
+      },
+      "selection": "Under 2.5",
+      "probability": 0.9735511773177572,
+      "confidence": 0.8304391542520468,
+      "fairOdds": 1.03,
       "quotedOdds": null,
       "oddsSource": null
     },
@@ -139724,6 +139219,41 @@
       "oddsSource": null
     },
     {
+      "id": "espn-401841212-OVER_0_5",
+      "fixtureId": "espn-401841212",
+      "league": {
+        "id": "630",
+        "name": "Brazilian Serie A",
+        "country": "",
+        "season": "2026"
+      },
+      "kickoff": "2026-08-30T00:20:00.000Z",
+      "homeTeam": {
+        "id": "espn-3454",
+        "name": "Vasco da Gama",
+        "shortName": "VAS",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png"
+      },
+      "awayTeam": {
+        "id": "espn-2022",
+        "name": "Cruzeiro",
+        "shortName": "CRU",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
+      },
+      "market": {
+        "key": "OVER_0_5",
+        "name": "Total goals",
+        "category": "Goals",
+        "line": 0.5
+      },
+      "selection": "Over 0.5",
+      "probability": 0.9152821278372922,
+      "confidence": 0.8191775044143765,
+      "fairOdds": 1.09,
+      "quotedOdds": null,
+      "oddsSource": null
+    },
+    {
       "id": "espn-401841535-UNDER_4_5",
       "fixtureId": "espn-401841535",
       "league": {
@@ -139757,146 +139287,6 @@
       "fairOdds": 1.09,
       "quotedOdds": null,
       "oddsSource": null
-    },
-    {
-      "id": "espn-761768-OVER_0_5",
-      "fixtureId": "espn-761768",
-      "league": {
-        "id": "770",
-        "name": "MLS",
-        "country": "",
-        "season": "2026"
-      },
-      "kickoff": "2026-08-30T02:30:00.000Z",
-      "homeTeam": {
-        "id": "espn-9723",
-        "name": "Portland Timbers",
-        "shortName": "POR",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/9723.png"
-      },
-      "awayTeam": {
-        "id": "espn-20906",
-        "name": "Austin FC",
-        "shortName": "ATX",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/20906.png"
-      },
-      "market": {
-        "key": "OVER_0_5",
-        "name": "Total goals",
-        "category": "Goals",
-        "line": 0.5
-      },
-      "selection": "Over 0.5",
-      "probability": 0.9359084956945014,
-      "confidence": 0.8179840252369941,
-      "fairOdds": 1.07,
-      "quotedOdds": null,
-      "oddsSource": null
-    },
-    {
-      "id": "espn-401841533-UNDER_4_5",
-      "fixtureId": "espn-401841533",
-      "league": {
-        "id": "745",
-        "name": "Argentine Liga Profesional de Fútbol",
-        "country": "",
-        "season": "2026"
-      },
-      "kickoff": "2026-08-31T00:30:00.000Z",
-      "homeTeam": {
-        "id": "espn-9744",
-        "name": "Independiente Rivadavia",
-        "shortName": "RIV",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/9744.png"
-      },
-      "awayTeam": {
-        "id": "espn-15",
-        "name": "Racing Club",
-        "shortName": "RAC",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/15.png"
-      },
-      "market": {
-        "key": "UNDER_4_5",
-        "name": "Total goals",
-        "category": "Goals",
-        "line": 4.5
-      },
-      "selection": "Under 4.5",
-      "probability": 0.9341880891302047,
-      "confidence": 0.8164803898997988,
-      "fairOdds": 1.07,
-      "quotedOdds": null,
-      "oddsSource": null
-    },
-    {
-      "id": "espn-761755-OVER_0_5",
-      "fixtureId": "espn-761755",
-      "league": {
-        "id": "770",
-        "name": "MLS",
-        "country": "",
-        "season": "2026"
-      },
-      "kickoff": "2026-08-29T20:30:00.000Z",
-      "homeTeam": {
-        "id": "espn-9726",
-        "name": "Seattle Sounders FC",
-        "shortName": "SEA",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/9726.png"
-      },
-      "awayTeam": {
-        "id": "espn-182",
-        "name": "Chicago Fire FC",
-        "shortName": "CHI",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/182.png"
-      },
-      "market": {
-        "key": "OVER_0_5",
-        "name": "Total goals",
-        "category": "Goals",
-        "line": 0.5
-      },
-      "selection": "Over 0.5",
-      "probability": 0.9316976339420417,
-      "confidence": 0.8143037320653443,
-      "fairOdds": 1.07,
-      "quotedOdds": null,
-      "oddsSource": null
-    },
-    {
-      "id": "espn-401841534-AWAY_UNDER_2_5",
-      "fixtureId": "espn-401841534",
-      "league": {
-        "id": "745",
-        "name": "Argentine Liga Profesional de Fútbol",
-        "country": "",
-        "season": "2026"
-      },
-      "kickoff": "2026-09-01T00:15:00.000Z",
-      "homeTeam": {
-        "id": "espn-2975",
-        "name": "Instituto (Córdoba)",
-        "shortName": "IACC",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2975.png"
-      },
-      "awayTeam": {
-        "id": "espn-18",
-        "name": "San Lorenzo",
-        "shortName": "SLO",
-        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/18.png"
-      },
-      "market": {
-        "key": "AWAY_UNDER_2_5",
-        "name": "Away team goals",
-        "category": "Team",
-        "line": 2.5
-      },
-      "selection": "Under 2.5",
-      "probability": 0.9784072414396493,
-      "confidence": 0.8140348248777882,
-      "fairOdds": 1.02,
-      "quotedOdds": null,
-      "oddsSource": null
     }
   ],
   "tickets": [
@@ -139907,8 +139297,8 @@
       "status": "PUBLISHED",
       "totalOdds": 1.92,
       "priceStatus": "MODEL_ESTIMATE",
-      "confidence": 0.7290929210394125,
-      "publishedAt": "2026-08-26T01:59:35.146Z",
+      "confidence": 0.7388832565305362,
+      "publishedAt": "2026-08-26T03:19:38.018Z",
       "bookingCodes": [],
       "selections": [
         {
@@ -139948,38 +139338,38 @@
           "oddsSource": "espn-draftkings"
         },
         {
-          "id": "espn-401841214-OVER_0_5",
-          "fixtureId": "espn-401841214",
+          "id": "espn-401841212-UNDER_4_5",
+          "fixtureId": "espn-401841212",
           "league": {
             "id": "630",
             "name": "Brazilian Serie A",
             "country": "",
             "season": "2026"
           },
-          "kickoff": "2026-08-30T19:00:00.000Z",
+          "kickoff": "2026-08-30T00:20:00.000Z",
           "homeTeam": {
-            "id": "espn-874",
-            "name": "Corinthians",
-            "shortName": "COR",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/874.png"
+            "id": "espn-3454",
+            "name": "Vasco da Gama",
+            "shortName": "VAS",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png"
           },
           "awayTeam": {
-            "id": "espn-2674",
-            "name": "Santos",
-            "shortName": "SAN",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2674.png"
+            "id": "espn-2022",
+            "name": "Cruzeiro",
+            "shortName": "CRU",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
           },
           "market": {
-            "key": "OVER_0_5",
+            "key": "UNDER_4_5",
             "name": "Total goals",
             "category": "Goals",
-            "line": 0.5
+            "line": 4.5
           },
-          "selection": "Over 0.5",
+          "selection": "Under 4.5",
           "odds": 1.12,
           "priceStatus": "MODEL_ESTIMATE",
-          "probability": 0.8944670983903569,
-          "confidence": 0.7817642439931718,
+          "probability": 0.8953574468999098,
+          "confidence": 0.8013449149754193,
           "edge": null,
           "oddsSource": null
         }
@@ -139990,10 +139380,10 @@
       "title": "Daily 5 Odds",
       "category": "VALUE_5",
       "status": "PUBLISHED",
-      "totalOdds": 4.7,
+      "totalOdds": 4.5,
       "priceStatus": "MODEL_ESTIMATE",
-      "confidence": 0.7089655466855977,
-      "publishedAt": "2026-08-26T01:59:35.155Z",
+      "confidence": 0.7277993461852397,
+      "publishedAt": "2026-08-26T03:19:38.027Z",
       "bookingCodes": [],
       "selections": [
         {
@@ -140031,6 +139421,42 @@
           "confidence": 0.6764215980856532,
           "edge": 0.20819600085454637,
           "oddsSource": "espn-draftkings"
+        },
+        {
+          "id": "espn-401841212-AWAY_UNDER_2_5",
+          "fixtureId": "espn-401841212",
+          "league": {
+            "id": "630",
+            "name": "Brazilian Serie A",
+            "country": "",
+            "season": "2026"
+          },
+          "kickoff": "2026-08-30T00:20:00.000Z",
+          "homeTeam": {
+            "id": "espn-3454",
+            "name": "Vasco da Gama",
+            "shortName": "VAS",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png"
+          },
+          "awayTeam": {
+            "id": "espn-2022",
+            "name": "Cruzeiro",
+            "shortName": "CRU",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
+          },
+          "market": {
+            "key": "AWAY_UNDER_2_5",
+            "name": "Away team goals",
+            "category": "Team",
+            "line": 2.5
+          },
+          "selection": "Under 2.5",
+          "odds": 1.19,
+          "priceStatus": "MODEL_ESTIMATE",
+          "probability": 0.8418381068654319,
+          "confidence": 0.7534451056445616,
+          "edge": null,
+          "oddsSource": null
         },
         {
           "id": "espn-401841213-HOME_OVER_0_5",
@@ -140069,20 +139495,20 @@
           "oddsSource": null
         },
         {
-          "id": "espn-401841212-AWAY_UNDER_2_5",
-          "fixtureId": "espn-401841212",
+          "id": "espn-401909112-HOME_UNDER_2_5",
+          "fixtureId": "espn-401909112",
           "league": {
-            "id": "630",
-            "name": "Brazilian Serie A",
-            "country": "",
+            "id": "8306",
+            "name": "Quarterfinals",
+            "country": "Brazil",
             "season": "2026"
           },
-          "kickoff": "2026-08-30T00:20:00.000Z",
+          "kickoff": "2026-09-02T00:00:00.000Z",
           "homeTeam": {
-            "id": "espn-3454",
-            "name": "Vasco da Gama",
-            "shortName": "VAS",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png"
+            "id": "espn-7632",
+            "name": "Atlético-MG",
+            "shortName": "CAM",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7632.png"
           },
           "awayTeam": {
             "id": "espn-2022",
@@ -140091,16 +139517,16 @@
             "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
           },
           "market": {
-            "key": "AWAY_UNDER_2_5",
-            "name": "Away team goals",
+            "key": "HOME_UNDER_2_5",
+            "name": "Home team goals",
             "category": "Team",
             "line": 2.5
           },
           "selection": "Under 2.5",
-          "odds": 1.2,
+          "odds": 1.18,
           "priceStatus": "MODEL_ESTIMATE",
-          "probability": 0.8367860558778547,
-          "confidence": 0.7313510128372449,
+          "probability": 0.8451548835777347,
+          "confidence": 0.774161873357205,
           "edge": null,
           "oddsSource": null
         },
@@ -140175,42 +139601,6 @@
           "confidence": 0.7076665881516322,
           "edge": null,
           "oddsSource": null
-        },
-        {
-          "id": "espn-401841208-HOME_UNDER_2_5",
-          "fixtureId": "espn-401841208",
-          "league": {
-            "id": "630",
-            "name": "Brazilian Serie A",
-            "country": "",
-            "season": "2026"
-          },
-          "kickoff": "2026-08-30T14:00:00.000Z",
-          "homeTeam": {
-            "id": "espn-3458",
-            "name": "Athletico-PR",
-            "shortName": "CAP",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3458.png"
-          },
-          "awayTeam": {
-            "id": "espn-3445",
-            "name": "Fluminense",
-            "shortName": "FLU",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3445.png"
-          },
-          "market": {
-            "key": "HOME_UNDER_2_5",
-            "name": "Home team goals",
-            "category": "Team",
-            "line": 2.5
-          },
-          "selection": "Under 2.5",
-          "odds": 1.22,
-          "priceStatus": "MODEL_ESTIMATE",
-          "probability": 0.8212177514022482,
-          "confidence": 0.6832531691666704,
-          "edge": null,
-          "oddsSource": null
         }
       ]
     },
@@ -140219,10 +139609,10 @@
       "title": "Balanced 10 Odds",
       "category": "BALANCED_10",
       "status": "PUBLISHED",
-      "totalOdds": 8.59,
+      "totalOdds": 9.3,
       "priceStatus": "MODEL_ESTIMATE",
-      "confidence": 0.6866467813798602,
-      "publishedAt": "2026-08-26T01:59:35.166Z",
+      "confidence": 0.688044780585247,
+      "publishedAt": "2026-08-26T03:19:38.037Z",
       "bookingCodes": [],
       "selections": [
         {
@@ -140406,42 +139796,6 @@
           "oddsSource": null
         },
         {
-          "id": "espn-401841208-HOME_UNDER_2_5",
-          "fixtureId": "espn-401841208",
-          "league": {
-            "id": "630",
-            "name": "Brazilian Serie A",
-            "country": "",
-            "season": "2026"
-          },
-          "kickoff": "2026-08-30T14:00:00.000Z",
-          "homeTeam": {
-            "id": "espn-3458",
-            "name": "Athletico-PR",
-            "shortName": "CAP",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3458.png"
-          },
-          "awayTeam": {
-            "id": "espn-3445",
-            "name": "Fluminense",
-            "shortName": "FLU",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3445.png"
-          },
-          "market": {
-            "key": "HOME_UNDER_2_5",
-            "name": "Home team goals",
-            "category": "Team",
-            "line": 2.5
-          },
-          "selection": "Under 2.5",
-          "odds": 1.22,
-          "priceStatus": "MODEL_ESTIMATE",
-          "probability": 0.8212177514022482,
-          "confidence": 0.6832531691666704,
-          "edge": null,
-          "oddsSource": null
-        },
-        {
           "id": "espn-401841216-DNB_HOME",
           "fixtureId": "espn-401841216",
           "league": {
@@ -140470,10 +139824,46 @@
             "line": null
           },
           "selection": "Atlético-MG",
-          "odds": 1.22,
+          "odds": 1.23,
           "priceStatus": "MODEL_ESTIMATE",
-          "probability": 0.8203796334235421,
-          "confidence": 0.682555855008387,
+          "probability": 0.8107183004687705,
+          "confidence": 0.6915427102998611,
+          "edge": null,
+          "oddsSource": null
+        },
+        {
+          "id": "espn-401841212-UNDER_3_5",
+          "fixtureId": "espn-401841212",
+          "league": {
+            "id": "630",
+            "name": "Brazilian Serie A",
+            "country": "",
+            "season": "2026"
+          },
+          "kickoff": "2026-08-30T00:20:00.000Z",
+          "homeTeam": {
+            "id": "espn-3454",
+            "name": "Vasco da Gama",
+            "shortName": "VAS",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png"
+          },
+          "awayTeam": {
+            "id": "espn-2022",
+            "name": "Cruzeiro",
+            "shortName": "CRU",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
+          },
+          "market": {
+            "key": "UNDER_3_5",
+            "name": "Total goals",
+            "category": "Goals",
+            "line": 3.5
+          },
+          "selection": "Under 3.5",
+          "odds": 1.31,
+          "priceStatus": "MODEL_ESTIMATE",
+          "probability": 0.7643042550982172,
+          "confidence": 0.6840523083129044,
           "edge": null,
           "oddsSource": null
         }
@@ -140487,7 +139877,7 @@
       "totalOdds": 17.68,
       "priceStatus": "QUOTED",
       "confidence": 0.598061401958027,
-      "publishedAt": "2026-08-26T01:59:35.177Z",
+      "publishedAt": "2026-08-26T03:19:38.049Z",
       "bookingCodes": [],
       "selections": [
         {
@@ -140677,10 +140067,10 @@
       "title": "Daily 21-Leg Longshot",
       "category": "LONGSHOT_21",
       "status": "PUBLISHED",
-      "totalOdds": 202.88,
+      "totalOdds": 192.4,
       "priceStatus": "MODEL_ESTIMATE",
-      "confidence": 0.7124565473432943,
-      "publishedAt": "2026-08-26T01:59:35.233Z",
+      "confidence": 0.7216024509923299,
+      "publishedAt": "2026-08-26T03:19:38.108Z",
       "bookingCodes": [],
       "selections": [
         {
@@ -140718,6 +140108,42 @@
           "confidence": 0.6764215980856532,
           "edge": 0.20819600085454637,
           "oddsSource": "espn-draftkings"
+        },
+        {
+          "id": "espn-401841212-UNDER_4_5",
+          "fixtureId": "espn-401841212",
+          "league": {
+            "id": "630",
+            "name": "Brazilian Serie A",
+            "country": "",
+            "season": "2026"
+          },
+          "kickoff": "2026-08-30T00:20:00.000Z",
+          "homeTeam": {
+            "id": "espn-3454",
+            "name": "Vasco da Gama",
+            "shortName": "VAS",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png"
+          },
+          "awayTeam": {
+            "id": "espn-2022",
+            "name": "Cruzeiro",
+            "shortName": "CRU",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
+          },
+          "market": {
+            "key": "UNDER_4_5",
+            "name": "Total goals",
+            "category": "Goals",
+            "line": 4.5
+          },
+          "selection": "Under 4.5",
+          "odds": 1.12,
+          "priceStatus": "MODEL_ESTIMATE",
+          "probability": 0.8953574468999098,
+          "confidence": 0.8013449149754193,
+          "edge": null,
+          "oddsSource": null
         },
         {
           "id": "espn-401882899-UNDER_3_5",
@@ -140792,42 +140218,6 @@
           "oddsSource": null
         },
         {
-          "id": "espn-401841212-UNDER_4_5",
-          "fixtureId": "espn-401841212",
-          "league": {
-            "id": "630",
-            "name": "Brazilian Serie A",
-            "country": "",
-            "season": "2026"
-          },
-          "kickoff": "2026-08-30T00:20:00.000Z",
-          "homeTeam": {
-            "id": "espn-3454",
-            "name": "Vasco da Gama",
-            "shortName": "VAS",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png"
-          },
-          "awayTeam": {
-            "id": "espn-2022",
-            "name": "Cruzeiro",
-            "shortName": "CRU",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
-          },
-          "market": {
-            "key": "UNDER_4_5",
-            "name": "Total goals",
-            "category": "Goals",
-            "line": 4.5
-          },
-          "selection": "Under 4.5",
-          "odds": 1.12,
-          "priceStatus": "MODEL_ESTIMATE",
-          "probability": 0.8929719863699296,
-          "confidence": 0.7804575160873184,
-          "edge": null,
-          "oddsSource": null
-        },
-        {
           "id": "espn-401841213-UNDER_4_5",
           "fixtureId": "espn-401841213",
           "league": {
@@ -140896,6 +140286,150 @@
           "priceStatus": "MODEL_ESTIMATE",
           "probability": 0.8613771699934824,
           "confidence": 0.7709325671441667,
+          "edge": null,
+          "oddsSource": null
+        },
+        {
+          "id": "espn-401841216-OVER_0_5",
+          "fixtureId": "espn-401841216",
+          "league": {
+            "id": "630",
+            "name": "Brazilian Serie A",
+            "country": "",
+            "season": "2026"
+          },
+          "kickoff": "2026-08-29T21:30:00.000Z",
+          "homeTeam": {
+            "id": "espn-7632",
+            "name": "Atlético-MG",
+            "shortName": "CAM",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7632.png"
+          },
+          "awayTeam": {
+            "id": "espn-3457",
+            "name": "Vitória",
+            "shortName": "VIT",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3457.png"
+          },
+          "market": {
+            "key": "OVER_0_5",
+            "name": "Total goals",
+            "category": "Goals",
+            "line": 0.5
+          },
+          "selection": "Over 0.5",
+          "odds": 1.12,
+          "priceStatus": "MODEL_ESTIMATE",
+          "probability": 0.8945846176904789,
+          "confidence": 0.7630806788899785,
+          "edge": null,
+          "oddsSource": null
+        },
+        {
+          "id": "espn-401909112-UNDER_4_5",
+          "fixtureId": "espn-401909112",
+          "league": {
+            "id": "8306",
+            "name": "Quarterfinals",
+            "country": "Brazil",
+            "season": "2026"
+          },
+          "kickoff": "2026-09-02T00:00:00.000Z",
+          "homeTeam": {
+            "id": "espn-7632",
+            "name": "Atlético-MG",
+            "shortName": "CAM",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7632.png"
+          },
+          "awayTeam": {
+            "id": "espn-2022",
+            "name": "Cruzeiro",
+            "shortName": "CRU",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
+          },
+          "market": {
+            "key": "UNDER_4_5",
+            "name": "Total goals",
+            "category": "Goals",
+            "line": 4.5
+          },
+          "selection": "Under 4.5",
+          "odds": 1.12,
+          "priceStatus": "MODEL_ESTIMATE",
+          "probability": 0.8910882587123972,
+          "confidence": 0.8162368449805557,
+          "edge": null,
+          "oddsSource": null
+        },
+        {
+          "id": "espn-401884817-UNDER_4_5",
+          "fixtureId": "espn-401884817",
+          "league": {
+            "id": "720",
+            "name": "German Bundesliga",
+            "country": "",
+            "season": "2026"
+          },
+          "kickoff": "2026-08-28T18:30:00.000Z",
+          "homeTeam": {
+            "id": "espn-132",
+            "name": "Bayern Munich",
+            "shortName": "MUN",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/132.png"
+          },
+          "awayTeam": {
+            "id": "espn-134",
+            "name": "VfB Stuttgart",
+            "shortName": "VFB",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/134.png"
+          },
+          "market": {
+            "key": "UNDER_4_5",
+            "name": "Total goals",
+            "category": "Goals",
+            "line": 4.5
+          },
+          "selection": "Under 4.5",
+          "odds": 1.61,
+          "priceStatus": "QUOTED",
+          "probability": 0.8301184305607485,
+          "confidence": 0.5686311249341127,
+          "edge": 0.20900041813838832,
+          "oddsSource": "espn-draftkings"
+        },
+        {
+          "id": "espn-761755-HOME_UNDER_2_5",
+          "fixtureId": "espn-761755",
+          "league": {
+            "id": "770",
+            "name": "MLS",
+            "country": "",
+            "season": "2026"
+          },
+          "kickoff": "2026-08-29T20:30:00.000Z",
+          "homeTeam": {
+            "id": "espn-9726",
+            "name": "Seattle Sounders FC",
+            "shortName": "SEA",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/9726.png"
+          },
+          "awayTeam": {
+            "id": "espn-182",
+            "name": "Chicago Fire FC",
+            "shortName": "CHI",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/182.png"
+          },
+          "market": {
+            "key": "HOME_UNDER_2_5",
+            "name": "Home team goals",
+            "category": "Team",
+            "line": 2.5
+          },
+          "selection": "Under 2.5",
+          "odds": 1.12,
+          "priceStatus": "MODEL_ESTIMATE",
+          "probability": 0.8968062594185283,
+          "confidence": 0.8026416021795829,
           "edge": null,
           "oddsSource": null
         },
@@ -141008,78 +140542,6 @@
           "oddsSource": null
         },
         {
-          "id": "espn-401841216-AWAY_UNDER_1_5",
-          "fixtureId": "espn-401841216",
-          "league": {
-            "id": "630",
-            "name": "Brazilian Serie A",
-            "country": "",
-            "season": "2026"
-          },
-          "kickoff": "2026-08-29T21:30:00.000Z",
-          "homeTeam": {
-            "id": "espn-7632",
-            "name": "Atlético-MG",
-            "shortName": "CAM",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7632.png"
-          },
-          "awayTeam": {
-            "id": "espn-3457",
-            "name": "Vitória",
-            "shortName": "VIT",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3457.png"
-          },
-          "market": {
-            "key": "AWAY_UNDER_1_5",
-            "name": "Away team goals",
-            "category": "Team",
-            "line": 1.5
-          },
-          "selection": "Under 1.5",
-          "odds": 1.15,
-          "priceStatus": "MODEL_ESTIMATE",
-          "probability": 0.8710362343954565,
-          "confidence": 0.7247021470170197,
-          "edge": null,
-          "oddsSource": null
-        },
-        {
-          "id": "espn-401884817-UNDER_4_5",
-          "fixtureId": "espn-401884817",
-          "league": {
-            "id": "720",
-            "name": "German Bundesliga",
-            "country": "",
-            "season": "2026"
-          },
-          "kickoff": "2026-08-28T18:30:00.000Z",
-          "homeTeam": {
-            "id": "espn-132",
-            "name": "Bayern Munich",
-            "shortName": "MUN",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/132.png"
-          },
-          "awayTeam": {
-            "id": "espn-134",
-            "name": "VfB Stuttgart",
-            "shortName": "VFB",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/134.png"
-          },
-          "market": {
-            "key": "UNDER_4_5",
-            "name": "Total goals",
-            "category": "Goals",
-            "line": 4.5
-          },
-          "selection": "Under 4.5",
-          "odds": 1.61,
-          "priceStatus": "QUOTED",
-          "probability": 0.8301184305607485,
-          "confidence": 0.5686311249341127,
-          "edge": 0.20900041813838832,
-          "oddsSource": "espn-draftkings"
-        },
-        {
           "id": "espn-401841528-UNDER_4_5",
           "fixtureId": "espn-401841528",
           "league": {
@@ -141148,42 +140610,6 @@
           "priceStatus": "MODEL_ESTIMATE",
           "probability": 0.8941593774223027,
           "confidence": 0.7814952958670924,
-          "edge": null,
-          "oddsSource": null
-        },
-        {
-          "id": "espn-401909112-AWAY_UNDER_2_5",
-          "fixtureId": "espn-401909112",
-          "league": {
-            "id": "8306",
-            "name": "Quarterfinals",
-            "country": "Brazil",
-            "season": "2026"
-          },
-          "kickoff": "2026-09-02T00:00:00.000Z",
-          "homeTeam": {
-            "id": "espn-7632",
-            "name": "Atlético-MG",
-            "shortName": "CAM",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7632.png"
-          },
-          "awayTeam": {
-            "id": "espn-2022",
-            "name": "Cruzeiro",
-            "shortName": "CRU",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
-          },
-          "market": {
-            "key": "AWAY_UNDER_2_5",
-            "name": "Away team goals",
-            "category": "Team",
-            "line": 2.5
-          },
-          "selection": "Under 2.5",
-          "odds": 1.13,
-          "priceStatus": "MODEL_ESTIMATE",
-          "probability": 0.8881789826569321,
-          "confidence": 0.7762684308421586,
           "edge": null,
           "oddsSource": null
         },
@@ -141400,42 +140826,6 @@
           "priceStatus": "MODEL_ESTIMATE",
           "probability": 0.8839705253690586,
           "confidence": 0.7725902391725571,
-          "edge": null,
-          "oddsSource": null
-        },
-        {
-          "id": "espn-401841215-OVER_0_5",
-          "fixtureId": "espn-401841215",
-          "league": {
-            "id": "630",
-            "name": "Brazilian Serie A",
-            "country": "",
-            "season": "2026"
-          },
-          "kickoff": "2026-08-30T22:30:00.000Z",
-          "homeTeam": {
-            "id": "espn-9967",
-            "name": "Bahia",
-            "shortName": "BAH",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/9967.png"
-          },
-          "awayTeam": {
-            "id": "espn-1936",
-            "name": "Internacional",
-            "shortName": "INT",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/1936.png"
-          },
-          "market": {
-            "key": "OVER_0_5",
-            "name": "Total goals",
-            "category": "Goals",
-            "line": 0.5
-          },
-          "selection": "Over 0.5",
-          "odds": 1.14,
-          "priceStatus": "MODEL_ESTIMATE",
-          "probability": 0.8752305430940728,
-          "confidence": 0.709811970449293,
           "edge": null,
           "oddsSource": null
         }
@@ -141448,10 +140838,10 @@
       "title": "Daily 21-Leg Longshot",
       "category": "LONGSHOT_21",
       "status": "PENDING",
-      "totalOdds": 202.88,
+      "totalOdds": 192.4,
       "priceStatus": "MODEL_ESTIMATE",
-      "confidence": 0.7124565473432943,
-      "publishedAt": "2026-08-26T01:59:35.233Z",
+      "confidence": 0.7216024509923299,
+      "publishedAt": "2026-08-26T03:19:38.108Z",
       "bookingCodes": [],
       "selections": [
         {
@@ -141489,6 +140879,43 @@
           "confidence": 0.6764215980856532,
           "edge": 0.20819600085454637,
           "oddsSource": "espn-draftkings",
+          "result": "PENDING"
+        },
+        {
+          "id": "espn-401841212-UNDER_4_5",
+          "fixtureId": "espn-401841212",
+          "league": {
+            "id": "630",
+            "name": "Brazilian Serie A",
+            "country": "",
+            "season": "2026"
+          },
+          "kickoff": "2026-08-30T00:20:00.000Z",
+          "homeTeam": {
+            "id": "espn-3454",
+            "name": "Vasco da Gama",
+            "shortName": "VAS",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png"
+          },
+          "awayTeam": {
+            "id": "espn-2022",
+            "name": "Cruzeiro",
+            "shortName": "CRU",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
+          },
+          "market": {
+            "key": "UNDER_4_5",
+            "name": "Total goals",
+            "category": "Goals",
+            "line": 4.5
+          },
+          "selection": "Under 4.5",
+          "odds": 1.12,
+          "priceStatus": "MODEL_ESTIMATE",
+          "probability": 0.8953574468999098,
+          "confidence": 0.8013449149754193,
+          "edge": null,
+          "oddsSource": null,
           "result": "PENDING"
         },
         {
@@ -141566,43 +140993,6 @@
           "result": "PENDING"
         },
         {
-          "id": "espn-401841212-UNDER_4_5",
-          "fixtureId": "espn-401841212",
-          "league": {
-            "id": "630",
-            "name": "Brazilian Serie A",
-            "country": "",
-            "season": "2026"
-          },
-          "kickoff": "2026-08-30T00:20:00.000Z",
-          "homeTeam": {
-            "id": "espn-3454",
-            "name": "Vasco da Gama",
-            "shortName": "VAS",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png"
-          },
-          "awayTeam": {
-            "id": "espn-2022",
-            "name": "Cruzeiro",
-            "shortName": "CRU",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
-          },
-          "market": {
-            "key": "UNDER_4_5",
-            "name": "Total goals",
-            "category": "Goals",
-            "line": 4.5
-          },
-          "selection": "Under 4.5",
-          "odds": 1.12,
-          "priceStatus": "MODEL_ESTIMATE",
-          "probability": 0.8929719863699296,
-          "confidence": 0.7804575160873184,
-          "edge": null,
-          "oddsSource": null,
-          "result": "PENDING"
-        },
-        {
           "id": "espn-401841213-UNDER_4_5",
           "fixtureId": "espn-401841213",
           "league": {
@@ -141672,6 +141062,154 @@
           "priceStatus": "MODEL_ESTIMATE",
           "probability": 0.8613771699934824,
           "confidence": 0.7709325671441667,
+          "edge": null,
+          "oddsSource": null,
+          "result": "PENDING"
+        },
+        {
+          "id": "espn-401841216-OVER_0_5",
+          "fixtureId": "espn-401841216",
+          "league": {
+            "id": "630",
+            "name": "Brazilian Serie A",
+            "country": "",
+            "season": "2026"
+          },
+          "kickoff": "2026-08-29T21:30:00.000Z",
+          "homeTeam": {
+            "id": "espn-7632",
+            "name": "Atlético-MG",
+            "shortName": "CAM",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7632.png"
+          },
+          "awayTeam": {
+            "id": "espn-3457",
+            "name": "Vitória",
+            "shortName": "VIT",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3457.png"
+          },
+          "market": {
+            "key": "OVER_0_5",
+            "name": "Total goals",
+            "category": "Goals",
+            "line": 0.5
+          },
+          "selection": "Over 0.5",
+          "odds": 1.12,
+          "priceStatus": "MODEL_ESTIMATE",
+          "probability": 0.8945846176904789,
+          "confidence": 0.7630806788899785,
+          "edge": null,
+          "oddsSource": null,
+          "result": "PENDING"
+        },
+        {
+          "id": "espn-401909112-UNDER_4_5",
+          "fixtureId": "espn-401909112",
+          "league": {
+            "id": "8306",
+            "name": "Quarterfinals",
+            "country": "Brazil",
+            "season": "2026"
+          },
+          "kickoff": "2026-09-02T00:00:00.000Z",
+          "homeTeam": {
+            "id": "espn-7632",
+            "name": "Atlético-MG",
+            "shortName": "CAM",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7632.png"
+          },
+          "awayTeam": {
+            "id": "espn-2022",
+            "name": "Cruzeiro",
+            "shortName": "CRU",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
+          },
+          "market": {
+            "key": "UNDER_4_5",
+            "name": "Total goals",
+            "category": "Goals",
+            "line": 4.5
+          },
+          "selection": "Under 4.5",
+          "odds": 1.12,
+          "priceStatus": "MODEL_ESTIMATE",
+          "probability": 0.8910882587123972,
+          "confidence": 0.8162368449805557,
+          "edge": null,
+          "oddsSource": null,
+          "result": "PENDING"
+        },
+        {
+          "id": "espn-401884817-UNDER_4_5",
+          "fixtureId": "espn-401884817",
+          "league": {
+            "id": "720",
+            "name": "German Bundesliga",
+            "country": "",
+            "season": "2026"
+          },
+          "kickoff": "2026-08-28T18:30:00.000Z",
+          "homeTeam": {
+            "id": "espn-132",
+            "name": "Bayern Munich",
+            "shortName": "MUN",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/132.png"
+          },
+          "awayTeam": {
+            "id": "espn-134",
+            "name": "VfB Stuttgart",
+            "shortName": "VFB",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/134.png"
+          },
+          "market": {
+            "key": "UNDER_4_5",
+            "name": "Total goals",
+            "category": "Goals",
+            "line": 4.5
+          },
+          "selection": "Under 4.5",
+          "odds": 1.61,
+          "priceStatus": "QUOTED",
+          "probability": 0.8301184305607485,
+          "confidence": 0.5686311249341127,
+          "edge": 0.20900041813838832,
+          "oddsSource": "espn-draftkings",
+          "result": "PENDING"
+        },
+        {
+          "id": "espn-761755-HOME_UNDER_2_5",
+          "fixtureId": "espn-761755",
+          "league": {
+            "id": "770",
+            "name": "MLS",
+            "country": "",
+            "season": "2026"
+          },
+          "kickoff": "2026-08-29T20:30:00.000Z",
+          "homeTeam": {
+            "id": "espn-9726",
+            "name": "Seattle Sounders FC",
+            "shortName": "SEA",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/9726.png"
+          },
+          "awayTeam": {
+            "id": "espn-182",
+            "name": "Chicago Fire FC",
+            "shortName": "CHI",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/182.png"
+          },
+          "market": {
+            "key": "HOME_UNDER_2_5",
+            "name": "Home team goals",
+            "category": "Team",
+            "line": 2.5
+          },
+          "selection": "Under 2.5",
+          "odds": 1.12,
+          "priceStatus": "MODEL_ESTIMATE",
+          "probability": 0.8968062594185283,
+          "confidence": 0.8026416021795829,
           "edge": null,
           "oddsSource": null,
           "result": "PENDING"
@@ -141788,80 +141326,6 @@
           "result": "PENDING"
         },
         {
-          "id": "espn-401841216-AWAY_UNDER_1_5",
-          "fixtureId": "espn-401841216",
-          "league": {
-            "id": "630",
-            "name": "Brazilian Serie A",
-            "country": "",
-            "season": "2026"
-          },
-          "kickoff": "2026-08-29T21:30:00.000Z",
-          "homeTeam": {
-            "id": "espn-7632",
-            "name": "Atlético-MG",
-            "shortName": "CAM",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7632.png"
-          },
-          "awayTeam": {
-            "id": "espn-3457",
-            "name": "Vitória",
-            "shortName": "VIT",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3457.png"
-          },
-          "market": {
-            "key": "AWAY_UNDER_1_5",
-            "name": "Away team goals",
-            "category": "Team",
-            "line": 1.5
-          },
-          "selection": "Under 1.5",
-          "odds": 1.15,
-          "priceStatus": "MODEL_ESTIMATE",
-          "probability": 0.8710362343954565,
-          "confidence": 0.7247021470170197,
-          "edge": null,
-          "oddsSource": null,
-          "result": "PENDING"
-        },
-        {
-          "id": "espn-401884817-UNDER_4_5",
-          "fixtureId": "espn-401884817",
-          "league": {
-            "id": "720",
-            "name": "German Bundesliga",
-            "country": "",
-            "season": "2026"
-          },
-          "kickoff": "2026-08-28T18:30:00.000Z",
-          "homeTeam": {
-            "id": "espn-132",
-            "name": "Bayern Munich",
-            "shortName": "MUN",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/132.png"
-          },
-          "awayTeam": {
-            "id": "espn-134",
-            "name": "VfB Stuttgart",
-            "shortName": "VFB",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/134.png"
-          },
-          "market": {
-            "key": "UNDER_4_5",
-            "name": "Total goals",
-            "category": "Goals",
-            "line": 4.5
-          },
-          "selection": "Under 4.5",
-          "odds": 1.61,
-          "priceStatus": "QUOTED",
-          "probability": 0.8301184305607485,
-          "confidence": 0.5686311249341127,
-          "edge": 0.20900041813838832,
-          "oddsSource": "espn-draftkings",
-          "result": "PENDING"
-        },
-        {
           "id": "espn-401841528-UNDER_4_5",
           "fixtureId": "espn-401841528",
           "league": {
@@ -141931,43 +141395,6 @@
           "priceStatus": "MODEL_ESTIMATE",
           "probability": 0.8941593774223027,
           "confidence": 0.7814952958670924,
-          "edge": null,
-          "oddsSource": null,
-          "result": "PENDING"
-        },
-        {
-          "id": "espn-401909112-AWAY_UNDER_2_5",
-          "fixtureId": "espn-401909112",
-          "league": {
-            "id": "8306",
-            "name": "Quarterfinals",
-            "country": "Brazil",
-            "season": "2026"
-          },
-          "kickoff": "2026-09-02T00:00:00.000Z",
-          "homeTeam": {
-            "id": "espn-7632",
-            "name": "Atlético-MG",
-            "shortName": "CAM",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7632.png"
-          },
-          "awayTeam": {
-            "id": "espn-2022",
-            "name": "Cruzeiro",
-            "shortName": "CRU",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
-          },
-          "market": {
-            "key": "AWAY_UNDER_2_5",
-            "name": "Away team goals",
-            "category": "Team",
-            "line": 2.5
-          },
-          "selection": "Under 2.5",
-          "odds": 1.13,
-          "priceStatus": "MODEL_ESTIMATE",
-          "probability": 0.8881789826569321,
-          "confidence": 0.7762684308421586,
           "edge": null,
           "oddsSource": null,
           "result": "PENDING"
@@ -142193,43 +141620,6 @@
           "edge": null,
           "oddsSource": null,
           "result": "PENDING"
-        },
-        {
-          "id": "espn-401841215-OVER_0_5",
-          "fixtureId": "espn-401841215",
-          "league": {
-            "id": "630",
-            "name": "Brazilian Serie A",
-            "country": "",
-            "season": "2026"
-          },
-          "kickoff": "2026-08-30T22:30:00.000Z",
-          "homeTeam": {
-            "id": "espn-9967",
-            "name": "Bahia",
-            "shortName": "BAH",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/9967.png"
-          },
-          "awayTeam": {
-            "id": "espn-1936",
-            "name": "Internacional",
-            "shortName": "INT",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/1936.png"
-          },
-          "market": {
-            "key": "OVER_0_5",
-            "name": "Total goals",
-            "category": "Goals",
-            "line": 0.5
-          },
-          "selection": "Over 0.5",
-          "odds": 1.14,
-          "priceStatus": "MODEL_ESTIMATE",
-          "probability": 0.8752305430940728,
-          "confidence": 0.709811970449293,
-          "edge": null,
-          "oddsSource": null,
-          "result": "PENDING"
         }
       ],
       "settledAt": null,
@@ -142245,7 +141635,7 @@
       "totalOdds": 17.68,
       "priceStatus": "QUOTED",
       "confidence": 0.598061401958027,
-      "publishedAt": "2026-08-26T01:59:35.177Z",
+      "publishedAt": "2026-08-26T03:19:38.049Z",
       "bookingCodes": [],
       "selections": [
         {
@@ -142444,10 +141834,10 @@
       "title": "Balanced 10 Odds",
       "category": "BALANCED_10",
       "status": "PENDING",
-      "totalOdds": 8.59,
+      "totalOdds": 9.3,
       "priceStatus": "MODEL_ESTIMATE",
-      "confidence": 0.6866467813798602,
-      "publishedAt": "2026-08-26T01:59:35.166Z",
+      "confidence": 0.688044780585247,
+      "publishedAt": "2026-08-26T03:19:38.037Z",
       "bookingCodes": [],
       "selections": [
         {
@@ -142636,43 +142026,6 @@
           "result": "PENDING"
         },
         {
-          "id": "espn-401841208-HOME_UNDER_2_5",
-          "fixtureId": "espn-401841208",
-          "league": {
-            "id": "630",
-            "name": "Brazilian Serie A",
-            "country": "",
-            "season": "2026"
-          },
-          "kickoff": "2026-08-30T14:00:00.000Z",
-          "homeTeam": {
-            "id": "espn-3458",
-            "name": "Athletico-PR",
-            "shortName": "CAP",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3458.png"
-          },
-          "awayTeam": {
-            "id": "espn-3445",
-            "name": "Fluminense",
-            "shortName": "FLU",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3445.png"
-          },
-          "market": {
-            "key": "HOME_UNDER_2_5",
-            "name": "Home team goals",
-            "category": "Team",
-            "line": 2.5
-          },
-          "selection": "Under 2.5",
-          "odds": 1.22,
-          "priceStatus": "MODEL_ESTIMATE",
-          "probability": 0.8212177514022482,
-          "confidence": 0.6832531691666704,
-          "edge": null,
-          "oddsSource": null,
-          "result": "PENDING"
-        },
-        {
           "id": "espn-401841216-DNB_HOME",
           "fixtureId": "espn-401841216",
           "league": {
@@ -142701,10 +142054,47 @@
             "line": null
           },
           "selection": "Atlético-MG",
-          "odds": 1.22,
+          "odds": 1.23,
           "priceStatus": "MODEL_ESTIMATE",
-          "probability": 0.8203796334235421,
-          "confidence": 0.682555855008387,
+          "probability": 0.8107183004687705,
+          "confidence": 0.6915427102998611,
+          "edge": null,
+          "oddsSource": null,
+          "result": "PENDING"
+        },
+        {
+          "id": "espn-401841212-UNDER_3_5",
+          "fixtureId": "espn-401841212",
+          "league": {
+            "id": "630",
+            "name": "Brazilian Serie A",
+            "country": "",
+            "season": "2026"
+          },
+          "kickoff": "2026-08-30T00:20:00.000Z",
+          "homeTeam": {
+            "id": "espn-3454",
+            "name": "Vasco da Gama",
+            "shortName": "VAS",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png"
+          },
+          "awayTeam": {
+            "id": "espn-2022",
+            "name": "Cruzeiro",
+            "shortName": "CRU",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
+          },
+          "market": {
+            "key": "UNDER_3_5",
+            "name": "Total goals",
+            "category": "Goals",
+            "line": 3.5
+          },
+          "selection": "Under 3.5",
+          "odds": 1.31,
+          "priceStatus": "MODEL_ESTIMATE",
+          "probability": 0.7643042550982172,
+          "confidence": 0.6840523083129044,
           "edge": null,
           "oddsSource": null,
           "result": "PENDING"
@@ -142720,10 +142110,10 @@
       "title": "Daily 5 Odds",
       "category": "VALUE_5",
       "status": "PENDING",
-      "totalOdds": 4.7,
+      "totalOdds": 4.5,
       "priceStatus": "MODEL_ESTIMATE",
-      "confidence": 0.7089655466855977,
-      "publishedAt": "2026-08-26T01:59:35.155Z",
+      "confidence": 0.7277993461852397,
+      "publishedAt": "2026-08-26T03:19:38.027Z",
       "bookingCodes": [],
       "selections": [
         {
@@ -142764,6 +142154,43 @@
           "result": "PENDING"
         },
         {
+          "id": "espn-401841212-AWAY_UNDER_2_5",
+          "fixtureId": "espn-401841212",
+          "league": {
+            "id": "630",
+            "name": "Brazilian Serie A",
+            "country": "",
+            "season": "2026"
+          },
+          "kickoff": "2026-08-30T00:20:00.000Z",
+          "homeTeam": {
+            "id": "espn-3454",
+            "name": "Vasco da Gama",
+            "shortName": "VAS",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png"
+          },
+          "awayTeam": {
+            "id": "espn-2022",
+            "name": "Cruzeiro",
+            "shortName": "CRU",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
+          },
+          "market": {
+            "key": "AWAY_UNDER_2_5",
+            "name": "Away team goals",
+            "category": "Team",
+            "line": 2.5
+          },
+          "selection": "Under 2.5",
+          "odds": 1.19,
+          "priceStatus": "MODEL_ESTIMATE",
+          "probability": 0.8418381068654319,
+          "confidence": 0.7534451056445616,
+          "edge": null,
+          "oddsSource": null,
+          "result": "PENDING"
+        },
+        {
           "id": "espn-401841213-HOME_OVER_0_5",
           "fixtureId": "espn-401841213",
           "league": {
@@ -142801,20 +142228,20 @@
           "result": "PENDING"
         },
         {
-          "id": "espn-401841212-AWAY_UNDER_2_5",
-          "fixtureId": "espn-401841212",
+          "id": "espn-401909112-HOME_UNDER_2_5",
+          "fixtureId": "espn-401909112",
           "league": {
-            "id": "630",
-            "name": "Brazilian Serie A",
-            "country": "",
+            "id": "8306",
+            "name": "Quarterfinals",
+            "country": "Brazil",
             "season": "2026"
           },
-          "kickoff": "2026-08-30T00:20:00.000Z",
+          "kickoff": "2026-09-02T00:00:00.000Z",
           "homeTeam": {
-            "id": "espn-3454",
-            "name": "Vasco da Gama",
-            "shortName": "VAS",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png"
+            "id": "espn-7632",
+            "name": "Atlético-MG",
+            "shortName": "CAM",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/7632.png"
           },
           "awayTeam": {
             "id": "espn-2022",
@@ -142823,16 +142250,16 @@
             "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
           },
           "market": {
-            "key": "AWAY_UNDER_2_5",
-            "name": "Away team goals",
+            "key": "HOME_UNDER_2_5",
+            "name": "Home team goals",
             "category": "Team",
             "line": 2.5
           },
           "selection": "Under 2.5",
-          "odds": 1.2,
+          "odds": 1.18,
           "priceStatus": "MODEL_ESTIMATE",
-          "probability": 0.8367860558778547,
-          "confidence": 0.7313510128372449,
+          "probability": 0.8451548835777347,
+          "confidence": 0.774161873357205,
           "edge": null,
           "oddsSource": null,
           "result": "PENDING"
@@ -142910,43 +142337,6 @@
           "edge": null,
           "oddsSource": null,
           "result": "PENDING"
-        },
-        {
-          "id": "espn-401841208-HOME_UNDER_2_5",
-          "fixtureId": "espn-401841208",
-          "league": {
-            "id": "630",
-            "name": "Brazilian Serie A",
-            "country": "",
-            "season": "2026"
-          },
-          "kickoff": "2026-08-30T14:00:00.000Z",
-          "homeTeam": {
-            "id": "espn-3458",
-            "name": "Athletico-PR",
-            "shortName": "CAP",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3458.png"
-          },
-          "awayTeam": {
-            "id": "espn-3445",
-            "name": "Fluminense",
-            "shortName": "FLU",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3445.png"
-          },
-          "market": {
-            "key": "HOME_UNDER_2_5",
-            "name": "Home team goals",
-            "category": "Team",
-            "line": 2.5
-          },
-          "selection": "Under 2.5",
-          "odds": 1.22,
-          "priceStatus": "MODEL_ESTIMATE",
-          "probability": 0.8212177514022482,
-          "confidence": 0.6832531691666704,
-          "edge": null,
-          "oddsSource": null,
-          "result": "PENDING"
         }
       ],
       "settledAt": null,
@@ -142961,8 +142351,8 @@
       "status": "PENDING",
       "totalOdds": 1.92,
       "priceStatus": "MODEL_ESTIMATE",
-      "confidence": 0.7290929210394125,
-      "publishedAt": "2026-08-26T01:59:35.146Z",
+      "confidence": 0.7388832565305362,
+      "publishedAt": "2026-08-26T03:19:38.018Z",
       "bookingCodes": [],
       "selections": [
         {
@@ -143003,38 +142393,38 @@
           "result": "PENDING"
         },
         {
-          "id": "espn-401841214-OVER_0_5",
-          "fixtureId": "espn-401841214",
+          "id": "espn-401841212-UNDER_4_5",
+          "fixtureId": "espn-401841212",
           "league": {
             "id": "630",
             "name": "Brazilian Serie A",
             "country": "",
             "season": "2026"
           },
-          "kickoff": "2026-08-30T19:00:00.000Z",
+          "kickoff": "2026-08-30T00:20:00.000Z",
           "homeTeam": {
-            "id": "espn-874",
-            "name": "Corinthians",
-            "shortName": "COR",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/874.png"
+            "id": "espn-3454",
+            "name": "Vasco da Gama",
+            "shortName": "VAS",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/3454.png"
           },
           "awayTeam": {
-            "id": "espn-2674",
-            "name": "Santos",
-            "shortName": "SAN",
-            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2674.png"
+            "id": "espn-2022",
+            "name": "Cruzeiro",
+            "shortName": "CRU",
+            "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/2022.png"
           },
           "market": {
-            "key": "OVER_0_5",
+            "key": "UNDER_4_5",
             "name": "Total goals",
             "category": "Goals",
-            "line": 0.5
+            "line": 4.5
           },
-          "selection": "Over 0.5",
+          "selection": "Under 4.5",
           "odds": 1.12,
           "priceStatus": "MODEL_ESTIMATE",
-          "probability": 0.8944670983903569,
-          "confidence": 0.7817642439931718,
+          "probability": 0.8953574468999098,
+          "confidence": 0.8013449149754193,
           "edge": null,
           "oddsSource": null,
           "result": "PENDING"
@@ -143498,7 +142888,7 @@
           "confidence": 0.7955005357598929,
           "edge": null,
           "oddsSource": null,
-          "result": "PENDING"
+          "result": "WON"
         },
         {
           "id": "espn-401841210-AWAY_UNDER_2_5",
@@ -143835,7 +143225,7 @@
         }
       ],
       "settledAt": null,
-      "wonLegs": 0,
+      "wonLegs": 1,
       "lostLegs": 0,
       "voidLegs": 0
     },
@@ -145100,7 +144490,7 @@
           "confidence": 0.7955005357598929,
           "edge": null,
           "oddsSource": null,
-          "result": "PENDING"
+          "result": "WON"
         },
         {
           "id": "espn-401841215-OVER_0_5",
@@ -145437,7 +144827,7 @@
         }
       ],
       "settledAt": null,
-      "wonLegs": 0,
+      "wonLegs": 1,
       "lostLegs": 0,
       "voidLegs": 0
     },
@@ -146702,7 +146092,7 @@
           "confidence": 0.7955005357598929,
           "edge": null,
           "oddsSource": null,
-          "result": "PENDING"
+          "result": "WON"
         },
         {
           "id": "espn-401841535-OVER_0_5",
@@ -147076,7 +146466,7 @@
         }
       ],
       "settledAt": null,
-      "wonLegs": 2,
+      "wonLegs": 3,
       "lostLegs": 0,
       "voidLegs": 0
     },
@@ -148711,7 +148101,7 @@
           "confidence": 0.7478246584840892,
           "edge": null,
           "oddsSource": null,
-          "result": "PENDING"
+          "result": "WON"
         },
         {
           "id": "espn-401879319-UNDER_3_5",
@@ -148899,8 +148289,8 @@
           "result": "PENDING"
         }
       ],
-      "settledAt": "2026-08-26T01:59:30.000Z",
-      "wonLegs": 10,
+      "settledAt": "2026-08-26T03:19:30.938Z",
+      "wonLegs": 11,
       "lostLegs": 2,
       "voidLegs": 0
     },
@@ -149138,7 +148528,7 @@
           "result": "WON"
         }
       ],
-      "settledAt": "2026-08-26T01:59:30.000Z",
+      "settledAt": "2026-08-26T03:19:30.938Z",
       "wonLegs": 3,
       "lostLegs": 1,
       "voidLegs": 0
@@ -149340,7 +148730,7 @@
           "result": "WON"
         }
       ],
-      "settledAt": "2026-08-26T01:59:30.000Z",
+      "settledAt": "2026-08-26T03:19:30.938Z",
       "wonLegs": 4,
       "lostLegs": 1,
       "voidLegs": 0
@@ -149633,7 +149023,7 @@
           "result": "WON"
         }
       ],
-      "settledAt": "2026-08-26T01:59:30.000Z",
+      "settledAt": "2026-08-26T03:19:30.938Z",
       "wonLegs": 2,
       "lostLegs": 0,
       "voidLegs": 0
@@ -150427,7 +149817,7 @@
           "result": "PENDING"
         }
       ],
-      "settledAt": "2026-08-26T01:59:30.000Z",
+      "settledAt": "2026-08-26T03:19:30.938Z",
       "wonLegs": 11,
       "lostLegs": 8,
       "voidLegs": 0
@@ -150629,7 +150019,7 @@
           "result": "WON"
         }
       ],
-      "settledAt": "2026-08-26T01:59:30.000Z",
+      "settledAt": "2026-08-26T03:19:30.938Z",
       "wonLegs": 3,
       "lostLegs": 2,
       "voidLegs": 0
@@ -150831,7 +150221,7 @@
           "result": "WON"
         }
       ],
-      "settledAt": "2026-08-26T01:59:30.000Z",
+      "settledAt": "2026-08-26T03:19:30.938Z",
       "wonLegs": 3,
       "lostLegs": 2,
       "voidLegs": 0
@@ -151033,7 +150423,7 @@
           "result": "WON"
         }
       ],
-      "settledAt": "2026-08-26T01:59:30.000Z",
+      "settledAt": "2026-08-26T03:19:30.938Z",
       "wonLegs": 4,
       "lostLegs": 1,
       "voidLegs": 0
@@ -151161,7 +150551,7 @@
           "result": "WON"
         }
       ],
-      "settledAt": "2026-08-26T01:59:30.000Z",
+      "settledAt": "2026-08-26T03:19:30.938Z",
       "wonLegs": 3,
       "lostLegs": 0,
       "voidLegs": 0
