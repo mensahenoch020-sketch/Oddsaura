@@ -47,7 +47,6 @@ export default function MatchesPage() {
   const [view, setView] = useState<View>("today");
   const [search, setSearch] = useState("");
   const [league, setLeague] = useState<LeagueFilter>("ALL");
-  const [showLeagueFilter, setShowLeagueFilter] = useState(false);
   const [limit, setLimit] = useState(120);
   const [loading, setLoading] = useState(true);
 
@@ -98,8 +97,8 @@ export default function MatchesPage() {
       </div>
       <label className="matches-search"><span>Search</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Team or league" /></label>
     </section>
-    <button className="matches-filter-toggle" type="button" aria-expanded={showLeagueFilter} onClick={() => setShowLeagueFilter((value) => !value)}><b>☰ Leagues</b><span>{LEAGUE_FILTERS.find((item) => item.id === league)?.label} · {showLeagueFilter ? "Close" : "Open"}</span></button>
-    <div className={`matches-league-tabs ${showLeagueFilter ? "open" : ""}`} aria-label="League filter">{LEAGUE_FILTERS.map((item) => <button type="button" key={item.id} className={league === item.id ? "active" : ""} onClick={() => { setLeague(item.id); setLimit(120); setShowLeagueFilter(false); }}>{item.label}</button>)}</div>
+    <div className="matches-filter-toggle matches-filter-label"><b>Leagues</b><span>{LEAGUE_FILTERS.find((item) => item.id === league)?.label}</span></div>
+    <div className="matches-league-tabs open" aria-label="League filter">{LEAGUE_FILTERS.map((item) => <button type="button" key={item.id} className={league === item.id ? "active" : ""} onClick={() => { setLeague(item.id); setLimit(120); }}>{item.label}</button>)}</div>
 
     <div className="matches-summary"><span>{loading ? "Refreshing match data…" : `Showing ${Math.min(limit, visible.length)} of ${visible.length} ${visible.length === 1 ? "match" : "matches"}`}</span><small>{snapshot.message}</small></div>
 
