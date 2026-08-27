@@ -12,6 +12,7 @@
     "start": "node scripts/railway-server.mjs",
     "test": "npm run build && node --test tests/rendered-html.test.mjs",
     "data:update": "node pipeline/update.mjs",
+    "data:history": "node pipeline/update-history.mjs",
     "data:test": "node --test pipeline/tests/*.test.mjs",
     "lint": "bash scripts/sites-env.sh -- eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "bash scripts/sites-env.sh -- drizzle-kit generate"

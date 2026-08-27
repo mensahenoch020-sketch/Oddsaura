@@ -32,7 +32,8 @@ async function readJson(req) { const chunks = []; let size = 0; for await (const
 
 async function ensureTables() {
   if (!pool) return;
-  await pool.query(`CREATE TABLE IF NOT EXISTS oa_users (email TEXT PRIMARY KEY, display_name TEXT NOT NULL, password_hash TEXT NOT NULL, created_at BIGINT NOT NULL, updated_at BIGINT NOT NULL)`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS oa_users (email TEXT PRIMARY KEY, display_name TEXT NOT NULL, password_hash TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'USER', created_at BIGINT NOT NULL, updated_at BIGINT NOT NULL)`);
+  await pool.query(`ALTER TABLE oa_users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'USER'`);
   await pool.query(`CREATE TABLE IF NOT EXISTS oa_sessions (token_hash TEXT PRIMARY KEY, user_email TEXT NOT NULL REFERENCES oa_users(email) ON DELETE CASCADE, expires_at BIGINT NOT NULL, created_at BIGINT NOT NULL)`);
   await pool.query(`CREATE INDEX IF NOT EXISTS oa_sessions_user_expires_idx ON oa_sessions(user_email, expires_at)`);
   await pool.query(`CREATE TABLE IF NOT EXISTS oa_password_resets (token_hash TEXT PRIMARY KEY, user_email TEXT NOT NULL REFERENCES oa_users(email) ON DELETE CASCADE, expires_at BIGINT NOT NULL, used_at BIGINT, created_at BIGINT NOT NULL)`);
@@ -41,7 +42,7 @@ async function ensureTables() {
 }
 
 async function createSession(email, maxAge = sessionSeconds) { const token = randomToken(); const now = Date.now(); await pool.query("INSERT INTO oa_sessions(token_hash,user_email,expires_at,created_at) VALUES($1,$2,$3,$4)", [await digest(token), email, now + maxAge * 1000, now]); return token; }
-async function identity(req) { if (!pool) return null; const token = parseCookies(req.headers.cookie)[cookieName]; if (!token) return null; const result = await pool.query("SELECT u.email,u.display_name AS name FROM oa_sessions s JOIN oa_users u ON u.email=s.user_email WHERE s.token_hash=$1 AND s.expires_at>$2 LIMIT 1", [await digest(token), Date.now()]); return result.rows[0] || null; }
+async function identity(req) { if (!pool) return null; const token = parseCookies(req.headers.cookie)[cookieName]; if (!token) return null; const result = await pool.query("SELECT u.email,u.display_name AS name,u.role FROM oa_sessions s JOIN oa_users u ON u.email=s.user_email WHERE s.token_hash=$1 AND s.expires_at>$2 LIMIT 1", [await digest(token), Date.now()]); const user = result.rows[0]; if (!user) return null; const admins = new Set(String(process.env.ODDSAURA_ADMIN_EMAILS || "").split(",").map((item) => item.trim().toLowerCase()).filter(Boolean)); return { ...user, role: user.role === "ADMIN" || admins.has(user.email) ? "ADMIN" : "USER" }; }
 
 async function sendResetEmail(req, email, token) {
   if (!process.env.RESEND_API_KEY || !process.env.RESEND_FROM_EMAIL) return false;
@@ -134,6 +135,7 @@ createServer(async (req, res) => {
     const apiProtected = protectedApis.some((path) => url.pathname === path || url.pathname.startsWith(`${path}/`));
     const user = pageProtected || apiProtected ? await identity(req) : null;
     if ((pageProtected || apiProtected) && !user) { if (apiProtected) return json(res, 401, { error: "Log in to continue." }); const next = encodeURIComponent(`${url.pathname}${url.search}`); res.writeHead(302, { location: `/login?next=${next}`, "cache-control": "no-store" }); return res.end(); }
+    if ((url.pathname === "/admin" || url.pathname.startsWith("/admin/")) && user?.role !== "ADMIN") { res.writeHead(302, { location: "/dashboard", "cache-control": "no-store" }); return res.end(); }
     if (url.pathname === "/api/account" || url.pathname === "/api/slips" || url.pathname.startsWith("/api/slips/")) return await slipsApi(req, res, url, user);
     return proxy(req, res, user);
   } catch (error) { console.error(error); return json(res, 500, { error: "OddsAura could not complete this request." }); }

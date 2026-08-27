@@ -15,6 +15,20 @@
       "when": 1787329398445,
       "tag": "0001_simple_winter_soldier",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1787795082149,
+      "tag": "0002_skinny_princess_powerful",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1787795296212,
+      "tag": "0003_zippy_angel",
+      "breakpoints": true
     }
   ]
 }

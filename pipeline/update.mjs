@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { collectEspn, collectEspnGlobal } from "./lib/espn.mjs";
-import { attachOdds, scoreEvent } from "./lib/model.mjs";
+import { attachOdds, buildModelContext, scoreEvent } from "./lib/model.mjs";
 import { buildTicket } from "./lib/tickets.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -11,19 +11,23 @@ const now = new Date();
 const futureDays = Number(process.env.FUTURE_DAYS ?? 7);
 const horizon = now.getTime() + futureDays * 24 * 60 * 60 * 1000;
 const previous = JSON.parse(await readFile(output, "utf8"));
+const historical = await readFile(resolve(root, "data/history/football-data.json"), "utf8").then(JSON.parse).catch(() => ({ events: [], generatedAt: null, warnings: ["Historical cache unavailable"] }));
 
 let events = [];
 let warnings = [];
 let sourceStatus = "error";
 let message = "The source did not respond; serving the last successful snapshot.";
 const sources = [];
+const eventIdentity = (event) => `${event.league?.id ?? event.league?.name}-${event.kickoff.slice(0, 10)}-${event.homeTeam.id}-${event.awayTeam.id}`;
 const [historyRun, globalRun] = await Promise.allSettled([
   collectEspn({ historyDays: Number(process.env.ESPN_HISTORY_DAYS ?? 35), futureDays }),
   collectEspnGlobal({ historyDays: Number(process.env.GLOBAL_HISTORY_DAYS ?? 14), futureDays }),
 ]);
 const eventMap = new Map();
+for (const event of historical.events ?? []) eventMap.set(eventIdentity(event), event);
+sources.push({ id: "football-data-history", label: "Multi-season historical results and odds", status: historical.events?.length ? "healthy" : "waiting", lastSuccessAt: historical.generatedAt ?? null, records: historical.events?.length ?? 0, warnings: (historical.warnings ?? []).slice(0, 8) });
 if (historyRun.status === "fulfilled" && historyRun.value.events.length) {
-  for (const event of historyRun.value.events) eventMap.set(event.id, event);
+  for (const event of historyRun.value.events) eventMap.set(eventIdentity(event), event);
   warnings.push(...historyRun.value.warnings);
   sources.push({ id: "espn-league-history", label: "ESPN league history", status: historyRun.value.warnings.length ? "partial" : "healthy", lastSuccessAt: now.toISOString(), records: historyRun.value.events.length, warnings: historyRun.value.warnings.slice(0, 8) });
 } else {
@@ -32,11 +36,12 @@ if (historyRun.status === "fulfilled" && historyRun.value.events.length) {
 }
 if (globalRun.status === "fulfilled" && globalRun.value.events.length) {
   for (const event of globalRun.value.events) {
-    const existing = eventMap.get(event.id);
+    const identity = eventIdentity(event);
+    const existing = eventMap.get(identity);
     // The dedicated league feed carries the real competition name; the
     // global board often replaces it with a generic country label. Preserve
     // the richer record and only fill prices that it did not already have.
-    eventMap.set(event.id, existing ? { ...existing, odds: existing.odds.length ? existing.odds : event.odds } : event);
+    eventMap.set(identity, existing ? { ...existing, ...event, odds: event.odds.length ? event.odds : existing.odds } : event);
   }
   warnings.push(...globalRun.value.warnings);
   sources.push({ id: "espn-global-json", label: "ESPN global match board", status: globalRun.value.warnings.length ? "partial" : "healthy", lastSuccessAt: now.toISOString(), records: globalRun.value.events.length, warnings: globalRun.value.warnings.slice(0, 8) });
@@ -57,7 +62,8 @@ if (!events.length) {
 
 const upcoming = events.filter((event) => event.status === "SCHEDULED" && new Date(event.kickoff) > now && new Date(event.kickoff).getTime() < horizon);
 const liveFixtures = events.filter((event) => event.status === "LIVE").sort((a, b) => a.kickoff.localeCompare(b.kickoff));
-const predictions = upcoming.flatMap((event) => attachOdds(scoreEvent(event, events), event.odds));
+const modelContext = buildModelContext(events, now.toISOString());
+const predictions = upcoming.flatMap((event) => attachOdds(scoreEvent(event, events, modelContext), event.odds));
 const tickets = ["SAFE_2", "VALUE_5", "BALANCED_10", "HIGH_RISK", "LONGSHOT_21"].map((category) => buildTicket(predictions, category, upcoming)).filter(Boolean);
 const fixtureMap = new Map(upcoming.map((fixture) => [fixture.id, fixture]));
 const predictedPicks = [];

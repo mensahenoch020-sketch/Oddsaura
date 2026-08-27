@@ -2,29 +2,61 @@ const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const factorial = (n) => { let out = 1; for (let i = 2; i <= n; i += 1) out *= i; return out; };
 const poisson = (lambda, goals) => Math.exp(-lambda) * Math.pow(lambda, goals) / factorial(goals);
 
-export function buildForm(teamId, events, before, limit = 10) {
+export function buildForm(teamId, events, before, limit = 12, venue = "ALL") {
   const matches = events
-    .filter((event) => event.status === "FINISHED" && event.kickoff < before && (event.homeTeam.id === teamId || event.awayTeam.id === teamId) && event.homeScore !== null && event.awayScore !== null)
+    .filter((event) => {
+      if (event.status !== "FINISHED" || event.kickoff >= before || event.homeScore === null || event.awayScore === null) return false;
+      if (venue === "HOME") return event.homeTeam.id === teamId;
+      if (venue === "AWAY") return event.awayTeam.id === teamId;
+      return event.homeTeam.id === teamId || event.awayTeam.id === teamId;
+    })
     .sort((a, b) => b.kickoff.localeCompare(a.kickoff))
     .slice(0, limit);
-  const form = { played: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, points: 0 };
-  for (const match of matches) {
+  const form = { played: 0, weight: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, points: 0, lastKickoff: null };
+  for (const [index, match] of matches.entries()) {
     const home = match.homeTeam.id === teamId;
     const gf = home ? match.homeScore : match.awayScore;
     const ga = home ? match.awayScore : match.homeScore;
-    form.played += 1; form.goalsFor += gf; form.goalsAgainst += ga;
-    if (gf > ga) { form.wins += 1; form.points += 3; }
-    else if (gf === ga) { form.draws += 1; form.points += 1; }
-    else form.losses += 1;
+    const weight = Math.pow(0.9, index);
+    form.played += 1; form.weight += weight; form.goalsFor += gf * weight; form.goalsAgainst += ga * weight;
+    if (index === 0) form.lastKickoff = match.kickoff;
+    if (gf > ga) { form.wins += weight; form.points += 3 * weight; }
+    else if (gf === ga) { form.draws += weight; form.points += weight; }
+    else form.losses += weight;
   }
   return form;
 }
 
-function grid(homeLambda, awayLambda, maxGoals = 9) {
+export function buildModelContext(events, before = "9999-12-31T00:00:00.000Z") {
+  const ratings = new Map();
+  const leagues = new Map();
+  const finished = events.filter((event) => event.status === "FINISHED" && event.kickoff < before && event.homeScore != null && event.awayScore != null).sort((a, b) => a.kickoff.localeCompare(b.kickoff));
+  for (const match of finished) {
+    const homeId = match.homeTeam.id; const awayId = match.awayTeam.id;
+    const homeRating = ratings.get(homeId) ?? 1500; const awayRating = ratings.get(awayId) ?? 1500;
+    const expected = 1 / (1 + Math.pow(10, -((homeRating + 60) - awayRating) / 400));
+    const actual = match.homeScore > match.awayScore ? 1 : match.homeScore === match.awayScore ? 0.5 : 0;
+    const margin = Math.abs(match.homeScore - match.awayScore);
+    const change = 22 * (1 + Math.min(3, margin) * 0.12) * (actual - expected);
+    ratings.set(homeId, homeRating + change); ratings.set(awayId, awayRating - change);
+    const leagueId = match.league?.id ?? match.league?.name ?? "football";
+    const league = leagues.get(leagueId) ?? { matches: 0, homeGoals: 0, awayGoals: 0 };
+    league.matches += 1; league.homeGoals += match.homeScore; league.awayGoals += match.awayScore;
+    leagues.set(leagueId, league);
+  }
+  return { ratings, leagues };
+}
+
+function grid(homeLambda, awayLambda, maxGoals = 9, rho = -0.08) {
   const rows = [];
   let total = 0;
   for (let home = 0; home <= maxGoals; home += 1) for (let away = 0; away <= maxGoals; away += 1) {
-    const probability = poisson(homeLambda, home) * poisson(awayLambda, away);
+    let correction = 1;
+    if (home === 0 && away === 0) correction = 1 - homeLambda * awayLambda * rho;
+    else if (home === 0 && away === 1) correction = 1 + homeLambda * rho;
+    else if (home === 1 && away === 0) correction = 1 + awayLambda * rho;
+    else if (home === 1 && away === 1) correction = 1 - rho;
+    const probability = poisson(homeLambda, home) * poisson(awayLambda, away) * Math.max(0.2, correction);
     rows.push({ home, away, probability }); total += probability;
   }
   return rows.map((row) => ({ ...row, probability: row.probability / total }));
@@ -33,27 +65,44 @@ function grid(homeLambda, awayLambda, maxGoals = 9) {
 const sum = (rows, predicate) => rows.reduce((value, row) => value + (predicate(row) ? row.probability : 0), 0);
 const market = (key, name, category, selection, probability, extra = {}) => ({ key, name, category, selection, probability: clamp(probability, 0.001, 0.999), ...extra });
 
-export function scoreEvent(event, allEvents) {
-  const home = buildForm(event.homeTeam.id, allEvents, event.kickoff);
-  const away = buildForm(event.awayTeam.id, allEvents, event.kickoff);
+export function scoreEvent(event, allEvents, suppliedContext = null) {
+  const home = buildForm(event.homeTeam.id, allEvents, event.kickoff, 12);
+  const away = buildForm(event.awayTeam.id, allEvents, event.kickoff, 12);
+  const homeVenue = buildForm(event.homeTeam.id, allEvents, event.kickoff, 8, "HOME");
+  const awayVenue = buildForm(event.awayTeam.id, allEvents, event.kickoff, 8, "AWAY");
+  const context = suppliedContext ?? buildModelContext(allEvents, event.kickoff);
+  const league = context.leagues.get(event.league?.id ?? event.league?.name ?? "football");
+  const leagueHome = league?.matches >= 20 ? league.homeGoals / league.matches : 1.42;
+  const leagueAway = league?.matches >= 20 ? league.awayGoals / league.matches : 1.12;
   // Bayesian league priors keep every scheduled fixture modelled without
   // pretending that a team with little history has high-confidence evidence.
   const priorMatches = 4;
-  const homeGF = (home.goalsFor + 1.38 * priorMatches) / (home.played + priorMatches);
-  const homeGA = (home.goalsAgainst + 1.08 * priorMatches) / (home.played + priorMatches);
-  const awayGF = (away.goalsFor + 1.08 * priorMatches) / (away.played + priorMatches);
-  const awayGA = (away.goalsAgainst + 1.38 * priorMatches) / (away.played + priorMatches);
-  const homePPG = (home.points + 1.45 * priorMatches) / (home.played + priorMatches);
-  const awayPPG = (away.points + 1.10 * priorMatches) / (away.played + priorMatches);
-  const formDelta = clamp((homePPG - awayPPG) / 8, -0.18, 0.18);
-  const homeLambda = clamp(0.52 * homeGF + 0.38 * awayGA + 0.1 * 1.38 + formDelta, 0.25, 3.8);
-  const awayLambda = clamp(0.52 * awayGF + 0.38 * homeGA + 0.1 * 1.08 - formDelta, 0.2, 3.5);
+  const rate = (form, key, prior) => (form[key] + prior * priorMatches) / (form.weight + priorMatches);
+  const homeGF = 0.58 * rate(homeVenue, "goalsFor", leagueHome) + 0.42 * rate(home, "goalsFor", leagueHome);
+  const homeGA = 0.58 * rate(homeVenue, "goalsAgainst", leagueAway) + 0.42 * rate(home, "goalsAgainst", leagueAway);
+  const awayGF = 0.58 * rate(awayVenue, "goalsFor", leagueAway) + 0.42 * rate(away, "goalsFor", leagueAway);
+  const awayGA = 0.58 * rate(awayVenue, "goalsAgainst", leagueHome) + 0.42 * rate(away, "goalsAgainst", leagueHome);
+  const homePPG = rate(home, "points", 1.45);
+  const awayPPG = rate(away, "points", 1.1);
+  const homeRating = context.ratings.get(event.homeTeam.id) ?? 1500;
+  const awayRating = context.ratings.get(event.awayTeam.id) ?? 1500;
+  const eloHome = 1 / (1 + Math.pow(10, -((homeRating + 60) - awayRating) / 400));
+  const formDelta = clamp((homePPG - awayPPG) / 10, -0.16, 0.16);
+  const ratingDelta = clamp((eloHome - 0.5) * 0.48, -0.22, 0.22);
+  const restDays = (form) => form.lastKickoff ? (new Date(event.kickoff).getTime() - new Date(form.lastKickoff).getTime()) / 86_400_000 : 7;
+  const restDelta = clamp((restDays(home) - restDays(away)) * 0.012, -0.06, 0.06);
+  const homeAttack = clamp(homeGF / Math.max(0.45, leagueHome), 0.35, 2.4);
+  const awayDefence = clamp(awayGA / Math.max(0.45, leagueHome), 0.35, 2.4);
+  const awayAttack = clamp(awayGF / Math.max(0.35, leagueAway), 0.35, 2.4);
+  const homeDefence = clamp(homeGA / Math.max(0.35, leagueAway), 0.35, 2.4);
+  const homeLambda = clamp(leagueHome * Math.sqrt(homeAttack * awayDefence) + formDelta + ratingDelta + restDelta, 0.25, 3.8);
+  const awayLambda = clamp(leagueAway * Math.sqrt(awayAttack * homeDefence) - formDelta - ratingDelta - restDelta, 0.2, 3.5);
   const rows = grid(homeLambda, awayLambda);
   const homeWin = sum(rows, (r) => r.home > r.away);
   const draw = sum(rows, (r) => r.home === r.away);
   const awayWin = sum(rows, (r) => r.home < r.away);
   const btts = sum(rows, (r) => r.home > 0 && r.away > 0);
-  const quality = clamp((home.played + away.played) / 20, 0.08, 1);
+  const quality = clamp((home.played + away.played + homeVenue.played + awayVenue.played) / 36, 0.08, 1);
   const predictions = [
     market("MATCH_HOME", "Match result", "Result", event.homeTeam.name, homeWin),
     market("MATCH_DRAW", "Match result", "Result", "Draw", draw),
@@ -112,12 +161,12 @@ export function scoreEvent(event, allEvents) {
     expectedHomeGoals: Number(homeLambda.toFixed(2)),
     expectedAwayGoals: Number(awayLambda.toFixed(2)),
     dataQuality: quality,
-    confidence: clamp(item.probability * (0.58 + quality * 0.42), 0, 0.99),
+    confidence: clamp(item.probability * (0.68 + quality * 0.32), 0, 0.99),
     fairOdds: Number((1 / item.probability).toFixed(2)),
     quotedOdds: null,
     oddsSource: null,
     edge: null,
-    factors: { homePlayed: home.played, awayPlayed: away.played, homePPG: homePPG, awayPPG: awayPPG, homeGF, awayGF, homeGA, awayGA },
+    factors: { homePlayed: home.played, awayPlayed: away.played, homeVenuePlayed: homeVenue.played, awayVenuePlayed: awayVenue.played, homePPG, awayPPG, homeGF, awayGF, homeGA, awayGA, homeElo: Math.round(homeRating), awayElo: Math.round(awayRating), eloHome, homeRestDays: Number(restDays(home).toFixed(1)), awayRestDays: Number(restDays(away).toFixed(1)), leagueHomeGoals: leagueHome, leagueAwayGoals: leagueAway },
   }));
 }
 
@@ -137,6 +186,25 @@ export function attachOdds(predictions, odds) {
     });
     if (!quote) return prediction;
     const implied = 1 / quote.odds;
-    return { ...prediction, quotedOdds: quote.odds, oddsSource: quote.source, oddsProvider: quote.provider ?? null, providerDeepLink: quote.deepLink ?? null, edge: prediction.probability - implied, impliedProbability: implied, providerMarketId: quote.marketId, providerSelectionId: quote.selectionId };
+    const comparable = odds.filter((odd) => odd.marketId === quote.marketId && odd.odds > 1);
+    const overround = comparable.reduce((sum, odd) => sum + 1 / odd.odds, 0);
+    const consensus = comparable.length >= 2 && overround > 0 ? implied / overround : null;
+    const blendedProbability = consensus == null ? prediction.probability : clamp(prediction.probability * 0.84 + consensus * 0.16, 0.001, 0.999);
+    return {
+      ...prediction,
+      modelProbability: prediction.probability,
+      probability: blendedProbability,
+      confidence: clamp(blendedProbability * (0.68 + prediction.dataQuality * 0.32), 0, 0.99),
+      fairOdds: Number((1 / blendedProbability).toFixed(2)),
+      quotedOdds: quote.odds,
+      oddsSource: quote.source,
+      oddsProvider: quote.provider ?? null,
+      providerDeepLink: quote.deepLink ?? null,
+      edge: blendedProbability - implied,
+      impliedProbability: implied,
+      consensusProbability: consensus,
+      providerMarketId: quote.marketId,
+      providerSelectionId: quote.selectionId,
+    };
   });
 }

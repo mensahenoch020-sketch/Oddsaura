@@ -1,0 +1,7 @@
+.build-filter-toggle,.matches-filter-toggle{width:100%;border:1px solid #dce0d8;background:#fff;padding:11px 13px;display:none;align-items:center;justify-content:space-between;color:#0b1426;font-size:10px;font-weight:800}
+.build-filter-toggle{border-width:0 0 1px;border-radius:0;padding:12px 20px}
+.matches-filter-toggle{border-radius:9px;margin-top:8px}
+.build-filter-toggle span,.matches-filter-toggle span{color:#74808e;font-size:9px;font-weight:600}
+.build-provider-ready{margin:15px 20px 0;padding:12px;border:1px solid #dce0d8;background:#f6f8f3;border-radius:9px;display:grid;grid-template-columns:1fr auto;gap:3px 10px}
+.build-provider-ready>span{font-size:8px;text-transform:uppercase;color:#7a8592}.build-provider-ready>strong{grid-column:2;grid-row:1/3;font-size:12px}.build-provider-ready>small{font-size:8px;color:#7d8794;line-height:1.35}
+@media(max-width:650px){.build-filter-toggle,.matches-filter-toggle{display:flex}.build-league-tabs,.matches-league-tabs{display:none}.build-league-tabs.open,.matches-league-tabs.open{display:flex}.build-provider-ready{margin:14px 16px 0}.matches-league-tabs{padding:10px 0 1px}}

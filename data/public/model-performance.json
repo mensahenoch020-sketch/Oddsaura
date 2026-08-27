@@ -1,0 +1,11 @@
+{
+  "generatedAt": null,
+  "methodology": "Walk-forward backtest pending historical refresh.",
+  "matches": 0,
+  "oneXTwoAccuracy": null,
+  "over25Accuracy": null,
+  "brierScore": null,
+  "logLoss": null,
+  "calibration": [],
+  "leagues": []
+}
