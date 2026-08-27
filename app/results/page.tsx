@@ -2,17 +2,40 @@
 
 import { useEffect, useMemo, useState } from "react";
 import ProductNavigation from "../product-navigation";
-import { fallbackSnapshot, loadSnapshot, type Snapshot } from "../data";
+import { fallbackSnapshot, loadSnapshot, type Fixture, type Snapshot } from "../data";
 import "./results.css";
 import "./results-shell.css";
 
 const money = new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 });
 type Period = "TODAY" | "7D" | "30D" | "ALL";
+type RequestedPick = { fixtureId: string; homeTeam: string; awayTeam: string; marketKey: string; marketName: string; selection: string; line?: number | null };
+type PersonalCode = { id: string; provider: string; code: string; createdAt: number; selections: { requested?: RequestedPick[] } };
+type ModelPerformance = { matches: number; oneXTwoAccuracy: number; over25Accuracy: number; brierScore: number; generatedAt: string };
 
 function startOfDay(timestamp: number) {
   const value = new Date(timestamp);
   value.setHours(0, 0, 0, 0);
   return value.getTime();
+}
+
+function settlePersonal(selection: RequestedPick, fixture?: Fixture) {
+  if (!fixture || fixture.status !== "FINISHED" || fixture.homeScore == null || fixture.awayScore == null) return "PENDING";
+  const home = Number(fixture.homeScore); const away = Number(fixture.awayScore); const total = home + away; const line = Number(selection.line); const key = selection.marketKey;
+  if (key === "MATCH_HOME") return home > away ? "WON" : "LOST";
+  if (key === "MATCH_DRAW") return home === away ? "WON" : "LOST";
+  if (key === "MATCH_AWAY") return away > home ? "WON" : "LOST";
+  if (key === "DC_1X") return home >= away ? "WON" : "LOST";
+  if (key === "DC_X2") return away >= home ? "WON" : "LOST";
+  if (key === "DC_12") return home !== away ? "WON" : "LOST";
+  if (key === "BTTS_YES") return home > 0 && away > 0 ? "WON" : "LOST";
+  if (key === "BTTS_NO") return home === 0 || away === 0 ? "WON" : "LOST";
+  if (key.startsWith("HOME_OVER_")) return home > line ? "WON" : "LOST";
+  if (key.startsWith("HOME_UNDER_")) return home < line ? "WON" : "LOST";
+  if (key.startsWith("AWAY_OVER_")) return away > line ? "WON" : "LOST";
+  if (key.startsWith("AWAY_UNDER_")) return away < line ? "WON" : "LOST";
+  if (key.startsWith("OVER_")) return total > line ? "WON" : "LOST";
+  if (key.startsWith("UNDER_")) return total < line ? "WON" : "LOST";
+  return "CHECK";
 }
 
 export default function ResultsPage() {
@@ -21,8 +44,14 @@ export default function ResultsPage() {
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<Period>("7D");
   const [referenceTime] = useState(() => Date.now());
+  const [personalCodes, setPersonalCodes] = useState<PersonalCode[]>([]);
+  const [model, setModel] = useState<ModelPerformance | null>(null);
 
-  useEffect(() => { loadSnapshot().then(setSnapshot).catch(() => undefined).finally(() => setLoading(false)); }, []);
+  useEffect(() => {
+    loadSnapshot().then(setSnapshot).catch(() => undefined).finally(() => setLoading(false));
+    fetch("/api/codes").then((response) => response.ok ? response.json() : { codes: [] }).then((payload) => setPersonalCodes(payload.codes ?? [])).catch(() => undefined);
+    fetch("https://raw.githubusercontent.com/mensahenoch020-sketch/Oddsaura/main/data/public/model-performance.json", { cache: "no-store" }).then((response) => response.ok ? response.json() : null).then(setModel).catch(() => undefined);
+  }, []);
   const history = useMemo(() => snapshot.ticketHistory ?? snapshot.tickets, [snapshot.ticketHistory, snapshot.tickets]);
   const tickets = useMemo(() => {
     if (period === "ALL") return history;
@@ -47,11 +76,13 @@ export default function ResultsPage() {
   }, [tickets, stake]);
 
   return <main className="results-app">
-    <ProductNavigation active="predictions" />
+    <ProductNavigation active="results" />
     <section className="results-hero"><div><span>Ticket tracker</span><h1>Results without<br /><i>the guesswork.</i></h1></div><p>OddsAura settles supported markets from final scores. Always confirm early-payout markets, voids and official settlement inside your bookmaker account.</p></section>
     <nav className="results-periods" aria-label="Results period">{([['TODAY', 'Today'], ['7D', '7 days'], ['30D', '30 days'], ['ALL', 'Archive']] as const).map(([value, label]) => <button type="button" key={value} className={period === value ? "active" : ""} onClick={() => setPeriod(value)}>{label}</button>)}</nav>
     <section className="results-summary"><article><span>Won</span><strong>{summary.won}</strong></article><article><span>Lost</span><strong>{summary.lost}</strong></article><article><span>Pending</span><strong>{summary.pending}</strong></article><label><span>Stake calculator</span><div>₦<input type="number" min="0" step="100" value={stake} onChange={(event) => setStake(Math.max(0, Number(event.target.value) || 0))} /></div></label></section>
     <section className="results-performance" aria-label="Performance summary"><article><span>Settled</span><strong>{performance.settled}</strong></article><article><span>Hit rate</span><strong>{performance.hitRate.toFixed(1)}%</strong></article><article><span>Model ROI</span><strong className={performance.roi < 0 ? "negative" : ""}>{performance.roi >= 0 ? "+" : ""}{performance.roi.toFixed(1)}%</strong></article></section>
+    {model ? <section className="model-scorecard" aria-label="Model scorecard"><header><span>Walk-forward scorecard</span><b>{model.matches} historical matches</b></header><div><article><span>1X2</span><strong>{(model.oneXTwoAccuracy * 100).toFixed(1)}%</strong></article><article><span>Over 2.5</span><strong>{(model.over25Accuracy * 100).toFixed(1)}%</strong></article><article><span>Brier score</span><strong>{model.brierScore.toFixed(3)}</strong></article></div></section> : null}
+    {personalCodes.length ? <section className="personal-results"><div className="results-title"><div><span>My codes</span><h2>Personal slip results</h2></div><small>{personalCodes.length} recent codes</small></div><div className="personal-code-grid">{personalCodes.map((item) => { const requested = item.selections.requested ?? []; const rows = requested.map((pick) => ({ pick, result: settlePersonal(pick, snapshot.recentResults?.find((fixture) => fixture.id === pick.fixtureId)) })); const status = rows.some((row) => row.result === "LOST") ? "LOST" : rows.some((row) => row.result === "PENDING") ? "PENDING" : rows.some((row) => row.result === "CHECK") ? "CHECK" : "WON"; return <article key={item.id}><header><div><span>{item.provider}</span><strong>{item.code}</strong></div><b className={status.toLowerCase()}>{status}</b></header><small>{new Date(item.createdAt).toLocaleString()} · {requested.length} picks</small><div>{rows.map(({ pick, result }) => <p key={`${item.id}-${pick.fixtureId}`}><span>{pick.homeTeam} vs {pick.awayTeam}</span><b>{result === "WON" ? "✓" : result === "LOST" ? "×" : "–"}</b></p>)}</div></article>; })}</div></section> : null}
     <section className="results-board">
       <div className="results-title"><div><span>Published tickets</span><h2>Daily ticket history</h2></div><small>{loading ? "Loading results…" : `${tickets.length} tracked ${tickets.length === 1 ? "ticket" : "tickets"}`}</small></div>
       <div className="results-grid">{tickets.map((ticket) => {
