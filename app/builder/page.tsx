@@ -56,6 +56,8 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
   const [imagePreview, setImagePreview] = useState("");
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
   const [liveOdds, setLiveOdds] = useState<Record<string, number>>({});
+  const [targetOdds, setTargetOdds] = useState("5");
+  const [sportyReadyOnly, setSportyReadyOnly] = useState(false);
 
   useEffect(() => {
     loadSnapshot().then((data) => {
@@ -76,13 +78,13 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
     const groups = new Map<string, { fixtureId: string; league: PredictedPick["league"]; kickoff: string; homeTeam: Team; awayTeam: Team; predictions: PredictedPick[] }>();
     for (const pick of predictions) {
       const text = `${pick.homeTeam.name} ${pick.awayTeam.name} ${pick.league.name} ${pick.market.name} ${pick.selection}`.toLowerCase();
-      if (!text.includes(search.trim().toLowerCase()) || (tier !== "ALL" && pick.tier !== tier) || !leagueMatches(pick.league, league)) continue;
+      if (!text.includes(search.trim().toLowerCase()) || (tier !== "ALL" && pick.tier !== tier) || !leagueMatches(pick.league, league) || (sportyReadyOnly && !(pick.providerMarketId && pick.providerSelectionId))) continue;
       const group = groups.get(pick.fixtureId) ?? { fixtureId: pick.fixtureId, league: pick.league, kickoff: pick.kickoff, homeTeam: pick.homeTeam, awayTeam: pick.awayTeam, predictions: [] };
       group.predictions.push(pick);
       groups.set(pick.fixtureId, group);
     }
     return [...groups.values()].sort((a, b) => a.kickoff.localeCompare(b.kickoff));
-  }, [predictions, search, tier, league]);
+  }, [predictions, search, tier, league, sportyReadyOnly]);
   const priceFor = (pick: PredictedPick) => liveOdds[pick.fixtureId] ?? pick.quotedOdds ?? null;
   const totalOdds = useMemo(() => picks.every((pick) => liveOdds[pick.fixtureId] ?? pick.quotedOdds) ? picks.reduce((value, pick) => value * (liveOdds[pick.fixtureId] ?? pick.quotedOdds ?? 1), 1) : null, [picks, liveOdds]);
 
@@ -96,6 +98,42 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
     setPicks((rows) => rows.filter((row) => row.fixtureId !== fixtureId));
     setSportyCode(null);
     setLiveOdds((current) => Object.fromEntries(Object.entries(current).filter(([id]) => id !== fixtureId)));
+  }
+
+  function buildToTarget() {
+    const target = Math.max(1.2, Math.min(100, Number(targetOdds) || 5));
+    const quality = { HIGH: 2, MEDIUM: 1, LOW: 0 };
+    const ranked = [...predictions]
+      .filter((pick) => pick.quotedOdds && pick.quotedOdds > 1 && pick.confidence >= .48)
+      .sort((a, b) => (b.confidence + quality[b.dataQuality ?? "LOW"] * .05) - (a.confidence + quality[a.dataQuality ?? "LOW"] * .05));
+    const selected: PredictedPick[] = [];
+    let combined = 1;
+    let underMarkets = 0;
+    for (const pick of ranked) {
+      if (combined >= target || selected.length >= 20 || selected.some((item) => item.fixtureId === pick.fixtureId)) continue;
+      const isUnder = pick.market.key.includes("UNDER");
+      if (isUnder && underMarkets >= Math.max(1, Math.floor((selected.length + 1) * .4))) continue;
+      selected.push(pick); combined *= pick.quotedOdds ?? 1;
+      if (isUnder) underMarkets += 1;
+    }
+    setPicks(selected); setSportyCode(null); setLiveOdds({}); setSlipOpen(true);
+    setNotice(selected.length ? `${selected.length} stronger picks built near ${target.toFixed(2)} odds.` : "No priced picks are ready for that target.");
+  }
+
+  const weakestPick = useMemo(() => [...picks].sort((a, b) => {
+    const score = (pick: PredictedPick) => pick.confidence + (pick.dataQuality === "HIGH" ? .08 : pick.dataQuality === "MEDIUM" ? .04 : 0) + (pick.quotedOdds ? .03 : 0);
+    return score(a) - score(b);
+  })[0] ?? null, [picks]);
+
+  function replaceWeakest() {
+    if (!weakestPick) return;
+    const used = new Set(picks.map((pick) => pick.fixtureId));
+    const replacement = [...predictions]
+      .filter((pick) => !used.has(pick.fixtureId) && pick.quotedOdds && pick.confidence > weakestPick.confidence && pick.dataQuality !== "LOW")
+      .sort((a, b) => b.confidence - a.confidence)[0];
+    if (!replacement) { setNotice("No stronger replacement is available right now."); return; }
+    setPicks((current) => current.map((pick) => pick.id === weakestPick.id ? replacement : pick));
+    setSportyCode(null); setLiveOdds({}); setNotice("Weakest pick replaced.");
   }
 
   async function copyText(value: string, label: string) {
@@ -208,6 +246,7 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
       <div className="build-board">
         <div className="build-toolbar"><div><h2>Matches</h2><span>{loading ? "Loading…" : `${fixtureGroups.length} available`}</span></div><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search team or league" aria-label="Search predicted games" /></div>
         <div className="build-tier-tabs" aria-label="Prediction risk"><button type="button" className={tier === "ALL" ? "active" : ""} onClick={() => setTier("ALL")}>All <b>{tierCounts.ALL}</b></button><button type="button" className={tier === "SAFE" ? "active" : ""} onClick={() => setTier("SAFE")}>Safe <b>{tierCounts.SAFE}</b></button><button type="button" className={tier === "BALANCED" ? "active" : ""} onClick={() => setTier("BALANCED")}>Balanced <b>{tierCounts.BALANCED}</b></button><button type="button" className={tier === "HIGH_RISK" ? "active" : ""} onClick={() => setTier("HIGH_RISK")}>High risk <b>{tierCounts.HIGH_RISK}</b></button></div>
+        <div className="build-tools"><label><span>Target odds</span><input inputMode="decimal" value={targetOdds} onChange={(event) => setTargetOdds(event.target.value)} aria-label="Target total odds" /></label><button type="button" onClick={buildToTarget}>Build target</button><label className="build-ready"><input type="checkbox" checked={sportyReadyOnly} onChange={(event) => setSportyReadyOnly(event.target.checked)} /><span>SportyBet IDs ready</span></label></div>
         <div className="build-filter-toggle build-filter-label"><b>Leagues</b><span>{LEAGUE_FILTERS.find((item) => item.id === league)?.label}</span></div>
         <div className="build-league-tabs open" aria-label="League filter">{LEAGUE_FILTERS.map((item) => <button type="button" key={item.id} className={league === item.id ? "active" : ""} onClick={() => setLeague(item.id)}>{item.label}</button>)}</div>
         <div className="build-fixtures">{fixtureGroups.map((group) => <article id={`fixture-${encodeURIComponent(group.fixtureId)}`} key={group.fixtureId} className="build-fixture">
@@ -219,6 +258,7 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
         <div className="build-slip-title"><div><span>Betslip</span><h2>{picks.length} {picks.length === 1 ? "selection" : "selections"}</h2></div><div>{picks.length > 0 && <button type="button" onClick={() => { setPicks([]); setSportyCode(null); setLiveOdds({}); }}>Clear</button>}<button className="build-slip-close" type="button" onClick={() => setSlipOpen(false)}>×</button></div></div>
         <div className="build-picks">{picks.map((pick) => <div key={pick.fixtureId}><button type="button" aria-label={`Remove ${pick.homeTeam.name} versus ${pick.awayTeam.name}`} onClick={() => removePick(pick.fixtureId)}>×</button><span>{pick.homeTeam.name} vs {pick.awayTeam.name}</span><strong>{pick.market.name}: {pick.selection}</strong><b>{priceFor(pick)?.toFixed(2) ?? "Pending"} <small>{liveOdds[pick.fixtureId] ? "LIVE" : ""}</small></b><a href={`#fixture-${encodeURIComponent(pick.fixtureId)}`} onClick={() => setSlipOpen(false)}>Change</a></div>)}{!picks.length && <p>No selections</p>}</div>
         <div className="build-total"><span>{totalOdds ? "Total odds" : "Bookmaker prices"}</span><strong>{totalOdds?.toFixed(2) ?? "Pending"}</strong></div>
+        {weakestPick ? <div className="slip-doctor"><div><span>Slip Doctor</span><b>{weakestPick.homeTeam.shortName || weakestPick.homeTeam.name} vs {weakestPick.awayTeam.shortName || weakestPick.awayTeam.name}</b><small>{weakestPick.dataQuality === "LOW" ? "Limited match history" : `${Math.round(weakestPick.confidence * 100)}% confidence · weakest leg`}</small></div><button type="button" onClick={replaceWeakest}>Replace</button></div> : null}
         <div className="build-provider-list" aria-label="Choose bookmaker">{providerAdapters.filter((item) => item.id !== "draftkings").map((item) => <button type="button" key={item.id} className={provider === item.id ? "active" : ""} onClick={() => { setProvider(item.id); setSportyCode(null); }}>{item.label}<small>{item.status === "live" ? "Live" : "Next"}</small></button>)}</div>
         <button className="build-code" type="button" disabled={!picks.length || creatingCode || activeProvider.status !== "live"} onClick={() => void requestCode()}>{activeProvider.status !== "live" ? `${activeProvider.label} verification pending` : creatingCode ? "Checking live odds…" : "Generate code"} <span>→</span></button>
         {sportyCode && <div className="build-real-code"><span>SportyBet code</span><strong>{sportyCode.code}</strong><div><button type="button" onClick={() => void copyText(sportyCode.code, "Code copied")}>{copied === "Code copied" ? "Copied ✓" : "Copy code"}</button><a href={sportyCode.deepLink} target="_blank" rel="noreferrer">Open SportyBet ↗</a></div></div>}
