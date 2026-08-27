@@ -30,6 +30,16 @@ function estimatedOdds(item) {
   return Number.isFinite(value) ? Number(value) : null;
 }
 
+function marketFamily(key = "") {
+  if (/^UNDER_|_(UNDER)_/.test(key)) return "UNDER";
+  if (/^OVER_|_(OVER)_/.test(key)) return "OVER";
+  if (/^MATCH_/.test(key)) return "RESULT";
+  if (/^DC_/.test(key)) return "DOUBLE_CHANCE";
+  if (/^BTTS_/.test(key)) return "BTTS";
+  if (/^DNB_/.test(key)) return "DNB";
+  return "OTHER";
+}
+
 export function buildTicket(candidates, category, fixtures) {
   const band = bands[category];
   if (!band) return null;
@@ -42,11 +52,14 @@ export function buildTicket(candidates, category, fixtures) {
     })
     .sort((a, b) => {
       const leagueDelta = priorityLeague(fixtureMap.get(a.fixtureId)?.league) - priorityLeague(fixtureMap.get(b.fixtureId)?.league);
-      const qualityDelta = (b.confidence + Math.max(0, b.edge ?? 0)) - (a.confidence + Math.max(0, a.edge ?? 0));
+      const diversityA = marketFamily(a.key) === "UNDER" ? -.035 : 0;
+      const diversityB = marketFamily(b.key) === "UNDER" ? -.035 : 0;
+      const qualityDelta = (b.confidence + Math.max(0, b.edge ?? 0) + diversityB) - (a.confidence + Math.max(0, a.edge ?? 0) + diversityA);
       return Math.abs(qualityDelta) > .055 ? qualityDelta : leagueDelta || qualityDelta;
     });
   const selected = [];
   const used = new Set();
+  const familyCounts = new Map();
   let totalOdds = 1;
   for (const item of eligible) {
     if (used.has(item.fixtureId) || selected.length >= band.selections) continue;
@@ -55,6 +68,9 @@ export function buildTicket(candidates, category, fixtures) {
     if (!fixture || fixture.status !== "SCHEDULED" || new Date(fixture.kickoff).getTime() <= Date.now() + 20 * 60 * 1000) continue;
     const odds = estimatedOdds(item);
     if (!band.exactSelections && selected.length && totalOdds * odds > band.max) continue;
+    const family = marketFamily(item.key);
+    const familyLimit = family === "UNDER" ? Math.max(1, Math.ceil(band.selections * .35)) : Math.max(2, Math.ceil(band.selections * .55));
+    if ((familyCounts.get(family) ?? 0) >= familyLimit) continue;
     selected.push({
       id: `${item.fixtureId}-${item.key}`,
       fixtureId: item.fixtureId,
@@ -72,6 +88,7 @@ export function buildTicket(candidates, category, fixtures) {
       oddsSource: item.oddsSource,
     });
     used.add(item.fixtureId);
+    familyCounts.set(family, (familyCounts.get(family) ?? 0) + 1);
     totalOdds *= odds;
   }
   if (band.exactSelections && selected.length !== band.exactSelections) return null;

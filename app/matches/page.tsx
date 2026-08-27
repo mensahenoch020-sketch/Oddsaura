@@ -88,10 +88,7 @@ export default function MatchesPage() {
   return <main className="matches-app">
     <ProductNavigation active="matches" />
 
-    <section className="matches-hero">
-      <div><span className="matches-kicker">Football centre</span><h1>Find a match.<br /><i>See what matters.</i></h1></div>
-      <p>Live scores, today’s fixtures and the next seven days in one simple view. Team badges come directly from the active football feed.</p>
-    </section>
+    <section className="matches-hero"><div><span className="matches-kicker">Football</span><h1>All matches</h1></div></section>
 
     <section className="matches-controls" aria-label="Match filters">
       <div className="matches-tabs" role="tablist" aria-label="Fixture period">
@@ -101,7 +98,7 @@ export default function MatchesPage() {
       </div>
       <label className="matches-search"><span>Search</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Team or league" /></label>
     </section>
-    <button className="matches-filter-toggle" type="button" aria-expanded={showLeagueFilter} onClick={() => setShowLeagueFilter((value) => !value)}>Filter leagues <span>{LEAGUE_FILTERS.find((item) => item.id === league)?.label}</span></button>
+    <button className="matches-filter-toggle" type="button" aria-expanded={showLeagueFilter} onClick={() => setShowLeagueFilter((value) => !value)}><b>☰ Leagues</b><span>{LEAGUE_FILTERS.find((item) => item.id === league)?.label} · {showLeagueFilter ? "Close" : "Open"}</span></button>
     <div className={`matches-league-tabs ${showLeagueFilter ? "open" : ""}`} aria-label="League filter">{LEAGUE_FILTERS.map((item) => <button type="button" key={item.id} className={league === item.id ? "active" : ""} onClick={() => { setLeague(item.id); setLimit(120); setShowLeagueFilter(false); }}>{item.label}</button>)}</div>
 
     <div className="matches-summary"><span>{loading ? "Refreshing match data…" : `Showing ${Math.min(limit, visible.length)} of ${visible.length} ${visible.length === 1 ? "match" : "matches"}`}</span><small>{snapshot.message}</small></div>
@@ -116,7 +113,7 @@ export default function MatchesPage() {
             <div><TeamMark team={fixture.awayTeam} /><strong>{fixture.awayTeam.name}</strong>{fixture.status === "LIVE" && <b>{fixture.awayScore ?? "–"}</b>}</div>
           </div>
           {modelPicks.length ? <div className="matches-prices">{modelPicks.slice(0, 3).map((pick) => <span key={pick.id}><small>{pick.selection}</small><b>{pick.quotedOdds?.toFixed(2) ?? `Fair ${pick.fairOdds.toFixed(2)}`}</b></span>)}</div> : <p className="matches-waiting">A prediction will appear after the next model refresh.</p>}
-          <div className="matches-card-foot"><span>{modelPicks.length} modelled {modelPicks.length === 1 ? "pick" : "picks"}</span>{modelPicks.length ? <Link href={`/builder?fixture=${encodeURIComponent(fixture.id)}`}>Choose prediction <b>→</b></Link> : <span>Not selectable yet</span>}</div>
+          <div className="matches-card-foot"><span>{modelPicks.length} {modelPicks.length === 1 ? "pick" : "picks"}</span>{modelPicks.length ? <Link href={`/dashboard?fixture=${encodeURIComponent(fixture.id)}`}>Select <b>→</b></Link> : <span>Unavailable</span>}</div>
         </article>; })}</div>
       </section>)}
       {visible.length > limit && <button className="matches-more" type="button" onClick={() => setLimit((value) => value + 120)}>Load 120 more matches</button>}

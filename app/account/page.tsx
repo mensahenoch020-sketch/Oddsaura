@@ -9,5 +9,5 @@ export const dynamic = "force-dynamic";
 
 export default async function AccountPage() {
   const user = await getOddsAuraUser();
-  return <main className="account-page"><ProductNavigation active="profile" /><section className="account-hero"><span>Profile & settings</span><h1>{user.displayName}</h1><p>{user.email}</p></section><AccountSettings initialName={user.displayName} email={user.email} /><GeneratedCodes /><SavedSlips /></main>;
+  return <main className="account-page"><ProductNavigation active="profile" /><section className="account-hero"><span>Account</span><h1>Profile</h1><p>{user.displayName} · {user.email}</p></section><AccountSettings initialName={user.displayName} email={user.email} /><GeneratedCodes /><SavedSlips /></main>;
 }

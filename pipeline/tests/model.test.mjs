@@ -75,6 +75,15 @@ test("ticket construction does not repeat a fixture", () => {
   assert.equal(new Set(ticket.selections.map((item) => item.fixtureId)).size, ticket.selections.length);
 });
 
+test("ticket construction does not fill a ticket with under markets", () => {
+  const candidates = Array.from({ length: 10 }, (_, index) => ({ fixtureId: `mix${index}`, key: index < 5 ? "UNDER_3_5" : "DC_1X", name: index < 5 ? "Under 3.5" : "Double chance", category: index < 5 ? "Goals" : "Result", selection: index < 5 ? "Under 3.5" : "1X", probability: .78, confidence: index < 5 ? .8 : .79, quotedOdds: 1.35, fairOdds: 1.28, edge: .03, oddsSource: "public-json", factors: { homePlayed: 8, awayPlayed: 8 } }));
+  const fixtures = candidates.map((item) => ({ id: item.fixtureId, status: "SCHEDULED", kickoff: new Date(Date.now() + 86_400_000).toISOString(), league: { name: "League" }, homeTeam: { name: "Home" }, awayTeam: { name: "Away" } }));
+  const ticket = buildTicket(candidates, "SAFE_2", fixtures);
+  assert.ok(ticket);
+  assert.ok(ticket.selections.some((item) => !item.market.key.startsWith("UNDER_")));
+  assert.ok(ticket.selections.filter((item) => item.market.key.startsWith("UNDER_")).length <= 2);
+});
+
 test("the ESPN fallback normalizes fixtures and available moneyline prices", () => {
   const event = normalizeEspnEvent({
     id: "401",

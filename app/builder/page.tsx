@@ -4,10 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import ProductNavigation from "../product-navigation";
 import { fallbackSnapshot, loadSnapshot, type PredictedPick, type Snapshot, type Team } from "../data";
 import { LEAGUE_FILTERS, leagueMatches, type LeagueFilter } from "../leagues";
-import { generateSportyBetCode, type SportyBetCodeResponse } from "./providers";
+import { generateSportyBetCode, providerAdapters, type ProviderId, type SportyBetCodeResponse } from "./providers";
 import "./builder.css";
 import "./predictions.css";
 import "../filter-controls.css";
+import "../compact-theme.css";
 
 /* Badge hosts are supplied dynamically by the football feed. */
 /* eslint-disable @next/next/no-img-element */
@@ -39,7 +40,7 @@ function TeamBadge({ team }: { team: Team }) {
   return <span className="build-team-badge" aria-hidden="true">{!failed && team.logo ? <img src={team.logo} alt="" loading="lazy" onError={() => setFailed(true)} /> : initials(team.shortName || team.name)}</span>;
 }
 
-export default function BuilderPage() {
+export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "home" | "slip" }) {
   const [snapshot, setSnapshot] = useState<Snapshot>(fallbackSnapshot);
   const [picks, setPicks] = useState<PredictedPick[]>([]);
   const [search, setSearch] = useState("");
@@ -50,6 +51,12 @@ export default function BuilderPage() {
   const [sportyCode, setSportyCode] = useState<SportyBetCodeResponse | null>(null);
   const [creatingCode, setCreatingCode] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [slipOpen, setSlipOpen] = useState(false);
+  const [provider, setProvider] = useState<ProviderId>("sportybet");
+  const [copied, setCopied] = useState("");
+  const [imagePreview, setImagePreview] = useState("");
+  const [imageBlob, setImageBlob] = useState<Blob | null>(null);
+  const [liveOdds, setLiveOdds] = useState<Record<string, number>>({});
 
   useEffect(() => {
     loadSnapshot().then((data) => {
@@ -77,12 +84,25 @@ export default function BuilderPage() {
     }
     return [...groups.values()].sort((a, b) => a.kickoff.localeCompare(b.kickoff));
   }, [predictions, search, tier, league]);
-  const totalOdds = useMemo(() => picks.every((pick) => pick.quotedOdds) ? picks.reduce((value, pick) => value * (pick.quotedOdds ?? 1), 1) : null, [picks]);
+  const priceFor = (pick: PredictedPick) => liveOdds[pick.fixtureId] ?? pick.quotedOdds ?? null;
+  const totalOdds = useMemo(() => picks.every((pick) => liveOdds[pick.fixtureId] ?? pick.quotedOdds) ? picks.reduce((value, pick) => value * (liveOdds[pick.fixtureId] ?? pick.quotedOdds ?? 1), 1) : null, [picks, liveOdds]);
 
   function choose(pick: PredictedPick) {
-    setPicks((current) => [...current.filter((item) => item.fixtureId !== pick.fixtureId), pick]);
+    setPicks((current) => current.some((item) => item.id === pick.id) ? current.filter((item) => item.id !== pick.id) : [...current.filter((item) => item.fixtureId !== pick.fixtureId), pick]);
     setNotice("");
     setSportyCode(null);
+  }
+
+  function removePick(fixtureId: string) {
+    setPicks((rows) => rows.filter((row) => row.fixtureId !== fixtureId));
+    setSportyCode(null);
+    setLiveOdds((current) => Object.fromEntries(Object.entries(current).filter(([id]) => id !== fixtureId)));
+  }
+
+  async function copyText(value: string, label: string) {
+    await navigator.clipboard.writeText(value);
+    setCopied(label);
+    window.setTimeout(() => setCopied(""), 1800);
   }
 
   async function save() {
@@ -100,8 +120,8 @@ export default function BuilderPage() {
     url.searchParams.set("slip", serialize(picks));
     window.history.replaceState({}, "", url);
     if (navigator.share) await navigator.share({ title: "My OddsAura predicted slip", text: `${picks.length} modelled picks${totalOdds ? ` · ${totalOdds.toFixed(2)} total odds` : " · some prices pending"}`, url: url.toString() });
-    else await navigator.clipboard.writeText(url.toString());
-    setNotice(navigator.share ? "Share sheet opened." : "Share link copied.");
+    else await copyText(url.toString(), "Link copied");
+    if (navigator.share) setNotice("Share opened");
   }
 
   function jpeg() {
@@ -110,23 +130,42 @@ export default function BuilderPage() {
     canvas.width = 1080; canvas.height = Math.max(1350, 330 + exported.length * 112);
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    ctx.fillStyle = "#0b1426"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#c7fa45"; ctx.beginPath(); ctx.arc(90, 92, 28, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#0d0f12"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#23d96c"; ctx.beginPath(); ctx.arc(90, 92, 28, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = "#ffffff"; ctx.font = "700 44px Arial"; ctx.fillText("OddsAura", 135, 108);
     ctx.fillStyle = "#9ba8b9"; ctx.font = "24px Arial"; ctx.fillText("MY PREDICTED MATCH SLIP", 70, 180);
     let y = 250;
     for (const pick of exported) {
-      ctx.fillStyle = "#17243a"; ctx.fillRect(60, y - 40, 960, 104);
+      ctx.fillStyle = "#20242b"; ctx.fillRect(60, y - 40, 960, 104);
       ctx.fillStyle = "#ffffff"; ctx.font = "700 25px Arial"; ctx.fillText(`${pick.homeTeam.name} vs ${pick.awayTeam.name}`.slice(0, 58), 85, y);
       ctx.fillStyle = "#aab5c4"; ctx.font = "22px Arial"; ctx.fillText(`${pick.market.name}: ${pick.selection} · ${Math.round(pick.confidence * 100)}% confidence`.slice(0, 72), 85, y + 36);
-      ctx.fillStyle = "#c7fa45"; ctx.font = "700 25px Arial"; ctx.textAlign = "right"; ctx.fillText(pick.quotedOdds?.toFixed(2) ?? "PRICE PENDING", 985, y + 12); ctx.textAlign = "left";
+      ctx.fillStyle = "#23d96c"; ctx.font = "700 25px Arial"; ctx.textAlign = "right"; ctx.fillText(priceFor(pick)?.toFixed(2) ?? "PRICE PENDING", 985, y + 12); ctx.textAlign = "left";
       y += 112;
     }
     const footerY = canvas.height - 90;
-    ctx.fillStyle = "#c7fa45"; ctx.font = "700 58px Arial"; ctx.fillText(totalOdds?.toFixed(2) ?? "MODEL SLIP", 70, footerY);
+    ctx.fillStyle = "#23d96c"; ctx.font = "700 58px Arial"; ctx.fillText(totalOdds?.toFixed(2) ?? "MODEL SLIP", 70, footerY);
     ctx.fillStyle = "#ffffff"; ctx.font = "22px Arial"; ctx.fillText(totalOdds ? "TOTAL ODDS · Prices may change" : "SOME BOOKMAKER PRICES ARE PENDING", 70, footerY + 42);
-    const link = document.createElement("a"); link.download = "oddsaura-predicted-slip.jpg"; link.href = canvas.toDataURL("image/jpeg", .92); link.click();
-    setNotice("Prediction slip saved as a JPEG.");
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+      setImageBlob(blob);
+      setImagePreview(URL.createObjectURL(blob));
+    }, "image/jpeg", .92);
+  }
+
+  async function shareJpeg() {
+    if (!imageBlob) return;
+    const file = new File([imageBlob], "oddsaura-slip.jpg", { type: "image/jpeg" });
+    if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
+      await navigator.share({ title: "OddsAura betslip", files: [file] });
+      setNotice("Choose Save Image");
+    } else {
+      const link = document.createElement("a");
+      link.download = file.name;
+      link.href = imagePreview;
+      link.click();
+      setNotice("JPEG downloaded");
+    }
   }
 
   async function requestCode() {
@@ -148,9 +187,12 @@ export default function BuilderPage() {
         providerOutcomeId: pick.fixtureId.startsWith("sr:match:") ? pick.providerSelectionId : null,
       })));
       setSportyCode(result);
+      const currentLiveOdds = Object.fromEntries(result.resolved.flatMap((item) => item.odds ? [[item.fixtureId, item.odds]] : []));
+      setLiveOdds(currentLiveOdds);
+      const changed = picks.filter((pick) => currentLiveOdds[pick.fixtureId] && pick.quotedOdds && Math.abs(currentLiveOdds[pick.fixtureId] - pick.quotedOdds) > .001).length;
       setNotice(result.partial
-        ? `Code created for ${result.resolved.length} of ${picks.length} selections. Remove or pick manually for the unmatched games.`
-        : `Verified by SportyBet · ${result.resolved.length} selections matched.`);
+        ? `${result.resolved.length}/${picks.length} matched${changed ? ` · ${changed} prices updated` : ""}`
+        : `Verified · ${result.resolved.length} selections${changed ? ` · ${changed} prices updated` : ""}`);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "SportyBet could not create this code.");
     } finally {
@@ -158,32 +200,37 @@ export default function BuilderPage() {
     }
   }
 
-  return <main className="build-app">
-    <ProductNavigation active="slip" slipCount={picks.length} />
-    <section className="build-hero"><div><span>Predicted ticket builder</span><h1>Choose our picks.<br /><i>Build your own ticket.</i></h1></div><p>Every option below has already passed through OddsAura’s probability model. Pick one prediction per match, then save it, share it, export a JPEG or prepare it for SportyBet mapping.</p></section>
+  const activeProvider = providerAdapters.find((item) => item.id === provider) ?? providerAdapters[0];
+
+  return <main className="build-app compact-betting-app">
+    <ProductNavigation active={activeArea} slipCount={picks.length} />
+    <section className="build-hero compact-hero"><div><span>Football</span><h1>Pick your matches</h1></div><div className="build-live-state"><i /> Predictions updated</div></section>
     <section className="build-layout">
       <div className="build-board">
-        <div className="build-toolbar"><div><h2>Predicted games</h2><span>{loading ? "Scoring today’s matches…" : `${fixtureGroups.length} matches with selectable predictions`}</span></div><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search team, league or market" aria-label="Search predicted games" /></div>
+        <div className="build-toolbar"><div><h2>Matches</h2><span>{loading ? "Loading…" : `${fixtureGroups.length} available`}</span></div><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search team or league" aria-label="Search predicted games" /></div>
         <div className="build-tier-tabs" aria-label="Prediction risk"><button type="button" className={tier === "ALL" ? "active" : ""} onClick={() => setTier("ALL")}>All <b>{tierCounts.ALL}</b></button><button type="button" className={tier === "SAFE" ? "active" : ""} onClick={() => setTier("SAFE")}>Safe <b>{tierCounts.SAFE}</b></button><button type="button" className={tier === "BALANCED" ? "active" : ""} onClick={() => setTier("BALANCED")}>Balanced <b>{tierCounts.BALANCED}</b></button><button type="button" className={tier === "HIGH_RISK" ? "active" : ""} onClick={() => setTier("HIGH_RISK")}>High risk <b>{tierCounts.HIGH_RISK}</b></button></div>
-        <button className="build-filter-toggle" type="button" aria-expanded={showLeagueFilter} onClick={() => setShowLeagueFilter((value) => !value)}>Filter leagues <span>{LEAGUE_FILTERS.find((item) => item.id === league)?.label}</span></button>
+        <button className="build-filter-toggle" type="button" aria-expanded={showLeagueFilter} onClick={() => setShowLeagueFilter((value) => !value)}><b>☰ Leagues</b><span>{LEAGUE_FILTERS.find((item) => item.id === league)?.label} · {showLeagueFilter ? "Close" : "Open"}</span></button>
         <div className={`build-league-tabs ${showLeagueFilter ? "open" : ""}`} aria-label="League filter">{LEAGUE_FILTERS.map((item) => <button type="button" key={item.id} className={league === item.id ? "active" : ""} onClick={() => { setLeague(item.id); setShowLeagueFilter(false); }}>{item.label}</button>)}</div>
-        <div className="build-fixtures">{fixtureGroups.map((group) => <article key={group.fixtureId} className="build-fixture">
+        <div className="build-fixtures">{fixtureGroups.map((group) => <article id={`fixture-${encodeURIComponent(group.fixtureId)}`} key={group.fixtureId} className="build-fixture">
           <div className="build-match build-predicted-match"><div><TeamBadge team={group.homeTeam} /><strong>{group.homeTeam.name}</strong><span>vs</span><TeamBadge team={group.awayTeam} /><strong>{group.awayTeam.name}</strong></div><small>{group.league.name} · {new Date(group.kickoff).toLocaleString()}</small></div>
-          <div className="build-markets build-predictions">{group.predictions.map((pick) => { const active = picks.some((item) => item.id === pick.id); return <button className={active ? "active" : ""} type="button" key={pick.id} onClick={() => choose(pick)}><span>{pick.tier.replace("_", " ")} · {pick.market.name}</span><b>{pick.selection}</b><strong>{pick.quotedOdds?.toFixed(2) ?? `Fair ${pick.fairOdds.toFixed(2)}`}</strong><small>{pick.dataQuality === "LOW" ? "Limited data" : `${Math.round(pick.confidence * 100)}% confidence`}</small><em>{pick.reasoning}</em></button>; })}</div>
+          <div className="build-markets build-predictions">{group.predictions.map((pick) => { const active = picks.some((item) => item.id === pick.id); const price = priceFor(pick); return <button className={active ? "active" : ""} type="button" key={pick.id} onClick={() => choose(pick)}><span>{pick.market.name}</span><b>{pick.selection}</b><strong>{price?.toFixed(2) ?? pick.fairOdds.toFixed(2)}</strong><small>{liveOdds[pick.fixtureId] ? "SportyBet live" : pick.quotedOdds ? `${pick.oddsProvider ?? "Quoted"}` : "Model price"}</small></button>; })}</div>
         </article>)}{!loading && !fixtureGroups.length && <div className="build-no-data">No model-approved selections match this filter yet. Try All predictions or another team.</div>}</div>
       </div>
-      <aside className="build-slip" id="my-slip">
-        <div className="build-slip-title"><div><span>Your predicted selections</span><h2>{picks.length} {picks.length === 1 ? "pick" : "picks"}</h2></div>{picks.length > 0 && <button type="button" onClick={() => setPicks([])}>Clear</button>}</div>
-        <div className="build-picks">{picks.map((pick) => <div key={pick.fixtureId}><button type="button" aria-label={`Remove ${pick.homeTeam.name} versus ${pick.awayTeam.name}`} onClick={() => setPicks((rows) => rows.filter((row) => row.fixtureId !== pick.fixtureId))}>×</button><span>{pick.homeTeam.name} vs {pick.awayTeam.name}</span><strong>{pick.market.name}: {pick.selection}</strong><b>{pick.quotedOdds?.toFixed(2) ?? "Price pending"} · {pick.dataQuality === "LOW" ? "Limited data" : `${Math.round(pick.confidence * 100)}%`}</b></div>)}{!picks.length && <p>Choose one of OddsAura’s predicted selections to start your ticket.</p>}</div>
+      <aside className={`build-slip ${slipOpen ? "open" : ""}`} id="my-slip" aria-label="Betslip">
+        <div className="build-slip-title"><div><span>Betslip</span><h2>{picks.length} {picks.length === 1 ? "selection" : "selections"}</h2></div><div>{picks.length > 0 && <button type="button" onClick={() => { setPicks([]); setSportyCode(null); setLiveOdds({}); }}>Clear</button>}<button className="build-slip-close" type="button" onClick={() => setSlipOpen(false)}>×</button></div></div>
+        <div className="build-picks">{picks.map((pick) => <div key={pick.fixtureId}><button type="button" aria-label={`Remove ${pick.homeTeam.name} versus ${pick.awayTeam.name}`} onClick={() => removePick(pick.fixtureId)}>×</button><span>{pick.homeTeam.name} vs {pick.awayTeam.name}</span><strong>{pick.market.name}: {pick.selection}</strong><b>{priceFor(pick)?.toFixed(2) ?? "Pending"} <small>{liveOdds[pick.fixtureId] ? "LIVE" : ""}</small></b><a href={`#fixture-${encodeURIComponent(pick.fixtureId)}`} onClick={() => setSlipOpen(false)}>Change</a></div>)}{!picks.length && <p>No selections</p>}</div>
         <div className="build-total"><span>{totalOdds ? "Total odds" : "Bookmaker prices"}</span><strong>{totalOdds?.toFixed(2) ?? "Pending"}</strong></div>
-        <div className="build-provider-ready"><span>Booking code</span><strong>SportyBet</strong><small>Additional bookmakers will appear only after their adapters pass verification.</small></div>
-        <button className="build-code" type="button" disabled={!picks.length || creatingCode} onClick={() => void requestCode()}>{creatingCode ? "Creating real SportyBet code…" : "Generate SportyBet code"} <span>→</span></button>
-        {sportyCode && <div className="build-real-code"><span>SportyBet booking code</span><strong>{sportyCode.code}</strong><div><button type="button" onClick={() => void navigator.clipboard.writeText(sportyCode.code)}>Copy code</button><a href={sportyCode.deepLink} target="_blank" rel="noreferrer">Load on SportyBet ↗</a></div></div>}
-        {sportyCode?.unmatched.length ? <div className="build-unmatched"><strong>Not included in this code</strong>{sportyCode.unmatched.map((item) => <div key={item.fixtureId}><span>{item.homeTeam} vs {item.awayTeam}</span><small>{item.reason}</small><button type="button" onClick={() => setPicks((rows) => rows.filter((row) => row.fixtureId !== item.fixtureId))}>Drop selection</button></div>)}</div> : null}
-        <div className="build-share"><button type="button" disabled={!picks.length} onClick={() => void save()}>Save</button><button type="button" disabled={!picks.length} onClick={() => void share()}>Share link</button><button type="button" disabled={!picks.length} onClick={jpeg}>JPEG</button></div>
+        <div className="build-provider-list" aria-label="Choose bookmaker">{providerAdapters.filter((item) => item.id !== "draftkings").map((item) => <button type="button" key={item.id} className={provider === item.id ? "active" : ""} onClick={() => { setProvider(item.id); setSportyCode(null); }}>{item.label}<small>{item.status === "live" ? "Live" : "Next"}</small></button>)}</div>
+        <button className="build-code" type="button" disabled={!picks.length || creatingCode || activeProvider.status !== "live"} onClick={() => void requestCode()}>{activeProvider.status !== "live" ? `${activeProvider.label} verification pending` : creatingCode ? "Checking live odds…" : "Generate code"} <span>→</span></button>
+        {sportyCode && <div className="build-real-code"><span>SportyBet code</span><strong>{sportyCode.code}</strong><div><button type="button" onClick={() => void copyText(sportyCode.code, "Code copied")}>{copied === "Code copied" ? "Copied ✓" : "Copy code"}</button><a href={sportyCode.deepLink} target="_blank" rel="noreferrer">Open SportyBet ↗</a></div></div>}
+        {sportyCode?.unmatched.length ? <div className="build-unmatched"><strong>Not included</strong>{sportyCode.unmatched.map((item) => <div key={item.fixtureId}><span>{item.homeTeam} vs {item.awayTeam}</span><small>{item.reason}</small><button type="button" onClick={() => removePick(item.fixtureId)}>Remove</button></div>)}</div> : null}
+        <div className="build-share"><button type="button" disabled={!picks.length} onClick={() => void save()}>Save</button><button type="button" disabled={!picks.length} onClick={() => void share()}>Share</button><button type="button" disabled={!picks.length} onClick={jpeg}>Save image</button></div>
         {notice && <p className="build-notice">{notice}</p>}
-        <small>Only model-scored predictions appear here. SportyBet codes are returned only after every selection is matched and the new code is loaded back from SportyBet for verification.</small>
       </aside>
     </section>
+    <button className="build-floating-slip" type="button" onClick={() => setSlipOpen(true)}><span>▤</span><b>{picks.length}</b><strong>{totalOdds?.toFixed(2) ?? "Betslip"}</strong></button>
+    {slipOpen && <button className="build-slip-backdrop" type="button" aria-label="Close betslip" onClick={() => setSlipOpen(false)} />}
+    {copied && <div className="copy-toast" role="status">✓ {copied}</div>}
+    {imagePreview && <div className="image-preview" role="dialog" aria-modal="true" aria-label="Betslip image preview"><div><header><strong>Betslip image</strong><button type="button" onClick={() => { URL.revokeObjectURL(imagePreview); setImagePreview(""); setImageBlob(null); }}>×</button></header><img src={imagePreview} alt="OddsAura betslip ready to save" /><footer><button type="button" onClick={() => void shareJpeg()}>Save to phone</button><a href={imagePreview} download="oddsaura-slip.jpg">Download JPEG</a></footer></div></div>}
   </main>;
 }
