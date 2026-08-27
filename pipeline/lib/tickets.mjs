@@ -52,8 +52,8 @@ export function buildTicket(candidates, category, fixtures) {
     })
     .sort((a, b) => {
       const leagueDelta = priorityLeague(fixtureMap.get(a.fixtureId)?.league) - priorityLeague(fixtureMap.get(b.fixtureId)?.league);
-      const diversityA = marketFamily(a.key) === "UNDER" ? -.035 : 0;
-      const diversityB = marketFamily(b.key) === "UNDER" ? -.035 : 0;
+      const diversityA = marketFamily(a.key) === "UNDER" ? -.06 : 0;
+      const diversityB = marketFamily(b.key) === "UNDER" ? -.06 : 0;
       const qualityDelta = (b.confidence + Math.max(0, b.edge ?? 0) + diversityB) - (a.confidence + Math.max(0, a.edge ?? 0) + diversityA);
       return Math.abs(qualityDelta) > .055 ? qualityDelta : leagueDelta || qualityDelta;
     });
@@ -69,7 +69,7 @@ export function buildTicket(candidates, category, fixtures) {
     const odds = estimatedOdds(item);
     if (!band.exactSelections && selected.length && totalOdds * odds > band.max) continue;
     const family = marketFamily(item.key);
-    const familyLimit = family === "UNDER" ? Math.max(1, Math.ceil(band.selections * .35)) : Math.max(2, Math.ceil(band.selections * .55));
+    const familyLimit = family === "UNDER" ? Math.max(1, Math.ceil(band.selections * .25)) : Math.max(2, Math.ceil(band.selections * .55));
     if ((familyCounts.get(family) ?? 0) >= familyLimit) continue;
     selected.push({
       id: `${item.fixtureId}-${item.key}`,
