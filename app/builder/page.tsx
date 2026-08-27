@@ -46,7 +46,6 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
   const [search, setSearch] = useState("");
   const [tier, setTier] = useState<Tier>("ALL");
   const [league, setLeague] = useState<LeagueFilter>("ALL");
-  const [showLeagueFilter, setShowLeagueFilter] = useState(false);
   const [notice, setNotice] = useState("");
   const [sportyCode, setSportyCode] = useState<SportyBetCodeResponse | null>(null);
   const [creatingCode, setCreatingCode] = useState(false);
@@ -209,8 +208,8 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
       <div className="build-board">
         <div className="build-toolbar"><div><h2>Matches</h2><span>{loading ? "Loading…" : `${fixtureGroups.length} available`}</span></div><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search team or league" aria-label="Search predicted games" /></div>
         <div className="build-tier-tabs" aria-label="Prediction risk"><button type="button" className={tier === "ALL" ? "active" : ""} onClick={() => setTier("ALL")}>All <b>{tierCounts.ALL}</b></button><button type="button" className={tier === "SAFE" ? "active" : ""} onClick={() => setTier("SAFE")}>Safe <b>{tierCounts.SAFE}</b></button><button type="button" className={tier === "BALANCED" ? "active" : ""} onClick={() => setTier("BALANCED")}>Balanced <b>{tierCounts.BALANCED}</b></button><button type="button" className={tier === "HIGH_RISK" ? "active" : ""} onClick={() => setTier("HIGH_RISK")}>High risk <b>{tierCounts.HIGH_RISK}</b></button></div>
-        <button className="build-filter-toggle" type="button" aria-expanded={showLeagueFilter} onClick={() => setShowLeagueFilter((value) => !value)}><b>☰ Leagues</b><span>{LEAGUE_FILTERS.find((item) => item.id === league)?.label} · {showLeagueFilter ? "Close" : "Open"}</span></button>
-        <div className={`build-league-tabs ${showLeagueFilter ? "open" : ""}`} aria-label="League filter">{LEAGUE_FILTERS.map((item) => <button type="button" key={item.id} className={league === item.id ? "active" : ""} onClick={() => { setLeague(item.id); setShowLeagueFilter(false); }}>{item.label}</button>)}</div>
+        <div className="build-filter-toggle build-filter-label"><b>Leagues</b><span>{LEAGUE_FILTERS.find((item) => item.id === league)?.label}</span></div>
+        <div className="build-league-tabs open" aria-label="League filter">{LEAGUE_FILTERS.map((item) => <button type="button" key={item.id} className={league === item.id ? "active" : ""} onClick={() => setLeague(item.id)}>{item.label}</button>)}</div>
         <div className="build-fixtures">{fixtureGroups.map((group) => <article id={`fixture-${encodeURIComponent(group.fixtureId)}`} key={group.fixtureId} className="build-fixture">
           <div className="build-match build-predicted-match"><div><TeamBadge team={group.homeTeam} /><strong>{group.homeTeam.name}</strong><span>vs</span><TeamBadge team={group.awayTeam} /><strong>{group.awayTeam.name}</strong></div><small>{group.league.name} · {new Date(group.kickoff).toLocaleString()}</small></div>
           <div className="build-markets build-predictions">{group.predictions.map((pick) => { const active = picks.some((item) => item.id === pick.id); const price = priceFor(pick); return <button className={active ? "active" : ""} type="button" key={pick.id} onClick={() => choose(pick)}><span>{pick.market.name}</span><b>{pick.selection}</b><strong>{price?.toFixed(2) ?? pick.fairOdds.toFixed(2)}</strong><small>{liveOdds[pick.fixtureId] ? "SportyBet live" : pick.quotedOdds ? `${pick.oddsProvider ?? "Quoted"}` : "Model price"}</small></button>; })}</div>
