@@ -7,6 +7,7 @@ import "./admin.css";
 
 type ModelPerformance = { generatedAt: string | null; matches: number; oneXTwoAccuracy: number | null; over25Accuracy: number | null; brierScore: number | null; logLoss: number | null; methodology: string; leagues: Array<{ id: string; name: string; matches: number; accuracy: number }> };
 const emptyPerformance: ModelPerformance = { generatedAt: null, matches: 0, oneXTwoAccuracy: null, over25Accuracy: null, brierScore: null, logLoss: null, methodology: "Walk-forward backtest pending historical refresh.", leagues: [] };
+const modelPerformanceUrl = process.env.NEXT_PUBLIC_MODEL_PERFORMANCE_URL ?? "https://raw.githubusercontent.com/mensahenoch020-sketch/Oddsaura/main/data/public/model-performance.json";
 
 export default function AdminPage() {
   const [snapshot, setSnapshot] = useState<Snapshot>(fallbackSnapshot);
@@ -26,7 +27,7 @@ export default function AdminPage() {
     loadSnapshot().then((data) => { if (active) setSnapshot(data); }).catch(() => { if (active) setMessage("The live GitHub snapshot could not be reached. The last bundled snapshot is still shown."); }).finally(() => { if (active) setBusy(false); });
     return () => { active = false; };
   }, []);
-  useEffect(() => { fetch(`/model-performance.json?v=${Math.floor(Date.now() / 300_000)}`, { cache: "no-store" }).then((response) => response.ok ? response.json() : Promise.reject()).then(setPerformance).catch(() => undefined); }, []);
+  useEffect(() => { fetch(`${modelPerformanceUrl}?v=${Math.floor(Date.now() / 300_000)}`, { cache: "no-store" }).then((response) => response.ok ? response.json() : Promise.reject()).then(setPerformance).catch(() => undefined); }, []);
 
   return <main className="adm-app">
     <aside className="adm-sidebar"><Link href="/dashboard" className="adm-brand">Odds<span>Aura</span></Link><nav><a href="#overview">Pipeline</a><a href="#tickets">Published tickets</a><a href="#markets">Market coverage</a></nav><a className="adm-repo" href="https://github.com/mensahenoch020-sketch/Oddsaura/actions" target="_blank" rel="noreferrer">Automation runs ↗</a></aside>
