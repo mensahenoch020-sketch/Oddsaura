@@ -1,11 +1,99 @@
 {
-  "generatedAt": null,
-  "methodology": "Walk-forward backtest pending historical refresh.",
-  "matches": 0,
-  "oneXTwoAccuracy": null,
-  "over25Accuracy": null,
-  "brierScore": null,
-  "logLoss": null,
-  "calibration": [],
-  "leagues": []
+  "generatedAt": "2026-08-27T02:14:52.666Z",
+  "methodology": "Walk-forward test: every prediction uses only matches completed before kickoff.",
+  "matches": 800,
+  "oneXTwoAccuracy": 0.5025,
+  "over25Accuracy": 0.56375,
+  "brierScore": 0.20327479501496856,
+  "logLoss": 1.0172466231044293,
+  "calibration": [
+    {
+      "from": 0.3,
+      "predictions": 148,
+      "wins": 54,
+      "actualRate": 0.36486486486486486
+    },
+    {
+      "from": 0.4,
+      "predictions": 331,
+      "wins": 159,
+      "actualRate": 0.48036253776435045
+    },
+    {
+      "from": 0.5,
+      "predictions": 222,
+      "wins": 121,
+      "actualRate": 0.545045045045045
+    },
+    {
+      "from": 0.6,
+      "predictions": 83,
+      "wins": 58,
+      "actualRate": 0.6987951807228916
+    },
+    {
+      "from": 0.7,
+      "predictions": 16,
+      "wins": 10,
+      "actualRate": 0.625
+    }
+  ],
+  "leagues": [
+    {
+      "id": "esp.1",
+      "name": "La Liga",
+      "matches": 126,
+      "correct": 63,
+      "accuracy": 0.5
+    },
+    {
+      "id": "ita.1",
+      "name": "Serie A",
+      "matches": 109,
+      "correct": 58,
+      "accuracy": 0.5321100917431193
+    },
+    {
+      "id": "por-1",
+      "name": "Primeira Liga",
+      "matches": 105,
+      "correct": 54,
+      "accuracy": 0.5142857142857142
+    },
+    {
+      "id": "eng.1",
+      "name": "Premier League",
+      "matches": 99,
+      "correct": 49,
+      "accuracy": 0.494949494949495
+    },
+    {
+      "id": "tur-1",
+      "name": "Süper Lig",
+      "matches": 97,
+      "correct": 49,
+      "accuracy": 0.5051546391752577
+    },
+    {
+      "id": "ned-1",
+      "name": "Eredivisie",
+      "matches": 95,
+      "correct": 54,
+      "accuracy": 0.5684210526315789
+    },
+    {
+      "id": "fra.1",
+      "name": "Ligue 1",
+      "matches": 89,
+      "correct": 36,
+      "accuracy": 0.4044943820224719
+    },
+    {
+      "id": "ger.1",
+      "name": "Bundesliga",
+      "matches": 80,
+      "correct": 39,
+      "accuracy": 0.4875
+    }
+  ]
 }
