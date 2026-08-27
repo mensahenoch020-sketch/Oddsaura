@@ -63,3 +63,4 @@ export async function generateSportyBetCode(selections: Array<{
   if (!response.ok || !payload.verified || !payload.code) throw new Error(payload.error || "SportyBet could not create this code.");
   return payload;
 }
+

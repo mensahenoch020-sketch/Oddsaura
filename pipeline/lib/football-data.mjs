@@ -94,8 +94,11 @@ export function seasonCodes(count = 6, now = new Date()) {
 
 export async function collectFootballDataHistory({ seasons = 6, competitions = leagues } = {}) {
   const events = []; const warnings = [];
-  for (const season of seasonCodes(seasons)) {
-    for (const league of competitions) {
+  const tasks = seasonCodes(seasons).flatMap((season) => competitions.map((league) => ({ season, league })));
+  let cursor = 0;
+  const workers = Array.from({ length: Math.min(8, tasks.length) }, async () => {
+    while (cursor < tasks.length) {
+      const { season, league } = tasks[cursor++];
       try {
         const csv = await fetchText(`${BASE}/${season.code}/${league.code}.csv`, { retries: 1, timeoutMs: 20_000 });
         for (const row of parseCsv(csv)) {
@@ -106,7 +109,8 @@ export async function collectFootballDataHistory({ seasons = 6, competitions = l
         warnings.push(`${season.label} ${league.name}: ${error instanceof Error ? error.message : "fetch failed"}`);
       }
     }
-  }
+  });
+  await Promise.all(workers);
   return { events: [...new Map(events.map((event) => [event.id, event])).values()].sort((a, b) => a.kickoff.localeCompare(b.kickoff)), warnings };
 }
 

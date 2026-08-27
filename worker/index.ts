@@ -259,6 +259,55 @@ async function accountApi(request: Request, env: Env, url: URL, identity: Accoun
   return Response.json({ error: "Method not allowed" }, { status: 405 });
 }
 
+async function ticketControlsApi(env: Env) {
+  if (!env.DB) return Response.json({ controls: [] }, { headers: { "cache-control": "no-store" } });
+  const rows = await env.DB.prepare("SELECT ticket_id AS ticketId, visible, title_override AS titleOverride, updated_at AS updatedAt FROM ticket_controls").all();
+  return Response.json({ controls: rows.results.map((row) => ({ ...row, visible: Boolean(row.visible) })) }, { headers: { "cache-control": "no-store" } });
+}
+
+async function adminApi(request: Request, env: Env, url: URL, identity: AccountIdentity | null) {
+  if (!identity) return Response.json({ error: "Log in to continue." }, { status: 401 });
+  if (identity.role !== "ADMIN") return Response.json({ error: "Administrator access required." }, { status: 403 });
+  if (!env.DB) return Response.json({ error: "Account storage is unavailable." }, { status: 503 });
+  const now = Date.now();
+  if (url.pathname === "/api/admin/overview" && request.method === "GET") {
+    const [usersCount, slipsCount, codesCount, usersRows, controlsRows] = await Promise.all([
+      env.DB.prepare("SELECT COUNT(*) AS count FROM users").first<{ count: number }>(),
+      env.DB.prepare("SELECT COUNT(*) AS count FROM saved_slips").first<{ count: number }>(),
+      env.DB.prepare("SELECT COUNT(*) AS count FROM generated_codes").first<{ count: number }>(),
+      env.DB.prepare("SELECT email, display_name AS name, role, created_at AS createdAt FROM users ORDER BY created_at DESC LIMIT 25").all(),
+      env.DB.prepare("SELECT ticket_id AS ticketId, visible, title_override AS titleOverride, updated_at AS updatedAt FROM ticket_controls").all(),
+    ]);
+    return Response.json({
+      stats: { users: Number(usersCount?.count ?? 0), savedSlips: Number(slipsCount?.count ?? 0), generatedCodes: Number(codesCount?.count ?? 0) },
+      users: usersRows.results,
+      controls: controlsRows.results.map((row) => ({ ...row, visible: Boolean(row.visible) })),
+      services: { passwordResetEmail: Boolean(env.RESEND_API_KEY && env.RESEND_FROM_EMAIL) },
+    }, { headers: { "cache-control": "no-store" } });
+  }
+  if (url.pathname.startsWith("/api/admin/tickets/") && request.method === "PATCH") {
+    const ticketId = decodeURIComponent(url.pathname.slice("/api/admin/tickets/".length)).slice(0, 160);
+    const body = await requestJson(request);
+    if (!ticketId) return Response.json({ error: "Ticket ID is required." }, { status: 400 });
+    const visible = body.visible !== false;
+    const titleOverride = String(body.titleOverride || "").trim().slice(0, 80) || null;
+    await env.DB.prepare("INSERT INTO ticket_controls (ticket_id, visible, title_override, updated_by, updated_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT(ticket_id) DO UPDATE SET visible = excluded.visible, title_override = excluded.title_override, updated_by = excluded.updated_by, updated_at = excluded.updated_at")
+      .bind(ticketId, visible ? 1 : 0, titleOverride, identity.email, now).run();
+    return Response.json({ control: { ticketId, visible, titleOverride, updatedAt: now } });
+  }
+  if (url.pathname.startsWith("/api/admin/users/") && request.method === "PATCH") {
+    const email = normalizeEmail(decodeURIComponent(url.pathname.slice("/api/admin/users/".length)));
+    const body = await requestJson(request);
+    const role = body.role === "ADMIN" ? "ADMIN" : body.role === "USER" ? "USER" : null;
+    if (!email || !role) return Response.json({ error: "Valid user and role required." }, { status: 400 });
+    const fixedAdmins = new Set(String(env.ODDSAURA_ADMIN_EMAILS || "").split(",").map((item) => item.trim().toLowerCase()).filter(Boolean));
+    if (fixedAdmins.has(email) && role !== "ADMIN") return Response.json({ error: "Environment-designated admins cannot be demoted here." }, { status: 400 });
+    await env.DB.prepare("UPDATE users SET role = ?, updated_at = ? WHERE email = ?").bind(role, now, email).run();
+    return Response.json({ user: { email, role } });
+  }
+  return Response.json({ error: "Method not allowed" }, { status: 405 });
+}
+
 // Image security config. SVG sources with .svg extension auto-skip the
 // optimization endpoint on the client side (served directly, no proxy).
 // To route SVGs through the optimizer (with security headers), set
@@ -283,7 +332,7 @@ const worker = {
 
     const protectedPages = ["/dashboard", "/daily", "/matches", "/builder", "/results", "/account", "/admin"];
     const isProtectedPage = protectedPages.some((path) => url.pathname === path || url.pathname.startsWith(`${path}/`));
-    const isProtectedApi = url.pathname === "/api/sportybet/code" || url.pathname === "/api/account" || url.pathname === "/api/codes" || url.pathname === "/api/slips" || url.pathname.startsWith("/api/slips/");
+    const isProtectedApi = url.pathname === "/api/sportybet/code" || url.pathname === "/api/account" || url.pathname === "/api/codes" || url.pathname === "/api/slips" || url.pathname.startsWith("/api/slips/") || url.pathname === "/api/ticket-controls" || url.pathname.startsWith("/api/admin/");
     const identity = isProtectedPage || isProtectedApi ? await sessionIdentity(request, env) : null;
     if ((isProtectedPage || isProtectedApi) && !identity) {
       if (isProtectedApi) return Response.json({ error: "Log in to continue." }, { status: 401, headers: { "cache-control": "no-store" } });
@@ -293,6 +342,7 @@ const worker = {
     if ((url.pathname === "/admin" || url.pathname.startsWith("/admin/")) && identity?.role !== "ADMIN") {
       return Response.redirect(new URL("/dashboard", request.url), 302);
     }
+    if (url.pathname.startsWith("/api/admin/") && identity?.role !== "ADMIN") return Response.json({ error: "Administrator access required." }, { status: 403 });
     let authenticatedRequest = request;
     if (identity) {
       const headers = new Headers(request.headers);
@@ -304,6 +354,8 @@ const worker = {
     if (url.pathname === "/api/account" || url.pathname === "/api/codes" || url.pathname === "/api/slips" || url.pathname.startsWith("/api/slips/")) {
       return accountApi(authenticatedRequest, env, url, identity);
     }
+    if (url.pathname === "/api/ticket-controls") return ticketControlsApi(env);
+    if (url.pathname.startsWith("/api/admin/")) return adminApi(authenticatedRequest, env, url, identity);
 
     if (url.pathname === "/api/sportybet/code") {
       if (request.method !== "POST") return Response.json({ error: "Method not allowed" }, { status: 405, headers: { allow: "POST" } });

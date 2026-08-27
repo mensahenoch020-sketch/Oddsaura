@@ -44,3 +44,4 @@ export default function AccountSettings({ initialName, email }: { initialName: s
     <article className="session-card"><span>Session</span><h2>Sign out</h2><button type="button" onClick={() => void logout()} disabled={busy === "logout"}>{busy === "logout" ? "Logging out…" : "Log out"}</button></article>
   </section>;
 }
+

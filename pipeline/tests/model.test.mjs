@@ -104,3 +104,4 @@ test("the ESPN fallback normalizes fixtures and available moneyline prices", () 
   assert.equal(event.odds[0].odds, 1.67);
   assert.equal(event.odds.find((odd) => odd.selection === "Over 2.5").odds, 1.83);
 });
+

@@ -107,3 +107,4 @@ export function buildTicket(candidates, category, fixtures) {
     selections: selected,
   };
 }
+
