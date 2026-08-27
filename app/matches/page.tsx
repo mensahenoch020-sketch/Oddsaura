@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import Brand from "../brand";
+import ProductNavigation from "../product-navigation";
 import { fallbackSnapshot, loadSnapshot, type Fixture, type Snapshot, type Team } from "../data";
 import { LEAGUE_FILTERS, leagueMatches, type LeagueFilter } from "../leagues";
 import "./matches.css";
 import "./matches-more.css";
+import "../filter-controls.css";
 
 /* Dynamic football feeds supply arbitrary badge hosts, so a native image with a text fallback is intentional. */
 /* eslint-disable @next/next/no-img-element */
@@ -46,6 +47,7 @@ export default function MatchesPage() {
   const [view, setView] = useState<View>("today");
   const [search, setSearch] = useState("");
   const [league, setLeague] = useState<LeagueFilter>("ALL");
+  const [showLeagueFilter, setShowLeagueFilter] = useState(false);
   const [limit, setLimit] = useState(120);
   const [loading, setLoading] = useState(true);
 
@@ -84,10 +86,7 @@ export default function MatchesPage() {
   }, [limit, visible]);
 
   return <main className="matches-app">
-    <header className="matches-header">
-      <Brand className="matches-brand" href="/dashboard" />
-      <nav aria-label="Main navigation"><Link href="/builder">Build a slip</Link><Link href="/results">Results</Link><Link href="/dashboard">Predictions</Link><Link href="/account">Account</Link></nav>
-    </header>
+    <ProductNavigation active="matches" />
 
     <section className="matches-hero">
       <div><span className="matches-kicker">Football centre</span><h1>Find a match.<br /><i>See what matters.</i></h1></div>
@@ -102,7 +101,8 @@ export default function MatchesPage() {
       </div>
       <label className="matches-search"><span>Search</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Team or league" /></label>
     </section>
-    <div className="matches-league-tabs" aria-label="League filter">{LEAGUE_FILTERS.map((item) => <button type="button" key={item.id} className={league === item.id ? "active" : ""} onClick={() => { setLeague(item.id); setLimit(120); }}>{item.label}</button>)}</div>
+    <button className="matches-filter-toggle" type="button" aria-expanded={showLeagueFilter} onClick={() => setShowLeagueFilter((value) => !value)}>Filter leagues <span>{LEAGUE_FILTERS.find((item) => item.id === league)?.label}</span></button>
+    <div className={`matches-league-tabs ${showLeagueFilter ? "open" : ""}`} aria-label="League filter">{LEAGUE_FILTERS.map((item) => <button type="button" key={item.id} className={league === item.id ? "active" : ""} onClick={() => { setLeague(item.id); setLimit(120); setShowLeagueFilter(false); }}>{item.label}</button>)}</div>
 
     <div className="matches-summary"><span>{loading ? "Refreshing match data…" : `Showing ${Math.min(limit, visible.length)} of ${visible.length} ${visible.length === 1 ? "match" : "matches"}`}</span><small>{snapshot.message}</small></div>
 

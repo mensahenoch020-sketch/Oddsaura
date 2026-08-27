@@ -1,4 +1,5 @@
 import { fetchJson, wait } from "./http.mjs";
+import { canonicalLeagueId, canonicalTeamId } from "./identity.mjs";
 
 const BASE = "https://site.api.espn.com/apis/site/v2/sports/soccer";
 const DEFAULT_LEAGUES = [
@@ -105,7 +106,7 @@ export function normalizeEspnEvent(raw, leagueFallback = {}, source = "espn-publ
     providerId: eventId,
     source,
     league: {
-      id: String(league?.id ?? league?.slug ?? ""),
+      id: canonicalLeagueId(league?.id ?? league?.slug ?? league?.name ?? ""),
       name: league?.name ?? league?.abbreviation ?? "Football",
       country: league?.country ?? "",
       season: String(raw?.season?.year ?? ""),
@@ -113,8 +114,8 @@ export function normalizeEspnEvent(raw, leagueFallback = {}, source = "espn-publ
     round: raw?.week?.text ?? raw?.seasonType?.name ?? "",
     kickoff: new Date(raw?.date ?? competition?.date ?? 0).toISOString(),
     status,
-    homeTeam: { id: `espn-${home?.team?.id ?? ""}`, name: home?.team?.displayName ?? home?.team?.name ?? "Home", shortName: home?.team?.abbreviation ?? "", logo: home?.team?.logo ?? null },
-    awayTeam: { id: `espn-${away?.team?.id ?? ""}`, name: away?.team?.displayName ?? away?.team?.name ?? "Away", shortName: away?.team?.abbreviation ?? "", logo: away?.team?.logo ?? null },
+    homeTeam: { id: canonicalTeamId(home?.team?.displayName ?? home?.team?.name ?? "Home"), providerId: String(home?.team?.id ?? ""), name: home?.team?.displayName ?? home?.team?.name ?? "Home", shortName: home?.team?.abbreviation ?? "", logo: home?.team?.logo ?? null },
+    awayTeam: { id: canonicalTeamId(away?.team?.displayName ?? away?.team?.name ?? "Away"), providerId: String(away?.team?.id ?? ""), name: away?.team?.displayName ?? away?.team?.name ?? "Away", shortName: away?.team?.abbreviation ?? "", logo: away?.team?.logo ?? null },
     homeScore: scoreValue(home),
     awayScore: scoreValue(away),
     odds: normalizeOdds(competition, home, away),

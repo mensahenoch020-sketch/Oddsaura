@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { attachOdds, scoreEvent } from "../lib/model.mjs";
+import { attachOdds, buildModelContext, scoreEvent } from "../lib/model.mjs";
 import { buildTicket } from "../lib/tickets.mjs";
 import { normalizeEspnEvent, normalizeEspnGlobalEvent } from "../lib/espn.mjs";
+import { normalizeFootballDataRow, parseCsv } from "../lib/football-data.mjs";
+import { canonicalTeamId } from "../lib/identity.mjs";
 
 const finished = (id, days, homeId, awayId, homeScore, awayScore) => ({ id, kickoff: new Date(Date.now() - days * 86_400_000).toISOString(), status: "FINISHED", homeTeam: { id: homeId, name: homeId }, awayTeam: { id: awayId, name: awayId }, homeScore, awayScore });
 const history = [
@@ -25,6 +27,22 @@ test("fixtures with no team history still receive cautious model probabilities",
   assert.equal(predictions[0].factors.homePlayed, 0);
   assert.ok(predictions.every((item) => item.dataQuality < 0.2));
   assert.ok(predictions.some((item) => item.key === "OVER_1_5"));
+});
+
+test("the model context adds opponent-adjusted Elo and venue history", () => {
+  const context = buildModelContext(history, fixture.kickoff);
+  const home = scoreEvent(fixture, history, context).find((item) => item.key === "MATCH_HOME");
+  assert.ok(home.factors.homeElo > home.factors.awayElo);
+  assert.ok(home.factors.homeVenuePlayed > 0);
+  assert.ok(Number.isFinite(home.factors.homeRestDays));
+});
+
+test("historical CSV rows normalize into the same permanent team identities", () => {
+  const rows = parseCsv("Date,Time,HomeTeam,AwayTeam,FTHG,FTAG,B365H,B365D,B365A\n20/08/2026,20:00,Wolves,Man United,2,1,2.4,3.2,2.9\n");
+  const event = normalizeFootballDataRow(rows[0], { code: "E0", id: "eng.1", name: "Premier League", country: "England" }, "2026-27");
+  assert.equal(event.homeTeam.id, canonicalTeamId("Wolverhampton Wanderers"));
+  assert.equal(event.awayTeam.id, canonicalTeamId("Manchester United"));
+  assert.equal(event.odds.length, 3);
 });
 
 test("quoted odds keep the provider mapping needed for future booking codes", () => {

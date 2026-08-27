@@ -8,6 +8,7 @@ interface Env {
   DB?: D1Database;
   RESEND_API_KEY?: string;
   RESEND_FROM_EMAIL?: string;
+  ODDSAURA_ADMIN_EMAILS?: string;
   IMAGES: {
     input(stream: ReadableStream): {
       transform(options: Record<string, unknown>): {
@@ -22,7 +23,7 @@ interface ExecutionContext {
   passThroughOnException(): void;
 }
 
-type AccountIdentity = { email: string; name: string };
+type AccountIdentity = { email: string; name: string; role: "USER" | "ADMIN" };
 
 const SESSION_COOKIE = "oa_session";
 const SESSION_SECONDS = 60 * 60 * 24 * 30;
@@ -107,13 +108,15 @@ async function requestJson(request: Request) {
 
 async function ensureAccountTables(db: D1Database) {
   await db.batch([
-    db.prepare("CREATE TABLE IF NOT EXISTS users (email TEXT PRIMARY KEY NOT NULL, display_name TEXT NOT NULL, password_hash TEXT, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS users (email TEXT PRIMARY KEY NOT NULL, display_name TEXT NOT NULL, password_hash TEXT, role TEXT NOT NULL DEFAULT 'USER', created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL)"),
     db.prepare("CREATE TABLE IF NOT EXISTS sessions (token_hash TEXT PRIMARY KEY NOT NULL, user_email TEXT NOT NULL REFERENCES users(email) ON DELETE CASCADE, expires_at INTEGER NOT NULL, created_at INTEGER NOT NULL)"),
     db.prepare("CREATE INDEX IF NOT EXISTS sessions_user_expires_idx ON sessions (user_email, expires_at)"),
     db.prepare("CREATE TABLE IF NOT EXISTS password_reset_tokens (token_hash TEXT PRIMARY KEY NOT NULL, user_email TEXT NOT NULL REFERENCES users(email) ON DELETE CASCADE, expires_at INTEGER NOT NULL, used_at INTEGER, created_at INTEGER NOT NULL)"),
     db.prepare("CREATE INDEX IF NOT EXISTS password_reset_user_expires_idx ON password_reset_tokens (user_email, expires_at)"),
     db.prepare("CREATE TABLE IF NOT EXISTS saved_slips (id TEXT PRIMARY KEY NOT NULL, user_email TEXT NOT NULL REFERENCES users(email) ON DELETE CASCADE, name TEXT NOT NULL, picks_json TEXT NOT NULL, created_at INTEGER NOT NULL)"),
     db.prepare("CREATE INDEX IF NOT EXISTS saved_slips_user_created_idx ON saved_slips (user_email, created_at)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS generated_codes (id TEXT PRIMARY KEY NOT NULL, user_email TEXT NOT NULL REFERENCES users(email) ON DELETE CASCADE, provider TEXT NOT NULL, code TEXT NOT NULL, deep_link TEXT, selections_json TEXT NOT NULL, created_at INTEGER NOT NULL)"),
+    db.prepare("CREATE INDEX IF NOT EXISTS generated_codes_user_created_idx ON generated_codes (user_email, created_at)"),
   ]);
 }
 
@@ -129,13 +132,16 @@ async function sessionIdentity(request: Request, env: Env): Promise<AccountIdent
   if (!env.DB) {
     const email = request.headers.get("x-oddsaura-user-email")?.trim().toLowerCase();
     const name = request.headers.get("x-oddsaura-user-name")?.trim();
-    return email ? { email, name: name || email } : null;
+    const admins = new Set(String(env.ODDSAURA_ADMIN_EMAILS || "").split(",").map((item) => item.trim().toLowerCase()).filter(Boolean));
+    return email ? { email, name: name || email, role: admins.has(email) ? "ADMIN" : "USER" } : null;
   }
   const token = cookieValue(request, SESSION_COOKIE);
   if (!token) return null;
   await ensureAccountTables(env.DB);
-  const row = await env.DB.prepare("SELECT users.email AS email, users.display_name AS name FROM sessions JOIN users ON users.email = sessions.user_email WHERE sessions.token_hash = ? AND sessions.expires_at > ? LIMIT 1").bind(await digest(token), Date.now()).first<{ email: string; name: string }>();
-  return row ? { email: row.email, name: row.name } : null;
+  const row = await env.DB.prepare("SELECT users.email AS email, users.display_name AS name, users.role AS role FROM sessions JOIN users ON users.email = sessions.user_email WHERE sessions.token_hash = ? AND sessions.expires_at > ? LIMIT 1").bind(await digest(token), Date.now()).first<{ email: string; name: string; role: "USER" | "ADMIN" }>();
+  if (!row) return null;
+  const admins = new Set(String(env.ODDSAURA_ADMIN_EMAILS || "").split(",").map((item) => item.trim().toLowerCase()).filter(Boolean));
+  return { email: row.email, name: row.name, role: row.role === "ADMIN" || admins.has(row.email) ? "ADMIN" : "USER" };
 }
 
 async function sendResetEmail(request: Request, env: Env, email: string, token: string) {
@@ -241,6 +247,11 @@ async function accountApi(request: Request, env: Env, url: URL, identity: Accoun
     await env.DB.prepare("DELETE FROM saved_slips WHERE id = ? AND user_email = ?").bind(id, identity.email).run();
     return Response.json({ deleted: true });
   }
+  if (url.pathname === "/api/codes" && request.method === "GET") {
+    const rows = await env.DB.prepare("SELECT id, provider, code, deep_link AS deepLink, selections_json AS selectionsJson, created_at AS createdAt FROM generated_codes WHERE user_email = ? ORDER BY created_at DESC LIMIT 50")
+      .bind(identity.email).all();
+    return Response.json({ codes: rows.results.map((row) => ({ ...row, selections: JSON.parse(String(row.selectionsJson)), selectionsJson: undefined })) }, { headers: { "cache-control": "no-store" } });
+  }
   return Response.json({ error: "Method not allowed" }, { status: 405 });
 }
 
@@ -268,12 +279,15 @@ const worker = {
 
     const protectedPages = ["/dashboard", "/matches", "/builder", "/results", "/account", "/admin"];
     const isProtectedPage = protectedPages.some((path) => url.pathname === path || url.pathname.startsWith(`${path}/`));
-    const isProtectedApi = url.pathname === "/api/sportybet/code" || url.pathname === "/api/account" || url.pathname === "/api/slips" || url.pathname.startsWith("/api/slips/");
+    const isProtectedApi = url.pathname === "/api/sportybet/code" || url.pathname === "/api/account" || url.pathname === "/api/codes" || url.pathname === "/api/slips" || url.pathname.startsWith("/api/slips/");
     const identity = isProtectedPage || isProtectedApi ? await sessionIdentity(request, env) : null;
     if ((isProtectedPage || isProtectedApi) && !identity) {
       if (isProtectedApi) return Response.json({ error: "Log in to continue." }, { status: 401, headers: { "cache-control": "no-store" } });
       const returnTo = `${url.pathname}${url.search}`;
       return Response.redirect(new URL(`/login?next=${encodeURIComponent(returnTo)}`, request.url), 302);
+    }
+    if ((url.pathname === "/admin" || url.pathname.startsWith("/admin/")) && identity?.role !== "ADMIN") {
+      return Response.redirect(new URL("/dashboard", request.url), 302);
     }
     let authenticatedRequest = request;
     if (identity) {
@@ -283,7 +297,7 @@ const worker = {
       authenticatedRequest = new Request(request, { headers });
     }
 
-    if (url.pathname === "/api/account" || url.pathname === "/api/slips" || url.pathname.startsWith("/api/slips/")) {
+    if (url.pathname === "/api/account" || url.pathname === "/api/codes" || url.pathname === "/api/slips" || url.pathname.startsWith("/api/slips/")) {
       return accountApi(authenticatedRequest, env, url, identity);
     }
 
@@ -292,6 +306,11 @@ const worker = {
       try {
         const body = await authenticatedRequest.json() as { selections?: SportyBetSelectionInput[]; allowPartial?: boolean };
         const result = await createSportyBetCode(body.selections ?? [], fetch, body.allowPartial ?? false);
+        if (identity && env.DB) {
+          await ensureAccountTables(env.DB);
+          await env.DB.prepare("INSERT INTO generated_codes (id, user_email, provider, code, deep_link, selections_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
+            .bind(crypto.randomUUID(), identity.email, "sportybet", result.code, result.deepLink ?? null, JSON.stringify({ requested: body.selections ?? [], resolved: result.resolved ?? [], unmatched: result.unmatched ?? [] }), Date.now()).run();
+        }
         return Response.json({ provider: "sportybet", verified: true, ...result }, { headers: { "cache-control": "no-store" } });
       } catch (error) {
         const typed = error instanceof SportyBetIntegrationError ? error : new SportyBetIntegrationError("SportyBet code creation failed.", 502);

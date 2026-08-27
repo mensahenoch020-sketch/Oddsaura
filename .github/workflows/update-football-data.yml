@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "pipeline/**"
+      - "data/history/**"
       - ".github/workflows/update-football-data.yml"
       - "package.json"
   schedule:
