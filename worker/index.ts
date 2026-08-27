@@ -117,6 +117,10 @@ async function ensureAccountTables(db: D1Database) {
     db.prepare("CREATE INDEX IF NOT EXISTS saved_slips_user_created_idx ON saved_slips (user_email, created_at)"),
     db.prepare("CREATE TABLE IF NOT EXISTS generated_codes (id TEXT PRIMARY KEY NOT NULL, user_email TEXT NOT NULL REFERENCES users(email) ON DELETE CASCADE, provider TEXT NOT NULL, code TEXT NOT NULL, deep_link TEXT, selections_json TEXT NOT NULL, created_at INTEGER NOT NULL)"),
     db.prepare("CREATE INDEX IF NOT EXISTS generated_codes_user_created_idx ON generated_codes (user_email, created_at)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS code_request_events (id TEXT PRIMARY KEY NOT NULL, user_email TEXT NOT NULL REFERENCES users(email) ON DELETE CASCADE, request_hash TEXT NOT NULL, status TEXT NOT NULL, created_at INTEGER NOT NULL)"),
+    db.prepare("CREATE INDEX IF NOT EXISTS code_request_events_user_created_idx ON code_request_events (user_email, created_at)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS sportybet_code_cache (request_hash TEXT PRIMARY KEY NOT NULL, response_json TEXT NOT NULL, expires_at INTEGER NOT NULL, created_at INTEGER NOT NULL)"),
+    db.prepare("CREATE INDEX IF NOT EXISTS sportybet_code_cache_expires_idx ON sportybet_code_cache (expires_at)"),
   ]);
 }
 
@@ -303,16 +307,43 @@ const worker = {
 
     if (url.pathname === "/api/sportybet/code") {
       if (request.method !== "POST") return Response.json({ error: "Method not allowed" }, { status: 405, headers: { allow: "POST" } });
+      if (!identity || !env.DB) return Response.json({ error: "Account storage is not ready yet." }, { status: 503 });
+      let eventId = "";
       try {
         const body = await authenticatedRequest.json() as { selections?: SportyBetSelectionInput[]; allowPartial?: boolean };
-        const result = await createSportyBetCode(body.selections ?? [], fetch, body.allowPartial ?? false);
-        if (identity && env.DB) {
-          await ensureAccountTables(env.DB);
-          await env.DB.prepare("INSERT INTO generated_codes (id, user_email, provider, code, deep_link, selections_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
-            .bind(crypto.randomUUID(), identity.email, "sportybet", result.code, result.deepLink ?? null, JSON.stringify({ requested: body.selections ?? [], resolved: result.resolved ?? [], unmatched: result.unmatched ?? [] }), Date.now()).run();
+        await ensureAccountTables(env.DB);
+        const now = Date.now();
+        const requestHash = await digest(`${identity.email}|${JSON.stringify({ selections: body.selections ?? [], allowPartial: body.allowPartial ?? false })}`);
+        const recent = await env.DB.prepare("SELECT COUNT(*) AS count FROM code_request_events WHERE user_email = ? AND created_at > ?")
+          .bind(identity.email, now - 60_000).first<{ count: number }>();
+        if (Number(recent?.count ?? 0) >= 6) {
+          return Response.json({ error: "Please wait a moment before generating another code." }, { status: 429, headers: { "retry-after": "60", "cache-control": "no-store" } });
         }
+        eventId = crypto.randomUUID();
+        await env.DB.prepare("INSERT INTO code_request_events (id, user_email, request_hash, status, created_at) VALUES (?, ?, ?, 'STARTED', ?)")
+          .bind(eventId, identity.email, requestHash, now).run();
+        const cached = await env.DB.prepare("SELECT response_json AS responseJson FROM sportybet_code_cache WHERE request_hash = ? AND expires_at > ? LIMIT 1")
+          .bind(requestHash, now).first<{ responseJson: string }>();
+        if (cached?.responseJson) {
+          const cachedResult = JSON.parse(cached.responseJson) as Record<string, unknown>;
+          await env.DB.prepare("UPDATE code_request_events SET status = 'CACHED' WHERE id = ?").bind(eventId).run();
+          return Response.json({ provider: "sportybet", verified: true, cached: true, ...cachedResult }, { headers: { "cache-control": "no-store" } });
+        }
+        const result = await createSportyBetCode(body.selections ?? [], fetch, body.allowPartial ?? false);
+        await env.DB.batch([
+          env.DB.prepare("INSERT INTO generated_codes (id, user_email, provider, code, deep_link, selections_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
+            .bind(crypto.randomUUID(), identity.email, "sportybet", result.code, result.deepLink ?? null, JSON.stringify({ requested: body.selections ?? [], resolved: result.resolved ?? [], unmatched: result.unmatched ?? [] }), now),
+          env.DB.prepare("INSERT INTO sportybet_code_cache (request_hash, response_json, expires_at, created_at) VALUES (?, ?, ?, ?) ON CONFLICT(request_hash) DO UPDATE SET response_json = excluded.response_json, expires_at = excluded.expires_at, created_at = excluded.created_at")
+            .bind(requestHash, JSON.stringify(result), now + 120_000, now),
+          env.DB.prepare("UPDATE code_request_events SET status = 'SUCCEEDED' WHERE id = ?").bind(eventId),
+        ]);
+        ctx.waitUntil(env.DB.batch([
+          env.DB.prepare("DELETE FROM code_request_events WHERE created_at < ?").bind(now - 86_400_000),
+          env.DB.prepare("DELETE FROM sportybet_code_cache WHERE expires_at < ?").bind(now),
+        ]).then(() => undefined));
         return Response.json({ provider: "sportybet", verified: true, ...result }, { headers: { "cache-control": "no-store" } });
       } catch (error) {
+        if (eventId) ctx.waitUntil(env.DB.prepare("UPDATE code_request_events SET status = 'FAILED' WHERE id = ?").bind(eventId).run().then(() => undefined));
         const typed = error instanceof SportyBetIntegrationError ? error : new SportyBetIntegrationError("SportyBet code creation failed.", 502);
         return Response.json({ error: typed.message, details: typed.details }, { status: typed.status, headers: { "cache-control": "no-store" } });
       }
