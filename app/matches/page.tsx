@@ -85,7 +85,7 @@ export default function MatchesPage() {
   }, [limit, visible]);
 
   return <main className="matches-app">
-    <ProductNavigation active="matches" />
+    <ProductNavigation active="home" />
 
     <section className="matches-hero"><div><span className="matches-kicker">Football</span><h1>All matches</h1></div></section>
 

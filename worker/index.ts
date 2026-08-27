@@ -281,7 +281,7 @@ const worker = {
       }
     }
 
-    const protectedPages = ["/dashboard", "/matches", "/builder", "/results", "/account", "/admin"];
+    const protectedPages = ["/dashboard", "/daily", "/matches", "/builder", "/results", "/account", "/admin"];
     const isProtectedPage = protectedPages.some((path) => url.pathname === path || url.pathname.startsWith(`${path}/`));
     const isProtectedApi = url.pathname === "/api/sportybet/code" || url.pathname === "/api/account" || url.pathname === "/api/codes" || url.pathname === "/api/slips" || url.pathname.startsWith("/api/slips/");
     const identity = isProtectedPage || isProtectedApi ? await sessionIdentity(request, env) : null;

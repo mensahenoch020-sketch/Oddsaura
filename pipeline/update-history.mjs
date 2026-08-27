@@ -8,7 +8,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const historyPath = resolve(root, "data/history/football-data.json");
 const performancePath = resolve(root, "data/public/model-performance.json");
 const previous = await readFile(historyPath, "utf8").then(JSON.parse).catch(() => ({ events: [] }));
-const result = await collectFootballDataHistory({ seasons: Number(process.env.HISTORY_SEASONS ?? 6) });
+const result = await collectFootballDataHistory({ seasons: Number(process.env.HISTORY_SEASONS ?? 8) });
 if (result.events.length < 500) {
   if (previous.events?.length) {
     console.warn(`Historical refresh returned only ${result.events.length} matches; preserving ${previous.events.length} cached matches.`);
@@ -17,7 +17,7 @@ if (result.events.length < 500) {
   throw new Error(`Historical refresh returned only ${result.events.length} matches.`);
 }
 const payload = { version: 1, generatedAt: new Date().toISOString(), source: "football-data.co.uk", warnings: result.warnings, events: result.events };
-const performance = backtestHistory(result.events, { sampleSize: Number(process.env.BACKTEST_MATCHES ?? 800) });
+const performance = backtestHistory(result.events, { sampleSize: Number(process.env.BACKTEST_MATCHES ?? 2000) });
 await mkdir(dirname(historyPath), { recursive: true });
 await writeFile(historyPath, `${JSON.stringify(payload)}\n`);
 await writeFile(performancePath, `${JSON.stringify(performance, null, 2)}\n`);

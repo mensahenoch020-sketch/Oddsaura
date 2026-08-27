@@ -1,4 +1,4 @@
-export type ProviderId = "sportybet" | "bet9ja" | "betpawa" | "1xbet" | "draftkings";
+export type ProviderId = "sportybet" | "bet9ja" | "betpawa" | "1xbet" | "betking" | "draftkings";
 
 export type ProviderAdapter = {
   id: ProviderId;
@@ -12,6 +12,7 @@ export const providerAdapters: ProviderAdapter[] = [
   { id: "bet9ja", label: "Bet9ja", capability: "booking-code", status: "endpoint-required" },
   { id: "betpawa", label: "BetPawa", capability: "booking-code", status: "endpoint-required" },
   { id: "1xbet", label: "1xBet", capability: "booking-code", status: "endpoint-required" },
+  { id: "betking", label: "BetKing", capability: "booking-code", status: "endpoint-required" },
   { id: "draftkings", label: "DraftKings", capability: "deep-link", status: "partial" },
 ];
 

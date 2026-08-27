@@ -27,3 +27,10 @@ test("redirects anonymous visitors away from protected predictions", async () =>
   assert.equal(response.status, 302);
   assert.equal(response.headers.get("location"), "http://localhost/login?next=%2Fdashboard");
 });
+
+test("protects the Daily Odds hub", async () => {
+  const worker = await loadWorker();
+  const response = await worker.fetch(new Request("http://localhost/daily"), env, ctx);
+  assert.equal(response.status, 302);
+  assert.equal(response.headers.get("location"), "http://localhost/login?next=%2Fdaily");
+});
