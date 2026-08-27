@@ -26,3 +26,4 @@ export default function SavedSlips() {
 
   return <section className="saved-section"><div><span>Saved</span><h2>My slips</h2></div>{loading ? <p>Loading…</p> : error ? <p>{error}</p> : slips.length ? <div className="saved-grid">{slips.map((slip) => <article key={slip.id}><span>{new Date(slip.createdAt).toLocaleString()}</span><h3>{slip.name}</h3><p>{slip.picks.length} {slip.picks.length === 1 ? "selection" : "selections"}</p><div><Link href={`/builder?slip=${encode(slip.picks)}`}>Open</Link><button type="button" onClick={() => void remove(slip.id)}>Remove</button></div></article>)}</div> : <div className="saved-empty"><p>No saved slips</p><Link href="/dashboard">Choose matches</Link></div>}</section>;
 }
+

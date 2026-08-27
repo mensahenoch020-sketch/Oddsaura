@@ -34,3 +34,4 @@ export default function ProductNavigation({ active, slipCount = 0 }: { active: P
     </nav>
   </>;
 }
+

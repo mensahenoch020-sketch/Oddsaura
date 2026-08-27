@@ -100,3 +100,4 @@ export default function ResultsPage() {
     <footer><span>OddsAura</span><p>18+ · Tracker calculations are informational. Bookmaker settlement is final.</p></footer>
   </main>;
 }
+

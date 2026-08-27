@@ -122,3 +122,4 @@ export default function MatchesPage() {
     <footer className="matches-footer"><span>OddsAura</span><p>18+ · Match data may be delayed. Predictions are information, not guarantees.</p></footer>
   </main>;
 }
+

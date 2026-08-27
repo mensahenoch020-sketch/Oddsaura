@@ -7,6 +7,7 @@ import { generateSportyBetCode } from "../builder/providers";
 import "./daily.css";
 
 type CodeState = { code: string; deepLink: string; matched: number; total: number };
+type TicketControl = { ticketId: string; visible: boolean; titleOverride: string | null };
 
 const ticketOrder: Record<string, number> = { SAFE_2: 1, VALUE_5: 2, BALANCED_10: 3, HIGH_RISK: 4, LONGSHOT_21: 5 };
 
@@ -28,9 +29,18 @@ export default function DailyOddsPage() {
   const [creating, setCreating] = useState<string | null>(null);
   const [codes, setCodes] = useState<Record<string, CodeState>>({});
   const [notice, setNotice] = useState("");
+  const [controls, setControls] = useState<TicketControl[]>([]);
 
-  useEffect(() => { loadSnapshot().then(setSnapshot).catch(() => setNotice("Daily odds are refreshing. Try again shortly.")).finally(() => setLoading(false)); }, []);
-  const tickets = useMemo(() => [...snapshot.tickets].sort((a, b) => (ticketOrder[a.category] ?? 99) - (ticketOrder[b.category] ?? 99)), [snapshot.tickets]);
+  useEffect(() => {
+    Promise.all([
+      loadSnapshot().then(setSnapshot).catch(() => setNotice("Daily odds are refreshing. Try again shortly.")),
+      fetch("/api/ticket-controls", { cache: "no-store" }).then((response) => response.ok ? response.json() : { controls: [] }).then((data) => setControls(data.controls ?? [])).catch(() => undefined),
+    ]).finally(() => setLoading(false));
+  }, []);
+  const tickets = useMemo(() => {
+    const byId = new Map(controls.map((control) => [control.ticketId, control]));
+    return snapshot.tickets.filter((ticket) => byId.get(ticket.id)?.visible !== false).map((ticket) => ({ ...ticket, title: byId.get(ticket.id)?.titleOverride || ticket.title })).sort((a, b) => (ticketOrder[a.category] ?? 99) - (ticketOrder[b.category] ?? 99));
+  }, [snapshot.tickets, controls]);
 
   function addTicket(ticket: Ticket) {
     const ids = ticketPredictionIds(ticket, snapshot.predictedPicks ?? []);

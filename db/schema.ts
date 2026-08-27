@@ -41,3 +41,11 @@ export const generatedCodes = sqliteTable("generated_codes", {
   selectionsJson: text("selections_json").notNull(),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 }, (table) => [index("generated_codes_user_created_idx").on(table.userEmail, table.createdAt)]);
+
+export const ticketControls = sqliteTable("ticket_controls", {
+  ticketId: text("ticket_id").primaryKey(),
+  visible: integer("visible", { mode: "boolean" }).notNull().default(true),
+  titleOverride: text("title_override"),
+  updatedBy: text("updated_by").notNull().references(() => users.email),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+});
