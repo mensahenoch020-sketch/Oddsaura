@@ -1,57 +1,50 @@
 {
-  "generatedAt": "2026-08-27T19:24:28.204Z",
+  "generatedAt": "2026-08-28T04:01:52.850Z",
   "methodology": "Walk-forward test: every prediction uses only matches completed before kickoff.",
   "matches": 2000,
-  "oneXTwoAccuracy": 0.5055,
-  "over25Accuracy": 0.565,
-  "brierScore": 0.20141658351789002,
-  "logLoss": 1.0097043520631985,
+  "oneXTwoAccuracy": 0.507,
+  "over25Accuracy": 0.558,
+  "brierScore": 0.20117229019628613,
+  "logLoss": 1.0086559587986592,
   "calibration": [
     {
       "from": 0.3,
-      "predictions": 369,
-      "wins": 131,
-      "actualRate": 0.35501355013550134
+      "predictions": 368,
+      "wins": 132,
+      "actualRate": 0.358695652173913
     },
     {
       "from": 0.4,
-      "predictions": 821,
-      "wins": 388,
-      "actualRate": 0.4725943970767357
+      "predictions": 818,
+      "wins": 386,
+      "actualRate": 0.4718826405867971
     },
     {
       "from": 0.5,
-      "predictions": 545,
-      "wins": 302,
-      "actualRate": 0.5541284403669725
+      "predictions": 546,
+      "wins": 299,
+      "actualRate": 0.5476190476190477
     },
     {
       "from": 0.6,
-      "predictions": 213,
-      "wins": 149,
-      "actualRate": 0.6995305164319249
+      "predictions": 218,
+      "wins": 157,
+      "actualRate": 0.7201834862385321
     },
     {
       "from": 0.7,
       "predictions": 47,
-      "wins": 38,
-      "actualRate": 0.8085106382978723
+      "wins": 37,
+      "actualRate": 0.7872340425531915
     },
     {
       "from": 0.8,
-      "predictions": 5,
+      "predictions": 3,
       "wins": 3,
-      "actualRate": 0.6
+      "actualRate": 1
     }
   ],
   "leagues": [
-    {
-      "id": "ita.1",
-      "name": "Serie A",
-      "matches": 290,
-      "correct": 152,
-      "accuracy": 0.5241379310344828
-    },
     {
       "id": "eng.1",
       "name": "Premier League",
@@ -62,16 +55,23 @@
     {
       "id": "esp.1",
       "name": "La Liga",
-      "matches": 286,
-      "correct": 140,
-      "accuracy": 0.48951048951048953
+      "matches": 289,
+      "correct": 142,
+      "accuracy": 0.4913494809688581
+    },
+    {
+      "id": "ita.1",
+      "name": "Serie A",
+      "matches": 289,
+      "correct": 150,
+      "accuracy": 0.5190311418685121
     },
     {
       "id": "por-1",
       "name": "Primeira Liga",
-      "matches": 240,
-      "correct": 131,
-      "accuracy": 0.5458333333333333
+      "matches": 239,
+      "correct": 134,
+      "accuracy": 0.5606694560669456
     },
     {
       "id": "ned-1",
@@ -97,9 +97,9 @@
     {
       "id": "fra.1",
       "name": "Ligue 1",
-      "matches": 216,
+      "matches": 215,
       "correct": 102,
-      "accuracy": 0.4722222222222222
+      "accuracy": 0.4744186046511628
     }
   ]
 }
