@@ -11,8 +11,8 @@ const cookieName = "oa_session";
 const sessionSeconds = 60 * 60 * 24 * 30;
 const passwordIterations = 100_000;
 const encoder = new TextEncoder();
-const protectedPages = ["/dashboard", "/matches", "/builder", "/results", "/account", "/admin"];
-const protectedApis = ["/api/sportybet/code", "/api/account", "/api/slips"];
+const protectedPages = ["/dashboard", "/daily", "/matches", "/builder", "/results", "/account", "/admin"];
+const protectedApis = ["/api/sportybet/code", "/api/account", "/api/codes", "/api/slips", "/api/ticket-controls", "/api/admin"];
 const edgeOrigin = (process.env.ODDSAURA_EDGE_ORIGIN || "https://oddsaura.chipsofrio.chatgpt.site").replace(/\/$/, "");
 
 const pool = process.env.DATABASE_URL ? new Pool({ connectionString: process.env.DATABASE_URL }) : null;
@@ -39,6 +39,9 @@ async function ensureTables() {
   await pool.query(`CREATE TABLE IF NOT EXISTS oa_password_resets (token_hash TEXT PRIMARY KEY, user_email TEXT NOT NULL REFERENCES oa_users(email) ON DELETE CASCADE, expires_at BIGINT NOT NULL, used_at BIGINT, created_at BIGINT NOT NULL)`);
   await pool.query(`CREATE TABLE IF NOT EXISTS oa_saved_slips (id TEXT PRIMARY KEY, user_email TEXT NOT NULL REFERENCES oa_users(email) ON DELETE CASCADE, name TEXT NOT NULL, picks_json TEXT NOT NULL, created_at BIGINT NOT NULL)`);
   await pool.query(`CREATE INDEX IF NOT EXISTS oa_saved_slips_user_created_idx ON oa_saved_slips(user_email, created_at DESC)`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS oa_generated_codes (id TEXT PRIMARY KEY, user_email TEXT NOT NULL REFERENCES oa_users(email) ON DELETE CASCADE, provider TEXT NOT NULL, code TEXT NOT NULL, deep_link TEXT, selections_json TEXT NOT NULL, created_at BIGINT NOT NULL)`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS oa_generated_codes_user_created_idx ON oa_generated_codes(user_email, created_at DESC)`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS oa_ticket_controls (ticket_id TEXT PRIMARY KEY, visible BOOLEAN NOT NULL DEFAULT TRUE, title_override TEXT, updated_by TEXT NOT NULL REFERENCES oa_users(email), updated_at BIGINT NOT NULL)`);
 }
 
 async function createSession(email, maxAge = sessionSeconds) { const token = randomToken(); const now = Date.now(); await pool.query("INSERT INTO oa_sessions(token_hash,user_email,expires_at,created_at) VALUES($1,$2,$3,$4)", [await digest(token), email, now + maxAge * 1000, now]); return token; }
@@ -89,6 +92,77 @@ async function slipsApi(req, res, url, user) {
   return json(res, 405, { error: "Method not allowed." });
 }
 
+async function codesApi(req, res, user) {
+  if (!pool) return json(res, 503, { error: "Account storage is not configured yet." });
+  if (req.method !== "GET") return json(res, 405, { error: "Method not allowed." });
+  const result = await pool.query("SELECT id,provider,code,deep_link,selections_json,created_at FROM oa_generated_codes WHERE user_email=$1 ORDER BY created_at DESC LIMIT 50", [user.email]);
+  return json(res, 200, { codes: result.rows.map((row) => ({ id: row.id, provider: row.provider, code: row.code, deepLink: row.deep_link, selections: JSON.parse(row.selections_json), createdAt: Number(row.created_at) })) });
+}
+
+async function ticketControlsApi(req, res) {
+  if (!pool) return json(res, 503, { error: "Account storage is not configured yet." });
+  if (req.method !== "GET") return json(res, 405, { error: "Method not allowed." });
+  const result = await pool.query("SELECT ticket_id,title_override,visible,updated_at FROM oa_ticket_controls");
+  return json(res, 200, { controls: result.rows.map((row) => ({ ticketId: row.ticket_id, titleOverride: row.title_override, visible: row.visible, updatedAt: Number(row.updated_at) })) });
+}
+
+async function adminApi(req, res, url, user) {
+  if (!pool) return json(res, 503, { error: "Account storage is not configured yet." });
+  if (user.role !== "ADMIN") return json(res, 403, { error: "Administrator access required." });
+  const now = Date.now();
+  if (url.pathname === "/api/admin/overview" && req.method === "GET") {
+    const [users, slips, codes, recentUsers, controls] = await Promise.all([
+      pool.query("SELECT COUNT(*)::int AS count FROM oa_users"),
+      pool.query("SELECT COUNT(*)::int AS count FROM oa_saved_slips"),
+      pool.query("SELECT COUNT(*)::int AS count FROM oa_generated_codes"),
+      pool.query("SELECT email,display_name AS name,role,created_at FROM oa_users ORDER BY created_at DESC LIMIT 25"),
+      pool.query("SELECT ticket_id,title_override,visible,updated_at FROM oa_ticket_controls"),
+    ]);
+    return json(res, 200, {
+      stats: { users: users.rows[0].count, savedSlips: slips.rows[0].count, generatedCodes: codes.rows[0].count },
+      users: recentUsers.rows.map((row) => ({ email: row.email, name: row.name, role: row.role, createdAt: Number(row.created_at) })),
+      controls: controls.rows.map((row) => ({ ticketId: row.ticket_id, titleOverride: row.title_override, visible: row.visible, updatedAt: Number(row.updated_at) })),
+      services: { passwordResetEmail: Boolean(process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL) },
+    });
+  }
+  if (url.pathname.startsWith("/api/admin/tickets/") && req.method === "PATCH") {
+    const ticketId = decodeURIComponent(url.pathname.slice("/api/admin/tickets/".length)).slice(0, 160);
+    const body = await readJson(req);
+    if (!ticketId) return json(res, 400, { error: "Ticket ID is required." });
+    const visible = body.visible !== false;
+    const titleOverride = String(body.titleOverride || "").trim().slice(0, 80) || null;
+    await pool.query("INSERT INTO oa_ticket_controls(ticket_id,visible,title_override,updated_by,updated_at) VALUES($1,$2,$3,$4,$5) ON CONFLICT(ticket_id) DO UPDATE SET visible=EXCLUDED.visible,title_override=EXCLUDED.title_override,updated_by=EXCLUDED.updated_by,updated_at=EXCLUDED.updated_at", [ticketId, visible, titleOverride, user.email, now]);
+    return json(res, 200, { control: { ticketId, visible, titleOverride, updatedAt: now } });
+  }
+  if (url.pathname.startsWith("/api/admin/users/") && req.method === "PATCH") {
+    const email = normalizeEmail(decodeURIComponent(url.pathname.slice("/api/admin/users/".length)));
+    const body = await readJson(req);
+    const role = body.role === "ADMIN" ? "ADMIN" : body.role === "USER" ? "USER" : null;
+    if (!email || !role) return json(res, 400, { error: "Valid user and role required." });
+    const fixedAdmins = new Set(String(process.env.ODDSAURA_ADMIN_EMAILS || "").split(",").map((item) => item.trim().toLowerCase()).filter(Boolean));
+    if (fixedAdmins.has(email) && role !== "ADMIN") return json(res, 400, { error: "Environment-designated admins cannot be demoted here." });
+    const result = await pool.query("UPDATE oa_users SET role=$1,updated_at=$2 WHERE email=$3", [role, now, email]);
+    if (!result.rowCount) return json(res, 404, { error: "User not found." });
+    return json(res, 200, { user: { email, role } });
+  }
+  return json(res, 405, { error: "Method not allowed." });
+}
+
+async function sportyBetApi(req, res, user) {
+  const body = await readJson(req);
+  const response = await fetch(`http://127.0.0.1:${appPort}/api/sportybet/code`, {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-oddsaura-user-email": user.email, "x-oddsaura-user-name": user.name },
+    body: JSON.stringify(body),
+  });
+  const payload = await response.json().catch(() => ({ error: "SportyBet returned an invalid response." }));
+  if (response.ok && payload.verified && payload.code && pool) {
+    const selections = { requested: Array.isArray(body.selections) ? body.selections : [], resolved: payload.resolved ?? [], unmatched: payload.unmatched ?? [] };
+    await pool.query("INSERT INTO oa_generated_codes(id,user_email,provider,code,deep_link,selections_json,created_at) VALUES($1,$2,$3,$4,$5,$6,$7)", [crypto.randomUUID(), user.email, "sportybet", payload.code, payload.deepLink ?? null, JSON.stringify(selections), Date.now()]);
+  }
+  return json(res, response.status, payload);
+}
+
 function proxy(req, res, user) {
   const headers = { ...req.headers, host: `127.0.0.1:${appPort}` };
   for (const name of Object.keys(headers)) if (name.startsWith("x-oddsaura-")) delete headers[name];
@@ -136,7 +210,11 @@ createServer(async (req, res) => {
     const user = pageProtected || apiProtected ? await identity(req) : null;
     if ((pageProtected || apiProtected) && !user) { if (apiProtected) return json(res, 401, { error: "Log in to continue." }); const next = encodeURIComponent(`${url.pathname}${url.search}`); res.writeHead(302, { location: `/login?next=${next}`, "cache-control": "no-store" }); return res.end(); }
     if ((url.pathname === "/admin" || url.pathname.startsWith("/admin/")) && user?.role !== "ADMIN") { res.writeHead(302, { location: "/dashboard", "cache-control": "no-store" }); return res.end(); }
+    if (url.pathname === "/api/sportybet/code") return await sportyBetApi(req, res, user);
     if (url.pathname === "/api/account" || url.pathname === "/api/slips" || url.pathname.startsWith("/api/slips/")) return await slipsApi(req, res, url, user);
+    if (url.pathname === "/api/codes") return await codesApi(req, res, user);
+    if (url.pathname === "/api/ticket-controls") return await ticketControlsApi(req, res);
+    if (url.pathname.startsWith("/api/admin/")) return await adminApi(req, res, url, user);
     return proxy(req, res, user);
   } catch (error) { console.error(error); return json(res, 500, { error: "OddsAura could not complete this request." }); }
 }).listen(port, "0.0.0.0", () => console.log(`OddsAura listening on ${port}`));
