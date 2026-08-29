@@ -28,7 +28,7 @@ export function inspectProviderSlip(providerId: ProviderId, selections: Provider
   if (adapter.capability === "deep-link") {
     return `${adapter.label}: ${linked} of ${selections.length} selections have a verified bookmaker link. A combined booking code is not exposed by this feed.`;
   }
-  if (adapter.id === "1xbet") return "1xBet requires a signed-in account before it will save or load a booking code. OddsAura keeps the slip ready for account handoff.";
+  if (adapter.id === "1xbet") return "OddsAura does not generate a verified 1xBet code yet. Copy the selections, add them inside your signed-in 1xBet account, then use Save/load events to generate the valid code.";
   return `${adapter.label}: all ${selections.length} selections are stored in a provider-neutral format. This bookmaker still requires a verified booking-code endpoint; OddsAura will not invent a code.`;
 }
 

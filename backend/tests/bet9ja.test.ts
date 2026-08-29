@@ -29,3 +29,23 @@ test("creates and reload-verifies a public Bet9ja booking code", async () => {
   assert.equal(slip.BETS[0].ODDS["825252096$S_1X2_1"], 1.54);
   assert.ok(calls.some((call) => call.url.includes("couponCode=5PGCLX3")));
 });
+
+test("retries Bet9ja search after bootstrapping the public session", async () => {
+  let searchCalls = 0;
+  const arsenalDetail = { ...detail, IDSottoEvento: 9001, SottoEvento: "Arsenal - Chelsea", ClassiQuotaList: [{ IDClasseQuota: 1, ClasseQuota: "1X2", QuoteList: [{ IDQuota: 1, TipoQuotaBreve: "1", QuotaValore: 2.05, Giocabilita: 1 }] }] };
+  const fakeFetch = async (input: string | URL | Request) => {
+    const url = String(input);
+    if (url.endsWith("/Sport/Odds")) return new Response("<html>Bet9ja</html>", { headers: { "set-cookie": "ASP.NET_SessionId=test; Path=/; HttpOnly" } });
+    if (url.endsWith("GetSearchBoxData")) {
+      searchCalls += 1;
+      if (searchCalls === 1) return new Response("<html>session required</html>", { headers: { "content-type": "text/html" } });
+      return Response.json({ d: JSON.stringify({ SearchResults: [{ ID: 9001, Type: "SE", Area: "Arsenal - Chelsea", DataInizio: "/Date(1788003000000)/" }] }) });
+    }
+    if (url.endsWith("GetSubEventDetails")) return Response.json({ d: arsenalDetail });
+    if (url.includes("BookABetV2")) return Response.json({ status: 1, data: [{ RIS: "SESSION9" }] });
+    return Response.json({ d: { O: { "9001$S_1X2_1": {} } } });
+  };
+  const result = await createBet9jaCode([{ fixtureId: "session-test", homeTeam: "Arsenal FC", awayTeam: "Chelsea FC", kickoff: "2026-08-29T11:30:00Z", marketKey: "MATCH_HOME", marketName: "Match result", selection: "Arsenal" }], fakeFetch as typeof fetch);
+  assert.equal(result.code, "SESSION9");
+  assert.ok(searchCalls > 1);
+});
