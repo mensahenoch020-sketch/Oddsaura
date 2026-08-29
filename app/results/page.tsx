@@ -48,7 +48,7 @@ export default function ResultsPage() {
   const [model, setModel] = useState<ModelPerformance | null>(null);
 
   useEffect(() => {
-    loadSnapshot().then(setSnapshot).catch(() => undefined).finally(() => setLoading(false));
+    loadSnapshot("results").then(setSnapshot).catch(() => undefined).finally(() => setLoading(false));
     fetch("/api/codes").then((response) => response.ok ? response.json() : { codes: [] }).then((payload) => setPersonalCodes(payload.codes ?? [])).catch(() => undefined);
     fetch("https://raw.githubusercontent.com/mensahenoch020-sketch/Oddsaura/main/data/public/model-performance.json", { cache: "no-store" }).then((response) => response.ok ? response.json() : null).then(setModel).catch(() => undefined);
   }, []);
@@ -100,4 +100,3 @@ export default function ResultsPage() {
     <footer><span>OddsAura</span><p>18+ · Tracker calculations are informational. Bookmaker settlement is final.</p></footer>
   </main>;
 }
-

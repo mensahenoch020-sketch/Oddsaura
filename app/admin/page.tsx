@@ -26,7 +26,7 @@ export default function AdminPage() {
   async function refresh() {
     setBusy(true); setMessage("");
     try {
-      const [nextSnapshot, adminResponse] = await Promise.all([loadSnapshot(), fetch("/api/admin/overview", { cache: "no-store" })]);
+      const [nextSnapshot, adminResponse] = await Promise.all([loadSnapshot("admin"), fetch("/api/admin/overview", { cache: "no-store" })]);
       setSnapshot(nextSnapshot);
       if (adminResponse.ok) setOverview(await adminResponse.json());
     }
@@ -36,7 +36,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     let active = true;
-    loadSnapshot().then((data) => { if (active) setSnapshot(data); }).catch(() => { if (active) setMessage("The live GitHub snapshot could not be reached. The last bundled snapshot is still shown."); }).finally(() => { if (active) setBusy(false); });
+    loadSnapshot("admin").then((data) => { if (active) setSnapshot(data); }).catch(() => { if (active) setMessage("The live GitHub snapshot could not be reached. The last bundled snapshot is still shown."); }).finally(() => { if (active) setBusy(false); });
     return () => { active = false; };
   }, []);
   useEffect(() => { fetch(`${modelPerformanceUrl}?v=${Math.floor(Date.now() / 300_000)}`, { cache: "no-store" }).then((response) => response.ok ? response.json() : Promise.reject()).then(setPerformance).catch(() => undefined); }, []);

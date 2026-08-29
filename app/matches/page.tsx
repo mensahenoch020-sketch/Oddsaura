@@ -51,7 +51,7 @@ export default function MatchesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadSnapshot().then(setSnapshot).catch(() => undefined).finally(() => setLoading(false));
+    loadSnapshot("matches").then(setSnapshot).catch(() => undefined).finally(() => setLoading(false));
   }, []);
 
   const allFixtures = useMemo(() => uniqueFixtures([...(snapshot.liveFixtures ?? []), ...(snapshot.fixtures ?? [])]), [snapshot.fixtures, snapshot.liveFixtures]);
@@ -122,4 +122,3 @@ export default function MatchesPage() {
     <footer className="matches-footer"><span>OddsAura</span><p>18+ · Match data may be delayed. Predictions are information, not guarantees.</p></footer>
   </main>;
 }
-

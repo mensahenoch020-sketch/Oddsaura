@@ -33,7 +33,7 @@ export default function DailyOddsPage() {
 
   useEffect(() => {
     Promise.all([
-      loadSnapshot().then(setSnapshot).catch(() => setNotice("Daily odds are refreshing. Try again shortly.")),
+      loadSnapshot("daily").then(setSnapshot).catch(() => setNotice("Daily odds are refreshing. Try again shortly.")),
       fetch("/api/ticket-controls", { cache: "no-store" }).then((response) => response.ok ? response.json() : { controls: [] }).then((data) => setControls(data.controls ?? [])).catch(() => undefined),
     ]).finally(() => setLoading(false));
   }, []);

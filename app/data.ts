@@ -71,11 +71,19 @@ export const fallbackSnapshot: Snapshot = {
   tickets: [],
   ticketHistory: [],
 };
-export const publicSnapshotUrl = process.env.NEXT_PUBLIC_DATA_URL ?? "https://raw.githubusercontent.com/mensahenoch020-sketch/Oddsaura/main/data/public/snapshot.json";
+export type SnapshotScope = "snapshot" | "builder" | "matches" | "daily" | "results" | "admin";
+const publicDataBase = "https://raw.githubusercontent.com/mensahenoch020-sketch/Oddsaura/main/data/public";
 
-export async function loadSnapshot() {
+export async function loadSnapshot(scope: SnapshotScope = "snapshot") {
   const cacheWindow = Math.floor(Date.now() / 300_000);
-  const response = await fetch(`${publicSnapshotUrl}?v=${cacheWindow}`, { cache: "no-store" });
+  const configured = process.env.NEXT_PUBLIC_DATA_URL;
+  const remoteUrl = configured && scope === "snapshot" ? configured : `${publicDataBase}/${scope}.json`;
+  // The deploy bundles the latest scoped snapshot at the same origin. It
+  // avoids a second DNS/TLS trip to GitHub and gives mobile screens an
+  // immediate cached response; the remote source remains the safe fallback.
+  let response = await fetch(`/data/${scope}.json?v=${cacheWindow}`, { cache: "force-cache" });
+  if (!response.ok) response = await fetch(`${remoteUrl}?v=${cacheWindow}`, { cache: "force-cache" });
+  if (!response.ok && scope !== "snapshot") response = await fetch(`${configured ?? `${publicDataBase}/snapshot.json`}?v=${cacheWindow}`, { cache: "force-cache" });
   if (!response.ok) throw new Error("The latest GitHub snapshot could not be reached");
   return response.json() as Promise<Snapshot>;
 }

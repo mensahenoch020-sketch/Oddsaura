@@ -43,3 +43,9 @@ next-env.d.ts
 /.sites-runtime/
 /outputs/
 /work/
+/public/data/
+/data/public/admin.json
+/data/public/builder.json
+/data/public/daily.json
+/data/public/matches.json
+/data/public/results.json

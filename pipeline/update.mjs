@@ -13,6 +13,44 @@ const horizon = now.getTime() + futureDays * 24 * 60 * 60 * 1000;
 const previous = JSON.parse(await readFile(output, "utf8"));
 const historical = await readFile(resolve(root, "data/history/football-data.json"), "utf8").then(JSON.parse).catch(() => ({ events: [], generatedAt: null, warnings: ["Historical cache unavailable"] }));
 
+async function writePublicSnapshots(snapshot) {
+  const withoutOdds = (fixture) => ({ ...fixture, odds: [] });
+  // Route payloads intentionally omit modelling fields their screens never
+  // read. This keeps first paint quick on mobile without reducing the full
+  // operational snapshot or the selectable bookmaker markets.
+  const slimPick = (source) => {
+    const pick = { ...source };
+    for (const key of ["probability", "edge", "historyMatches", "reasoning", "providerDeepLink"]) delete pick[key];
+    return pick;
+  };
+  const dailyPick = (source) => {
+    const pick = slimPick(source);
+    for (const key of ["providerMarketId", "providerSelectionId", "oddsProvider"]) delete pick[key];
+    return pick;
+  };
+  const routePicks = (snapshot.predictedPicks ?? []).map(slimPick);
+  const common = {
+    version: snapshot.version,
+    generatedAt: snapshot.generatedAt,
+    stale: snapshot.stale,
+    status: snapshot.status,
+    message: snapshot.message,
+    metrics: snapshot.metrics,
+  };
+  const scoped = {
+    builder: { ...common, predictedPicks: routePicks },
+    matches: { ...common, fixtures: (snapshot.fixtures ?? []).map(withoutOdds), liveFixtures: (snapshot.liveFixtures ?? []).map(withoutOdds), predictedPicks: routePicks },
+    daily: { ...common, tickets: snapshot.tickets ?? [], predictedPicks: (snapshot.predictedPicks ?? []).map(dailyPick) },
+    results: { ...common, recentResults: (snapshot.recentResults ?? []).map(withoutOdds), tickets: snapshot.tickets ?? [], ticketHistory: snapshot.ticketHistory ?? [] },
+    admin: { ...common, sources: snapshot.sources ?? [], tickets: snapshot.tickets ?? [], marketCatalog: snapshot.marketCatalog ?? [] },
+  };
+  await mkdir(dirname(output), { recursive: true });
+  await Promise.all([
+    writeFile(output, `${JSON.stringify(snapshot)}\n`),
+    ...Object.entries(scoped).map(([name, payload]) => writeFile(resolve(root, `data/public/${name}.json`), `${JSON.stringify(payload)}\n`)),
+  ]);
+}
+
 let events = [];
 let warnings = [];
 let sourceStatus = "error";
@@ -56,7 +94,7 @@ message = healthySources ? "Global fixtures, team badges, recent results and mod
 
 if (!events.length) {
   const stale = { ...previous, generatedAt: now.toISOString(), stale: true, status: "stale", message, sources };
-  await writeFile(output, `${JSON.stringify(stale, null, 2)}\n`);
+  await writePublicSnapshots(stale);
   process.exit(0);
 }
 
@@ -268,6 +306,5 @@ const snapshot = {
   tickets,
   ticketHistory,
 };
-await mkdir(dirname(output), { recursive: true });
-await writeFile(output, `${JSON.stringify(snapshot, null, 2)}\n`);
+await writePublicSnapshots(snapshot);
 console.log(`OddsAura updated: ${upcoming.length} fixtures, ${predictions.length} model scores, ${predictedPicks.length} selectable predictions, ${tickets.length} tickets`);

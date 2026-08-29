@@ -10,7 +10,7 @@
     "dev": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vite",
     "build": "bash scripts/build-verified.sh",
     "start": "node scripts/railway-server.mjs",
-    "test": "npm run build && node --test tests/rendered-html.test.mjs",
+    "test": "npm run build && node --test tests/*.test.mjs",
     "data:update": "node pipeline/update.mjs",
     "data:history": "node pipeline/update-history.mjs",
     "data:test": "node --test pipeline/tests/*.test.mjs",

@@ -1,7 +1,8 @@
 /** Cloudflare Worker entry point for the vinext-starter template. */
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
-import { createSportyBetCode, SportyBetIntegrationError, type SportyBetSelectionInput } from "../backend/src/modules/providers/sportybet";
+import { BookmakerIntegrationError, createBookmakerCode, type BookmakerId } from "../backend/src/modules/providers/controller";
+import type { SportyBetSelectionInput } from "../backend/src/modules/providers/sportybet";
 
 interface Env {
   ASSETS: Fetcher;
@@ -332,7 +333,8 @@ const worker = {
 
     const protectedPages = ["/dashboard", "/daily", "/matches", "/builder", "/results", "/account", "/admin"];
     const isProtectedPage = protectedPages.some((path) => url.pathname === path || url.pathname.startsWith(`${path}/`));
-    const isProtectedApi = url.pathname === "/api/sportybet/code" || url.pathname === "/api/account" || url.pathname === "/api/codes" || url.pathname === "/api/slips" || url.pathname.startsWith("/api/slips/") || url.pathname === "/api/ticket-controls" || url.pathname.startsWith("/api/admin/");
+    const providerCodeMatch = url.pathname.match(/^\/api\/providers\/(sportybet|betpawa|bet9ja|betking|1xbet)\/code$/);
+    const isProtectedApi = Boolean(providerCodeMatch) || url.pathname === "/api/sportybet/code" || url.pathname === "/api/account" || url.pathname === "/api/codes" || url.pathname === "/api/slips" || url.pathname.startsWith("/api/slips/") || url.pathname === "/api/ticket-controls" || url.pathname.startsWith("/api/admin/");
     const identity = isProtectedPage || isProtectedApi ? await sessionIdentity(request, env) : null;
     if ((isProtectedPage || isProtectedApi) && !identity) {
       if (isProtectedApi) return Response.json({ error: "Log in to continue." }, { status: 401, headers: { "cache-control": "no-store" } });
@@ -357,7 +359,8 @@ const worker = {
     if (url.pathname === "/api/ticket-controls") return ticketControlsApi(env);
     if (url.pathname.startsWith("/api/admin/")) return adminApi(authenticatedRequest, env, url, identity);
 
-    if (url.pathname === "/api/sportybet/code") {
+    if (providerCodeMatch || url.pathname === "/api/sportybet/code") {
+      const provider = (providerCodeMatch?.[1] ?? "sportybet") as BookmakerId;
       if (request.method !== "POST") return Response.json({ error: "Method not allowed" }, { status: 405, headers: { allow: "POST" } });
       if (!identity || !env.DB) return Response.json({ error: "Account storage is not ready yet." }, { status: 503 });
       let eventId = "";
@@ -365,7 +368,7 @@ const worker = {
         const body = await authenticatedRequest.json() as { selections?: SportyBetSelectionInput[]; allowPartial?: boolean };
         await ensureAccountTables(env.DB);
         const now = Date.now();
-        const requestHash = await digest(`${identity.email}|${JSON.stringify({ selections: body.selections ?? [], allowPartial: body.allowPartial ?? false })}`);
+        const requestHash = await digest(`${identity.email}|${provider}|${JSON.stringify({ selections: body.selections ?? [], allowPartial: body.allowPartial ?? false })}`);
         const recent = await env.DB.prepare("SELECT COUNT(*) AS count FROM code_request_events WHERE user_email = ? AND created_at > ?")
           .bind(identity.email, now - 60_000).first<{ count: number }>();
         if (Number(recent?.count ?? 0) >= 6) {
@@ -379,12 +382,12 @@ const worker = {
         if (cached?.responseJson) {
           const cachedResult = JSON.parse(cached.responseJson) as Record<string, unknown>;
           await env.DB.prepare("UPDATE code_request_events SET status = 'CACHED' WHERE id = ?").bind(eventId).run();
-          return Response.json({ provider: "sportybet", verified: true, cached: true, ...cachedResult }, { headers: { "cache-control": "no-store" } });
+          return Response.json({ provider, verified: true, cached: true, ...cachedResult }, { headers: { "cache-control": "no-store" } });
         }
-        const result = await createSportyBetCode(body.selections ?? [], fetch, body.allowPartial ?? false);
+        const result = await createBookmakerCode(provider, body.selections ?? [], fetch, body.allowPartial ?? false);
         await env.DB.batch([
           env.DB.prepare("INSERT INTO generated_codes (id, user_email, provider, code, deep_link, selections_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
-            .bind(crypto.randomUUID(), identity.email, "sportybet", result.code, result.deepLink ?? null, JSON.stringify({ requested: body.selections ?? [], resolved: result.resolved ?? [], unmatched: result.unmatched ?? [] }), now),
+            .bind(crypto.randomUUID(), identity.email, provider, result.code, result.deepLink ?? null, JSON.stringify({ requested: body.selections ?? [], resolved: result.resolved ?? [], unmatched: result.unmatched ?? [] }), now),
           env.DB.prepare("INSERT INTO sportybet_code_cache (request_hash, response_json, expires_at, created_at) VALUES (?, ?, ?, ?) ON CONFLICT(request_hash) DO UPDATE SET response_json = excluded.response_json, expires_at = excluded.expires_at, created_at = excluded.created_at")
             .bind(requestHash, JSON.stringify(result), now + 120_000, now),
           env.DB.prepare("UPDATE code_request_events SET status = 'SUCCEEDED' WHERE id = ?").bind(eventId),
@@ -393,10 +396,10 @@ const worker = {
           env.DB.prepare("DELETE FROM code_request_events WHERE created_at < ?").bind(now - 86_400_000),
           env.DB.prepare("DELETE FROM sportybet_code_cache WHERE expires_at < ?").bind(now),
         ]).then(() => undefined));
-        return Response.json({ provider: "sportybet", verified: true, ...result }, { headers: { "cache-control": "no-store" } });
+        return Response.json({ provider, verified: true, ...result }, { headers: { "cache-control": "no-store" } });
       } catch (error) {
         if (eventId) ctx.waitUntil(env.DB.prepare("UPDATE code_request_events SET status = 'FAILED' WHERE id = ?").bind(eventId).run().then(() => undefined));
-        const typed = error instanceof SportyBetIntegrationError ? error : new SportyBetIntegrationError("SportyBet code creation failed.", 502);
+        const typed = error instanceof BookmakerIntegrationError ? error : new BookmakerIntegrationError("Bookmaker code creation failed.", 502);
         return Response.json({ error: typed.message, details: typed.details }, { status: typed.status, headers: { "cache-control": "no-store" } });
       }
     }
