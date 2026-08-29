@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-28T04:01:52.850Z",
+  "generatedAt": "2026-08-29T07:03:26.167Z",
   "methodology": "Walk-forward test: every prediction uses only matches completed before kickoff.",
   "matches": 2000,
   "oneXTwoAccuracy": 0.507,
