@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { createSportyBetCode, SportyBetIntegrationError } from "./sportybet.js";
+import { BOOKMAKER_IDS, BookmakerIntegrationError, createBookmakerCode, type BookmakerId } from "./controller.js";
 
 const selection = z.object({
   fixtureId: z.string().min(1),
@@ -18,12 +18,13 @@ const selection = z.object({
 });
 
 export async function providerRoutes(app: FastifyInstance) {
-  app.post("/api/providers/sportybet/code", async (request, reply) => {
+  app.post("/api/providers/:provider/code", async (request, reply) => {
+    const provider = z.enum(BOOKMAKER_IDS).parse((request.params as { provider?: string }).provider) as BookmakerId;
     const body = z.object({ selections: z.array(selection).min(1).max(50), allowPartial: z.boolean().optional() }).parse(request.body);
     try {
-      return { provider: "sportybet", verified: true, ...await createSportyBetCode(body.selections, fetch, body.allowPartial ?? false) };
+      return { provider, verified: true, ...await createBookmakerCode(provider, body.selections, fetch, body.allowPartial ?? false) };
     } catch (error) {
-      if (error instanceof SportyBetIntegrationError) return reply.code(error.status).send({ error: error.message, details: error.details });
+      if (error instanceof BookmakerIntegrationError) return reply.code(error.status).send({ error: error.message, details: error.details });
       throw error;
     }
   });

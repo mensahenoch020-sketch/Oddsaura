@@ -18,6 +18,10 @@ if [[ ! -x "${vinext}" ]]; then
   exit 69
 fi
 
+# Generate route-sized payloads from the canonical snapshot so deploys do not
+# depend on large generated slice files being committed to source control.
+node "${SITES_PROJECT_ROOT}/scripts/build-public-data.mjs"
+
 echo "Running bounded vinext build..."
 timeout \
   --signal=TERM \
