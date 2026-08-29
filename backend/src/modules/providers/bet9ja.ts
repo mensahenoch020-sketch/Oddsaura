@@ -7,6 +7,7 @@ const CREATE_URL = "https://apigw.bet9ja.com/sportsbook/placebet/BookABetV2";
 const VERIFY_URL = "https://sports.bet9ja.com/desktop/feapi/CouponAjax/GetBookABetCouponV2";
 const SITE_URL = "https://sports.bet9ja.com/";
 const cache = new Map<string, { until: number; event: Json }>();
+let sessionCookie = "";
 
 export class Bet9jaIntegrationError extends Error {
   constructor(message: string, readonly status = 422, readonly details?: unknown) {
@@ -28,22 +29,51 @@ function teamScore(left: string, right: string) {
     x === y ? 1 : x.includes(y) || y.includes(x) ? .92 : 0);
 }
 
-async function request(fetcher: FetchLike, url: string, init: RequestInit, failure: string) {
-  let response: Response;
+function parsePayload(text: string): unknown {
+  let value: unknown = JSON.parse(text.replace(/^\uFEFF/, "").replace(/^\)\]\}',?\s*/, "").trim());
+  if (typeof value === "string" && /^[\[{]/.test(value.trim())) value = JSON.parse(value);
+  return value;
+}
+
+async function bootstrapSession(fetcher: FetchLike) {
+  if (sessionCookie) return;
   try {
-    response = await fetcher(url, { ...init, headers: { accept: "application/json", ...init.headers }, signal: init.signal ?? AbortSignal.timeout(15_000) });
+    const response = await fetcher("https://web.bet9ja.com/Sport/Odds", { method: "GET", headers: { accept: "text/html", "user-agent": "Mozilla/5.0 OddsAura/1.0" }, signal: AbortSignal.timeout(15_000) });
+    const raw = response.headers.get("set-cookie") || "";
+    sessionCookie = raw.split(/,(?=[^;,]+=)/).map((part) => part.split(";", 1)[0]?.trim()).filter(Boolean).join("; ");
+    await response.text();
+  } catch { /* The JSON endpoint may still work without a bootstrap cookie. */ }
+}
+
+async function request(fetcher: FetchLike, url: string, init: RequestInit, failure: string, retried = false): Promise<unknown> {
+  let response: Response;
+  const searchRequest = url.startsWith(SEARCH_URL);
+  try {
+    response = await fetcher(url, { ...init, headers: { accept: "application/json, text/plain, */*", origin: searchRequest ? "https://web.bet9ja.com" : SITE_URL.slice(0, -1), referer: searchRequest ? "https://web.bet9ja.com/Sport/Odds" : SITE_URL, "x-requested-with": "XMLHttpRequest", "user-agent": "Mozilla/5.0 OddsAura/1.0", ...(searchRequest && sessionCookie ? { cookie: sessionCookie } : {}), ...init.headers }, signal: init.signal ?? AbortSignal.timeout(15_000) });
   } catch (error) {
     throw new Bet9jaIntegrationError(failure, 502, { cause: error instanceof Error ? error.message : String(error) });
   }
-  let payload: unknown;
-  try { payload = await response.json(); }
-  catch { throw new Bet9jaIntegrationError("Bet9ja returned an unreadable response.", 502, { status: response.status }); }
+  const text = await response.text();
+  let payload: unknown = null;
+  try { payload = parsePayload(text); }
+  catch {
+    if (!retried && url.startsWith(SEARCH_URL)) {
+      await bootstrapSession(fetcher);
+      return request(fetcher, url, init, failure, true);
+    }
+    throw new Bet9jaIntegrationError("Bet9ja's website did not accept the booking request. Please try again shortly.", 502, { status: response.status, contentType: response.headers.get("content-type"), preview: text.slice(0, 120) });
+  }
   if (!response.ok) throw new Bet9jaIntegrationError(failure, 502, payload);
   return payload;
 }
 
 function unwrap(payload: unknown) {
-  return isRecord(payload) && isRecord(payload.d) ? payload.d : payload;
+  const wrapped = isRecord(payload) ? payload.d : null;
+  if (isRecord(wrapped)) return wrapped;
+  if (typeof wrapped === "string") {
+    try { return parsePayload(wrapped); } catch { return wrapped; }
+  }
+  return payload;
 }
 
 function splitTeams(name: string) {
@@ -59,13 +89,17 @@ function dotNetTime(value: unknown) {
 async function findEvent(fetcher: FetchLike, input: SportyBetSelectionInput) {
   const key = `${norm(input.homeTeam)}|${norm(input.awayTeam)}|${input.kickoff.slice(0, 10)}`;
   const saved = cache.get(key); if (saved && saved.until > Date.now()) return saved.event;
-  const payload = unwrap(await request(fetcher, `${SEARCH_URL}/GetSearchBoxData`, {
-    method: "POST", headers: { "content-type": "application/json; charset=UTF-8" },
-    body: JSON.stringify({ textToSearch: input.homeTeam, showMatches: true, showCompetitions: false, pageSize: 50, startRowIndex: 0, getTotals: true }),
-  }, "Bet9ja's fixture search is temporarily unavailable."));
-  const rows = isRecord(payload) && Array.isArray(payload.SearchResults) ? payload.SearchResults.filter(isRecord) : [];
+  const terms = [...new Set([input.homeTeam, input.awayTeam, ...norm(input.homeTeam).split(" ").filter((part) => part.length > 3), ...norm(input.awayTeam).split(" ").filter((part) => part.length > 3)])].slice(0, 5);
+  const rows: Json[] = [];
+  for (const term of terms) {
+    const payload = unwrap(await request(fetcher, `${SEARCH_URL}/GetSearchBoxData`, {
+      method: "POST", headers: { "content-type": "application/json; charset=UTF-8" },
+      body: JSON.stringify({ textToSearch: term, showMatches: true, showCompetitions: false, pageSize: 100, startRowIndex: 0, getTotals: true }),
+    }, "Bet9ja's fixture search is temporarily unavailable."));
+    if (isRecord(payload) && Array.isArray(payload.SearchResults)) rows.push(...payload.SearchResults.filter(isRecord));
+  }
   const wantedTime = Date.parse(input.kickoff);
-  const ranked = rows.filter((row) => str(row.Type) === "SE" && !str(row.Area).startsWith("("))
+  const ranked = [...new Map(rows.map((row) => [str(row.ID), row])).values()].filter((row) => str(row.Type) === "SE" && !str(row.Area).startsWith("("))
     .map((row) => {
       const pair = splitTeams(str(row.Area));
       const names = Math.max((teamScore(input.homeTeam, pair.home) + teamScore(input.awayTeam, pair.away)) / 2,

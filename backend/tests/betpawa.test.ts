@@ -48,3 +48,18 @@ test("maps a totals row by its live line", async () => {
   assert.equal(result.resolved[0]?.outcomeId, "101");
   assert.equal(result.resolved[0]?.specifier, "total=2.5");
 });
+
+test("falls back to betPawa's public event list when search returns no fixture", async () => {
+  const publicEvent = { ...event, id: "777001", participants: [{ name: "Arsenal FC", position: 1 }, { name: "Chelsea FC", position: 2 }] };
+  const fakeFetch = async (input: string | URL | Request) => {
+    const url = String(input);
+    if (url.includes("/api/sportsbook/v3/search?")) return Response.json({ data: { events: [] } });
+    if (url.includes("/events?categoryId=") || url.includes("/events/popular?")) return new Response('<a href="/event/777001?filter=all"><span>Arsenal FC</span><span>Chelsea FC</span></a>');
+    if (url.includes("/api/sportsbook/v4/events/777001")) return Response.json({ data: publicEvent });
+    if (url.endsWith("/booking-number")) return Response.json({ code: "FALL777" });
+    return Response.json({ items: [{}], originalCount: 1 });
+  };
+  const result = await createBetPawaCode([{ fixtureId: "fallback", homeTeam: "Arsenal", awayTeam: "Chelsea", kickoff: event.startTime, marketKey: "MATCH_HOME", marketName: "Match result", selection: "Arsenal" }], fakeFetch as typeof fetch);
+  assert.equal(result.code, "FALL777");
+  assert.equal(result.resolved[0]?.eventId, "777001");
+});

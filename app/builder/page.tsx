@@ -88,11 +88,15 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
   }, [predictions, search, tier, league, sportyReadyOnly]);
   const priceFor = (pick: PredictedPick) => liveOdds[pick.fixtureId] ?? pick.quotedOdds ?? null;
   const totalOdds = useMemo(() => picks.every((pick) => liveOdds[pick.fixtureId] ?? pick.quotedOdds) ? picks.reduce((value, pick) => value * (liveOdds[pick.fixtureId] ?? pick.quotedOdds ?? 1), 1) : null, [picks, liveOdds]);
+  const livePriceCount = useMemo(() => picks.filter((pick) => Boolean(liveOdds[pick.fixtureId])).length, [picks, liveOdds]);
+  const allPricesLive = picks.length > 0 && livePriceCount === picks.length;
+  const selectionsText = picks.map((pick) => `${pick.homeTeam.name} vs ${pick.awayTeam.name} — ${pick.market.name}: ${pick.selection}`).join("\n");
 
   function choose(pick: PredictedPick) {
     setPicks((current) => current.some((item) => item.id === pick.id) ? current.filter((item) => item.id !== pick.id) : [...current.filter((item) => item.fixtureId !== pick.fixtureId), pick]);
     setNotice("");
     setSportyCode(null);
+    setLiveOdds({});
     setDoctorNotice("");
   }
 
@@ -175,7 +179,7 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
     const url = new URL(window.location.href);
     url.searchParams.set("slip", serialize(picks));
     window.history.replaceState({}, "", url);
-    if (navigator.share) await navigator.share({ title: "My OddsAura predicted slip", text: `${picks.length} modelled picks${totalOdds ? ` · ${totalOdds.toFixed(2)} total odds` : " · some prices pending"}`, url: url.toString() });
+    if (navigator.share) await navigator.share({ title: "My OddsAura predicted slip", text: `${picks.length} modelled picks${totalOdds ? ` · ${totalOdds.toFixed(2)} ${allPricesLive ? "verified live" : "estimated"} odds` : " · some prices pending"}`, url: url.toString() });
     else await copyText(url.toString(), "Link copied");
     if (navigator.share) setNotice("Share opened");
   }
@@ -200,7 +204,7 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
     }
     const footerY = canvas.height - 90;
     ctx.fillStyle = "#23d96c"; ctx.font = "700 58px Arial"; ctx.fillText(totalOdds?.toFixed(2) ?? "MODEL SLIP", 70, footerY);
-    ctx.fillStyle = "#ffffff"; ctx.font = "22px Arial"; ctx.fillText(totalOdds ? "TOTAL ODDS · Prices may change" : "SOME BOOKMAKER PRICES ARE PENDING", 70, footerY + 42);
+    ctx.fillStyle = "#ffffff"; ctx.font = "22px Arial"; ctx.fillText(totalOdds ? (allPricesLive ? `${activeProvider.label.toUpperCase()} LIVE ODDS` : "ESTIMATED ODDS · VERIFY WITH BOOKMAKER") : "SOME BOOKMAKER PRICES ARE PENDING", 70, footerY + 42);
     canvas.toBlob((blob) => {
       if (!blob) return;
       if (imagePreview) URL.revokeObjectURL(imagePreview);
@@ -228,6 +232,7 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
     setCreatingCode(true);
     setNotice(`Matching every pick against ${activeProvider.label}’s current markets…`);
     setSportyCode(null);
+    setLiveOdds({});
     try {
       const result = await generateBookmakerCode(provider, picks.map((pick) => ({
         fixtureId: pick.fixtureId,
@@ -270,16 +275,16 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
         <div className="build-league-tabs open" aria-label="League filter">{LEAGUE_FILTERS.map((item) => <button type="button" key={item.id} className={league === item.id ? "active" : ""} onClick={() => setLeague(item.id)}>{item.label}</button>)}</div>
         <div className="build-fixtures">{fixtureGroups.map((group) => <article id={`fixture-${encodeURIComponent(group.fixtureId)}`} key={group.fixtureId} className="build-fixture">
           <div className="build-match build-predicted-match"><div><TeamBadge team={group.homeTeam} /><strong>{group.homeTeam.name}</strong><span>vs</span><TeamBadge team={group.awayTeam} /><strong>{group.awayTeam.name}</strong></div><small>{group.league.name} · {new Date(group.kickoff).toLocaleString()}</small></div>
-          <div className="build-markets build-predictions">{group.predictions.map((pick) => { const active = picks.some((item) => item.id === pick.id); const price = priceFor(pick); return <button className={active ? "active" : ""} type="button" key={pick.id} onClick={() => choose(pick)}><span>{pick.market.name}</span><b>{pick.selection}</b><strong>{price?.toFixed(2) ?? pick.fairOdds.toFixed(2)}</strong><small>{liveOdds[pick.fixtureId] ? `${activeProvider.label} live` : pick.quotedOdds ? `${pick.oddsProvider ?? "Quoted"}` : "Model price"}</small></button>; })}</div>
+          <div className="build-markets build-predictions">{group.predictions.map((pick) => { const active = picks.some((item) => item.id === pick.id); const price = priceFor(pick); return <button className={active ? "active" : ""} type="button" key={pick.id} onClick={() => choose(pick)}><span>{pick.market.name}</span><b>{pick.selection}</b><strong>{price?.toFixed(2) ?? pick.fairOdds.toFixed(2)}</strong><small>{liveOdds[pick.fixtureId] ? `${activeProvider.label} live` : pick.quotedOdds ? "Last quoted · verify" : "Model estimate"}</small></button>; })}</div>
         </article>)}{!loading && !fixtureGroups.length && <div className="build-no-data">No model-approved selections match this filter yet. Try All predictions or another team.</div>}</div>
       </div>
       <aside className={`build-slip ${slipOpen ? "open" : ""}`} id="my-slip" aria-label="Betslip">
         <div className="build-slip-title"><div><span>Betslip</span><h2>{picks.length} {picks.length === 1 ? "selection" : "selections"}</h2></div><div>{picks.length > 0 && <button type="button" onClick={() => { setPicks([]); setSportyCode(null); setLiveOdds({}); }}>Clear</button>}<button className="build-slip-close" type="button" onClick={() => setSlipOpen(false)}>×</button></div></div>
         <div className="build-picks">{picks.map((pick) => <div key={pick.fixtureId}><button type="button" aria-label={`Remove ${pick.homeTeam.name} versus ${pick.awayTeam.name}`} onClick={() => removePick(pick.fixtureId)}>×</button><span>{pick.homeTeam.name} vs {pick.awayTeam.name}</span><strong>{pick.market.name}: {pick.selection}</strong><b>{priceFor(pick)?.toFixed(2) ?? "Pending"} <small>{liveOdds[pick.fixtureId] ? "LIVE" : ""}</small></b><a href={`#fixture-${encodeURIComponent(pick.fixtureId)}`} onClick={() => setSlipOpen(false)}>Change</a></div>)}{!picks.length && <p>No selections</p>}</div>
-        <div className="build-total"><span>{totalOdds ? "Total odds" : "Bookmaker prices"}</span><strong>{totalOdds?.toFixed(2) ?? "Pending"}</strong></div>
+        <div className="build-total"><span>{totalOdds ? allPricesLive ? `${activeProvider.label} live total` : livePriceCount ? `Mixed total · ${livePriceCount}/${picks.length} live` : "Estimated total · verify before betting" : "Bookmaker prices"}</span><strong>{totalOdds?.toFixed(2) ?? "Pending"}</strong></div>
         {weakestPick ? <div className="slip-doctor"><div><span>Slip Doctor</span><b>{weakestPick.homeTeam.shortName || weakestPick.homeTeam.name} vs {weakestPick.awayTeam.shortName || weakestPick.awayTeam.name}</b><small>{doctorNotice || (weakestPick.dataQuality === "LOW" ? "Limited match history" : `${Math.round(weakestPick.confidence * 100)}% confidence · weakest leg`)}</small></div><button type="button" onClick={replaceWeakest}>Replace</button></div> : null}
-        <div className="build-provider-list" aria-label="Choose bookmaker">{providerAdapters.filter((item) => item.id !== "draftkings").map((item) => <button type="button" key={item.id} className={provider === item.id ? "active" : ""} onClick={() => { setProvider(item.id); setSportyCode(null); }}>{item.label}<small>{item.status === "live" ? "Live" : item.id === "1xbet" ? "Account" : "Testing"}</small></button>)}</div>
-        {activeProvider.id === "1xbet" ? <><a className="build-code" href={activeProvider.deepLink} target="_blank" rel="noreferrer">Continue in signed-in 1xBet <span>↗</span></a><p className="build-notice">1xBet only creates and loads saved slips inside a signed-in bookmaker account.</p></> : <button className="build-code" type="button" disabled={!picks.length || creatingCode || activeProvider.status !== "live"} onClick={() => void requestCode()}>{activeProvider.status !== "live" ? `${activeProvider.label} verification pending` : creatingCode ? "Checking live odds…" : "Generate code"} <span>→</span></button>}
+        <div className="build-provider-list" aria-label="Choose bookmaker">{providerAdapters.filter((item) => item.id !== "draftkings").map((item) => <button type="button" key={item.id} className={provider === item.id ? "active" : ""} onClick={() => { setProvider(item.id); setSportyCode(null); setLiveOdds({}); }}>{item.label}<small>{item.status === "live" ? "Live" : item.id === "1xbet" ? "Manual" : "Testing"}</small></button>)}</div>
+        {activeProvider.id === "1xbet" ? <><div className="build-one-xbet"><button type="button" disabled={!picks.length} onClick={() => void copyText(selectionsText, "Selections copied")}>Copy selections</button><a className="build-code" href={activeProvider.deepLink} target="_blank" rel="noreferrer">Open signed-in 1xBet <span>↗</span></a></div><p className="build-notice">OddsAura does not generate a verified 1xBet code yet. Add these selections inside 1xBet, then use Save/load events to generate a valid account code.</p></> : <button className="build-code" type="button" disabled={!picks.length || creatingCode || activeProvider.status !== "live"} onClick={() => void requestCode()}>{activeProvider.status !== "live" ? `${activeProvider.label} verification pending` : creatingCode ? "Checking live odds…" : "Generate code"} <span>→</span></button>}
         {sportyCode && <div className="build-real-code"><span>{activeProvider.label} code</span><strong>{sportyCode.code}</strong><div><button type="button" onClick={() => void copyText(sportyCode.code, "Code copied")}>{copied === "Code copied" ? "Copied ✓" : "Copy code"}</button><a href={sportyCode.deepLink} target="_blank" rel="noreferrer">Open {activeProvider.label} ↗</a></div></div>}
         {sportyCode?.unmatched.length ? <div className="build-unmatched"><strong>Not included</strong>{sportyCode.unmatched.map((item) => <div key={item.fixtureId}><span>{item.homeTeam} vs {item.awayTeam}</span><small>{item.reason}</small><button type="button" onClick={() => removePick(item.fixtureId)}>Remove</button></div>)}</div> : null}
         <div className="build-share"><button type="button" disabled={!picks.length} onClick={() => void save()}>Save</button><button type="button" disabled={!picks.length} onClick={() => void share()}>Share</button><button type="button" disabled={!picks.length} onClick={jpeg}>Save image</button></div>

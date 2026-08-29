@@ -40,14 +40,44 @@ async function pawaRequest(fetcher: FetchLike, path: string, init: RequestInit, 
   } catch (error) {
     throw new BetPawaIntegrationError(failure, 502, { cause: error instanceof Error ? error.message : String(error) });
   }
+  const text = await response.text();
   let payload: unknown;
-  try { payload = await response.json(); }
-  catch { throw new BetPawaIntegrationError("betPawa returned an unreadable response.", 502, { status: response.status }); }
+  try {
+    payload = JSON.parse(text.replace(/^\uFEFF/, "").trim());
+    if (typeof payload === "string" && /^[\[{]/.test(payload.trim())) payload = JSON.parse(payload);
+  } catch { throw new BetPawaIntegrationError("betPawa's live service returned an invalid response. Please try again shortly.", 502, { status: response.status, contentType: response.headers.get("content-type"), preview: text.slice(0, 120) }); }
   if (!response.ok) {
     const message = isRecord(payload) ? str(payload.error) : "";
     throw new BetPawaIntegrationError(message || failure, response.status === 400 ? 422 : 502, payload);
   }
   return payload;
+}
+
+function payloadEvents(payload: unknown): RecordValue[] {
+  if (Array.isArray(payload)) return payload.filter(isRecord);
+  if (!isRecord(payload)) return [];
+  if (Array.isArray(payload.events)) return payload.events.filter(isRecord);
+  for (const key of ["data", "results", "content"]) {
+    const found = payloadEvents(payload[key]);
+    if (found.length) return found;
+  }
+  return [];
+}
+
+const htmlText = (value: string) => value.replace(/<script[\s\S]*?<\/script>/gi, " ").replace(/<style[\s\S]*?<\/style>/gi, " ").replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/\s+/g, " ").trim();
+
+async function publicEventCandidates(fetcher: FetchLike): Promise<RecordValue[]> {
+  const found = new Map<string, RecordValue>();
+  for (const path of ["/events?categoryId=2&marketId=1X2", "/events/popular?categoryId=2&marketId=1X2"]) {
+    try {
+      const response = await fetcher(`${ORIGIN}${path}`, { method: "GET", headers: { accept: "text/html", "x-pawa-brand": "betpawa-nigeria", devicetype: "web", "user-agent": "Mozilla/5.0 OddsAura/1.0" }, signal: AbortSignal.timeout(15_000) });
+      if (!response.ok) continue;
+      const html = await response.text();
+      const links = html.matchAll(/href=["']\/event\/(\d+)[^"']*["'][^>]*>([\s\S]*?)<\/a>/gi);
+      for (const match of links) found.set(match[1]!, { id: match[1], searchLabel: htmlText(match[2] || "") });
+    } catch { /* Search API results remain the primary path. */ }
+  }
+  return [...found.values()];
 }
 
 function teams(event: RecordValue) {
@@ -59,9 +89,9 @@ function teams(event: RecordValue) {
 function ranked(events: RecordValue[], input: SportyBetSelectionInput) {
   const kickoff = Date.parse(input.kickoff);
   return events.map((event) => {
-    const pair = teams(event);
-    const names = Math.max((score(input.homeTeam, pair.home) + score(input.awayTeam, pair.away)) / 2,
-      (score(input.homeTeam, pair.away) + score(input.awayTeam, pair.home)) / 2 * .85);
+    const pair = teams(event), label = str(event.searchLabel);
+    const names = pair.home && pair.away ? Math.max((score(input.homeTeam, pair.home) + score(input.awayTeam, pair.away)) / 2,
+      (score(input.homeTeam, pair.away) + score(input.awayTeam, pair.home)) / 2 * .85) : (score(input.homeTeam, label) + score(input.awayTeam, label)) / 2;
     const start = Date.parse(str(event.startTime));
     const delta = kickoff && start ? Math.abs(kickoff - start) : null;
     return { event, names, delta, total: names * .84 + (delta == null ? .5 : Math.max(0, 1 - delta / 86_400_000)) * .16 };
@@ -72,18 +102,21 @@ async function findEvent(fetcher: FetchLike, input: SportyBetSelectionInput) {
   const key = `${norm(input.homeTeam)}|${norm(input.awayTeam)}|${input.kickoff.slice(0, 10)}`;
   const saved = cache.get(key); if (saved && saved.until > Date.now()) return saved.event;
   const results: RecordValue[] = [];
-  for (const term of [input.homeTeam, input.awayTeam].sort((a, b) => a.length - b.length)) {
+  const terms = [...new Set([input.homeTeam, input.awayTeam, ...norm(input.homeTeam).split(" ").filter((part) => part.length > 3), ...norm(input.awayTeam).split(" ").filter((part) => part.length > 3)])].slice(0, 5);
+  for (const term of terms) {
     const payload = await pawaRequest(fetcher, `/api/sportsbook/v3/search?name=${encodeURIComponent(term)}`, { method: "GET" }, "betPawa's fixture search is temporarily unavailable.");
-    if (isRecord(payload) && Array.isArray(payload.events)) results.push(...payload.events.filter(isRecord));
+    results.push(...payloadEvents(payload));
     const top = ranked(results, input)[0];
     if (top && top.names >= .9 && (top.delta == null || top.delta <= 28_800_000)) break;
   }
-  const match = ranked([...new Map(results.map((event) => [str(event.id), event])).values()], input)[0];
+  let match = ranked([...new Map(results.map((event) => [str(event.id), event])).values()], input)[0];
+  if (!match || match.names < .7) match = ranked(await publicEventCandidates(fetcher), input)[0];
   if (!match || match.names < .7 || (match.delta != null && match.delta > 259_200_000)) {
     throw new BetPawaIntegrationError(`betPawa does not currently list ${input.homeTeam} vs ${input.awayTeam}.`, 422, { fixtureId: input.fixtureId });
   }
   const eventId = str(match.event.id);
-  const event = await pawaRequest(fetcher, `/api/sportsbook/v4/events/${encodeURIComponent(eventId)}`, { method: "GET" }, "betPawa's market service is temporarily unavailable.");
+  const payload = await pawaRequest(fetcher, `/api/sportsbook/v4/events/${encodeURIComponent(eventId)}`, { method: "GET" }, "betPawa's market service is temporarily unavailable.");
+  const event = isRecord(payload) && isRecord(payload.event) ? payload.event : isRecord(payload) && isRecord(payload.data) ? payload.data : payload;
   if (!isRecord(event)) throw new BetPawaIntegrationError("betPawa did not return the selected fixture.", 502, { eventId });
   cache.set(key, { until: Date.now() + 300_000, event }); return event;
 }

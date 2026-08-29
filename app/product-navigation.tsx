@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import Brand from "./brand";
 import "./product-navigation.css";
 import "./compact-theme.css";
@@ -17,14 +20,22 @@ function NavIcon({ children }: { children: React.ReactNode }) {
   return <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{children}</svg>;
 }
 
-export default function ProductNavigation({ active, slipCount = 0 }: { active: ProductArea; slipCount?: number }) {
+export default function ProductNavigation({ active, slipCount = 0, initialName = "" }: { active: ProductArea; slipCount?: number; initialName?: string }) {
+  const [name, setName] = useState(initialName);
+  useEffect(() => {
+    if (initialName) return;
+    fetch("/api/auth/me", { cache: "no-store" }).then((response) => response.ok ? response.json() : null).then((payload) => {
+      if (payload?.user?.name) setName(String(payload.user.name));
+    }).catch(() => undefined);
+  }, [initialName]);
+  const badge = useMemo(() => (name || "OddsAura").split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase(), [name]);
   return <>
     <header className="product-header">
       <Brand href="/dashboard" className="product-brand" />
       <nav className="product-desktop-nav" aria-label="Main navigation">
         {items.map((item) => <Link key={item.id} href={item.href} aria-current={active === item.id ? "page" : undefined} className={active === item.id ? "active" : ""}>{item.label}{item.id === "slip" && slipCount > 0 ? <b>{slipCount}</b> : null}</Link>)}
       </nav>
-      <Link className="product-profile" href="/account" aria-label="Open profile and settings"><span>Profile</span><i aria-hidden="true">OA</i></Link>
+      <Link className="product-profile" href="/account" aria-label="Open profile and settings"><span>{name || "Profile"}</span><i aria-hidden="true">{badge}</i></Link>
     </header>
     <nav className="product-mobile-nav" aria-label="Mobile navigation">
       {items.map((item) => <Link key={item.id} href={item.href} aria-current={active === item.id ? "page" : undefined} className={active === item.id ? "active" : ""}>
@@ -34,4 +45,3 @@ export default function ProductNavigation({ active, slipCount = 0 }: { active: P
     </nav>
   </>;
 }
-
