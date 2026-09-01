@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { BOOKMAKER_IDS, BookmakerIntegrationError, createBookmakerCode, type BookmakerId } from "./controller.js";
+import { BOOKMAKER_IDS, BookmakerIntegrationError, createBookmakerCode, convertBookmakerCode, type BookmakerId } from "./controller.js";
 
 const selection = z.object({
   fixtureId: z.string().min(1),
@@ -18,6 +18,16 @@ const selection = z.object({
 });
 
 export async function providerRoutes(app: FastifyInstance) {
+  app.post("/api/providers/convert", async (request, reply) => {
+    const body = z.object({ sourceProvider: z.enum(BOOKMAKER_IDS), destinationProvider: z.enum(BOOKMAKER_IDS), code: z.string().min(4).max(16), allowPartial: z.boolean().optional() }).parse(request.body);
+    try {
+      return { verified: true, ...await convertBookmakerCode(body.sourceProvider, body.destinationProvider, body.code, fetch, body.allowPartial ?? false) };
+    } catch (error) {
+      if (error instanceof BookmakerIntegrationError) return reply.code(error.status).send({ error: error.message, details: error.details });
+      throw error;
+    }
+  });
+
   app.post("/api/providers/:provider/code", async (request, reply) => {
     const provider = z.enum(BOOKMAKER_IDS).parse((request.params as { provider?: string }).provider) as BookmakerId;
     const body = z.object({ selections: z.array(selection).min(1).max(50), allowPartial: z.boolean().optional() }).parse(request.body);

@@ -18,7 +18,7 @@ export default function AccountSettings({ initialName, email }: { initialName: s
 
   async function updateProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy("profile"); setError(""); setProfileMessage("");
-    try { const payload = await submitJson("/api/auth/profile", "PATCH", { name }); setName(payload.user?.name || name); setProfileMessage("Profile updated."); }
+    try { const payload = await submitJson("/api/auth/profile", "PATCH", { name }); const savedName = payload.user?.name || name; setName(savedName); window.dispatchEvent(new CustomEvent("oddsaura-profile-updated", { detail: { name: savedName } })); setProfileMessage("Profile updated. Your name now appears across OddsAura."); }
     catch (reason) { setError(reason instanceof Error ? reason.message : "Profile could not be updated."); }
     finally { setBusy(""); }
   }
@@ -44,4 +44,3 @@ export default function AccountSettings({ initialName, email }: { initialName: s
     <article className="session-card"><span>Session</span><h2>Sign out</h2><button type="button" onClick={() => void logout()} disabled={busy === "logout"}>{busy === "logout" ? "Logging out…" : "Log out"}</button></article>
   </section>;
 }
-

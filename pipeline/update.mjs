@@ -257,8 +257,29 @@ function settleSelection(selection, fixture) {
   return "UNVERIFIED";
 }
 
+const normalizedTeam = (value = "") => value.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\b(fc|cf|sc|afc|club|football|de|the)\b/g, " ").replace(/[^a-z0-9]+/g, " ").trim();
+
+function resultTeamScore(left, right) {
+  const a = new Set(normalizedTeam(left).split(" ").filter(Boolean));
+  const b = new Set(normalizedTeam(right).split(" ").filter(Boolean));
+  if (!a.size || !b.size) return 0;
+  const x = [...a].join(" "), y = [...b].join(" ");
+  return Math.max([...a].filter((word) => b.has(word)).length / new Set([...a, ...b]).size, x === y ? 1 : x.includes(y) || y.includes(x) ? .92 : 0);
+}
+
+function resultForSelection(selection) {
+  const exact = eventMap.get(selection.fixtureId);
+  if (exact) return exact;
+  const kickoff = Date.parse(selection.kickoff);
+  return events.filter((event) => event.status === "FINISHED").map((event) => {
+    const names = (resultTeamScore(selection.homeTeam?.name, event.homeTeam?.name) + resultTeamScore(selection.awayTeam?.name, event.awayTeam?.name)) / 2;
+    const delta = kickoff ? Math.abs(kickoff - Date.parse(event.kickoff)) : null;
+    return { event, names, delta, score: names * .88 + (delta == null ? .5 : Math.max(0, 1 - delta / 43_200_000)) * .12 };
+  }).filter((row) => row.names >= .72 && (row.delta == null || row.delta <= 43_200_000)).sort((a, b) => b.score - a.score)[0]?.event;
+}
+
 function trackTicket(ticket) {
-  const selections = ticket.selections.map((selection) => ({ ...selection, result: settleSelection(selection, eventMap.get(selection.fixtureId)) }));
+  const selections = ticket.selections.map((selection) => ({ ...selection, result: settleSelection(selection, resultForSelection(selection)) }));
   const lost = selections.filter((selection) => selection.result === "LOST").length;
   const pending = selections.filter((selection) => selection.result === "PENDING").length;
   const unverified = selections.filter((selection) => selection.result === "UNVERIFIED").length;

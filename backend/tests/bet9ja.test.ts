@@ -17,12 +17,12 @@ test("creates and reload-verifies a public Bet9ja booking code", async () => {
     if (url.endsWith("GetSearchBoxData")) return Response.json({ d: { SearchResults: [{ ID: 825252096, Type: "SE", Area: "Liverpool - Nottingham Forest", CodPub: "2939", DataInizio: "/Date(1788003000000)/" }] } });
     if (url.endsWith("GetSubEventDetails")) return Response.json({ d: detail });
     if (url.includes("BookABetV2")) return Response.json({ status: 1, data: [{ RIS: "5PGCLX3" }] });
-    return Response.json({ d: { O: { "825252096$S_1X2_1": {} } } });
+    return Response.json({ R: "OK", D: { O: { "825252096$S_1X2_1": {} } } });
   };
   const result = await createBet9jaCode([{ fixtureId: "one", homeTeam: "Liverpool FC", awayTeam: "Nottingham Forest", kickoff: "2026-08-29T11:30:00Z",
     marketKey: "MATCH_HOME", marketName: "Match result", selection: "Liverpool" }], fakeFetch as typeof fetch);
   assert.equal(result.code, "5PGCLX3");
-  assert.equal(result.deepLink, "https://sports.bet9ja.com/?bookABetCode=5PGCLX3");
+  assert.equal(result.deepLink, "https://sports.bet9ja.com/mobile?bookABetCode=5PGCLX3");
   const create = calls.find((call) => call.url.includes("BookABetV2"));
   const form = new URLSearchParams(String(create?.init?.body));
   const slip = JSON.parse(String(form.get("BETSLIP")));

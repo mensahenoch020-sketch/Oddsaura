@@ -74,7 +74,7 @@ function rule(input: SportyBetSelectionInput): Rule | null {
     DC_1X: { typeId: 146, outcome: "1X" }, DC_12: { typeId: 146, outcome: "12" }, DC_X2: { typeId: 146, outcome: "X2" },
     BTTS_YES: { typeId: 302, outcome: "Yes" }, BTTS_NO: { typeId: 302, outcome: "No" },
   };
-  if (fixed[input.marketKey]) return fixed[input.marketKey];
+  if (fixed[input.marketKey]) return fixed[input.marketKey]!;
   if (/^OVER_/.test(input.marketKey)) return { typeId: 160, outcome: "Over", line: input.line };
   if (/^UNDER_/.test(input.marketKey)) return { typeId: 160, outcome: "Under", line: input.line };
   if (/^HOME_(?:OVER|UNDER)_/.test(input.marketKey)) return { typeId: 10283, outcome: input.marketKey.includes("OVER") ? "Over" : "Under", line: input.line };

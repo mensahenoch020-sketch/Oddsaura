@@ -6,6 +6,7 @@ const SEARCH_URL = "https://web.bet9ja.com/Controls/ControlsWS.asmx";
 const CREATE_URL = "https://apigw.bet9ja.com/sportsbook/placebet/BookABetV2";
 const VERIFY_URL = "https://sports.bet9ja.com/desktop/feapi/CouponAjax/GetBookABetCouponV2";
 const SITE_URL = "https://sports.bet9ja.com/";
+const LOAD_URL = "https://sports.bet9ja.com/mobile";
 const cache = new Map<string, { until: number; event: Json }>();
 let sessionCookie = "";
 
@@ -68,7 +69,7 @@ async function request(fetcher: FetchLike, url: string, init: RequestInit, failu
 }
 
 function unwrap(payload: unknown) {
-  const wrapped = isRecord(payload) ? payload.d : null;
+  const wrapped = isRecord(payload) ? payload.D ?? payload.d : null;
   if (isRecord(wrapped)) return wrapped;
   if (typeof wrapped === "string") {
     try { return parsePayload(wrapped); } catch { return wrapped; }
@@ -131,7 +132,7 @@ function rule(input: SportyBetSelectionInput): Rule | null {
     ODD_GOALS: { className: "Odd/Even", sign: "Odd", market: "S_OE" }, EVEN_GOALS: { className: "Odd/Even", sign: "Even", market: "S_OE" },
     HT_HOME: { className: "Half Time", sign: "1", market: "S_1X21T" }, HT_DRAW: { className: "Half Time", sign: "X", market: "S_1X21T" }, HT_AWAY: { className: "Half Time", sign: "2", market: "S_1X21T" },
   };
-  if (fixed[input.marketKey]) return fixed[input.marketKey];
+  if (fixed[input.marketKey]) return fixed[input.marketKey]!;
   if (/^OVER_/.test(input.marketKey)) return { className: `O/U ${input.line}`, sign: "Over", market: "S_OU", line: input.line };
   if (/^UNDER_/.test(input.marketKey)) return { className: `O/U ${input.line}`, sign: "Under", market: "S_OU", line: input.line };
   return null;
@@ -186,9 +187,12 @@ export async function createBet9jaCode(selections: SportyBetSelectionInput[], fe
   const created = await request(fetcher, CREATE_URL, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded", "x-source": "desktop" }, body: form.toString() }, "Bet9ja's booking-code service is temporarily unavailable.");
   const first = isRecord(created) && Array.isArray(created.data) && isRecord(created.data[0]) ? created.data[0] : null;
   const code = first ? str(first.RIS) : "";
-  if (!isRecord(created) || Number(created.status) !== 1 || !/^[A-Z0-9]{5,12}$/i.test(code)) throw new Bet9jaIntegrationError("Bet9ja rejected one or more selections.", 422, created);
+  if (!isRecord(created) || Number(created.status) !== 1 || !/^[A-Z0-9]{5,12}$/i.test(code)) {
+    const message = isRecord(created) && isRecord(created.error) ? str(created.error.message) : "";
+    throw new Bet9jaIntegrationError(message || "Bet9ja rejected one or more selections.", 422, created);
+  }
   const checked = unwrap(await request(fetcher, `${VERIFY_URL}?couponCode=${encodeURIComponent(code)}`, { method: "GET" }, "Bet9ja created a code but did not confirm it. Please try again."));
   const confirmed = isRecord(checked) && isRecord(checked.O) ? Object.keys(checked.O).length : 0;
   if (confirmed !== resolved.length) throw new Bet9jaIntegrationError("Bet9ja did not confirm every selection in the generated code.", 502, { code, expected: resolved.length, confirmed });
-  return { code, deepLink: `${SITE_URL}?bookABetCode=${encodeURIComponent(code)}`, resolved, partial: unmatched.length > 0, unmatched };
+  return { code, deepLink: `${LOAD_URL}?bookABetCode=${encodeURIComponent(code)}`, resolved, partial: unmatched.length > 0, unmatched };
 }

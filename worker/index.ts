@@ -2,6 +2,7 @@
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
 import { BookmakerIntegrationError, createBookmakerCode, type BookmakerId } from "../backend/src/modules/providers/controller";
+import { decodeBookmakerCode } from "../backend/src/modules/providers/decoder";
 import type { SportyBetSelectionInput } from "../backend/src/modules/providers/sportybet";
 
 interface Env {
@@ -331,10 +332,10 @@ const worker = {
       }
     }
 
-    const protectedPages = ["/dashboard", "/daily", "/matches", "/builder", "/results", "/account", "/admin"];
+    const protectedPages = ["/dashboard", "/daily", "/matches", "/builder", "/converter", "/results", "/account", "/admin"];
     const isProtectedPage = protectedPages.some((path) => url.pathname === path || url.pathname.startsWith(`${path}/`));
-    const providerCodeMatch = url.pathname.match(/^\/api\/providers\/(sportybet|betpawa|bet9ja|betking|1xbet)\/code$/);
-    const isProtectedApi = Boolean(providerCodeMatch) || url.pathname === "/api/sportybet/code" || url.pathname === "/api/account" || url.pathname === "/api/codes" || url.pathname === "/api/slips" || url.pathname.startsWith("/api/slips/") || url.pathname === "/api/ticket-controls" || url.pathname.startsWith("/api/admin/");
+    const providerCodeMatch = url.pathname.match(/^\/api\/providers\/(sportybet|betpawa|bet9ja|betking|betway)\/code$/);
+    const isProtectedApi = Boolean(providerCodeMatch) || url.pathname === "/api/providers/convert" || url.pathname === "/api/sportybet/code" || url.pathname === "/api/account" || url.pathname === "/api/codes" || url.pathname === "/api/slips" || url.pathname.startsWith("/api/slips/") || url.pathname === "/api/ticket-controls" || url.pathname.startsWith("/api/admin/");
     const identity = isProtectedPage || isProtectedApi ? await sessionIdentity(request, env) : null;
     if ((isProtectedPage || isProtectedApi) && !identity) {
       if (isProtectedApi) return Response.json({ error: "Log in to continue." }, { status: 401, headers: { "cache-control": "no-store" } });
@@ -350,6 +351,7 @@ const worker = {
       const headers = new Headers(request.headers);
       headers.set("x-oddsaura-user-email", identity.email);
       headers.set("x-oddsaura-user-name", identity.name);
+      headers.set("x-oddsaura-user-role", identity.role);
       authenticatedRequest = new Request(request, { headers });
     }
 
@@ -358,6 +360,42 @@ const worker = {
     }
     if (url.pathname === "/api/ticket-controls") return ticketControlsApi(env);
     if (url.pathname.startsWith("/api/admin/")) return adminApi(authenticatedRequest, env, url, identity);
+
+    if (url.pathname === "/api/providers/convert") {
+      if (request.method !== "POST") return Response.json({ error: "Method not allowed" }, { status: 405, headers: { allow: "POST" } });
+      if (!identity || !env.DB) return Response.json({ error: "Account storage is not ready yet." }, { status: 503 });
+      try {
+        const body = await authenticatedRequest.json() as { sourceProvider?: BookmakerId; destinationProvider?: BookmakerId; code?: string; allowPartial?: boolean };
+        const providers = new Set<BookmakerId>(["sportybet", "betpawa", "bet9ja", "betking", "betway"]);
+        if (!body.sourceProvider || !body.destinationProvider || !providers.has(body.sourceProvider) || !providers.has(body.destinationProvider)) return Response.json({ error: "Choose valid source and destination bookmakers." }, { status: 400 });
+        if (body.sourceProvider === body.destinationProvider) return Response.json({ error: "Choose a different destination bookmaker." }, { status: 400 });
+        const code = String(body.code || "").trim().toUpperCase();
+        if (!/^[A-Z0-9]{4,16}$/.test(code)) return Response.json({ error: "Enter a valid bookmaker code." }, { status: 400 });
+        await ensureAccountTables(env.DB);
+        const stored = await env.DB.prepare("SELECT selections_json AS selectionsJson FROM generated_codes WHERE user_email = ? AND lower(provider) = ? AND upper(code) = ? ORDER BY created_at DESC LIMIT 1")
+          .bind(identity.email, body.sourceProvider, code).first<{ selectionsJson: string }>();
+        let selections: SportyBetSelectionInput[] = [];
+        let importedFrom: "account" | "bookmaker" = "bookmaker";
+        if (stored?.selectionsJson) {
+          const parsed = JSON.parse(stored.selectionsJson) as { requested?: SportyBetSelectionInput[] };
+          selections = Array.isArray(parsed.requested) ? parsed.requested : [];
+          importedFrom = "account";
+        }
+        if (!selections.length) {
+          const decoded = await decodeBookmakerCode(body.sourceProvider, code, fetch);
+          if (decoded.partial) throw new BookmakerIntegrationError("Every source selection must translate safely. Nothing was removed and no partial code was created.", 422, { skipped: decoded.skipped });
+          selections = decoded.selections;
+        }
+        const result = await createBookmakerCode(body.destinationProvider, selections, fetch, false);
+        const now = Date.now();
+        await env.DB.prepare("INSERT INTO generated_codes (id, user_email, provider, code, deep_link, selections_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
+          .bind(crypto.randomUUID(), identity.email, body.destinationProvider, result.code, result.deepLink ?? null, JSON.stringify({ requested: selections, resolved: result.resolved ?? [], unmatched: result.unmatched ?? [], convertedFrom: { provider: body.sourceProvider, code } }), now).run();
+        return Response.json({ verified: true, sourceProvider: body.sourceProvider, destinationProvider: body.destinationProvider, sourceCode: code, importedFrom, decoded: selections.length, ...result }, { headers: { "cache-control": "no-store" } });
+      } catch (error) {
+        const typed = error instanceof BookmakerIntegrationError ? error : error instanceof Error && "status" in error ? error as BookmakerIntegrationError : new BookmakerIntegrationError("The code could not be converted.", 502);
+        return Response.json({ error: typed.message, details: typed.details }, { status: typed.status, headers: { "cache-control": "no-store" } });
+      }
+    }
 
     if (providerCodeMatch || url.pathname === "/api/sportybet/code") {
       const provider = (providerCodeMatch?.[1] ?? "sportybet") as BookmakerId;

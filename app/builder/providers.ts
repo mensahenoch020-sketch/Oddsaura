@@ -1,4 +1,4 @@
-export type ProviderId = "sportybet" | "bet9ja" | "betpawa" | "1xbet" | "betking" | "draftkings";
+export type ProviderId = "sportybet" | "bet9ja" | "betpawa" | "betway" | "betking" | "draftkings";
 
 export type ProviderAdapter = {
   id: ProviderId;
@@ -10,9 +10,9 @@ export type ProviderAdapter = {
 
 export const providerAdapters: ProviderAdapter[] = [
   { id: "sportybet", label: "SportyBet", capability: "booking-code", status: "live" },
-  { id: "bet9ja", label: "Bet9ja", capability: "booking-code", status: "live" },
+  { id: "bet9ja", label: "Bet9ja", capability: "booking-code", status: "live", deepLink: "https://sports.bet9ja.com/mobile/" },
   { id: "betpawa", label: "betPawa", capability: "booking-code", status: "live" },
-  { id: "1xbet", label: "1xBet", capability: "booking-code", status: "partial", deepLink: "https://1xbet.ng/" },
+  { id: "betway", label: "Betway", capability: "booking-code", status: "live", deepLink: "https://www.betway.com.ng/book-a-bet" },
   { id: "betking", label: "BetKing", capability: "booking-code", status: "live" },
   { id: "draftkings", label: "DraftKings", capability: "deep-link", status: "partial" },
 ];
@@ -28,7 +28,6 @@ export function inspectProviderSlip(providerId: ProviderId, selections: Provider
   if (adapter.capability === "deep-link") {
     return `${adapter.label}: ${linked} of ${selections.length} selections have a verified bookmaker link. A combined booking code is not exposed by this feed.`;
   }
-  if (adapter.id === "1xbet") return "OddsAura does not generate a verified 1xBet code yet. Copy the selections, add them inside your signed-in 1xBet account, then use Save/load events to generate the valid code.";
   return `${adapter.label}: all ${selections.length} selections are stored in a provider-neutral format. This bookmaker still requires a verified booking-code endpoint; OddsAura will not invent a code.`;
 }
 
@@ -57,7 +56,7 @@ export type BookmakerSelection = {
   providerSpecifier?: string | null;
 };
 
-export async function generateBookmakerCode(provider: ProviderId, selections: BookmakerSelection[], allowPartial = true) {
+export async function generateBookmakerCode(provider: ProviderId, selections: BookmakerSelection[], allowPartial = false) {
   const response = await fetch(`/api/providers/${encodeURIComponent(provider)}/code`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -68,5 +67,5 @@ export async function generateBookmakerCode(provider: ProviderId, selections: Bo
   return payload;
 }
 
-export const generateSportyBetCode = (selections: BookmakerSelection[], allowPartial = true) => generateBookmakerCode("sportybet", selections, allowPartial);
+export const generateSportyBetCode = (selections: BookmakerSelection[], allowPartial = false) => generateBookmakerCode("sportybet", selections, allowPartial);
 export type SportyBetCodeResponse = BookmakerCodeResponse;

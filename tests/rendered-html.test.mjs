@@ -18,7 +18,7 @@ test("renders the public OddsAura landing page", async () => {
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   assert.match(html, /Football predictions/);
   assert.match(html, /Create account/);
-  for (const bookmaker of ["SportyBet", "Bet9ja", "betPawa", "1xBet", "BetKing"]) assert.match(html, new RegExp(bookmaker, "i"));
+  for (const bookmaker of ["SportyBet", "Bet9ja", "betPawa", "Betway", "BetKing"]) assert.match(html, new RegExp(bookmaker, "i"));
   assert.doesNotMatch(html, /codex-preview/);
 });
 

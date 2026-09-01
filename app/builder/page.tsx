@@ -59,11 +59,12 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
   const [targetOdds, setTargetOdds] = useState("5");
   const [sportyReadyOnly, setSportyReadyOnly] = useState(false);
   const [doctorNotice, setDoctorNotice] = useState("");
+  const [referenceTime] = useState(() => Date.now());
 
   useEffect(() => {
     loadSnapshot("builder").then((data) => {
-      setSnapshot(data);
-      const predictions = data.predictedPicks ?? [];
+      const predictions = (data.predictedPicks ?? []).filter((pick) => Date.parse(pick.kickoff) > referenceTime);
+      setSnapshot({ ...data, predictedPicks: predictions });
       const shared = parseSlip(new URLSearchParams(window.location.search).get("slip"));
       const local = parseSlip(window.localStorage.getItem("oddsaura-predicted-slip"));
       setPicks(hydrate(shared.length ? shared : local, predictions));
@@ -71,9 +72,9 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
       const target = predictions.find((pick) => pick.fixtureId === fixtureId);
       if (target) setSearch(`${target.homeTeam.name} ${target.awayTeam.name}`);
     }).catch(() => undefined).finally(() => setLoading(false));
-  }, []);
+  }, [referenceTime]);
 
-  const predictions = useMemo(() => snapshot.predictedPicks ?? [], [snapshot.predictedPicks]);
+  const predictions = useMemo(() => (snapshot.predictedPicks ?? []).filter((pick) => Date.parse(pick.kickoff) > referenceTime), [snapshot.predictedPicks, referenceTime]);
   const tierCounts = useMemo(() => ({ ALL: predictions.length, SAFE: predictions.filter((pick) => pick.tier === "SAFE").length, BALANCED: predictions.filter((pick) => pick.tier === "BALANCED").length, HIGH_RISK: predictions.filter((pick) => pick.tier === "HIGH_RISK").length }), [predictions]);
   const fixtureGroups = useMemo(() => {
     const groups = new Map<string, { fixtureId: string; league: PredictedPick["league"]; kickoff: string; homeTeam: Team; awayTeam: Team; predictions: PredictedPick[] }>();
@@ -283,8 +284,8 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
         <div className="build-picks">{picks.map((pick) => <div key={pick.fixtureId}><button type="button" aria-label={`Remove ${pick.homeTeam.name} versus ${pick.awayTeam.name}`} onClick={() => removePick(pick.fixtureId)}>×</button><span>{pick.homeTeam.name} vs {pick.awayTeam.name}</span><strong>{pick.market.name}: {pick.selection}</strong><b>{priceFor(pick)?.toFixed(2) ?? "Pending"} <small>{liveOdds[pick.fixtureId] ? "LIVE" : ""}</small></b><a href={`#fixture-${encodeURIComponent(pick.fixtureId)}`} onClick={() => setSlipOpen(false)}>Change</a></div>)}{!picks.length && <p>No selections</p>}</div>
         <div className="build-total"><span>{totalOdds ? allPricesLive ? `${activeProvider.label} live total` : livePriceCount ? `Mixed total · ${livePriceCount}/${picks.length} live` : "Estimated total · verify before betting" : "Bookmaker prices"}</span><strong>{totalOdds?.toFixed(2) ?? "Pending"}</strong></div>
         {weakestPick ? <div className="slip-doctor"><div><span>Slip Doctor</span><b>{weakestPick.homeTeam.shortName || weakestPick.homeTeam.name} vs {weakestPick.awayTeam.shortName || weakestPick.awayTeam.name}</b><small>{doctorNotice || (weakestPick.dataQuality === "LOW" ? "Limited match history" : `${Math.round(weakestPick.confidence * 100)}% confidence · weakest leg`)}</small></div><button type="button" onClick={replaceWeakest}>Replace</button></div> : null}
-        <div className="build-provider-list" aria-label="Choose bookmaker">{providerAdapters.filter((item) => item.id !== "draftkings").map((item) => <button type="button" key={item.id} className={provider === item.id ? "active" : ""} onClick={() => { setProvider(item.id); setSportyCode(null); setLiveOdds({}); }}>{item.label}<small>{item.status === "live" ? "Live" : item.id === "1xbet" ? "Manual" : "Testing"}</small></button>)}</div>
-        {activeProvider.id === "1xbet" ? <><div className="build-one-xbet"><button type="button" disabled={!picks.length} onClick={() => void copyText(selectionsText, "Selections copied")}>Copy selections</button><a className="build-code" href={activeProvider.deepLink} target="_blank" rel="noreferrer">Open signed-in 1xBet <span>↗</span></a></div><p className="build-notice">OddsAura does not generate a verified 1xBet code yet. Add these selections inside 1xBet, then use Save/load events to generate a valid account code.</p></> : <button className="build-code" type="button" disabled={!picks.length || creatingCode || activeProvider.status !== "live"} onClick={() => void requestCode()}>{activeProvider.status !== "live" ? `${activeProvider.label} verification pending` : creatingCode ? "Checking live odds…" : "Generate code"} <span>→</span></button>}
+        <div className="build-provider-list" aria-label="Choose bookmaker">{providerAdapters.filter((item) => item.id !== "draftkings").map((item) => <button type="button" key={item.id} className={provider === item.id ? "active" : ""} onClick={() => { setProvider(item.id); setSportyCode(null); setLiveOdds({}); }}>{item.label}<small>{item.status === "live" ? "Live" : "Manual rebuild"}</small></button>)}<a href="/converter">Convert a code ↗</a></div>
+        {activeProvider.status !== "live" ? <><div className="build-one-xbet"><button type="button" disabled={!picks.length} onClick={() => void copyText(selectionsText, "Selections copied")}>Copy selection list</button><a className="build-code" href={activeProvider.deepLink} target="_blank" rel="noreferrer">Open {activeProvider.label} — rebuild manually <span>↗</span></a></div><p className="build-notice">This bookmaker does not expose a verified code-creation connection yet.</p></> : <button className="build-code" type="button" disabled={!picks.length || creatingCode} onClick={() => void requestCode()}>{creatingCode ? "Checking live odds…" : "Generate code"} <span>→</span></button>}
         {sportyCode && <div className="build-real-code"><span>{activeProvider.label} code</span><strong>{sportyCode.code}</strong><div><button type="button" onClick={() => void copyText(sportyCode.code, "Code copied")}>{copied === "Code copied" ? "Copied ✓" : "Copy code"}</button><a href={sportyCode.deepLink} target="_blank" rel="noreferrer">Open {activeProvider.label} ↗</a></div></div>}
         {sportyCode?.unmatched.length ? <div className="build-unmatched"><strong>Not included</strong>{sportyCode.unmatched.map((item) => <div key={item.fixtureId}><span>{item.homeTeam} vs {item.awayTeam}</span><small>{item.reason}</small><button type="button" onClick={() => removePick(item.fixtureId)}>Remove</button></div>)}</div> : null}
         <div className="build-share"><button type="button" disabled={!picks.length} onClick={() => void save()}>Save</button><button type="button" disabled={!picks.length} onClick={() => void share()}>Share</button><button type="button" disabled={!picks.length} onClick={jpeg}>Save image</button></div>

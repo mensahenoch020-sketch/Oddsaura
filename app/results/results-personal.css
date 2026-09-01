@@ -1,0 +1,19 @@
+.personal-code-grid p > span {
+  display: grid;
+  gap: 3px;
+  overflow-wrap: anywhere;
+}
+
+.personal-code-grid p > span > b {
+  color: #f7f9f8;
+  font-weight: 600;
+}
+
+.personal-code-grid p > span > small {
+  color: #9ca5af;
+  font-size: 8px;
+}
+
+.personal-code-grid p > b {
+  color: #23d96c;
+}

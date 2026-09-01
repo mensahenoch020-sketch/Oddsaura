@@ -49,12 +49,15 @@ export default function MatchesPage() {
   const [league, setLeague] = useState<LeagueFilter>("ALL");
   const [limit, setLimit] = useState(120);
   const [loading, setLoading] = useState(true);
+  const [referenceTime] = useState(() => Date.now());
 
   useEffect(() => {
     loadSnapshot("matches").then(setSnapshot).catch(() => undefined).finally(() => setLoading(false));
   }, []);
 
-  const allFixtures = useMemo(() => uniqueFixtures([...(snapshot.liveFixtures ?? []), ...(snapshot.fixtures ?? [])]), [snapshot.fixtures, snapshot.liveFixtures]);
+  const allFixtures = useMemo(() => {
+    return uniqueFixtures([...(snapshot.liveFixtures ?? []), ...(snapshot.fixtures ?? [])]).filter((fixture) => fixture.status === "LIVE" || (fixture.status === "SCHEDULED" && Date.parse(fixture.kickoff) > referenceTime));
+  }, [snapshot.fixtures, snapshot.liveFixtures, referenceTime]);
   const predictionsByFixture = useMemo(() => {
     const result = new Map<string, NonNullable<Snapshot["predictedPicks"]>>();
     for (const pick of snapshot.predictedPicks ?? []) result.set(pick.fixtureId, [...(result.get(pick.fixtureId) ?? []), pick]);

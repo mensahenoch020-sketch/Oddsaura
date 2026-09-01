@@ -2,16 +2,18 @@ import { createSportyBetCode, SportyBetIntegrationError, type SportyBetCodeResul
 import { createBetPawaCode, BetPawaIntegrationError } from "./betpawa.js";
 import { createBet9jaCode, Bet9jaIntegrationError } from "./bet9ja.js";
 import { createBetKingCode, BetKingIntegrationError } from "./betking.js";
+import { createBetwayCode, BetwayIntegrationError } from "./betway.js";
+import { decodeBookmakerCode, BookmakerDecodeError } from "./decoder.js";
 
-export const BOOKMAKER_IDS = ["sportybet", "betpawa", "bet9ja", "betking", "1xbet"] as const;
+export const BOOKMAKER_IDS = ["sportybet", "betpawa", "bet9ja", "betking", "betway"] as const;
 export type BookmakerId = typeof BOOKMAKER_IDS[number];
 
 export const bookmakerCatalog: Record<BookmakerId, { label: string; deepLink: string; status: "live" | "integration" }> = {
   sportybet: { label: "SportyBet", deepLink: "https://www.sportybet.com/ng/", status: "live" },
   betpawa: { label: "betPawa", deepLink: "https://www.betpawa.ng/", status: "live" },
-  bet9ja: { label: "Bet9ja", deepLink: "https://sports.bet9ja.com/", status: "live" },
+  bet9ja: { label: "Bet9ja", deepLink: "https://sports.bet9ja.com/mobile/", status: "live" },
   betking: { label: "BetKing", deepLink: "https://m.betking.com/en-ng/sports", status: "live" },
-  "1xbet": { label: "1xBet", deepLink: "https://1xbet.ng/", status: "integration" },
+  betway: { label: "Betway", deepLink: "https://www.betway.com.ng/book-a-bet", status: "live" },
 };
 
 export class BookmakerIntegrationError extends Error {
@@ -50,6 +52,26 @@ export async function createBookmakerCode(provider: BookmakerId, selections: Spo
       throw error;
     }
   }
-  const bookmaker = bookmakerCatalog[provider];
-  throw new BookmakerIntegrationError(`${bookmaker.label} code verification is not ready yet. Your selections have not been sent to the bookmaker.`, 503, { provider });
+  if (provider === "betway") {
+    try { return await createBetwayCode(selections, fetcher, allowPartial); }
+    catch (error) {
+      if (error instanceof BetwayIntegrationError) throw new BookmakerIntegrationError(error.message, error.status, error.details);
+      throw error;
+    }
+  }
+  throw new BookmakerIntegrationError("This bookmaker code connection is not ready yet. Your selections have not been sent.", 503, { provider });
+}
+
+export async function convertBookmakerCode(sourceProvider: BookmakerId, destinationProvider: BookmakerId, code: string, fetcher: typeof fetch = fetch, allowPartial = false) {
+  if (sourceProvider === destinationProvider) throw new BookmakerIntegrationError("Choose a different destination bookmaker.", 400);
+  try {
+    const decoded = await decodeBookmakerCode(sourceProvider, code, fetcher);
+    if (decoded.partial && !allowPartial) throw new BookmakerIntegrationError("Every source selection must translate safely. Nothing was removed and no partial code was created.", 422, { skipped: decoded.skipped });
+    const result = await createBookmakerCode(destinationProvider, decoded.selections, fetcher, allowPartial);
+    return { sourceProvider, destinationProvider, sourceCode: decoded.sourceCode, decoded: decoded.selections.length, importPartial: decoded.partial, sourceSelections: decoded.selections, ...result };
+  } catch (error) {
+    if (error instanceof BookmakerIntegrationError) throw error;
+    if (error instanceof BookmakerDecodeError) throw new BookmakerIntegrationError(error.message, error.status, error.details);
+    throw error;
+  }
 }

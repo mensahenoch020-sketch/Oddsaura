@@ -11,7 +11,7 @@ const cookieName = "oa_session";
 const sessionSeconds = 60 * 60 * 24 * 30;
 const passwordIterations = 100_000;
 const encoder = new TextEncoder();
-const protectedPages = ["/dashboard", "/daily", "/matches", "/builder", "/results", "/account", "/admin"];
+const protectedPages = ["/dashboard", "/daily", "/matches", "/builder", "/converter", "/results", "/account", "/admin"];
 const protectedApis = ["/api/providers", "/api/sportybet/code", "/api/account", "/api/codes", "/api/slips", "/api/ticket-controls", "/api/admin"];
 const edgeOrigin = (process.env.ODDSAURA_EDGE_ORIGIN || "https://oddsaura.chipsofrio.chatgpt.site").replace(/\/$/, "");
 
@@ -155,7 +155,7 @@ async function bookmakerApi(req, res, user, provider) {
     headers: { "content-type": "application/json", "x-oddsaura-user-email": user.email, "x-oddsaura-user-name": user.name },
     body: JSON.stringify(body),
   });
-  const payload = await response.json().catch(() => ({ error: "SportyBet returned an invalid response." }));
+  const payload = await response.json().catch(() => ({ error: "The bookmaker returned an invalid response." }));
   if (response.ok && payload.verified && payload.code && pool) {
     const selections = { requested: Array.isArray(body.selections) ? body.selections : [], resolved: payload.resolved ?? [], unmatched: payload.unmatched ?? [] };
     await pool.query("INSERT INTO oa_generated_codes(id,user_email,provider,code,deep_link,selections_json,created_at) VALUES($1,$2,$3,$4,$5,$6,$7)", [crypto.randomUUID(), user.email, provider, payload.code, payload.deepLink ?? null, JSON.stringify(selections), Date.now()]);
@@ -163,10 +163,42 @@ async function bookmakerApi(req, res, user, provider) {
   return json(res, response.status, payload);
 }
 
+async function converterApi(req, res, user) {
+  if (!pool) return json(res, 503, { error: "Account storage is not configured yet." });
+  if (req.method !== "POST") return json(res, 405, { error: "Method not allowed." });
+  const body = await readJson(req);
+  const providers = new Set(["sportybet", "betpawa", "bet9ja", "betking", "betway"]);
+  const source = String(body.sourceProvider || "").toLowerCase();
+  const destination = String(body.destinationProvider || "").toLowerCase();
+  const code = String(body.code || "").trim().toUpperCase();
+  if (!providers.has(source) || !providers.has(destination)) return json(res, 400, { error: "Choose valid source and destination bookmakers." });
+  if (source === destination) return json(res, 400, { error: "Choose a different destination bookmaker." });
+  if (!/^[A-Z0-9]{4,16}$/.test(code)) return json(res, 400, { error: "Enter a valid bookmaker code." });
+  const stored = await pool.query("SELECT selections_json FROM oa_generated_codes WHERE user_email=$1 AND lower(provider)=$2 AND upper(code)=$3 ORDER BY created_at DESC LIMIT 1", [user.email, source, code]);
+  let upstreamPath = "/api/providers/convert";
+  let upstreamBody = { sourceProvider: source, destinationProvider: destination, code, allowPartial: false };
+  let importedFrom = "bookmaker";
+  if (stored.rowCount) {
+    const parsed = JSON.parse(stored.rows[0].selections_json || "{}") || {};
+    if (Array.isArray(parsed.requested) && parsed.requested.length) {
+      upstreamPath = `/api/providers/${encodeURIComponent(destination)}/code`;
+      upstreamBody = { selections: parsed.requested, allowPartial: false };
+      importedFrom = "account";
+    }
+  }
+  const response = await fetch(`http://127.0.0.1:${appPort}${upstreamPath}`, { method: "POST", headers: { "content-type": "application/json", "x-oddsaura-user-email": user.email, "x-oddsaura-user-name": user.name }, body: JSON.stringify(upstreamBody) });
+  const payload = await response.json().catch(() => ({ error: "The bookmaker returned an invalid response." }));
+  if (response.ok && payload.verified && payload.code) {
+    const requested = upstreamPath === "/api/providers/convert" ? (Array.isArray(payload.sourceSelections) ? payload.sourceSelections : []) : upstreamBody.selections;
+    await pool.query("INSERT INTO oa_generated_codes(id,user_email,provider,code,deep_link,selections_json,created_at) VALUES($1,$2,$3,$4,$5,$6,$7)", [crypto.randomUUID(), user.email, destination, payload.code, payload.deepLink ?? null, JSON.stringify({ requested, resolved: payload.resolved ?? [], unmatched: payload.unmatched ?? [], convertedFrom: { provider: source, code } }), Date.now()]);
+  }
+  return json(res, response.status, { sourceProvider: source, destinationProvider: destination, sourceCode: code, importedFrom, ...payload });
+}
+
 function proxy(req, res, user) {
   const headers = { ...req.headers, host: `127.0.0.1:${appPort}` };
   for (const name of Object.keys(headers)) if (name.startsWith("x-oddsaura-")) delete headers[name];
-  if (user) { headers["x-oddsaura-user-email"] = user.email; headers["x-oddsaura-user-name"] = user.name; }
+  if (user) { headers["x-oddsaura-user-email"] = user.email; headers["x-oddsaura-user-name"] = user.name; headers["x-oddsaura-user-role"] = user.role; }
   const upstream = httpRequest({ hostname: "127.0.0.1", port: appPort, path: req.url, method: req.method, headers }, (upstreamResponse) => { res.writeHead(upstreamResponse.statusCode || 502, upstreamResponse.headers); upstreamResponse.pipe(res); });
   upstream.on("error", () => json(res, 502, { error: "OddsAura is starting. Please retry shortly." }));
   req.pipe(upstream);
@@ -210,7 +242,8 @@ createServer(async (req, res) => {
     const user = pageProtected || apiProtected ? await identity(req) : null;
     if ((pageProtected || apiProtected) && !user) { if (apiProtected) return json(res, 401, { error: "Log in to continue." }); const next = encodeURIComponent(`${url.pathname}${url.search}`); res.writeHead(302, { location: `/login?next=${next}`, "cache-control": "no-store" }); return res.end(); }
     if ((url.pathname === "/admin" || url.pathname.startsWith("/admin/")) && user?.role !== "ADMIN") { res.writeHead(302, { location: "/dashboard", "cache-control": "no-store" }); return res.end(); }
-    const providerCodeMatch = url.pathname.match(/^\/api\/providers\/(sportybet|betpawa|bet9ja|betking|1xbet)\/code$/);
+    const providerCodeMatch = url.pathname.match(/^\/api\/providers\/(sportybet|betpawa|bet9ja|betking|betway)\/code$/);
+    if (url.pathname === "/api/providers/convert") return await converterApi(req, res, user);
     if (providerCodeMatch) return await bookmakerApi(req, res, user, providerCodeMatch[1]);
     if (url.pathname === "/api/sportybet/code") return await bookmakerApi(req, res, user, "sportybet");
     if (url.pathname === "/api/account" || url.pathname === "/api/slips" || url.pathname.startsWith("/api/slips/")) return await slipsApi(req, res, url, user);

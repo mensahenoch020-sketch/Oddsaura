@@ -26,7 +26,7 @@ function priorityLeague(league) {
 }
 
 function estimatedOdds(item) {
-  const value = item.quotedOdds ?? item.fairOdds;
+  const value = item.quotedOdds;
   return Number.isFinite(value) ? Number(value) : null;
 }
 
@@ -81,7 +81,7 @@ export function buildTicket(candidates, category, fixtures) {
       market: { key: item.key, name: item.name, category: item.category, line: item.line ?? null },
       selection: item.selection,
       odds,
-      priceStatus: item.quotedOdds ? "QUOTED" : "MODEL_ESTIMATE",
+      priceStatus: "QUOTED",
       probability: item.probability,
       confidence: item.confidence,
       edge: item.edge,
@@ -100,11 +100,10 @@ export function buildTicket(candidates, category, fixtures) {
     category,
     status: "PUBLISHED",
     totalOdds: Number(totalOdds.toFixed(2)),
-    priceStatus: selected.every((item) => item.priceStatus === "QUOTED") ? "QUOTED" : "MODEL_ESTIMATE",
+    priceStatus: "QUOTED",
     confidence,
     publishedAt: new Date().toISOString(),
     bookingCodes: [],
     selections: selected,
   };
 }
-
