@@ -19,6 +19,7 @@ export class Bet9jaIntegrationError extends Error {
 const isRecord = (value: unknown): value is Json => Boolean(value) && typeof value === "object" && !Array.isArray(value);
 const str = (value: unknown) => typeof value === "string" ? value : typeof value === "number" ? String(value) : "";
 const norm = (value: string) => value.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+  .replace(/\b(?:utd|united)\b/g, " united ")
   .replace(/\b(fc|cf|sc|afc|club|football|de|the)\b/g, " ").replace(/[^a-z0-9]+/g, " ").trim();
 
 function teamScore(left: string, right: string) {
@@ -183,7 +184,7 @@ export async function createBet9jaCode(selections: SportyBetSelectionInput[], fe
   const evs = Object.fromEntries(resolved.map((item) => [item.oddsKey, { id: item.oddsKey, eventId: Number(item.eventId), eventCode: item.eventCode,
     eventName: `${item.homeTeam} v ${item.awayTeam}`, market: item.market, sid: item.marketId, sign: item.outcome, GN: item.league, leagueName: item.league,
     SG: "", startdate: item.startDate, oddValue: item.odds, hnd: item.specifier ? item.specifier.split("=")[1] : "", sportName: item.sport }]));
-  const form = new URLSearchParams({ BETSLIP: JSON.stringify({ BETS: [bet], EVS: evs, IMPERSONIZE: 0 }), IS_PASSBET: "0" });
+  const form = new URLSearchParams({ BETSLIP: JSON.stringify({ BETS: [bet], EVS: evs, IMPERSONIZE: 0 }), IS_PASSBET: "0", LIVE: "0" });
   const created = await request(fetcher, CREATE_URL, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded", "x-source": "desktop" }, body: form.toString() }, "Bet9ja's booking-code service is temporarily unavailable.");
   const first = isRecord(created) && Array.isArray(created.data) && isRecord(created.data[0]) ? created.data[0] : null;
   const code = first ? str(first.RIS) : "";

@@ -36,3 +36,23 @@ test("does not create a partial Betway code by default", async () => {
   await assert.rejects(() => createBetwayCode([{ fixtureId: "source-one", homeTeam: "FC Copenhagen", awayTeam: "Sonderjyske", kickoff: new Date(1_800_000_000_000).toISOString(),
     marketKey: "BTTS_YES", marketName: "Both teams to score", selection: "Yes" }], fakeFetch as typeof fetch), /not supported/i);
 });
+
+test("uses the event id from scored Betway search results, not the decimal score", async () => {
+  const searchedEvent = { ...event, eventId: 71924999, homeTeam: "Arsenal", awayTeam: "Chelsea" };
+  const searchedMarket = { ...market, eventId: 71924999, marketId: "719249991" };
+  const searchedOutcome = { ...outcome, eventId: 71924999, marketId: "719249991", originalMarketId: "719249991", outcomeId: "7192499911", displayName: "Arsenal" };
+  const searchedPrice = { ...price, outcomeId: "7192499911" };
+  const calls: string[] = [];
+  const fakeFetch = async (input: string | URL | Request) => {
+    const url = String(input); calls.push(url);
+    if (url.includes("FeedsSearch/EventSearch")) return Response.json([{ searchEvent: { id: 71924999, name: "Arsenal - Chelsea" }, resultScore: 0.846153846 }]);
+    if (url.includes("Feeds/EMOP")) return Response.json([{ event: searchedEvent, markets: [searchedMarket], outcomes: [searchedOutcome], prices: [searchedPrice] }]);
+    if (url.includes("/v1/Betting/BookABet")) return Response.json({ bookingCode: "BW6SEARCH1" });
+    return Response.json({ selections: [{ sportEvent: searchedEvent, market: searchedMarket, outcome: searchedOutcome, price: searchedPrice }] });
+  };
+  const result = await createBetwayCode([{ fixtureId: "search-shape", homeTeam: "Arsenal", awayTeam: "Chelsea", kickoff: new Date(1_800_000_000_000).toISOString(), marketKey: "MATCH_HOME", marketName: "Match result", selection: "Arsenal" }], fakeFetch as typeof fetch);
+  assert.equal(result.code, "BW6SEARCH1");
+  const emop = calls.find((url) => url.includes("Feeds/EMOP")) ?? "";
+  assert.match(emop, /eventIds=71924999/);
+  assert.doesNotMatch(emop, /0\.846/);
+});

@@ -16,7 +16,7 @@ const items: Array<{ id: ProductArea; href: string; label: string; icon: React.R
   { id: "profile", href: "/account", label: "Profile", icon: <><circle cx="12" cy="8" r="3.5" /><path d="M5 20c.5-4 2.8-6 7-6s6.5 2 7 6" /></> },
 ];
 
-const converterItem = { id: "converter" as const, href: "/converter", label: "Convert Code" };
+const converterItem = { id: "converter" as const, href: "/dashboard#code-converter", label: "Convert Code" };
 
 function NavIcon({ children }: { children: React.ReactNode }) {
   return <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{children}</svg>;

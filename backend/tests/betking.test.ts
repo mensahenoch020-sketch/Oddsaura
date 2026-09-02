@@ -4,7 +4,8 @@ import { createBetKingCode } from "../src/modules/providers/betking.js";
 
 const event = {
   id: 1004777986, name: "Borussia Dortmund - Hamburg", homeTeam: "Borussia Dortmund", awayTeam: "Hamburg", date: "2026-08-29T16:30:00Z",
-  markets: [{ id: 673653050, typeId: 110, name: "1x2", specialValue: "", selections: [{ id: 2153200560, name: "1", status: "VALID", odd: { value: 1.31 } }] }],
+  markets: [{ id: 673653050, typeId: 110, name: "1x2", specialValue: "", selections: [{ id: 2153200560, name: "1", status: "VALID", odd: { value: 1.31 } }] },
+    { id: 500, typeId: 160, name: "Totals", spreadMarkets: [{ id: 501, typeId: 160, name: "Totals", specialValue: "1.5", selections: [{ id: 502, name: "Over", status: "VALID", odd: { value: 1.22 } }] }] }],
 };
 
 test("creates and reload-verifies a public BetKing booking code", async () => {
@@ -25,4 +26,19 @@ test("creates and reload-verifies a public BetKing booking code", async () => {
   const form = new URLSearchParams(String(create?.init?.body));
   assert.equal(JSON.parse(String(form.get("data"))).selections[0].selectionId, 2153200560);
   assert.ok(calls.some((call) => call.url.endsWith("widgets/bookBet")));
+});
+
+test("resolves total lines nested in BetKing spread markets", async () => {
+  const totalEvent = event;
+  const fakeFetch = async (input: string | URL | Request) => {
+    const url = String(input);
+    if (url.includes("main-bets/")) return Response.json({ events: [totalEvent] });
+    if (url.endsWith("action/createcoupon")) return Response.json({ odds: [{ selectionId: 502, matchName: totalEvent.name }] });
+    if (url.endsWith("action/bookbet")) return Response.json({ responseStatus: 1, bookedCouponCode: "TOTAL1" });
+    const context = { state: { actionData: { "routes/($locale).widgets.bookBet": { bookedCoupon: { odds: [{ selectionId: 502 }] } } } } };
+    return new Response(`<script>window.__remixContext = ${JSON.stringify(context)};</script>`, { status: 500 });
+  };
+  const result = await createBetKingCode([{ fixtureId: "total", homeTeam: "Borussia Dortmund", awayTeam: "Hamburg", kickoff: "2026-08-29T16:30:00Z", marketKey: "OVER_1_5", marketName: "Total goals", selection: "Over 1.5", line: 1.5 }], fakeFetch as typeof fetch);
+  assert.equal(result.code, "TOTAL1");
+  assert.equal(result.resolved[0]?.outcomeId, "502");
 });

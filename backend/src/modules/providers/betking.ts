@@ -85,7 +85,7 @@ function rule(input: SportyBetSelectionInput): Rule | null {
 function resolve(event: Json, input: SportyBetSelectionInput): SportyBetResolvedSelection {
   const wanted = rule(input);
   if (!wanted) throw new BetKingIntegrationError(`The ${input.marketName} market is not supported for automatic BetKing codes yet.`, 422, { marketKey: input.marketKey });
-  const markets = Array.isArray(event.markets) ? event.markets.filter(isRecord) : [];
+  const markets = Array.isArray(event.markets) ? event.markets.filter(isRecord).flatMap((item) => [item, ...(Array.isArray(item.spreadMarkets) ? item.spreadMarkets.filter(isRecord) : [])]) : [];
   const market = markets.find((item) => Number(item.typeId) === wanted.typeId && (wanted.line == null || Math.abs(Number(item.specialValue) - wanted.line) < .001));
   if (!market) throw new BetKingIntegrationError(`The ${input.marketName} market is not currently available on BetKing for ${input.homeTeam} vs ${input.awayTeam}.`, 422);
   const prices = Array.isArray(market.selections) ? market.selections.filter(isRecord) : [];

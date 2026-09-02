@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import ProductNavigation from "../product-navigation";
+import ConverterForm from "../converter/converter-form";
 import { fallbackSnapshot, loadSnapshot, type PredictedPick, type Snapshot, type Team } from "../data";
 import { LEAGUE_FILTERS, leagueMatches, type LeagueFilter } from "../leagues";
 import { generateBookmakerCode, providerAdapters, type BookmakerCodeResponse, type ProviderId } from "./providers";
@@ -9,6 +10,8 @@ import "./builder.css";
 import "./predictions.css";
 import "../filter-controls.css";
 import "../compact-theme.css";
+import "../converter/converter.css";
+import "../converter/home-converter.css";
 
 /* Badge hosts are supplied dynamically by the football feed. */
 /* eslint-disable @next/next/no-img-element */
@@ -266,6 +269,10 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
 
   return <main className="build-app compact-betting-app">
     <ProductNavigation active={activeArea} slipCount={picks.length} />
+    {activeArea === "home" ? <section className="home-code-converter" id="code-converter">
+      <header><div><span>Open code converter</span><h1>Convert any booking code</h1></div><p>Choose the original bookmaker and the bookmaker you want. OddsAura will load, match and verify every selection before creating the new code.</p></header>
+      <ConverterForm embedded />
+    </section> : null}
     <section className="build-hero compact-hero"><div><span>Football</span><h1>Pick your matches</h1></div><div className="build-live-state"><i /> Predictions updated</div></section>
     <section className="build-layout">
       <div className="build-board">
@@ -284,7 +291,7 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
         <div className="build-picks">{picks.map((pick) => <div key={pick.fixtureId}><button type="button" aria-label={`Remove ${pick.homeTeam.name} versus ${pick.awayTeam.name}`} onClick={() => removePick(pick.fixtureId)}>×</button><span>{pick.homeTeam.name} vs {pick.awayTeam.name}</span><strong>{pick.market.name}: {pick.selection}</strong><b>{priceFor(pick)?.toFixed(2) ?? "Pending"} <small>{liveOdds[pick.fixtureId] ? "LIVE" : ""}</small></b><a href={`#fixture-${encodeURIComponent(pick.fixtureId)}`} onClick={() => setSlipOpen(false)}>Change</a></div>)}{!picks.length && <p>No selections</p>}</div>
         <div className="build-total"><span>{totalOdds ? allPricesLive ? `${activeProvider.label} live total` : livePriceCount ? `Mixed total · ${livePriceCount}/${picks.length} live` : "Estimated total · verify before betting" : "Bookmaker prices"}</span><strong>{totalOdds?.toFixed(2) ?? "Pending"}</strong></div>
         {weakestPick ? <div className="slip-doctor"><div><span>Slip Doctor</span><b>{weakestPick.homeTeam.shortName || weakestPick.homeTeam.name} vs {weakestPick.awayTeam.shortName || weakestPick.awayTeam.name}</b><small>{doctorNotice || (weakestPick.dataQuality === "LOW" ? "Limited match history" : `${Math.round(weakestPick.confidence * 100)}% confidence · weakest leg`)}</small></div><button type="button" onClick={replaceWeakest}>Replace</button></div> : null}
-        <div className="build-provider-list" aria-label="Choose bookmaker">{providerAdapters.filter((item) => item.id !== "draftkings").map((item) => <button type="button" key={item.id} className={provider === item.id ? "active" : ""} onClick={() => { setProvider(item.id); setSportyCode(null); setLiveOdds({}); }}>{item.label}<small>{item.status === "live" ? "Live" : "Manual rebuild"}</small></button>)}<a href="/converter">Convert a code ↗</a></div>
+        <div className="build-provider-list" aria-label="Choose bookmaker">{providerAdapters.filter((item) => item.id !== "draftkings").map((item) => <button type="button" key={item.id} className={provider === item.id ? "active" : ""} onClick={() => { setProvider(item.id); setSportyCode(null); setLiveOdds({}); }}>{item.label}<small>{item.status === "live" ? "Live" : "Manual rebuild"}</small></button>)}<a href="/dashboard#code-converter">Convert a code ↗</a></div>
         {activeProvider.status !== "live" ? <><div className="build-one-xbet"><button type="button" disabled={!picks.length} onClick={() => void copyText(selectionsText, "Selections copied")}>Copy selection list</button><a className="build-code" href={activeProvider.deepLink} target="_blank" rel="noreferrer">Open {activeProvider.label} — rebuild manually <span>↗</span></a></div><p className="build-notice">This bookmaker does not expose a verified code-creation connection yet.</p></> : <button className="build-code" type="button" disabled={!picks.length || creatingCode} onClick={() => void requestCode()}>{creatingCode ? "Checking live odds…" : "Generate code"} <span>→</span></button>}
         {sportyCode && <div className="build-real-code"><span>{activeProvider.label} code</span><strong>{sportyCode.code}</strong><div><button type="button" onClick={() => void copyText(sportyCode.code, "Code copied")}>{copied === "Code copied" ? "Copied ✓" : "Copy code"}</button><a href={sportyCode.deepLink} target="_blank" rel="noreferrer">Open {activeProvider.label} ↗</a></div></div>}
         {sportyCode?.unmatched.length ? <div className="build-unmatched"><strong>Not included</strong>{sportyCode.unmatched.map((item) => <div key={item.fixtureId}><span>{item.homeTeam} vs {item.awayTeam}</span><small>{item.reason}</small><button type="button" onClick={() => removePick(item.fixtureId)}>Remove</button></div>)}</div> : null}

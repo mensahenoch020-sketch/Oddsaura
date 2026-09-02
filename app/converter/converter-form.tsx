@@ -13,7 +13,7 @@ const providers: Array<{ id: Provider; label: string; input: string; output: str
   { id: "betway", label: "Betway", input: "Public code import", output: "Automatic", note: "Loads, creates and reload-verifies Betway BookABet codes.", link: "https://www.betway.com.ng/book-a-bet" },
 ];
 
-export default function ConverterForm() {
+export default function ConverterForm({ embedded = false }: { embedded?: boolean }) {
   const [source, setSource] = useState<Provider>("sportybet");
   const [destination, setDestination] = useState<Provider>("betpawa");
   const [code, setCode] = useState("");
@@ -40,7 +40,7 @@ export default function ConverterForm() {
   }
 
   return <>
-    <section className="converter-workspace">
+    <section className={`converter-workspace${embedded ? " converter-workspace-embedded" : ""}`}>
       <form onSubmit={convert}>
         <div className="converter-route">
           <label><span>From</span><select value={source} onChange={(event) => { setSource(event.target.value as Provider); setResult(null); }}>{providers.map((item) => <option value={item.id} key={item.id}>{item.label}</option>)}</select><small>{sourceMeta.input}</small></label>
@@ -51,9 +51,9 @@ export default function ConverterForm() {
         <button className="converter-submit" disabled={busy || source === destination}>{source === destination ? "Choose a different bookmaker" : busy ? "Loading and matching…" : `Convert to ${destinationMeta.label}`}</button>
         {message ? <p className={result ? "converter-message success" : "converter-message"} role="status">{message}</p> : null}
       </form>
-      <aside><span>How it works</span><ol><li>Loads the source bookmaker code.</li><li>Translates supported markets and checks every match.</li><li>Uses the destination’s current odds.</li><li>Creates and reload-verifies the new code.</li></ol><p>Odds can change during conversion. The destination code always uses the odds available there at that moment.</p></aside>
+      {!embedded ? <aside><span>How it works</span><ol><li>Loads the source bookmaker code.</li><li>Translates supported markets and checks every match.</li><li>Uses the destination’s current odds.</li><li>Creates and reload-verifies the new code.</li></ol><p>Odds can change during conversion. The destination code always uses the odds available there at that moment.</p></aside> : null}
     </section>
     {result ? <section className="converter-result"><div><span>{destinationMeta.label} code</span><strong>{result.code}</strong><small>{result.decoded || 0} selections translated · {result.importedFrom === "account" ? "original OddsAura slip" : "bookmaker import"}</small></div><div><button type="button" onClick={() => void navigator.clipboard.writeText(result.code)}>Copy code</button><a href={result.deepLink} target="_blank" rel="noreferrer">Open {destinationMeta.label} ↗</a></div>{result.unmatched?.length ? <details><summary>{result.unmatched.length} unavailable selections</summary>{result.unmatched.map((item, index) => <p key={`${item.homeTeam}-${index}`}><b>{item.homeTeam} vs {item.awayTeam}</b><span>{item.reason}</span></p>)}</details> : null}</section> : null}
-    <section className="converter-support"><header><span>Live support</span><h2>Bookmaker connection status</h2></header><div>{providers.map((item) => <article key={item.id}><div><strong>{item.label}</strong><span className={item.output === "Automatic" ? "live" : "limited"}>{item.output}</span></div><p>{item.note}</p><a href={item.link} target="_blank" rel="noreferrer">Open bookmaker ↗</a></article>)}</div></section>
+    {!embedded ? <section className="converter-support"><header><span>Live support</span><h2>Bookmaker connection status</h2></header><div>{providers.map((item) => <article key={item.id}><div><strong>{item.label}</strong><span className={item.output === "Automatic" ? "live" : "limited"}>{item.output}</span></div><p>{item.note}</p><a href={item.link} target="_blank" rel="noreferrer">Open bookmaker ↗</a></article>)}</div></section> : null}
   </>;
 }

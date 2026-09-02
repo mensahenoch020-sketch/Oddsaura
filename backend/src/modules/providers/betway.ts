@@ -60,14 +60,24 @@ function rule(input: SportyBetSelectionInput): Rule | null {
   return null;
 }
 
+function safeEventId(value: unknown) {
+  const number = typeof value === "number" ? value : typeof value === "string" && /^\d+$/.test(value) ? Number(value) : NaN;
+  return Number.isSafeInteger(number) && number >= 1000 ? String(number) : "";
+}
+
 function collectEventIds(value: unknown, depth = 0): string[] {
   if (depth > 5 || value == null) return [];
-  if (typeof value === "number" || (typeof value === "string" && /^\d+$/.test(value))) return [String(value)];
+  if (typeof value === "number" || typeof value === "string") {
+    const id = safeEventId(value); return id ? [id] : [];
+  }
   if (Array.isArray(value)) return value.flatMap((item) => collectEventIds(item, depth + 1));
   if (!isRecord(value)) return [];
-  const direct = str(value.eventId ?? value.eventID ?? value.EventId ?? value.EventID);
+  const direct = safeEventId(value.eventId ?? value.eventID ?? value.EventId ?? value.EventID);
+  const searchEvent = isRecord(value.searchEvent) ? value.searchEvent : null;
+  const searchEventId = searchEvent && (str(searchEvent.name ?? searchEvent.eventName ?? searchEvent.homeTeam ?? searchEvent.awayTeam) || searchEvent.expectedStartEpoch != null)
+    ? safeEventId(searchEvent.id) : "";
   const nested = Object.entries(value).filter(([key]) => /event|result|data|item|match/i.test(key)).flatMap(([, item]) => collectEventIds(item, depth + 1));
-  return direct ? [direct, ...nested] : nested;
+  return [...(direct ? [direct] : []), ...(searchEventId ? [searchEventId] : []), ...nested];
 }
 
 function bundle(payload: unknown): Bundle {

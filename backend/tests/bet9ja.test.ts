@@ -25,9 +25,23 @@ test("creates and reload-verifies a public Bet9ja booking code", async () => {
   assert.equal(result.deepLink, "https://sports.bet9ja.com/mobile?bookABetCode=5PGCLX3");
   const create = calls.find((call) => call.url.includes("BookABetV2"));
   const form = new URLSearchParams(String(create?.init?.body));
+  assert.equal(form.get("LIVE"), "0");
   const slip = JSON.parse(String(form.get("BETSLIP")));
   assert.equal(slip.BETS[0].ODDS["825252096$S_1X2_1"], 1.54);
   assert.ok(calls.some((call) => call.url.includes("couponCode=5PGCLX3")));
+});
+
+test("matches United and Utd team aliases", async () => {
+  const leedsDetail = { ...detail, IDSottoEvento: 9002, SottoEvento: "Brighton - Leeds Utd" };
+  const fakeFetch = async (input: string | URL | Request) => {
+    const url = String(input);
+    if (url.endsWith("GetSearchBoxData")) return Response.json({ d: { SearchResults: [{ ID: 9002, Type: "SE", Area: "Brighton - Leeds Utd", DataInizio: "/Date(1788003000000)/" }] } });
+    if (url.endsWith("GetSubEventDetails")) return Response.json({ d: leedsDetail });
+    if (url.includes("BookABetV2")) return Response.json({ status: 1, data: [{ RIS: "ALIAS99" }] });
+    return Response.json({ d: { O: { "9002$S_1X2_1": {} } } });
+  };
+  const result = await createBet9jaCode([{ fixtureId: "alias-test", homeTeam: "Brighton", awayTeam: "Leeds United", kickoff: "2026-08-29T11:30:00Z", marketKey: "MATCH_HOME", marketName: "Match result", selection: "Brighton" }], fakeFetch as typeof fetch);
+  assert.equal(result.code, "ALIAS99");
 });
 
 test("retries Bet9ja search after bootstrapping the public session", async () => {
