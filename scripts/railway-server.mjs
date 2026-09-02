@@ -171,18 +171,19 @@ async function converterApi(req, res, user) {
   const source = String(body.sourceProvider || "").toLowerCase();
   const destination = String(body.destinationProvider || "").toLowerCase();
   const code = String(body.code || "").trim().toUpperCase();
+  const allowPartial = body.allowPartial === true;
   if (!providers.has(source) || !providers.has(destination)) return json(res, 400, { error: "Choose valid source and destination bookmakers." });
   if (source === destination) return json(res, 400, { error: "Choose a different destination bookmaker." });
   if (!/^[A-Z0-9]{4,16}$/.test(code)) return json(res, 400, { error: "Enter a valid bookmaker code." });
   const stored = await pool.query("SELECT selections_json FROM oa_generated_codes WHERE user_email=$1 AND lower(provider)=$2 AND upper(code)=$3 ORDER BY created_at DESC LIMIT 1", [user.email, source, code]);
   let upstreamPath = "/api/providers/convert";
-  let upstreamBody = { sourceProvider: source, destinationProvider: destination, code, allowPartial: false };
+  let upstreamBody = { sourceProvider: source, destinationProvider: destination, code, allowPartial };
   let importedFrom = "bookmaker";
   if (stored.rowCount) {
     const parsed = JSON.parse(stored.rows[0].selections_json || "{}") || {};
     if (Array.isArray(parsed.requested) && parsed.requested.length) {
       upstreamPath = `/api/providers/${encodeURIComponent(destination)}/code`;
-      upstreamBody = { selections: parsed.requested, allowPartial: false };
+      upstreamBody = { selections: parsed.requested, allowPartial };
       importedFrom = "account";
     }
   }
@@ -190,7 +191,7 @@ async function converterApi(req, res, user) {
   const payload = await response.json().catch(() => ({ error: "The bookmaker returned an invalid response." }));
   if (response.ok && payload.verified && payload.code) {
     const requested = upstreamPath === "/api/providers/convert" ? (Array.isArray(payload.sourceSelections) ? payload.sourceSelections : []) : upstreamBody.selections;
-    await pool.query("INSERT INTO oa_generated_codes(id,user_email,provider,code,deep_link,selections_json,created_at) VALUES($1,$2,$3,$4,$5,$6,$7)", [crypto.randomUUID(), user.email, destination, payload.code, payload.deepLink ?? null, JSON.stringify({ requested, resolved: payload.resolved ?? [], unmatched: payload.unmatched ?? [], convertedFrom: { provider: source, code } }), Date.now()]);
+    await pool.query("INSERT INTO oa_generated_codes(id,user_email,provider,code,deep_link,selections_json,created_at) VALUES($1,$2,$3,$4,$5,$6,$7)", [crypto.randomUUID(), user.email, destination, payload.code, payload.deepLink ?? null, JSON.stringify({ requested, resolved: payload.resolved ?? [], unmatched: payload.unmatched ?? [], sourceIssues: payload.sourceIssues ?? [], convertedFrom: { provider: source, code } }), Date.now()]);
   }
   return json(res, response.status, { sourceProvider: source, destinationProvider: destination, sourceCode: code, importedFrom, ...payload });
 }

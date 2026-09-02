@@ -74,6 +74,23 @@ function inferMarket(marketName: string, outcomeName: string, home: string, away
     if (/odd/.test(outcome)) return { marketKey: "ODD_GOALS", marketName: "Odd or even goals", selection: "Odd" };
     if (/even/.test(outcome)) return { marketKey: "EVEN_GOALS", marketName: "Odd or even goals", selection: "Even" };
   }
+  if (/correct score/.test(market)) {
+    const score = outcomeName.match(/(\d+)\D+(\d+)/);
+    if (score) return { marketKey: `CS_${score[1]}_${score[2]}`, marketName: "Correct score", selection: `${score[1]}-${score[2]}` };
+  }
+  if (/clean sheet/.test(market)) {
+    const yes = /yes|keep|clean/.test(outcome);
+    if (yes && (/home|team 1/.test(market) || homeOutcome)) return { marketKey: "HOME_CLEAN", marketName: "Home clean sheet", selection: "Yes" };
+    if (yes && (/away|team 2/.test(market) || awayOutcome)) return { marketKey: "AWAY_CLEAN", marketName: "Away clean sheet", selection: "Yes" };
+  }
+  if (/win.*nil|win to zero/.test(combined)) {
+    if (homeOutcome || /^1\b/.test(outcome)) return { marketKey: "HOME_WIN_NIL", marketName: "Win to nil", selection: home };
+    if (awayOutcome || /^2\b/.test(outcome)) return { marketKey: "AWAY_WIN_NIL", marketName: "Win to nil", selection: away };
+  }
+  if (line === 1.5 && /result.*total|winner.*total|result.*over/.test(market) && /over|\bo\b/.test(outcome)) {
+    if (homeOutcome || /^1\b/.test(outcome)) return { marketKey: "HOME_AND_O15", marketName: "Result and over 1.5", selection: `${home} and over 1.5`, line };
+    if (awayOutcome || /^2\b/.test(outcome)) return { marketKey: "AWAY_AND_O15", marketName: "Result and over 1.5", selection: `${away} and over 1.5`, line };
+  }
   if (line != null && /over|under|total|o u/.test(combined)) {
     const side = /under|\bu\b/.test(outcome) ? "UNDER" : /over|\bo\b/.test(outcome) ? "OVER" : null;
     if (side) {

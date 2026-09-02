@@ -381,20 +381,22 @@ const worker = {
           selections = Array.isArray(parsed.requested) ? parsed.requested : [];
           importedFrom = "account";
         }
+        let sourceIssues: Array<{ eventName?: string; marketName?: string; outcomeName?: string; reason?: string }> = [];
         if (!selections.length) {
           const decoded = await decodeBookmakerCode(body.sourceProvider, code, fetch);
-          if (decoded.partial) {
+          sourceIssues = decoded.skippedSelections;
+          if (decoded.partial && !body.allowPartial) {
             const firstSkipped = decoded.skippedSelections[0];
             const subject = firstSkipped ? `${firstSkipped.eventName} — ${firstSkipped.marketName}: ${firstSkipped.outcomeName}` : `${decoded.skipped} selection${decoded.skipped === 1 ? "" : "s"}`;
             throw new BookmakerIntegrationError(`Could not safely translate ${subject}. No selections were removed and no partial code was created.`, 422, { skipped: decoded.skipped, skippedSelections: decoded.skippedSelections });
           }
           selections = decoded.selections;
         }
-        const result = await createBookmakerCode(body.destinationProvider, selections, fetch, false);
+        const result = await createBookmakerCode(body.destinationProvider, selections, fetch, body.allowPartial ?? false);
         const now = Date.now();
         await env.DB.prepare("INSERT INTO generated_codes (id, user_email, provider, code, deep_link, selections_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
-          .bind(crypto.randomUUID(), identity.email, body.destinationProvider, result.code, result.deepLink ?? null, JSON.stringify({ requested: selections, resolved: result.resolved ?? [], unmatched: result.unmatched ?? [], convertedFrom: { provider: body.sourceProvider, code } }), now).run();
-        return Response.json({ verified: true, sourceProvider: body.sourceProvider, destinationProvider: body.destinationProvider, sourceCode: code, importedFrom, decoded: selections.length, ...result }, { headers: { "cache-control": "no-store" } });
+          .bind(crypto.randomUUID(), identity.email, body.destinationProvider, result.code, result.deepLink ?? null, JSON.stringify({ requested: selections, resolved: result.resolved ?? [], unmatched: result.unmatched ?? [], sourceIssues, convertedFrom: { provider: body.sourceProvider, code } }), now).run();
+        return Response.json({ verified: true, sourceProvider: body.sourceProvider, destinationProvider: body.destinationProvider, sourceCode: code, importedFrom, decoded: selections.length, sourceIssues, ...result, partial: Boolean(result.partial || sourceIssues.length) }, { headers: { "cache-control": "no-store" } });
       } catch (error) {
         const typed = error instanceof BookmakerIntegrationError ? error : error instanceof Error && "status" in error ? error as BookmakerIntegrationError : new BookmakerIntegrationError("The code could not be converted.", 502);
         return Response.json({ error: typed.message, details: typed.details }, { status: typed.status, headers: { "cache-control": "no-store" } });

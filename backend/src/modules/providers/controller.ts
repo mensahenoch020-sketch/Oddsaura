@@ -72,7 +72,7 @@ export async function convertBookmakerCode(sourceProvider: BookmakerId, destinat
       throw new BookmakerIntegrationError(`Could not safely translate ${subject}. No selections were removed and no partial code was created.`, 422, { skipped: decoded.skipped, skippedSelections: decoded.skippedSelections });
     }
     const result = await createBookmakerCode(destinationProvider, decoded.selections, fetcher, allowPartial);
-    return { sourceProvider, destinationProvider, sourceCode: decoded.sourceCode, decoded: decoded.selections.length, importPartial: decoded.partial, sourceSelections: decoded.selections, ...result };
+    return { sourceProvider, destinationProvider, sourceCode: decoded.sourceCode, decoded: decoded.selections.length, importPartial: decoded.partial, sourceIssues: decoded.skippedSelections, sourceSelections: decoded.selections, ...result, partial: Boolean(decoded.partial || result.partial) };
   } catch (error) {
     if (error instanceof BookmakerIntegrationError) throw error;
     if (error instanceof BookmakerDecodeError) throw new BookmakerIntegrationError(error.message, error.status, error.details);

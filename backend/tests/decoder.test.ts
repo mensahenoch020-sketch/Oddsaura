@@ -21,6 +21,15 @@ test("reports the exact source leg that has no safe market translation", () => {
   assert.equal(decoded.skippedSelections[0]?.marketName, "First throw-in");
 });
 
+test("decodes common clean-sheet, win-to-nil and correct-score markets", () => {
+  const decoded = decodeLoadedPayload("sportybet", "WIDER1", { data: { ticket: { selections: [
+    { eventId: "one", eventName: "Arsenal vs Chelsea", marketName: "Home Team Clean Sheet", outcomeName: "Yes" },
+    { eventId: "two", eventName: "Liverpool vs Everton", marketName: "Win To Nil", outcomeName: "1" },
+    { eventId: "three", eventName: "Milan vs Roma", marketName: "Correct Score", outcomeName: "2:1" },
+  ] } } });
+  assert.deepEqual(decoded.selections.map((item) => item.marketKey), ["HOME_CLEAN", "HOME_WIN_NIL", "CS_2_1"]);
+});
+
 test("decodes betPawa double chance selections", () => {
   const decoded = decodeLoadedPayload("betpawa", "PAWA12", { items: [
     { eventId: 44, eventName: "Lions - Tigers", startDate: "2026-08-31T12:00:00Z", marketName: "Double Chance", outcomeName: "X2" },

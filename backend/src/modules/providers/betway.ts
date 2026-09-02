@@ -1,4 +1,5 @@
 import type { SportyBetCodeResult, SportyBetResolvedSelection, SportyBetSelectionInput } from "./sportybet.js";
+import { teamSearchTerms, teamSimilarity } from "./team-matching.js";
 
 type Json = Record<string, unknown>;
 type FetchLike = typeof fetch;
@@ -26,12 +27,7 @@ const norm = (value: string) => value.normalize("NFKD").replace(/[\u0300-\u036f]
   .replace(/\b(fc|cf|sc|afc|club|football|de|the|calcio)\b/g, " ").replace(/[^a-z0-9]+/g, " ").trim();
 
 function teamScore(left: string, right: string) {
-  const a = new Set(norm(left).split(" ").filter(Boolean));
-  const b = new Set(norm(right).split(" ").filter(Boolean));
-  if (!a.size || !b.size) return 0;
-  const x = [...a].join(" "), y = [...b].join(" ");
-  return Math.max([...a].filter((word) => b.has(word)).length / new Set([...a, ...b]).size,
-    x === y ? 1 : x.includes(y) || y.includes(x) ? .92 : 0);
+  return teamSimilarity(left, right);
 }
 
 async function request(fetcher: FetchLike, url: string, init: RequestInit, failure: string) {
@@ -129,7 +125,7 @@ async function findBundle(fetcher: FetchLike, input: SportyBetSelectionInput, wa
   const key = `${norm(input.homeTeam)}|${norm(input.awayTeam)}|${input.kickoff.slice(0, 10)}|${wanted.marketName}`;
   const saved = cache.get(key); if (saved && saved.until > Date.now()) return saved.bundle;
   const ids = new Set<string>();
-  const terms = [...new Set([input.homeTeam, input.awayTeam, ...norm(input.homeTeam).split(" ").filter((part) => part.length > 3), ...norm(input.awayTeam).split(" ").filter((part) => part.length > 3)])].slice(0, 5);
+  const terms = teamSearchTerms(input.homeTeam, input.awayTeam).slice(0, 8);
   for (const term of terms) {
     const query = new URLSearchParams({ query: term, countryCode: COUNTRY, sportId: "soccer" });
     const payload = await request(fetcher, `${SPORTS}/v1/FeedsSearch/EventSearch?${query}`, { method: "GET" }, "Betway's fixture search is temporarily unavailable.");

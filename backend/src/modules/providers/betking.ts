@@ -1,4 +1,5 @@
 import type { SportyBetCodeResult, SportyBetResolvedSelection, SportyBetSelectionInput } from "./sportybet.js";
+import { teamSimilarity } from "./team-matching.js";
 
 type Json = Record<string, unknown>;
 type FetchLike = typeof fetch;
@@ -18,10 +19,7 @@ const norm = (value: string) => value.normalize("NFKD").replace(/[\u0300-\u036f]
   .replace(/\b(fc|cf|sc|afc|club|football|de|the)\b/g, " ").replace(/[^a-z0-9]+/g, " ").trim();
 
 function score(left: string, right: string) {
-  const a = new Set(norm(left).split(" ").filter(Boolean)), b = new Set(norm(right).split(" ").filter(Boolean));
-  if (!a.size || !b.size) return 0;
-  const x = [...a].join(" "), y = [...b].join(" ");
-  return Math.max([...a].filter((word) => b.has(word)).length / new Set([...a, ...b]).size, x === y ? 1 : x.includes(y) || y.includes(x) ? .92 : 0);
+  return teamSimilarity(left, right);
 }
 
 async function response(fetcher: FetchLike, path: string, init: RequestInit, failure: string, allowErrorPage = false) {
