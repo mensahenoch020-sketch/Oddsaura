@@ -52,6 +52,7 @@ export type Snapshot = {
   watchlist?: WatchlistPick[];
   tickets: Ticket[];
   ticketHistory?: Ticket[];
+  modelPerformance?: { matches: number; oneXTwoAccuracy: number; over25Accuracy: number; brierScore: number; generatedAt: string } | null;
 };
 
 export const fallbackSnapshot: Snapshot = {
@@ -78,10 +79,12 @@ export async function loadSnapshot(scope: SnapshotScope = "snapshot") {
   const cacheWindow = Math.floor(Date.now() / 300_000);
   const configured = process.env.NEXT_PUBLIC_DATA_URL;
   const remoteUrl = configured && scope === "snapshot" ? configured : `${publicDataBase}/${scope}.json`;
-  // Prefer the frequently refreshed GitHub snapshot so deployment time does
-  // not freeze results and fixtures. Keep the bundled copy as an offline fallback.
-  let response = await fetch(`${remoteUrl}?v=${cacheWindow}`, { cache: "force-cache" });
-  if (!response.ok) response = await fetch(`/data/${scope}.json?v=${cacheWindow}`, { cache: "force-cache" });
+  // Route-sized files are built into every deployment. Loading them first
+  // avoids a slow GitHub 404 and a multi-megabyte snapshot download.
+  let response = scope === "snapshot"
+    ? await fetch(`${remoteUrl}?v=${cacheWindow}`, { cache: "force-cache" })
+    : await fetch(`/data/${scope}.json?v=${cacheWindow}`, { cache: "force-cache" });
+  if (!response.ok && scope !== "snapshot") response = await fetch(`${remoteUrl}?v=${cacheWindow}`, { cache: "force-cache" });
   if (!response.ok && scope !== "snapshot") response = await fetch(`${configured ?? `${publicDataBase}/snapshot.json`}?v=${cacheWindow}`, { cache: "force-cache" });
   if (!response.ok) throw new Error("The latest GitHub snapshot could not be reached");
   return response.json() as Promise<Snapshot>;

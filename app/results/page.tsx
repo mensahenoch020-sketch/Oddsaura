@@ -19,7 +19,7 @@ function startOfDay(timestamp: number) {
   return value.getTime();
 }
 
-const normalTeam = (value: string) => value.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\b(fc|cf|sc|afc|club|football|de|the)\b/g, " ").replace(/[^a-z0-9]+/g, " ").trim();
+const normalTeam = (value: string) => value.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\b(?:utd|united)\b/g, " united ").replace(/\b(fc|cf|sc|afc|club|football|de|the)\b/g, " ").replace(/[^a-z0-9]+/g, " ").trim();
 
 function teamMatch(left: string, right: string) {
   const a = new Set(normalTeam(left).split(" ").filter(Boolean)); const b = new Set(normalTeam(right).split(" ").filter(Boolean));
@@ -45,6 +45,7 @@ function marketLine(selection: RequestedPick) {
 }
 
 function settlePersonal(selection: RequestedPick, fixture?: Fixture) {
+  if (fixture && ["CANCELLED", "POSTPONED"].includes(fixture.status)) return "VOID";
   if (!fixture || fixture.status !== "FINISHED" || fixture.homeScore == null || fixture.awayScore == null) return "PENDING";
   const home = Number(fixture.homeScore); const away = Number(fixture.awayScore); const total = home + away; const line = marketLine(selection); const key = selection.marketKey;
   if (key === "MATCH_HOME") return home > away ? "WON" : "LOST";
@@ -66,6 +67,8 @@ function settlePersonal(selection: RequestedPick, fixture?: Fixture) {
   return "CHECK";
 }
 
+const finalScore = (fixture?: Fixture) => fixture?.status === "FINISHED" && fixture.homeScore != null && fixture.awayScore != null ? `${fixture.homeScore}–${fixture.awayScore}` : null;
+
 export default function ResultsPage() {
   const [snapshot, setSnapshot] = useState<Snapshot>(fallbackSnapshot);
   const [stake, setStake] = useState(1000);
@@ -74,11 +77,11 @@ export default function ResultsPage() {
   const [referenceTime] = useState(() => Date.now());
   const [personalCodes, setPersonalCodes] = useState<PersonalCode[]>([]);
   const [model, setModel] = useState<ModelPerformance | null>(null);
+  const [visibleTickets, setVisibleTickets] = useState(20);
 
   useEffect(() => {
-    loadSnapshot("results").then(setSnapshot).catch(() => undefined).finally(() => setLoading(false));
+    loadSnapshot("results").then((data) => { setSnapshot(data); setModel(data.modelPerformance ?? null); }).catch(() => undefined).finally(() => setLoading(false));
     fetch("/api/codes").then((response) => response.ok ? response.json() : { codes: [] }).then((payload) => setPersonalCodes(payload.codes ?? [])).catch(() => undefined);
-    fetch("https://raw.githubusercontent.com/mensahenoch020-sketch/Oddsaura/main/data/public/model-performance.json", { cache: "no-store" }).then((response) => response.ok ? response.json() : null).then(setModel).catch(() => undefined);
   }, []);
   const history = useMemo(() => snapshot.ticketHistory ?? snapshot.tickets, [snapshot.ticketHistory, snapshot.tickets]);
   const tickets = useMemo(() => {
@@ -91,6 +94,7 @@ export default function ResultsPage() {
     lost: tickets.filter((ticket) => ticket.status === "LOST").length,
     pending: tickets.filter((ticket) => ticket.status === "PENDING" || ticket.status === "PUBLISHED").length,
   }), [tickets]);
+  const displayedTickets = useMemo(() => tickets.slice(0, visibleTickets), [tickets, visibleTickets]);
   const performance = useMemo(() => {
     const settled = tickets.filter((ticket) => ticket.status === "WON" || ticket.status === "LOST");
     const wins = settled.filter((ticket) => ticket.status === "WON");
@@ -108,23 +112,24 @@ export default function ResultsPage() {
   return <main className="results-app">
     <ProductNavigation active="results" />
     <section className="results-hero"><div><span>Ticket tracker</span><h1>Results without<br /><i>the guesswork.</i></h1></div><p>OddsAura settles supported markets from final scores. Always confirm early-payout markets, voids and official settlement inside your bookmaker account.</p></section>
-    <nav className="results-periods" aria-label="Results period">{([['TODAY', 'Today'], ['7D', '7 days'], ['30D', '30 days'], ['ALL', 'Archive']] as const).map(([value, label]) => <button type="button" key={value} className={period === value ? "active" : ""} onClick={() => setPeriod(value)}>{label}</button>)}</nav>
+    <nav className="results-periods" aria-label="Results period">{([['TODAY', 'Today'], ['7D', '7 days'], ['30D', '30 days'], ['ALL', 'Archive']] as const).map(([value, label]) => <button type="button" key={value} className={period === value ? "active" : ""} onClick={() => { setPeriod(value); setVisibleTickets(20); }}>{label}</button>)}</nav>
     <section className="results-summary"><article><span>Won</span><strong>{summary.won}</strong></article><article><span>Lost</span><strong>{summary.lost}</strong></article><article><span>Pending</span><strong>{summary.pending}</strong></article><label><span>Stake calculator</span><div>₦<input type="number" min="0" step="100" value={stake} onChange={(event) => setStake(Math.max(0, Number(event.target.value) || 0))} /></div></label></section>
     <section className="results-performance" aria-label="Performance summary"><article><span>Settled</span><strong>{performance.settled}</strong></article><article><span>Hit rate</span><strong>{performance.settled ? `${performance.hitRate.toFixed(1)}%` : "—"}</strong></article><article><span>Verified ticket ROI</span><strong className={performance.roi != null && performance.roi < 0 ? "negative" : ""}>{performance.roi == null ? "—" : `${performance.roi >= 0 ? "+" : ""}${performance.roi.toFixed(1)}%`}</strong></article></section>
     {model ? <section className="model-scorecard" aria-label="Model scorecard"><header><span>Walk-forward scorecard</span><b>{model.matches} historical matches</b></header><div><article><span>1X2</span><strong>{(model.oneXTwoAccuracy * 100).toFixed(1)}%</strong></article><article><span>Over 2.5</span><strong>{(model.over25Accuracy * 100).toFixed(1)}%</strong></article><article><span>Brier score</span><strong>{model.brierScore.toFixed(3)}</strong></article></div></section> : null}
-    {personalCodes.length ? <section className="personal-results"><div className="results-title"><div><span>My codes</span><h2>Personal slip results</h2></div><small>{personalCodes.length} recent codes</small></div><div className="personal-code-grid">{personalCodes.map((item) => { const requested = item.selections.requested ?? []; const rows = requested.map((pick) => ({ pick, result: settlePersonal(pick, resultFixture(pick, snapshot.recentResults)) })); const status = rows.some((row) => row.result === "LOST") ? "LOST" : rows.some((row) => row.result === "PENDING") ? "PENDING" : rows.some((row) => row.result === "CHECK") ? "CHECK" : "WON"; return <article key={item.id}><header><div><span>{item.provider}</span><strong>{item.code}</strong></div><b className={status.toLowerCase()}>{status}</b></header><small>{new Date(item.createdAt).toLocaleString()} · {requested.length} picks</small><div>{rows.map(({ pick, result }) => <p key={`${item.id}-${pick.fixtureId}-${pick.marketKey}`}><span><b>{pick.homeTeam} vs {pick.awayTeam}</b><small>{pick.marketName}: {pick.selection}</small></span><b>{result === "WON" ? "✓" : result === "LOST" ? "×" : result === "VOID" ? "V" : "–"}</b></p>)}</div></article>; })}</div></section> : null}
+    {personalCodes.length ? <section className="personal-results"><div className="results-title"><div><span>My codes</span><h2>Personal slip results</h2></div><small>{personalCodes.length} recent codes</small></div><div className="personal-code-grid">{personalCodes.map((item) => { const requested = item.selections.requested ?? []; const rows = requested.map((pick) => { const fixture = resultFixture(pick, snapshot.recentResults); return { pick, fixture, result: settlePersonal(pick, fixture) }; }); const status = rows.some((row) => row.result === "LOST") ? "LOST" : rows.some((row) => row.result === "PENDING") ? "PENDING" : rows.some((row) => row.result === "CHECK") ? "CHECK" : "WON"; return <article key={item.id}><header><div><span>{item.provider}</span><strong>{item.code}</strong></div><b className={status.toLowerCase()}>{status}</b></header><small>{new Date(item.createdAt).toLocaleString()} · {requested.length} picks</small><div>{rows.map(({ pick, fixture, result }) => <p key={`${item.id}-${pick.fixtureId}-${pick.marketKey}`}><span><b>{pick.homeTeam} vs {pick.awayTeam}</b><small>{pick.marketName}: {pick.selection}{finalScore(fixture) ? ` · FT ${finalScore(fixture)}` : ""}</small></span><b>{result === "WON" ? "✓" : result === "LOST" ? "×" : result === "VOID" ? "V" : "–"}</b></p>)}</div></article>; })}</div></section> : null}
     <section className="results-board">
       <div className="results-title"><div><span>Published tickets</span><h2>Daily ticket history</h2></div><small>{loading ? "Loading results…" : `${tickets.length} tracked ${tickets.length === 1 ? "ticket" : "tickets"}`}</small></div>
-      <div className="results-grid">{tickets.map((ticket) => {
+      <div className="results-grid">{displayedTickets.map((ticket) => {
         const status = ticket.status === "PUBLISHED" ? "PENDING" : ticket.status;
-        const returnValue = status === "LOST" ? 0 : stake * ticket.totalOdds;
+        const returnValue = status === "LOST" ? 0 : status === "VOID" ? stake : stake * ticket.totalOdds;
         return <article className={`results-ticket results-${status.toLowerCase()}`} key={ticket.id}>
           <header><div><span>{new Date(ticket.publishedAt ?? snapshot.generatedAt ?? "1970-01-01T00:00:00Z").toLocaleDateString()}</span><h3>{ticket.title}</h3></div><b>{status.replaceAll("_", " ")}</b></header>
-          <div className="results-numbers"><span>{ticket.selections.length} legs</span><strong>{ticket.totalOdds.toFixed(2)}</strong><span>{status === "WON" ? "Return" : status === "LOST" ? "Return" : "Potential return"} <b>{money.format(returnValue)}</b></span></div>
-          <div className="results-legs">{ticket.selections.map((selection) => <div key={selection.id}><span>{selection.homeTeam.name} vs {selection.awayTeam.name}</span><small>{selection.market.name}: {selection.selection}</small><b>{selection.result === "WON" ? "✓" : selection.result === "LOST" ? "×" : selection.result === "VOID" ? "V" : "–"}</b></div>)}</div>
+          <div className="results-numbers"><span>{ticket.selections.length} legs</span><strong>{ticket.totalOdds.toFixed(2)}</strong><span>{status === "WON" || status === "LOST" || status === "VOID" ? "Return" : "Potential return"} <b>{money.format(returnValue)}</b></span></div>
+          <div className="results-legs">{ticket.selections.map((selection) => { const fixture = resultFixture({ fixtureId: selection.fixtureId, homeTeam: selection.homeTeam.name, awayTeam: selection.awayTeam.name, kickoff: selection.kickoff, marketKey: selection.market.key, marketName: selection.market.name, selection: selection.selection, line: selection.market.line }, snapshot.recentResults); return <div key={selection.id}><span>{selection.homeTeam.name} vs {selection.awayTeam.name}</span><small>{selection.market.name}: {selection.selection}{finalScore(fixture) ? ` · FT ${finalScore(fixture)}` : ""}</small><b>{selection.result === "WON" ? "✓" : selection.result === "LOST" ? "×" : selection.result === "VOID" ? "V" : "–"}</b></div>; })}</div>
           {ticket.priceStatus === "MODEL_ESTIMATE" ? <small className="results-note">This archived ticket used reference model prices, so it is excluded from ROI.</small> : null}
         </article>;
       })}</div>
+      {displayedTickets.length < tickets.length ? <button className="results-load-more" type="button" onClick={() => setVisibleTickets((count) => count + 20)}>Show 20 more tickets</button> : null}
       {!loading && !tickets.length ? <div className="results-empty">No tickets in this period. Check the Archive for older results.</div> : null}
     </section>
     <footer><span>OddsAura</span><p>18+ · Tracker calculations are informational. Bookmaker settlement is final.</p></footer>

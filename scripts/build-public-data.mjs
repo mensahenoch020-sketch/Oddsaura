@@ -6,15 +6,11 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const sourceDir = resolve(root, "data/public");
 const targetDir = resolve(root, "public/data");
 const snapshot = JSON.parse(await readFile(resolve(sourceDir, "snapshot.json"), "utf8"));
+const modelPerformance = await readFile(resolve(sourceDir, "model-performance.json"), "utf8").then(JSON.parse).catch(() => null);
 const withoutOdds = (fixture) => ({ ...fixture, odds: [] });
 const slimPick = (source) => {
   const pick = { ...source };
   for (const key of ["probability", "edge", "historyMatches", "reasoning", "providerDeepLink"]) delete pick[key];
-  return pick;
-};
-const dailyPick = (source) => {
-  const pick = slimPick(source);
-  for (const key of ["providerMarketId", "providerSelectionId", "oddsProvider"]) delete pick[key];
   return pick;
 };
 const common = { version: snapshot.version, generatedAt: snapshot.generatedAt, stale: snapshot.stale, status: snapshot.status, message: snapshot.message, metrics: snapshot.metrics };
@@ -23,8 +19,8 @@ const generated = {
   snapshot,
   builder: { ...common, predictedPicks: routePicks },
   matches: { ...common, fixtures: (snapshot.fixtures ?? []).map(withoutOdds), liveFixtures: (snapshot.liveFixtures ?? []).map(withoutOdds), predictedPicks: routePicks },
-  daily: { ...common, tickets: snapshot.tickets ?? [], predictedPicks: (snapshot.predictedPicks ?? []).map(dailyPick) },
-  results: { ...common, recentResults: (snapshot.recentResults ?? []).map(withoutOdds), tickets: snapshot.tickets ?? [], ticketHistory: snapshot.ticketHistory ?? [] },
+  daily: { ...common, tickets: snapshot.tickets ?? [] },
+  results: { ...common, recentResults: (snapshot.recentResults ?? []).map(withoutOdds), tickets: snapshot.tickets ?? [], ticketHistory: snapshot.ticketHistory ?? [], modelPerformance },
   admin: { ...common, sources: snapshot.sources ?? [], tickets: snapshot.tickets ?? [], marketCatalog: snapshot.marketCatalog ?? [] },
 };
 

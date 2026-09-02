@@ -62,6 +62,7 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
   const [targetOdds, setTargetOdds] = useState("5");
   const [sportyReadyOnly, setSportyReadyOnly] = useState(false);
   const [doctorNotice, setDoctorNotice] = useState("");
+  const [visibleFixtures, setVisibleFixtures] = useState(60);
   const [referenceTime] = useState(() => Date.now());
 
   useEffect(() => {
@@ -90,6 +91,7 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
     }
     return [...groups.values()].sort((a, b) => a.kickoff.localeCompare(b.kickoff));
   }, [predictions, search, tier, league, sportyReadyOnly]);
+  const visibleFixtureGroups = useMemo(() => fixtureGroups.slice(0, visibleFixtures), [fixtureGroups, visibleFixtures]);
   const priceFor = (pick: PredictedPick) => liveOdds[pick.fixtureId] ?? pick.quotedOdds ?? null;
   const totalOdds = useMemo(() => picks.every((pick) => liveOdds[pick.fixtureId] ?? pick.quotedOdds) ? picks.reduce((value, pick) => value * (liveOdds[pick.fixtureId] ?? pick.quotedOdds ?? 1), 1) : null, [picks, liveOdds]);
   const livePriceCount = useMemo(() => picks.filter((pick) => Boolean(liveOdds[pick.fixtureId])).length, [picks, liveOdds]);
@@ -113,22 +115,28 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
 
   function buildToTarget() {
     const target = Math.max(1.2, Math.min(100, Number(targetOdds) || 5));
-    const quality = { HIGH: 2, MEDIUM: 1, LOW: 0 };
-    const ranked = [...predictions]
-      .filter((pick) => pick.quotedOdds && pick.quotedOdds > 1 && pick.confidence >= .48)
-      .sort((a, b) => (b.confidence + quality[b.dataQuality ?? "LOW"] * .05) - (a.confidence + quality[a.dataQuality ?? "LOW"] * .05));
-    const selected: PredictedPick[] = [];
-    let combined = 1;
-    let underMarkets = 0;
-    for (const pick of ranked) {
-      if (combined >= target || selected.length >= 20 || selected.some((item) => item.fixtureId === pick.fixtureId)) continue;
-      const isUnder = pick.market.key.includes("UNDER");
-      if (isUnder && underMarkets >= Math.max(1, Math.floor((selected.length + 1) * .4))) continue;
-      selected.push(pick); combined *= pick.quotedOdds ?? 1;
-      if (isUnder) underMarkets += 1;
+    const quality = { HIGH: .08, MEDIUM: .04, LOW: 0 };
+    const ranked = [...predictions].filter((pick) => pick.quotedOdds && pick.quotedOdds > 1.01 && pick.confidence >= .5)
+      .sort((a, b) => (b.confidence + quality[b.dataQuality ?? "LOW"]) - (a.confidence + quality[a.dataQuality ?? "LOW"]));
+    const candidates = [...new Map(ranked.map((pick) => [pick.fixtureId, pick])).values()].slice(0, 500);
+    type TargetState = { picks: PredictedPick[]; odds: number; confidence: number; under: number };
+    let beam: TargetState[] = [{ picks: [], odds: 1, confidence: 0, under: 0 }];
+    const rankState = (state: TargetState) => Math.abs(Math.log(Math.max(state.odds, 1.001) / target)) + Math.max(0, state.picks.length - 8) * .04 - (state.picks.length ? state.confidence / state.picks.length : 0) * .03;
+    for (const pick of candidates) {
+      const price = pick.quotedOdds ?? 1;
+      const additions = beam.flatMap((state) => {
+        if (state.picks.length >= 12 || state.odds * price > target * 1.35) return [];
+        const under = state.under + (pick.market.key.includes("UNDER") ? 1 : 0);
+        if (under > Math.max(1, Math.ceil((state.picks.length + 1) * .45))) return [];
+        return [{ picks: [...state.picks, pick], odds: state.odds * price, confidence: state.confidence + pick.confidence + quality[pick.dataQuality ?? "LOW"], under }];
+      });
+      beam = [...beam, ...additions].sort((a, b) => rankState(a) - rankState(b)).slice(0, 240);
     }
+    const minLegs = target < 2.5 ? 1 : 2;
+    const selectedState = beam.filter((state) => state.picks.length >= minLegs).sort((a, b) => rankState(a) - rankState(b))[0];
+    const selected = selectedState?.picks ?? [];
     setPicks(selected); setSportyCode(null); setLiveOdds({}); setSlipOpen(true);
-    setNotice(selected.length ? `${selected.length} stronger picks built near ${target.toFixed(2)} odds.` : "No priced picks are ready for that target.");
+    setNotice(selected.length ? `${selected.length} stronger picks built at ${selectedState!.odds.toFixed(2)} estimated odds. Generate a bookmaker code to confirm live prices.` : "No sufficiently strong priced picks are ready for that target.");
   }
 
   const weakestPick = useMemo(() => [...picks].sort((a, b) => {
@@ -276,15 +284,15 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
     <section className="build-hero compact-hero"><div><span>Football</span><h1>Pick your matches</h1></div><div className="build-live-state"><i /> Predictions updated</div></section>
     <section className="build-layout">
       <div className="build-board">
-        <div className="build-toolbar"><div><h2>Matches</h2><span>{loading ? "Loading…" : `${fixtureGroups.length} available`}</span></div><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search team or league" aria-label="Search predicted games" /></div>
-        <div className="build-tier-tabs" aria-label="Prediction risk"><button type="button" className={tier === "ALL" ? "active" : ""} onClick={() => setTier("ALL")}>All <b>{tierCounts.ALL}</b></button><button type="button" className={tier === "SAFE" ? "active" : ""} onClick={() => setTier("SAFE")}>Safe <b>{tierCounts.SAFE}</b></button><button type="button" className={tier === "BALANCED" ? "active" : ""} onClick={() => setTier("BALANCED")}>Balanced <b>{tierCounts.BALANCED}</b></button><button type="button" className={tier === "HIGH_RISK" ? "active" : ""} onClick={() => setTier("HIGH_RISK")}>High risk <b>{tierCounts.HIGH_RISK}</b></button></div>
-        <div className="build-tools"><label><span>Target odds</span><input inputMode="decimal" value={targetOdds} onChange={(event) => setTargetOdds(event.target.value)} aria-label="Target total odds" /></label><button type="button" onClick={buildToTarget}>Build target</button><label className="build-ready"><input type="checkbox" checked={sportyReadyOnly} onChange={(event) => setSportyReadyOnly(event.target.checked)} /><span>SportyBet IDs ready</span></label></div>
+        <div className="build-toolbar"><div><h2>Matches</h2><span>{loading ? "Loading…" : `${fixtureGroups.length} available`}</span></div><input value={search} onChange={(event) => { setSearch(event.target.value); setVisibleFixtures(60); }} placeholder="Search team or league" aria-label="Search predicted games" /></div>
+        <div className="build-tier-tabs" aria-label="Prediction risk"><button type="button" className={tier === "ALL" ? "active" : ""} onClick={() => { setTier("ALL"); setVisibleFixtures(60); }}>All <b>{tierCounts.ALL}</b></button><button type="button" className={tier === "SAFE" ? "active" : ""} onClick={() => { setTier("SAFE"); setVisibleFixtures(60); }}>Safe <b>{tierCounts.SAFE}</b></button><button type="button" className={tier === "BALANCED" ? "active" : ""} onClick={() => { setTier("BALANCED"); setVisibleFixtures(60); }}>Balanced <b>{tierCounts.BALANCED}</b></button><button type="button" className={tier === "HIGH_RISK" ? "active" : ""} onClick={() => { setTier("HIGH_RISK"); setVisibleFixtures(60); }}>High risk <b>{tierCounts.HIGH_RISK}</b></button></div>
+        <div className="build-tools"><label><span>Target odds</span><input inputMode="decimal" value={targetOdds} onChange={(event) => setTargetOdds(event.target.value)} aria-label="Target total odds" /></label><button type="button" onClick={buildToTarget}>Build target</button><label className="build-ready"><input type="checkbox" checked={sportyReadyOnly} onChange={(event) => { setSportyReadyOnly(event.target.checked); setVisibleFixtures(60); }} /><span>SportyBet IDs ready</span></label></div>
         <div className="build-filter-toggle build-filter-label"><b>Leagues</b><span>{LEAGUE_FILTERS.find((item) => item.id === league)?.label}</span></div>
-        <div className="build-league-tabs open" aria-label="League filter">{LEAGUE_FILTERS.map((item) => <button type="button" key={item.id} className={league === item.id ? "active" : ""} onClick={() => setLeague(item.id)}>{item.label}</button>)}</div>
-        <div className="build-fixtures">{fixtureGroups.map((group) => <article id={`fixture-${encodeURIComponent(group.fixtureId)}`} key={group.fixtureId} className="build-fixture">
+        <div className="build-league-tabs open" aria-label="League filter">{LEAGUE_FILTERS.map((item) => <button type="button" key={item.id} className={league === item.id ? "active" : ""} onClick={() => { setLeague(item.id); setVisibleFixtures(60); }}>{item.label}</button>)}</div>
+        <div className="build-fixtures">{visibleFixtureGroups.map((group) => <article id={`fixture-${encodeURIComponent(group.fixtureId)}`} key={group.fixtureId} className="build-fixture">
           <div className="build-match build-predicted-match"><div><TeamBadge team={group.homeTeam} /><strong>{group.homeTeam.name}</strong><span>vs</span><TeamBadge team={group.awayTeam} /><strong>{group.awayTeam.name}</strong></div><small>{group.league.name} · {new Date(group.kickoff).toLocaleString()}</small></div>
           <div className="build-markets build-predictions">{group.predictions.map((pick) => { const active = picks.some((item) => item.id === pick.id); const price = priceFor(pick); return <button className={active ? "active" : ""} type="button" key={pick.id} onClick={() => choose(pick)}><span>{pick.market.name}</span><b>{pick.selection}</b><strong>{price?.toFixed(2) ?? pick.fairOdds.toFixed(2)}</strong><small>{liveOdds[pick.fixtureId] ? `${activeProvider.label} live` : pick.quotedOdds ? "Last quoted · verify" : "Model estimate"}</small></button>; })}</div>
-        </article>)}{!loading && !fixtureGroups.length && <div className="build-no-data">No model-approved selections match this filter yet. Try All predictions or another team.</div>}</div>
+        </article>)}{visibleFixtureGroups.length < fixtureGroups.length ? <button className="build-load-more" type="button" onClick={() => setVisibleFixtures((count) => count + 60)}>Show 60 more matches</button> : null}{!loading && !fixtureGroups.length && <div className="build-no-data">No model-approved selections match this filter yet. Try All predictions or another team.</div>}</div>
       </div>
       <aside className={`build-slip ${slipOpen ? "open" : ""}`} id="my-slip" aria-label="Betslip">
         <div className="build-slip-title"><div><span>Betslip</span><h2>{picks.length} {picks.length === 1 ? "selection" : "selections"}</h2></div><div>{picks.length > 0 && <button type="button" onClick={() => { setPicks([]); setSportyCode(null); setLiveOdds({}); }}>Clear</button>}<button className="build-slip-close" type="button" onClick={() => setSlipOpen(false)}>×</button></div></div>

@@ -17,3 +17,15 @@
 .personal-code-grid p > b {
   color: #23d96c;
 }
+
+.results-load-more {
+  display: block;
+  margin: 18px auto 0;
+  border: 1px solid #d7dcd3;
+  border-radius: 8px;
+  background: #fff;
+  color: #172235;
+  padding: 12px 18px;
+  font-size: 10px;
+  font-weight: 800;
+}

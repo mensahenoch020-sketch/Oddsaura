@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import ProductNavigation from "../product-navigation";
-import { fallbackSnapshot, loadSnapshot, type PredictedPick, type Snapshot, type Ticket } from "../data";
+import { fallbackSnapshot, loadSnapshot, type Snapshot, type Ticket } from "../data";
 import { generateSportyBetCode } from "../builder/providers";
 import "./daily.css";
 
@@ -13,13 +13,6 @@ const ticketOrder: Record<string, number> = { SAFE_2: 1, VALUE_5: 2, BALANCED_10
 
 function serialize(ids: string[]) {
   return btoa(JSON.stringify(ids.map((predictionId) => ({ predictionId })))).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
-}
-
-function ticketPredictionIds(ticket: Ticket, picks: PredictedPick[]) {
-  return ticket.selections.flatMap((selection) => {
-    const match = picks.find((pick) => pick.id === selection.id) ?? picks.find((pick) => pick.fixtureId === selection.fixtureId && pick.market.key === selection.market.key && pick.selection === selection.selection);
-    return match ? [match.id] : [];
-  });
 }
 
 export default function DailyOddsPage() {
@@ -33,10 +26,8 @@ export default function DailyOddsPage() {
   const [referenceTime] = useState(() => Date.now());
 
   useEffect(() => {
-    Promise.all([
-      loadSnapshot("daily").then(setSnapshot).catch(() => setNotice("Daily odds are refreshing. Try again shortly.")),
-      fetch("/api/ticket-controls", { cache: "no-store" }).then((response) => response.ok ? response.json() : { controls: [] }).then((data) => setControls(data.controls ?? [])).catch(() => undefined),
-    ]).finally(() => setLoading(false));
+    loadSnapshot("daily").then(setSnapshot).catch(() => setNotice("Daily odds are refreshing. Try again shortly.")).finally(() => setLoading(false));
+    fetch("/api/ticket-controls", { cache: "no-store" }).then((response) => response.ok ? response.json() : { controls: [] }).then((data) => setControls(data.controls ?? [])).catch(() => undefined);
   }, []);
   const tickets = useMemo(() => {
     const byId = new Map(controls.map((control) => [control.ticketId, control]));
@@ -45,7 +36,7 @@ export default function DailyOddsPage() {
   }, [snapshot.tickets, controls, referenceTime]);
 
   function addTicket(ticket: Ticket) {
-    const ids = ticketPredictionIds(ticket, snapshot.predictedPicks ?? []);
+    const ids = ticket.selections.map((selection) => selection.id).filter(Boolean);
     if (!ids.length) { setNotice("This ticket is being refreshed."); return; }
     const encoded = serialize(ids);
     window.localStorage.setItem("oddsaura-predicted-slip", encoded);
@@ -83,7 +74,7 @@ export default function DailyOddsPage() {
     {notice ? <p className="daily-notice" role="status">{notice}</p> : null}
     <section className="daily-grid">
       {tickets.map((ticket) => { const shown = open === ticket.id; const code = codes[ticket.id]; return <article key={ticket.id} className="daily-ticket">
-        <header><div><span>{ticket.category === "LONGSHOT_21" ? "Longshot" : ticket.title.replace("Daily ", "")}</span><h2>{code ? code.liveTotalOdds.toFixed(2) : ticket.totalOdds.toFixed(2)} <span>{code ? "SportyBet live" : "latest quoted total"}</span></h2></div><b className={`daily-status ${ticket.status.toLowerCase()}`}>{ticket.status === "PUBLISHED" ? "Open" : ticket.status}</b></header>
+        <header><div><span>{ticket.category === "LONGSHOT_21" ? "Longshot" : ticket.title.replace("Daily ", "")}</span><h2>{code ? code.liveTotalOdds.toFixed(2) : ticket.totalOdds.toFixed(2)} <span>{code ? "SportyBet live" : ticket.priceStatus === "QUOTED" ? "latest quoted total" : "estimated · verify"}</span></h2></div><b className={`daily-status ${ticket.status.toLowerCase()}`}>{ticket.status === "PUBLISHED" ? "Open" : ticket.status}</b></header>
         <div className="daily-meta"><span>{ticket.selections.length} picks</span><span>{Math.round(ticket.confidence * 100)}% confidence</span><span>{code ? `${code.matched}/${code.total} live prices` : "Rechecked when you generate the code"}</span></div>
         <button className="daily-view" type="button" onClick={() => setOpen(shown ? null : ticket.id)}>{shown ? "Hide picks" : "View picks"}<span>{shown ? "−" : "+"}</span></button>
         {shown ? <div className="daily-legs">{ticket.selections.map((selection) => <div key={selection.id}><span>{selection.homeTeam.name} vs {selection.awayTeam.name}</span><b>{selection.market.name}: {selection.selection}</b><strong>{selection.odds.toFixed(2)} quoted</strong></div>)}</div> : null}

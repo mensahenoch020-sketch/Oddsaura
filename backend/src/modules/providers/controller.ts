@@ -11,7 +11,7 @@ export type BookmakerId = typeof BOOKMAKER_IDS[number];
 export const bookmakerCatalog: Record<BookmakerId, { label: string; deepLink: string; status: "live" | "integration" }> = {
   sportybet: { label: "SportyBet", deepLink: "https://www.sportybet.com/ng/", status: "live" },
   betpawa: { label: "betPawa", deepLink: "https://www.betpawa.ng/", status: "live" },
-  bet9ja: { label: "Bet9ja", deepLink: "https://sports.bet9ja.com/mobile/", status: "live" },
+  bet9ja: { label: "Bet9ja", deepLink: "https://sports.bet9ja.com/mobile/", status: "integration" },
   betking: { label: "BetKing", deepLink: "https://m.betking.com/en-ng/sports", status: "live" },
   betway: { label: "Betway", deepLink: "https://www.betway.com.ng/book-a-bet", status: "live" },
 };
@@ -66,7 +66,11 @@ export async function convertBookmakerCode(sourceProvider: BookmakerId, destinat
   if (sourceProvider === destinationProvider) throw new BookmakerIntegrationError("Choose a different destination bookmaker.", 400);
   try {
     const decoded = await decodeBookmakerCode(sourceProvider, code, fetcher);
-    if (decoded.partial && !allowPartial) throw new BookmakerIntegrationError("Every source selection must translate safely. Nothing was removed and no partial code was created.", 422, { skipped: decoded.skipped });
+    if (decoded.partial && !allowPartial) {
+      const firstSkipped = decoded.skippedSelections[0];
+      const subject = firstSkipped ? `${firstSkipped.eventName} — ${firstSkipped.marketName}: ${firstSkipped.outcomeName}` : `${decoded.skipped} selection${decoded.skipped === 1 ? "" : "s"}`;
+      throw new BookmakerIntegrationError(`Could not safely translate ${subject}. No selections were removed and no partial code was created.`, 422, { skipped: decoded.skipped, skippedSelections: decoded.skippedSelections });
+    }
     const result = await createBookmakerCode(destinationProvider, decoded.selections, fetcher, allowPartial);
     return { sourceProvider, destinationProvider, sourceCode: decoded.sourceCode, decoded: decoded.selections.length, importPartial: decoded.partial, sourceSelections: decoded.selections, ...result };
   } catch (error) {

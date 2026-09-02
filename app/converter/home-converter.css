@@ -52,6 +52,32 @@
   background: var(--cv-panel);
 }
 
+.converter-issues {
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid #75553b;
+  border-radius: 7px;
+  background: #2a2019;
+}
+
+.converter-issues > strong {
+  color: #ffd19a;
+  font-size: 11px;
+}
+
+.converter-issues p {
+  display: grid;
+  gap: 3px;
+  margin-top: 9px;
+  color: #f3eee8;
+  font-size: 10px;
+}
+
+.converter-issues p span {
+  color: var(--cv-muted);
+  line-height: 1.45;
+}
+
 @media (max-width: 760px) {
   .home-code-converter {
     margin: 12px 0 4px;

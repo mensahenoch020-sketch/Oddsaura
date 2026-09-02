@@ -10,7 +10,7 @@ export type ProviderAdapter = {
 
 export const providerAdapters: ProviderAdapter[] = [
   { id: "sportybet", label: "SportyBet", capability: "booking-code", status: "live" },
-  { id: "bet9ja", label: "Bet9ja", capability: "booking-code", status: "live", deepLink: "https://sports.bet9ja.com/mobile/" },
+  { id: "bet9ja", label: "Bet9ja", capability: "booking-code", status: "integration", deepLink: "https://sports.bet9ja.com/mobile/" },
   { id: "betpawa", label: "betPawa", capability: "booking-code", status: "live" },
   { id: "betway", label: "Betway", capability: "booking-code", status: "live", deepLink: "https://www.betway.com.ng/book-a-bet" },
   { id: "betking", label: "BetKing", capability: "booking-code", status: "live" },

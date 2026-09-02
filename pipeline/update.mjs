@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { collectEspn, collectEspnGlobal } from "./lib/espn.mjs";
 import { attachOdds, buildModelContext, scoreEvent } from "./lib/model.mjs";
 import { buildTicket } from "./lib/tickets.mjs";
+import { trackTicket } from "./lib/settlement.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const output = resolve(root, "data/public/snapshot.json");
@@ -14,6 +15,7 @@ const previous = JSON.parse(await readFile(output, "utf8"));
 const historical = await readFile(resolve(root, "data/history/football-data.json"), "utf8").then(JSON.parse).catch(() => ({ events: [], generatedAt: null, warnings: ["Historical cache unavailable"] }));
 
 async function writePublicSnapshots(snapshot) {
+  const modelPerformance = await readFile(resolve(root, "data/public/model-performance.json"), "utf8").then(JSON.parse).catch(() => null);
   const withoutOdds = (fixture) => ({ ...fixture, odds: [] });
   // Route payloads intentionally omit modelling fields their screens never
   // read. This keeps first paint quick on mobile without reducing the full
@@ -21,11 +23,6 @@ async function writePublicSnapshots(snapshot) {
   const slimPick = (source) => {
     const pick = { ...source };
     for (const key of ["probability", "edge", "historyMatches", "reasoning", "providerDeepLink"]) delete pick[key];
-    return pick;
-  };
-  const dailyPick = (source) => {
-    const pick = slimPick(source);
-    for (const key of ["providerMarketId", "providerSelectionId", "oddsProvider"]) delete pick[key];
     return pick;
   };
   const routePicks = (snapshot.predictedPicks ?? []).map(slimPick);
@@ -40,8 +37,8 @@ async function writePublicSnapshots(snapshot) {
   const scoped = {
     builder: { ...common, predictedPicks: routePicks },
     matches: { ...common, fixtures: (snapshot.fixtures ?? []).map(withoutOdds), liveFixtures: (snapshot.liveFixtures ?? []).map(withoutOdds), predictedPicks: routePicks },
-    daily: { ...common, tickets: snapshot.tickets ?? [], predictedPicks: (snapshot.predictedPicks ?? []).map(dailyPick) },
-    results: { ...common, recentResults: (snapshot.recentResults ?? []).map(withoutOdds), tickets: snapshot.tickets ?? [], ticketHistory: snapshot.ticketHistory ?? [] },
+    daily: { ...common, tickets: snapshot.tickets ?? [] },
+    results: { ...common, recentResults: (snapshot.recentResults ?? []).map(withoutOdds), tickets: snapshot.tickets ?? [], ticketHistory: snapshot.ticketHistory ?? [], modelPerformance },
     admin: { ...common, sources: snapshot.sources ?? [], tickets: snapshot.tickets ?? [], marketCatalog: snapshot.marketCatalog ?? [] },
   };
   await mkdir(dirname(output), { recursive: true });
@@ -231,75 +228,11 @@ const marketCatalog = [...new Set([
   "Corners", "Cards", "Shots and player props",
 ])].sort();
 
-function settleSelection(selection, fixture) {
-  if (!fixture || fixture.status !== "FINISHED" || fixture.homeScore == null || fixture.awayScore == null) return "PENDING";
-  const home = Number(fixture.homeScore);
-  const away = Number(fixture.awayScore);
-  const total = home + away;
-  const key = selection.market.key;
-  const line = Number(selection.market.line);
-  if (key === "MATCH_HOME") return home > away ? "WON" : "LOST";
-  if (key === "MATCH_DRAW") return home === away ? "WON" : "LOST";
-  if (key === "MATCH_AWAY") return away > home ? "WON" : "LOST";
-  if (key === "DC_1X") return home >= away ? "WON" : "LOST";
-  if (key === "DC_X2") return away >= home ? "WON" : "LOST";
-  if (key === "DC_12") return home !== away ? "WON" : "LOST";
-  if (key === "DNB_HOME") return home === away ? "VOID" : home > away ? "WON" : "LOST";
-  if (key === "DNB_AWAY") return home === away ? "VOID" : away > home ? "WON" : "LOST";
-  if (key === "BTTS_YES") return home > 0 && away > 0 ? "WON" : "LOST";
-  if (key === "BTTS_NO") return home === 0 || away === 0 ? "WON" : "LOST";
-  if (key.startsWith("HOME_OVER_")) return home > line ? "WON" : "LOST";
-  if (key.startsWith("HOME_UNDER_")) return home < line ? "WON" : "LOST";
-  if (key.startsWith("AWAY_OVER_")) return away > line ? "WON" : "LOST";
-  if (key.startsWith("AWAY_UNDER_")) return away < line ? "WON" : "LOST";
-  if (key.startsWith("OVER_")) return total > line ? "WON" : "LOST";
-  if (key.startsWith("UNDER_")) return total < line ? "WON" : "LOST";
-  return "UNVERIFIED";
-}
-
-const normalizedTeam = (value = "") => value.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\b(fc|cf|sc|afc|club|football|de|the)\b/g, " ").replace(/[^a-z0-9]+/g, " ").trim();
-
-function resultTeamScore(left, right) {
-  const a = new Set(normalizedTeam(left).split(" ").filter(Boolean));
-  const b = new Set(normalizedTeam(right).split(" ").filter(Boolean));
-  if (!a.size || !b.size) return 0;
-  const x = [...a].join(" "), y = [...b].join(" ");
-  return Math.max([...a].filter((word) => b.has(word)).length / new Set([...a, ...b]).size, x === y ? 1 : x.includes(y) || y.includes(x) ? .92 : 0);
-}
-
-function resultForSelection(selection) {
-  const exact = eventMap.get(selection.fixtureId);
-  if (exact) return exact;
-  const kickoff = Date.parse(selection.kickoff);
-  return events.filter((event) => event.status === "FINISHED").map((event) => {
-    const names = (resultTeamScore(selection.homeTeam?.name, event.homeTeam?.name) + resultTeamScore(selection.awayTeam?.name, event.awayTeam?.name)) / 2;
-    const delta = kickoff ? Math.abs(kickoff - Date.parse(event.kickoff)) : null;
-    return { event, names, delta, score: names * .88 + (delta == null ? .5 : Math.max(0, 1 - delta / 43_200_000)) * .12 };
-  }).filter((row) => row.names >= .72 && (row.delta == null || row.delta <= 43_200_000)).sort((a, b) => b.score - a.score)[0]?.event;
-}
-
-function trackTicket(ticket) {
-  const selections = ticket.selections.map((selection) => ({ ...selection, result: settleSelection(selection, resultForSelection(selection)) }));
-  const lost = selections.filter((selection) => selection.result === "LOST").length;
-  const pending = selections.filter((selection) => selection.result === "PENDING").length;
-  const unverified = selections.filter((selection) => selection.result === "UNVERIFIED").length;
-  const status = lost ? "LOST" : pending ? "PENDING" : unverified ? "CHECK_BOOKMAKER" : "WON";
-  return {
-    ...ticket,
-    status,
-    settledAt: status === "PENDING" ? null : now.toISOString(),
-    wonLegs: selections.filter((selection) => selection.result === "WON").length,
-    lostLegs: lost,
-    voidLegs: selections.filter((selection) => selection.result === "VOID").length,
-    selections,
-  };
-}
-
 const ticketArchive = new Map();
 for (const ticket of [...tickets, ...(previous.tickets ?? []), ...(previous.ticketHistory ?? [])]) {
   if (!ticketArchive.has(ticket.id)) ticketArchive.set(ticket.id, ticket);
 }
-const ticketHistory = [...ticketArchive.values()].map(trackTicket)
+const ticketHistory = [...ticketArchive.values()].map((ticket) => trackTicket(ticket, events, now.toISOString()))
   .sort((a, b) => String(b.publishedAt ?? "").localeCompare(String(a.publishedAt ?? "")))
   .slice(0, 90);
 const snapshot = {

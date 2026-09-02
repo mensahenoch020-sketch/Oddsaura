@@ -10,6 +10,17 @@ test("decodes SportyBet match result and total selections", () => {
   assert.deepEqual(decoded.selections.map((item) => [item.marketKey, item.selection, item.line ?? null]), [["MATCH_HOME", "Arsenal", null], ["OVER_2_5", "Over 2.5", 2.5]]);
 });
 
+test("reports the exact source leg that has no safe market translation", () => {
+  const decoded = decodeLoadedPayload("sportybet", "MIXED1", { data: { ticket: { selections: [
+    { eventId: "one", eventName: "Arsenal vs Chelsea", startTime: "2026-09-05T15:00:00Z", marketName: "1X2", outcomeName: "Home" },
+    { eventId: "two", eventName: "Liverpool vs Everton", startTime: "2026-09-05T17:00:00Z", marketName: "First throw-in", outcomeName: "Liverpool" },
+  ] } } });
+  assert.equal(decoded.partial, true);
+  assert.equal(decoded.skipped, 1);
+  assert.equal(decoded.skippedSelections[0]?.eventName, "Liverpool vs Everton");
+  assert.equal(decoded.skippedSelections[0]?.marketName, "First throw-in");
+});
+
 test("decodes betPawa double chance selections", () => {
   const decoded = decodeLoadedPayload("betpawa", "PAWA12", { items: [
     { eventId: 44, eventName: "Lions - Tigers", startDate: "2026-08-31T12:00:00Z", marketName: "Double Chance", outcomeName: "X2" },

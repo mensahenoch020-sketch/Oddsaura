@@ -239,10 +239,19 @@ async function hydrateSportyRows(payload: unknown, fetcher: FetchLike) {
 
 export function decodeLoadedPayload(provider: DecodableBookmaker, code: string, payload: unknown) {
   const rows = selectionRows(provider, payload);
-  const selections = rows.map((row, index) => toInput(row, provider, index)).filter((row): row is SportyBetSelectionInput => Boolean(row));
+  const converted = rows.map((row, index) => ({ row, input: toInput(row, provider, index) }));
+  const selections = converted.flatMap(({ input }) => input ? [input] : []);
+  const skippedSelections = converted.flatMap(({ row, input }) => {
+    if (input) return [];
+    const nested = [row, row.event, row.eventInfo, row.fixture, row.match, row.market, row.selection, row.selectionInfo, row.outcome].filter(isRecord);
+    const eventName = first(nested, ["eventName", "matchName", "fixtureName", "E_NAME", "N", "SE", "name"]);
+    const marketName = first(nested, ["marketName", "marketLabel", "marketTypeName", "groupName", "M_NAME", "M", "displayName"]);
+    const outcomeName = first(nested, ["outcomeName", "selectionName", "selection", "outcome", "sign", "SGN", "S", "displayName"]);
+    return [{ eventName: eventName || "Unknown match", marketName: marketName || "Unknown market", outcomeName: outcomeName || "Unknown selection", reason: !eventName ? "The bookmaker did not return readable teams." : "This market does not have a safe equivalent yet." }];
+  });
   if (!rows.length) throw new BookmakerDecodeError(`${provider} did not return any selections for this code.`, 422);
-  if (!selections.length) throw new BookmakerDecodeError(`OddsAura loaded the ${provider} code, but its markets could not be translated safely.`, 422, { loaded: rows.length });
-  return { sourceProvider: provider, sourceCode: code, selections, partial: selections.length !== rows.length, skipped: rows.length - selections.length };
+  if (!selections.length) throw new BookmakerDecodeError(`OddsAura loaded the ${provider} code, but none of its markets have a safe equivalent yet.`, 422, { loaded: rows.length, skippedSelections });
+  return { sourceProvider: provider, sourceCode: code, selections, partial: selections.length !== rows.length, skipped: rows.length - selections.length, skippedSelections };
 }
 
 async function jsonResponse(response: Response, failure: string) {

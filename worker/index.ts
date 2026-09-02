@@ -383,7 +383,11 @@ const worker = {
         }
         if (!selections.length) {
           const decoded = await decodeBookmakerCode(body.sourceProvider, code, fetch);
-          if (decoded.partial) throw new BookmakerIntegrationError("Every source selection must translate safely. Nothing was removed and no partial code was created.", 422, { skipped: decoded.skipped });
+          if (decoded.partial) {
+            const firstSkipped = decoded.skippedSelections[0];
+            const subject = firstSkipped ? `${firstSkipped.eventName} — ${firstSkipped.marketName}: ${firstSkipped.outcomeName}` : `${decoded.skipped} selection${decoded.skipped === 1 ? "" : "s"}`;
+            throw new BookmakerIntegrationError(`Could not safely translate ${subject}. No selections were removed and no partial code was created.`, 422, { skipped: decoded.skipped, skippedSelections: decoded.skippedSelections });
+          }
           selections = decoded.selections;
         }
         const result = await createBookmakerCode(body.destinationProvider, selections, fetch, false);
