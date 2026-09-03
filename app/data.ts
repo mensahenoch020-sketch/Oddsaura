@@ -75,17 +75,41 @@ export const fallbackSnapshot: Snapshot = {
 export type SnapshotScope = "snapshot" | "builder" | "matches" | "daily" | "results" | "admin";
 const publicDataBase = "https://raw.githubusercontent.com/mensahenoch020-sketch/Oddsaura/main/data/public";
 
+async function fetchSnapshot(url: string, timeout = 6_000, cache: RequestCache = "force-cache") {
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), timeout);
+  try {
+    const response = await fetch(url, { cache, signal: controller.signal });
+    if (!response.ok) throw new Error(`Football data returned ${response.status}`);
+    return await response.json() as Snapshot;
+  } finally {
+    window.clearTimeout(timer);
+  }
+}
+
+function remoteSnapshotUrl(scope: SnapshotScope, cacheWindow: number) {
+  const configured = process.env.NEXT_PUBLIC_DATA_URL;
+  if (configured && scope === "snapshot") return `${configured}?v=${cacheWindow}`;
+  return `${publicDataBase}/${scope}.json?v=${cacheWindow}`;
+}
+
 export async function loadSnapshot(scope: SnapshotScope = "snapshot") {
   const cacheWindow = Math.floor(Date.now() / 300_000);
   const configured = process.env.NEXT_PUBLIC_DATA_URL;
   const remoteUrl = configured && scope === "snapshot" ? configured : `${publicDataBase}/${scope}.json`;
   // Route-sized files are built into every deployment. Loading them first
   // avoids a slow GitHub 404 and a multi-megabyte snapshot download.
-  let response = scope === "snapshot"
-    ? await fetch(`${remoteUrl}?v=${cacheWindow}`, { cache: "force-cache" })
-    : await fetch(`/data/${scope}.json?v=${cacheWindow}`, { cache: "force-cache" });
-  if (!response.ok && scope !== "snapshot") response = await fetch(`${remoteUrl}?v=${cacheWindow}`, { cache: "force-cache" });
-  if (!response.ok && scope !== "snapshot") response = await fetch(`${configured ?? `${publicDataBase}/snapshot.json`}?v=${cacheWindow}`, { cache: "force-cache" });
-  if (!response.ok) throw new Error("The latest GitHub snapshot could not be reached");
-  return response.json() as Promise<Snapshot>;
+  if (scope === "snapshot") return fetchSnapshot(`${remoteUrl}?v=${cacheWindow}`);
+  try { return await fetchSnapshot(`/data/${scope}.json?v=${cacheWindow}`, 3_500); }
+  catch {
+    try { return await fetchSnapshot(`${remoteUrl}?v=${cacheWindow}`); }
+    catch { return fetchSnapshot(`${configured ?? `${publicDataBase}/snapshot.json`}?v=${cacheWindow}`); }
+  }
+}
+
+/** Fetch the newest generated data without waiting for another site deployment. */
+export async function refreshSnapshot(scope: SnapshotScope) {
+  const cacheWindow = Math.floor(Date.now() / 60_000);
+  try { return await fetchSnapshot(remoteSnapshotUrl(scope, cacheWindow), 8_000, "no-store"); }
+  catch { return fetchSnapshot(`${publicDataBase}/snapshot.json?v=${cacheWindow}`, 8_000, "no-store"); }
 }

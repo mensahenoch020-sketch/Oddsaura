@@ -29,3 +29,4 @@
   font-size: 10px;
   font-weight: 800;
 }
+.results-statuses{display:flex;gap:6px;margin:10px 0;overflow-x:auto}.results-statuses button{flex:1;min-width:74px;border:1px solid #30353d;border-radius:6px;background:#171a1f;color:#b7c0c8;padding:10px;font-size:10px;font-weight:800}.results-statuses button.active{background:#23d96c;border-color:#23d96c;color:#06120a}.results-legs>div{padding-right:82px!important}.results-legs>div>b{font-size:9px!important;border-radius:999px;padding:5px 7px;background:#2b3037;color:#cbd2d9}.results-legs>div.leg-won>b{background:#173d28;color:#70f3a5}.results-legs>div.leg-lost>b{background:#442326;color:#ff9a9a}.results-legs>div.leg-void>b{background:#39331f;color:#f5d878}.personal-code-grid p>span{display:grid;gap:3px}.personal-code-grid p>b{min-width:54px;text-align:right;font-size:8px}

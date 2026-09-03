@@ -9,7 +9,7 @@ on:
       - ".github/workflows/update-football-data.yml"
       - "package.json"
   schedule:
-    - cron: "17 */2 * * *"
+    - cron: "17,47 * * * *"
   workflow_dispatch:
 
 permissions:

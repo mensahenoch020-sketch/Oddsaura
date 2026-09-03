@@ -31,7 +31,8 @@ test("Railway protects and serves account operations used by the live UI", async
 test("public football payloads are split, bundled and cached for faster mobile loading", async () => {
   const [data, pipeline, build] = await Promise.all([read("app/data.ts"), read("pipeline/update.mjs"), read("scripts/build-verified.sh")]);
   assert.match(data, /SnapshotScope/);
-  assert.match(data, /cache: "force-cache"/);
+  assert.match(data, /cache: RequestCache = "force-cache"/);
+  assert.match(data, /refreshSnapshot/);
   assert.match(data, /\/data\/\$\{scope\}\.json/);
   assert.match(build, /build-public-data\.mjs/);
   for (const scope of ["builder", "matches", "daily", "results", "admin"]) assert.match(pipeline, new RegExp(`${scope}:`));

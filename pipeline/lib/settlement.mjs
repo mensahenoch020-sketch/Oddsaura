@@ -30,12 +30,23 @@ export function settleSelection(selection, fixture) {
   if (key === "DNB_AWAY") return home === away ? "VOID" : away > home ? "WON" : "LOST";
   if (key === "BTTS_YES") return home > 0 && away > 0 ? "WON" : "LOST";
   if (key === "BTTS_NO") return home === 0 || away === 0 ? "WON" : "LOST";
-  if (key.startsWith("HOME_OVER_")) return home > line ? "WON" : "LOST";
-  if (key.startsWith("HOME_UNDER_")) return home < line ? "WON" : "LOST";
-  if (key.startsWith("AWAY_OVER_")) return away > line ? "WON" : "LOST";
-  if (key.startsWith("AWAY_UNDER_")) return away < line ? "WON" : "LOST";
-  if (key.startsWith("OVER_")) return total > line ? "WON" : "LOST";
-  if (key.startsWith("UNDER_")) return total < line ? "WON" : "LOST";
+  if (key === "HOME_CLEAN") return away === 0 ? "WON" : "LOST";
+  if (key === "AWAY_CLEAN") return home === 0 ? "WON" : "LOST";
+  if (key === "HOME_WIN_NIL") return home > away && away === 0 ? "WON" : "LOST";
+  if (key === "AWAY_WIN_NIL") return away > home && home === 0 ? "WON" : "LOST";
+  if (key === "HOME_AND_O15") return home > away && total > 1.5 ? "WON" : "LOST";
+  if (key === "AWAY_AND_O15") return away > home && total > 1.5 ? "WON" : "LOST";
+  if (key === "ODD_GOALS") return total % 2 === 1 ? "WON" : "LOST";
+  if (key === "EVEN_GOALS") return total % 2 === 0 ? "WON" : "LOST";
+  const correctScore = key.match(/^CS_(\d+)_(\d+)$/);
+  if (correctScore) return home === Number(correctScore[1]) && away === Number(correctScore[2]) ? "WON" : "LOST";
+  const compare = (value, direction) => value === line ? "VOID" : direction === "OVER" ? value > line ? "WON" : "LOST" : value < line ? "WON" : "LOST";
+  if (key.startsWith("HOME_OVER_")) return compare(home, "OVER");
+  if (key.startsWith("HOME_UNDER_")) return compare(home, "UNDER");
+  if (key.startsWith("AWAY_OVER_")) return compare(away, "OVER");
+  if (key.startsWith("AWAY_UNDER_")) return compare(away, "UNDER");
+  if (key.startsWith("OVER_")) return compare(total, "OVER");
+  if (key.startsWith("UNDER_")) return compare(total, "UNDER");
   return "UNVERIFIED";
 }
 
