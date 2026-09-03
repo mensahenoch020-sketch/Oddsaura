@@ -5,6 +5,7 @@ import { FormEvent, useMemo, useState } from "react";
 type Provider = "sportybet" | "betpawa" | "bet9ja" | "betking" | "betway";
 type ConversionIssue = { eventName?: string; marketName?: string; outcomeName?: string; reason?: string };
 type Unmatched = { fixtureId?: string; homeTeam: string; awayTeam: string; reason: string };
+type SourceSelection = { fixtureId: string; homeTeam: string; awayTeam: string; kickoff: string; marketName: string; selection: string; line?: number | null };
 type Result = { code: string; deepLink: string; decoded: number; partial?: boolean; resolved?: unknown[]; unmatched?: Unmatched[]; sourceIssues?: ConversionIssue[]; importedFrom?: string };
 
 const providers: Array<{ id: Provider; label: string; input: string; output: string; note: string; link: string }> = [
@@ -23,35 +24,39 @@ export default function ConverterForm({ embedded = false }: { embedded?: boolean
   const [message, setMessage] = useState("");
   const [result, setResult] = useState<Result | null>(null);
   const [issues, setIssues] = useState<ConversionIssue[]>([]);
-  const [canRetryAvailable, setCanRetryAvailable] = useState(false);
+  const [transferSelections, setTransferSelections] = useState<SourceSelection[]>([]);
   const [copied, setCopied] = useState(false);
   const sourceMeta = useMemo(() => providers.find((item) => item.id === source)!, [source]);
   const destinationMeta = useMemo(() => providers.find((item) => item.id === destination)!, [destination]);
 
-  function resetFeedback() { setResult(null); setMessage(""); setIssues([]); setCanRetryAvailable(false); setCopied(false); }
+  function resetFeedback() { setResult(null); setMessage(""); setIssues([]); setTransferSelections([]); setCopied(false); }
   function swap() { setSource(destination); setDestination(source); resetFeedback(); }
 
-  async function runConversion(allowPartial: boolean) {
+  async function runConversion() {
     setBusy(true); resetFeedback();
     try {
-      const response = await fetch("/api/providers/convert", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ sourceProvider: source, destinationProvider: destination, code: code.trim(), allowPartial }) });
+      const response = await fetch("/api/providers/convert", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ sourceProvider: source, destinationProvider: destination, code: code.trim(), allowPartial: false }) });
       const text = await response.text();
-      let payload: Result & { error?: string; details?: { skippedSelections?: ConversionIssue[]; unmatched?: Unmatched[]; fixtureId?: string } };
+      let payload: Result & { error?: string; details?: { skippedSelections?: ConversionIssue[]; sourceSelections?: SourceSelection[]; unmatched?: Unmatched[]; fixtureId?: string } };
       try { payload = JSON.parse(text) as typeof payload; }
       catch { throw new Error("The bookmaker connection returned an unreadable response. Please retry shortly."); }
       if (!response.ok || !payload.code) {
         setIssues(payload.details?.skippedSelections ?? []);
-        setCanRetryAvailable(!allowPartial && response.status === 422);
+        setTransferSelections(payload.details?.sourceSelections ?? []);
         throw new Error(payload.error || "This code could not be converted.");
       }
       setResult(payload); setIssues(payload.sourceIssues ?? []);
-      setMessage(payload.partial ? "A verified code was created with the matches available at the destination. Review every exclusion below." : "Every selection was converted and the new code was reload-verified.");
+      setMessage("Every selection was converted and the new code was reload-verified.");
     } catch (error) { setMessage(error instanceof Error ? error.message : "This code could not be converted."); }
     finally { setBusy(false); }
   }
 
-  function convert(event: FormEvent<HTMLFormElement>) { event.preventDefault(); void runConversion(false); }
+  function convert(event: FormEvent<HTMLFormElement>) { event.preventDefault(); void runConversion(); }
   async function copyCode() { if (result?.code) { await navigator.clipboard.writeText(result.code); setCopied(true); } }
+  async function copyTransfer() {
+    const value = transferSelections.map((item, index) => `${index + 1}. ${item.homeTeam} vs ${item.awayTeam}\n${item.marketName}: ${item.selection}${item.line == null ? "" : ` (${item.line})`}\n${new Date(item.kickoff).toLocaleString()}`).join("\n\n");
+    await navigator.clipboard.writeText(value); setCopied(true);
+  }
 
   return <>
     <section className={`converter-workspace${embedded ? " converter-workspace-embedded" : ""}`}>
@@ -64,11 +69,11 @@ export default function ConverterForm({ embedded = false }: { embedded?: boolean
         <label className="converter-code"><span>{sourceMeta.label} code</span><input value={code} onChange={(event) => { setCode(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 16)); resetFeedback(); }} placeholder="Enter booking code" minLength={4} maxLength={16} required autoCapitalize="characters" /></label>
         <button className="converter-submit" disabled={busy || source === destination}>{source === destination ? "Choose a different bookmaker" : busy ? "Loading and matching…" : `Convert to ${destinationMeta.label}`}</button>
         {message ? <p className={result ? "converter-message success" : "converter-message"} role="status">{message}</p> : null}
-        {canRetryAvailable ? <button className="converter-available" type="button" disabled={busy} onClick={() => void runConversion(true)}>Create code with available matches</button> : null}
         {result ? <section className="converter-result converter-result-inline" aria-live="polite"><div><span>Your {destinationMeta.label} code</span><strong>{result.code}</strong><small>{result.resolved?.length ?? result.decoded} matches included{result.partial ? " · partial conversion" : " · exact conversion"}</small></div><div><button type="button" onClick={() => void copyCode()}>{copied ? "Copied ✓" : "Copy code"}</button><a href={result.deepLink} target="_blank" rel="noreferrer">Open {destinationMeta.label} ↗</a></div>{result.unmatched?.length ? <details open><summary>{result.unmatched.length} destination matches not included</summary>{result.unmatched.map((item, index) => <p key={`${item.fixtureId}-${index}`}><b>{item.homeTeam} vs {item.awayTeam}</b><span>{item.reason}</span></p>)}</details> : null}</section> : null}
         {issues.length ? <div className="converter-issues"><strong>Source selections needing another market mapping</strong>{issues.slice(0, 12).map((issue, index) => <p key={`${issue.eventName}-${index}`}><b>{issue.eventName}</b><span>{issue.marketName}: {issue.outcomeName} · {issue.reason}</span></p>)}</div> : null}
+        {destination === "bet9ja" && transferSelections.length ? <section className="converter-transfer"><header><div><span>Bet9ja assisted loader</span><strong>All {transferSelections.length} selections preserved</strong></div><div><button type="button" onClick={() => void copyTransfer()}>{copied ? "Copied ✓" : "Copy complete slip"}</button><a href={destinationMeta.link} target="_blank" rel="noreferrer">Open Bet9ja ↗</a></div></header>{transferSelections.map((item, index) => <div key={`${item.fixtureId}-${index}`}><b>{index + 1}. {item.homeTeam} vs {item.awayTeam}</b><span>{item.marketName}: {item.selection}</span><small>{new Date(item.kickoff).toLocaleString()}</small></div>)}</section> : null}
       </form>
-      {!embedded ? <aside><span>How it works</span><ol><li>Loads the source bookmaker code.</li><li>Translates markets and finds the same matches.</li><li>Uses the destination&apos;s current odds.</li><li>Creates and reload-verifies the new code.</li></ol><p>Odds change between bookmakers. Exact conversion is tried first; if a market is unavailable, you can choose a clearly labelled partial conversion.</p></aside> : null}
+      {!embedded ? <aside><span>How it works</span><ol><li>Loads the source bookmaker code.</li><li>Translates markets and finds the same matches.</li><li>Uses the destination&apos;s current odds.</li><li>Creates and reload-verifies the new code.</li></ol><p>OddsAura never removes a match. Every selection must convert exactly or the full slip is stopped and shown for assisted loading.</p></aside> : null}
     </section>
     {!embedded ? <section className="converter-support"><header><span>Live support</span><h2>Bookmaker connection status</h2></header><div>{providers.map((item) => <article key={item.id}><div><strong>{item.label}</strong><span className={item.output === "Automatic" ? "live" : "limited"}>{item.output}</span></div><p>{item.note}</p><a href={item.link} target="_blank" rel="noreferrer">Open bookmaker ↗</a></article>)}</div></section> : null}
   </>;

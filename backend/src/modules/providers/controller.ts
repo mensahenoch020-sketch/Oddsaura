@@ -69,9 +69,18 @@ export async function convertBookmakerCode(sourceProvider: BookmakerId, destinat
     if (decoded.partial && !allowPartial) {
       const firstSkipped = decoded.skippedSelections[0];
       const subject = firstSkipped ? `${firstSkipped.eventName} — ${firstSkipped.marketName}: ${firstSkipped.outcomeName}` : `${decoded.skipped} selection${decoded.skipped === 1 ? "" : "s"}`;
-      throw new BookmakerIntegrationError(`Could not safely translate ${subject}. No selections were removed and no partial code was created.`, 422, { skipped: decoded.skipped, skippedSelections: decoded.skippedSelections });
+      throw new BookmakerIntegrationError(`Could not safely translate ${subject}. No selections were removed and no partial code was created.`, 422, { skipped: decoded.skipped, skippedSelections: decoded.skippedSelections, sourceSelections: decoded.selections });
     }
-    const result = await createBookmakerCode(destinationProvider, decoded.selections, fetcher, allowPartial);
+    let result: SportyBetCodeResult;
+    try {
+      result = await createBookmakerCode(destinationProvider, decoded.selections, fetcher, allowPartial);
+    } catch (error) {
+      if (error instanceof BookmakerIntegrationError) {
+        const existing = error.details && typeof error.details === "object" && !Array.isArray(error.details) ? error.details : {};
+        throw new BookmakerIntegrationError(error.message, error.status, { ...existing, sourceSelections: decoded.selections });
+      }
+      throw error;
+    }
     return { sourceProvider, destinationProvider, sourceCode: decoded.sourceCode, decoded: decoded.selections.length, importPartial: decoded.partial, sourceIssues: decoded.skippedSelections, sourceSelections: decoded.selections, ...result, partial: Boolean(decoded.partial || result.partial) };
   } catch (error) {
     if (error instanceof BookmakerIntegrationError) throw error;

@@ -6,6 +6,7 @@ on:
     paths:
       - "pipeline/**"
       - "data/history/**"
+      - ".gitignore"
       - ".github/workflows/update-football-data.yml"
       - "package.json"
   schedule:

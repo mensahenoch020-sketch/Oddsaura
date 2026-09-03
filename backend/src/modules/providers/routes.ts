@@ -21,7 +21,7 @@ export async function providerRoutes(app: FastifyInstance) {
   app.post("/api/providers/convert", async (request, reply) => {
     const body = z.object({ sourceProvider: z.enum(BOOKMAKER_IDS), destinationProvider: z.enum(BOOKMAKER_IDS), code: z.string().min(4).max(16), allowPartial: z.boolean().optional() }).parse(request.body);
     try {
-      return { verified: true, ...await convertBookmakerCode(body.sourceProvider, body.destinationProvider, body.code, fetch, body.allowPartial ?? false) };
+      return { verified: true, ...await convertBookmakerCode(body.sourceProvider, body.destinationProvider, body.code, fetch, false) };
     } catch (error) {
       if (error instanceof BookmakerIntegrationError) return reply.code(error.status).send({ error: error.message, details: error.details });
       throw error;

@@ -171,7 +171,7 @@ async function converterApi(req, res, user) {
   const source = String(body.sourceProvider || "").toLowerCase();
   const destination = String(body.destinationProvider || "").toLowerCase();
   const code = String(body.code || "").trim().toUpperCase();
-  const allowPartial = body.allowPartial === true;
+  const allowPartial = false;
   if (!providers.has(source) || !providers.has(destination)) return json(res, 400, { error: "Choose valid source and destination bookmakers." });
   if (source === destination) return json(res, 400, { error: "Choose a different destination bookmaker." });
   if (!/^[A-Z0-9]{4,16}$/.test(code)) return json(res, 400, { error: "Enter a valid bookmaker code." });

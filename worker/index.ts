@@ -385,14 +385,23 @@ const worker = {
         if (!selections.length) {
           const decoded = await decodeBookmakerCode(body.sourceProvider, code, fetch);
           sourceIssues = decoded.skippedSelections;
-          if (decoded.partial && !body.allowPartial) {
+          if (decoded.partial) {
             const firstSkipped = decoded.skippedSelections[0];
             const subject = firstSkipped ? `${firstSkipped.eventName} — ${firstSkipped.marketName}: ${firstSkipped.outcomeName}` : `${decoded.skipped} selection${decoded.skipped === 1 ? "" : "s"}`;
-            throw new BookmakerIntegrationError(`Could not safely translate ${subject}. No selections were removed and no partial code was created.`, 422, { skipped: decoded.skipped, skippedSelections: decoded.skippedSelections });
+            throw new BookmakerIntegrationError(`Could not safely translate ${subject}. No selections were removed and no partial code was created.`, 422, { skipped: decoded.skipped, skippedSelections: decoded.skippedSelections, sourceSelections: decoded.selections });
           }
           selections = decoded.selections;
         }
-        const result = await createBookmakerCode(body.destinationProvider, selections, fetch, body.allowPartial ?? false);
+        let result;
+        try {
+          result = await createBookmakerCode(body.destinationProvider, selections, fetch, false);
+        } catch (error) {
+          if (error instanceof BookmakerIntegrationError) {
+            const existing = error.details && typeof error.details === "object" && !Array.isArray(error.details) ? error.details : {};
+            throw new BookmakerIntegrationError(error.message, error.status, { ...existing, sourceSelections: selections });
+          }
+          throw error;
+        }
         const now = Date.now();
         await env.DB.prepare("INSERT INTO generated_codes (id, user_email, provider, code, deep_link, selections_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
           .bind(crypto.randomUUID(), identity.email, body.destinationProvider, result.code, result.deepLink ?? null, JSON.stringify({ requested: selections, resolved: result.resolved ?? [], unmatched: result.unmatched ?? [], sourceIssues, convertedFrom: { provider: body.sourceProvider, code } }), now).run();

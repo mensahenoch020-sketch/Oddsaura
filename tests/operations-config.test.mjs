@@ -24,7 +24,7 @@ test("Railway protects and serves account operations used by the live UI", async
   assert.match(server, /async function bookmakerApi/);
   assert.match(server, /async function adminApi/);
   assert.match(server, /\/api\/providers/);
-  assert.match(server, /const allowPartial = body\.allowPartial === true/);
+  assert.match(server, /const allowPartial = false/);
   assert.match(server, /allowPartial \}/);
 });
 
@@ -38,11 +38,12 @@ test("public football payloads are split, bundled and cached for faster mobile l
   for (const scope of ["builder", "matches", "daily", "results", "admin"]) assert.match(pipeline, new RegExp(`${scope}:`));
 });
 
-test("converter exposes a visible code and supports an explicit partial retry", async () => {
+test("converter exposes verified codes and never offers a partial conversion", async () => {
   const [form, worker, railway] = await Promise.all([read("app/converter/converter-form.tsx"), read("worker/index.ts"), read("scripts/railway-server.mjs")]);
   assert.match(form, /Your \{destinationMeta\.label\} code/);
-  assert.match(form, /Create code with available matches/);
-  assert.match(form, /allowPartial \}/);
-  assert.match(worker, /body\.allowPartial \?\? false/);
-  assert.match(railway, /const allowPartial = body\.allowPartial === true/);
+  assert.doesNotMatch(form, /Create code with available matches/);
+  assert.match(form, /allowPartial: false/);
+  assert.match(form, /All \{transferSelections\.length\} selections preserved/);
+  assert.match(worker, /decoded\.partial\) \{/);
+  assert.match(railway, /const allowPartial = false/);
 });
