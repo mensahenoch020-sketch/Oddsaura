@@ -61,7 +61,7 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
   const [liveOdds, setLiveOdds] = useState<Record<string, number>>({});
   const [targetOdds, setTargetOdds] = useState("5");
-  const [builtTarget, setBuiltTarget] = useState<{ requested: number; estimated: number; legs: number } | null>(null);
+  const [builtTarget, setBuiltTarget] = useState<{ requested: number; estimated: number; legs: number; confidence: number } | null>(null);
   const [doctorNotice, setDoctorNotice] = useState("");
   const [visibleFixtures, setVisibleFixtures] = useState(60);
   const [referenceTime] = useState(() => Date.now());
@@ -121,9 +121,9 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
     const selected = result?.picks ?? [];
     setPicks(selected); setSportyCode(null); setLiveOdds({}); setSlipOpen(true);
     if (!result) { setBuiltTarget(null); setNotice(`No sufficiently strong ${activeProvider.label} ticket is ready for that target.`); return; }
-    setBuiltTarget({ requested: result.target, estimated: result.estimatedOdds, legs: selected.length });
-    if (activeProvider.status !== "live") { setNotice(`${selected.length} picks built for ${activeProvider.label} at ${result.estimatedOdds.toFixed(2)} estimated odds. Copy the complete list to rebuild it without losing matches.`); return; }
-    setNotice(`${selected.length} picks built at ${result.estimatedOdds.toFixed(2)} estimated odds for your ${result.target.toFixed(2)} target. Generate the code when you are ready to check the bookmaker's current prices.`);
+    setBuiltTarget({ requested: result.target, estimated: result.estimatedOdds, legs: selected.length, confidence: result.averageConfidence });
+    if (activeProvider.status !== "live") { setNotice(`${selected.length} quality-gated picks built for ${activeProvider.label} at ${result.estimatedOdds.toFixed(2)} estimated odds. Copy the complete list to rebuild it without losing matches.`); return; }
+    setNotice(`${selected.length} quality-gated picks built at ${result.estimatedOdds.toFixed(2)} estimated odds · ${Math.round(result.averageConfidence * 100)}% average match confidence. Generate the code to check current bookmaker prices.`);
   }
 
   const weakestPick = useMemo(() => [...picks].sort((a, b) => {
@@ -286,7 +286,7 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
       <aside className={`build-slip ${slipOpen ? "open" : ""}`} id="my-slip" aria-label="Betslip">
         <div className="build-slip-title"><div><span>Betslip</span><h2>{picks.length} {picks.length === 1 ? "selection" : "selections"}</h2></div><div>{picks.length > 0 && <button type="button" onClick={() => { setPicks([]); setSportyCode(null); setLiveOdds({}); }}>Clear</button>}<button className="build-slip-close" type="button" onClick={() => setSlipOpen(false)}>×</button></div></div>
         <div className="build-picks">{picks.map((pick) => <div key={pick.fixtureId}><button type="button" aria-label={`Remove ${pick.homeTeam.name} versus ${pick.awayTeam.name}`} onClick={() => removePick(pick.fixtureId)}>×</button><span>{pick.homeTeam.name} vs {pick.awayTeam.name}</span><strong>{pick.market.name}: {pick.selection}</strong><b>{priceFor(pick)?.toFixed(2) ?? "Pending"} <small>{liveOdds[pick.fixtureId] ? "LIVE" : ""}</small></b><a href={`#fixture-${encodeURIComponent(pick.fixtureId)}`} onClick={() => setSlipOpen(false)}>Change</a></div>)}{!picks.length && <p>No selections</p>}</div>
-        <div className="build-total"><span>{totalOdds ? allPricesLive ? `${activeProvider.label} live total` : livePriceCount ? `Mixed total · ${livePriceCount}/${picks.length} live` : builtTarget ? `Built for ${builtTarget.requested.toFixed(2)} target · ${builtTarget.legs} legs` : "Estimated total · verify before betting" : "Bookmaker prices"}</span><strong>{totalOdds?.toFixed(2) ?? "Pending"}</strong></div>
+        <div className="build-total"><span>{totalOdds ? allPricesLive ? `${activeProvider.label} live total` : livePriceCount ? `Mixed total · ${livePriceCount}/${picks.length} live` : builtTarget ? `Target ${builtTarget.requested.toFixed(2)} · ${builtTarget.legs} quality-gated legs · ${Math.round(builtTarget.confidence * 100)}% avg confidence` : "Estimated total · verify before betting" : "Bookmaker prices"}</span><strong>{totalOdds?.toFixed(2) ?? "Pending"}</strong></div>
         {weakestPick ? <div className="slip-doctor"><div><span>Slip Doctor</span><b>{weakestPick.homeTeam.shortName || weakestPick.homeTeam.name} vs {weakestPick.awayTeam.shortName || weakestPick.awayTeam.name}</b><small>{doctorNotice || (weakestPick.dataQuality === "LOW" ? "Limited match history" : `${Math.round(weakestPick.confidence * 100)}% confidence · weakest leg`)}</small></div><button type="button" onClick={replaceWeakest}>Replace</button></div> : null}
         <div className="build-provider-list" aria-label="Choose bookmaker">{providerAdapters.filter((item) => item.id !== "draftkings").map((item) => <button type="button" key={item.id} className={provider === item.id ? "active" : ""} onClick={() => { setProvider(item.id); setSportyCode(null); setLiveOdds({}); }}>{item.label}<small>{item.status === "live" ? "Live" : "Assisted load"}</small></button>)}<a href="/dashboard#code-converter">Convert a code ↗</a></div>
         {activeProvider.status !== "live" ? <><div className="build-one-xbet"><button type="button" disabled={!picks.length} onClick={() => void copyText(selectionsText, "Selections copied")}>Copy selection list</button><a className="build-code" href={activeProvider.deepLink} target="_blank" rel="noreferrer">Open {activeProvider.label} — rebuild manually <span>↗</span></a></div><p className="build-notice">This bookmaker does not expose a verified code-creation connection yet.</p></> : <button className="build-code" type="button" disabled={!picks.length || creatingCode} onClick={() => void requestCode()}>{creatingCode ? "Checking live odds…" : sportyCode ? "Recheck code and odds" : "Generate code"} <span>→</span></button>}

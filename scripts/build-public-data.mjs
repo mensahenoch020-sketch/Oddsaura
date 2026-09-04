@@ -10,7 +10,7 @@ const modelPerformance = await readFile(resolve(sourceDir, "model-performance.js
 const withoutOdds = (fixture) => ({ ...fixture, odds: [] });
 const slimPick = (source) => {
   const pick = { ...source };
-  for (const key of ["probability", "edge", "historyMatches", "reasoning", "providerDeepLink"]) delete pick[key];
+  for (const key of ["reasoning", "providerDeepLink"]) delete pick[key];
   return pick;
 };
 const common = { version: snapshot.version, generatedAt: snapshot.generatedAt, stale: snapshot.stale, status: snapshot.status, message: snapshot.message, metrics: snapshot.metrics };

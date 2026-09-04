@@ -22,7 +22,7 @@ async function writePublicSnapshots(snapshot) {
   // operational snapshot or the selectable bookmaker markets.
   const slimPick = (source) => {
     const pick = { ...source };
-    for (const key of ["probability", "edge", "historyMatches", "reasoning", "providerDeepLink"]) delete pick[key];
+    for (const key of ["reasoning", "providerDeepLink"]) delete pick[key];
     return pick;
   };
   const routePicks = (snapshot.predictedPicks ?? []).map(slimPick);
