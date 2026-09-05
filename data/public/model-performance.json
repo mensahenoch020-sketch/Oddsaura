@@ -1,15 +1,71 @@
 {
-  "generatedAt": "2026-09-05T13:17:59.943Z",
-  "methodology": "Walk-forward test: every prediction uses only matches completed before kickoff.",
+  "generatedAt": "2026-09-05T14:22:54.850Z",
+  "methodology": "Walk-forward test: every prediction uses only earlier matches with a two-hour completion buffer before kickoff.",
   "matches": 2000,
   "oneXTwoAccuracy": 0.507,
-  "over25Accuracy": 0.558,
-  "brierScore": 0.20117229019628613,
-  "logLoss": 1.0086559587986592,
+  "over25Accuracy": 0.5585,
+  "brierScore": 0.2011721775169675,
+  "logLoss": 1.0086551372593817,
   "baseline": {
     "label": "Always predict home win",
     "matches": 2000,
     "accuracy": 0.4305
+  },
+  "pricingAudit": {
+    "methodology": "Historical 1X2 closing prices are de-margined before comparison. Model weight 0 is bookmaker-only; 1 is OddsAura-only.",
+    "probabilityModels": [
+      {
+        "modelWeight": 0,
+        "matches": 2000,
+        "brier": 0.1944602836629677,
+        "logLoss": 0.9786932027042992
+      },
+      {
+        "modelWeight": 0.25,
+        "matches": 2000,
+        "brier": 0.19527273154199892,
+        "logLoss": 0.9825648623561749
+      },
+      {
+        "modelWeight": 1,
+        "matches": 2000,
+        "brier": 0.2011721775169675,
+        "logLoss": 1.0086551372593817
+      }
+    ],
+    "favoriteBands": [
+      {
+        "threshold": 0.55,
+        "picks": 738,
+        "hitRate": 0.6720867208672087,
+        "roi": -0.04581300813008
+      },
+      {
+        "threshold": 0.6,
+        "picks": 514,
+        "hitRate": 0.7062256809338522,
+        "roi": -0.05089494163424129
+      },
+      {
+        "threshold": 0.65,
+        "picks": 348,
+        "hitRate": 0.735632183908046,
+        "roi": -0.058074712643678264
+      },
+      {
+        "threshold": 0.7,
+        "picks": 217,
+        "hitRate": 0.7695852534562212,
+        "roi": -0.0571428571428573
+      },
+      {
+        "threshold": 0.75,
+        "picks": 119,
+        "hitRate": 0.8151260504201681,
+        "roi": -0.03991596638655498
+      }
+    ],
+    "conclusion": "The bookmaker price is the primary probability baseline. OddsAura acts as a cautious agreement and risk filter; it does not claim a proven pricing edge."
   },
   "markets": [
     {
@@ -23,7 +79,7 @@
       "status": "TESTED",
       "accuracy": 0.546,
       "baselineAccuracy": 0.5485,
-      "brier": 0.24625069882451467,
+      "brier": 0.24625054971645152,
       "selectedHitRate": 0.563894523326572
     },
     {
@@ -37,22 +93,22 @@
       "status": "TESTED",
       "accuracy": 0.778,
       "baselineAccuracy": 0.778,
-      "brier": 0.17126707494949564,
+      "brier": 0.17126698773602775,
       "selectedHitRate": 0.778
     },
     {
       "key": "OVER_2_5",
       "matches": 2000,
-      "correct": 1116,
+      "correct": 1117,
       "baselineCorrect": 1088,
       "voids": 0,
-      "selected": 1176,
-      "wins": 690,
+      "selected": 1177,
+      "wins": 691,
       "status": "TESTED",
-      "accuracy": 0.558,
+      "accuracy": 0.5585,
       "baselineAccuracy": 0.544,
-      "brier": 0.24541161674136414,
-      "selectedHitRate": 0.5867346938775511
+      "brier": 0.24541136516346626,
+      "selectedHitRate": 0.5870858113848768
     },
     {
       "key": "UNDER_3_5",
@@ -65,7 +121,7 @@
       "status": "TESTED",
       "accuracy": 0.6895,
       "baselineAccuracy": 0.6885,
-      "brier": 0.21024542435581905,
+      "brier": 0.21024498507277672,
       "selectedHitRate": 0.6895687061183551
     },
     {
@@ -79,7 +135,7 @@
       "status": "TESTED",
       "accuracy": 0.719,
       "baselineAccuracy": 0.6965,
-      "brier": 0.18919915597644654,
+      "brier": 0.18919892584751283,
       "selectedHitRate": 0.7261839956450735
     },
     {
@@ -93,7 +149,7 @@
       "status": "TESTED",
       "accuracy": 0.636,
       "baselineAccuracy": 0.5695,
-      "brier": 0.2198544067234362,
+      "brier": 0.2198542717586149,
       "selectedHitRate": 0.6523350630096367
     },
     {
@@ -107,7 +163,7 @@
       "status": "TESTED",
       "accuracy": 0.734,
       "baselineAccuracy": 0.734,
-      "brier": 0.19446330788897617,
+      "brier": 0.194463334944775,
       "selectedHitRate": 0.734
     },
     {
@@ -121,7 +177,7 @@
       "status": "TESTED",
       "accuracy": 0.6907356948228883,
       "baselineAccuracy": 0.5865122615803815,
-      "brier": 0.20144022032964404,
+      "brier": 0.20143980431244182,
       "selectedHitRate": 0.6997055937193327
     },
     {
@@ -135,7 +191,7 @@
       "status": "TESTED",
       "accuracy": 0.6907356948228883,
       "baselineAccuracy": 0.5865122615803815,
-      "brier": 0.20144022032964404,
+      "brier": 0.20143980431244182,
       "selectedHitRate": 0.6703786191536748
     },
     {
@@ -149,7 +205,7 @@
       "status": "TESTED",
       "accuracy": 0.78,
       "baselineAccuracy": 0.7785,
-      "brier": 0.1627226461025742,
+      "brier": 0.16272286333135164,
       "selectedHitRate": 0.7802308078273958
     },
     {
@@ -163,7 +219,7 @@
       "status": "TESTED",
       "accuracy": 0.6115,
       "baselineAccuracy": 0.538,
-      "brier": 0.23253841506494963,
+      "brier": 0.23253862240797019,
       "selectedHitRate": 0.6150234741784038
     },
     {
@@ -177,7 +233,7 @@
       "status": "TESTED",
       "accuracy": 0.706,
       "baselineAccuracy": 0.706,
-      "brier": 0.20048879596168107,
+      "brier": 0.20048845460242887,
       "selectedHitRate": 0.7134715025906736
     },
     {
@@ -191,7 +247,7 @@
       "status": "TESTED",
       "accuracy": 0.6605,
       "baselineAccuracy": 0.641,
-      "brier": 0.22005489440079948,
+      "brier": 0.22005413954011688,
       "selectedHitRate": 0.6065573770491803
     },
     {
@@ -205,7 +261,7 @@
       "status": "TESTED",
       "accuracy": 0.706,
       "baselineAccuracy": 0.706,
-      "brier": 0.20048879596168104,
+      "brier": 0.2004884546024288,
       "selectedHitRate": 0.5
     },
     {
@@ -219,7 +275,7 @@
       "status": "TESTED",
       "accuracy": 0.78,
       "baselineAccuracy": 0.7785,
-      "brier": 0.16272264610257417,
+      "brier": 0.1627228633313516,
       "selectedHitRate": 0.7142857142857143
     },
     {
@@ -233,7 +289,7 @@
       "status": "TESTED",
       "accuracy": 0.7715,
       "baselineAccuracy": 0.77,
-      "brier": 0.168092543064174,
+      "brier": 0.16809239487311856,
       "selectedHitRate": 0.6363636363636364
     },
     {
@@ -247,7 +303,7 @@
       "status": "TESTED",
       "accuracy": 0.8425,
       "baselineAccuracy": 0.8425,
-      "brier": 0.12467362916754529,
+      "brier": 0.12467369365873124,
       "selectedHitRate": null
     }
   ],
@@ -354,16 +410,17 @@
     }
   ],
   "builderAudit": {
-    "generatedAt": "2026-09-05T13:24:53.764Z",
+    "strategyVersion": "reverse-market-v1",
+    "generatedAt": "2026-09-05T14:24:39.743Z",
     "matches": 2000,
     "rows": [
       {
         "target": 2,
         "days": 156,
-        "built": 0,
-        "noTicket": 156,
-        "won": 0,
-        "lost": 0,
+        "built": 4,
+        "noTicket": 152,
+        "won": 3,
+        "lost": 1,
         "unverified": 0
       },
       {

@@ -17,6 +17,20 @@ export const providerAdapters: ProviderAdapter[] = [
   { id: "draftkings", label: "DraftKings", capability: "deep-link", status: "partial" },
 ];
 
+const automaticMarketPatterns: Record<Exclude<ProviderId, "draftkings">, RegExp> = {
+  sportybet: /^(MATCH_(HOME|DRAW|AWAY)|ONE_UP_(HOME|AWAY)|TWO_UP_(HOME|AWAY)|DC_(1X|X2|12)|DNB_(HOME|AWAY)|BTTS_(YES|NO)|ODD_GOALS|EVEN_GOALS|HOME_(OVER|UNDER)_|AWAY_(OVER|UNDER)_|OVER_|UNDER_|HOME_CLEAN|AWAY_CLEAN|HOME_WIN_NIL|AWAY_WIN_NIL|HOME_AND_O15|AWAY_AND_O15|DC1X_AND_O15|DCX2_AND_O15|BTTS_AND_O25|HT_(HOME|DRAW|AWAY)|HT_OVER_|CS_)/,
+  betpawa: /^(MATCH_(HOME|DRAW|AWAY)|ONE_UP_(HOME|AWAY)|TWO_UP_(HOME|AWAY)|DC_(1X|X2|12)|DNB_(HOME|AWAY)|BTTS_(YES|NO)|ODD_GOALS|EVEN_GOALS|HOME_(OVER|UNDER)_|AWAY_(OVER|UNDER)_|OVER_|UNDER_|HOME_CLEAN|AWAY_CLEAN|HOME_WIN_NIL|AWAY_WIN_NIL|HOME_AND_O15|AWAY_AND_O15|HT_(HOME|DRAW|AWAY)|HT_OVER_|CS_)/,
+  betway: /^(MATCH_(HOME|DRAW|AWAY)|DC_(1X|X2|12)|OVER_|UNDER_)/,
+  betking: /^(MATCH_(HOME|DRAW|AWAY)|ONE_UP_(HOME|AWAY)|TWO_UP_(HOME|AWAY)|DC_(1X|X2|12)|BTTS_(YES|NO)|HOME_(OVER|UNDER)_|AWAY_(OVER|UNDER)_|OVER_|UNDER_)/,
+  // Bet9ja is an assisted workflow until its server accepts automatic creation.
+  bet9ja: /^(MATCH_(HOME|DRAW|AWAY)|DC_(1X|X2|12)|DNB_(HOME|AWAY)|BTTS_(YES|NO)|HOME_(OVER|UNDER)_|AWAY_(OVER|UNDER)_|OVER_|UNDER_)/,
+};
+
+export function providerSupportsMarket(providerId: ProviderId, marketKey: string) {
+  if (providerId === "draftkings") return false;
+  return automaticMarketPatterns[providerId].test(marketKey);
+}
+
 type ProviderSelection = { provider?: string; deepLink?: string | null };
 
 export function inspectProviderSlip(providerId: ProviderId, selections: ProviderSelection[]) {

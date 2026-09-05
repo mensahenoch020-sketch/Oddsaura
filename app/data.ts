@@ -15,6 +15,10 @@ export type TicketSelection = {
   probability: number;
   confidence: number;
   edge?: number | null;
+  expectedValue?: number | null;
+  marketProbability?: number | null;
+  modelProbability?: number | null;
+  modelMarketGap?: number | null;
   oddsSource?: string | null;
   priceStatus?: "QUOTED" | "MODEL_ESTIMATE";
   result?: "PENDING" | "WON" | "LOST" | "VOID" | "UNVERIFIED";
@@ -35,7 +39,7 @@ export type PredictedPick = Omit<TicketSelection, "odds"> & {
   providerSelectionId?: string | null;
   providerDeepLink?: string | null;
 };
-export type Ticket = { id: string; title: string; category: string; status: string; totalOdds: number; confidence: number; priceStatus?: "QUOTED" | "MODEL_ESTIMATE"; publishedAt?: string; settledAt?: string | null; wonLegs?: number; lostLegs?: number; voidLegs?: number; bookingCodes: Array<{ provider: string; code: string; deepLink?: string }>; selections: TicketSelection[] };
+export type Ticket = { id: string; title: string; category: string; status: string; totalOdds: number; confidence: number; estimatedWinChance?: number; breakEvenChance?: number; strategyVersion?: string; paper?: boolean; priceStatus?: "QUOTED" | "MODEL_ESTIMATE"; publishedAt?: string; settledAt?: string | null; wonLegs?: number; lostLegs?: number; voidLegs?: number; bookingCodes: Array<{ provider: string; code: string; deepLink?: string }>; selections: TicketSelection[] };
 export type Snapshot = {
   version: number;
   generatedAt: string | null;
@@ -43,7 +47,7 @@ export type Snapshot = {
   status: string;
   message: string;
   sources: Array<{ id: string; label: string; status: string; lastSuccessAt: string | null; records: number; warnings?: string[] }>;
-  metrics: { fixtures: number; live: number; completed: number; pricedMarkets: number; predictions: number; selectablePredictions?: number; publishedTickets: number };
+  metrics: { fixtures: number; live: number; completed: number; pricedMarkets: number; predictions: number; selectablePredictions?: number; publishedTickets: number; noBetCategories?: string[]; strategyVersion?: string };
   fixtures?: Fixture[];
   liveFixtures?: Fixture[];
   recentResults?: Fixture[];

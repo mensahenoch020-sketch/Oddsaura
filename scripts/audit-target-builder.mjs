@@ -19,7 +19,7 @@ for (const day of days) {
     return {...pick, id: `${event.id}-${pick.key}`, kickoff: event.kickoff, homeTeam: event.homeTeam, awayTeam: event.awayTeam, league: event.league, market: {key: pick.key, name: pick.name, category: pick.category, line: pick.line}, dataQuality: historyMatches >= 14 ? "HIGH" : historyMatches >= 6 ? "MEDIUM" : "LOW", historyMatches, tier: "BALANCED", reasoning: "Historical audit"};
   }));
   for (const row of rows) {
-    const ticket = buildTargetSlip(predictions, row.target, now);
+    const ticket = buildTargetSlip(predictions, row.target, now, "sportybet");
     if (!ticket) {row.noTicket++; continue;}
     row.built++;
     const outcomes = ticket.picks.map(pick => settleSelection(pick, events.find(e => e.id === pick.fixtureId)));
@@ -30,6 +30,6 @@ for (const day of days) {
 }
 const path = new URL("../data/public/model-performance.json", import.meta.url);
 const report = JSON.parse(await readFile(path,"utf8"));
-report.builderAudit = {generatedAt: new Date().toISOString(), matches: sample.length, rows, limitation: "Retrospective same-day reconstruction using historical 1X2 prices only, not archived full-market candidate pools. Quote collection times are unknown. This is a limited algorithm audit, not a production win-rate or ROI claim."};
+report.builderAudit = {strategyVersion: "reverse-market-v1", generatedAt: new Date().toISOString(), matches: sample.length, rows, limitation: "Retrospective same-day reconstruction using historical 1X2 prices only, not archived full-market candidate pools. Quote collection times are unknown. This is a limited algorithm audit, not a production win-rate or ROI claim."};
 await writeFile(path, JSON.stringify(report,null,2)+"\n");
 console.log(JSON.stringify(report.builderAudit));

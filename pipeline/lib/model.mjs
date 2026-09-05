@@ -172,37 +172,84 @@ export function scoreEvent(event, allEvents, suppliedContext = null) {
 
 function text(value) { return String(value ?? "").toLowerCase().replace(/[^a-z0-9.]+/g, " ").trim(); }
 
+function predictionFamily(key = "") {
+  if (/^MATCH_/.test(key)) return "RESULT";
+  if (/^(ONE|TWO)_UP_/.test(key)) return "EARLY_RESULT";
+  if (/^DC_/.test(key)) return "DOUBLE_CHANCE";
+  if (/^DNB_/.test(key)) return "DRAW_NO_BET";
+  if (/^BTTS_/.test(key)) return "BTTS";
+  if (/^HOME_(OVER|UNDER)_/.test(key)) return "HOME_TOTAL";
+  if (/^AWAY_(OVER|UNDER)_/.test(key)) return "AWAY_TOTAL";
+  if (/^(OVER|UNDER)_/.test(key)) return "TOTAL";
+  return "OTHER";
+}
+
+function quoteFamily(value = "") {
+  const name = text(value);
+  if (/double chance/.test(name)) return "DOUBLE_CHANCE";
+  if (/draw no bet|dnb/.test(name)) return "DRAW_NO_BET";
+  if (/both teams.*score|btts|gg ng/.test(name)) return "BTTS";
+  if (/1up|1 up|2up|2 up|early payout/.test(name)) return "EARLY_RESULT";
+  if (/home (team )?(goals|total)|team 1 total/.test(name)) return "HOME_TOTAL";
+  if (/away (team )?(goals|total)|team 2 total/.test(name)) return "AWAY_TOTAL";
+  if (!/half|team/.test(name) && /total goals|match goals|over under|goals total|^total$/.test(name)) return "TOTAL";
+  if (/match result|match winner|moneyline|win draw win|1x2/.test(name)) return "RESULT";
+  return "OTHER";
+}
+
+function quotedLine(odd) {
+  if (odd.line != null && Number.isFinite(Number(odd.line))) return Number(odd.line);
+  const match = text(odd.selection).match(/(?:over|under)\s*(\d+(?:\.\d+)?)/);
+  return match ? Number(match[1]) : null;
+}
+
+function selectionMatches(prediction, odd) {
+  const wanted = text(prediction.selection), actual = text(odd.selection), key = prediction.key;
+  if (key === "MATCH_HOME") return actual === "1" || actual === "home" || actual === wanted;
+  if (key === "MATCH_DRAW") return actual === "x" || actual === "draw";
+  if (key === "MATCH_AWAY") return actual === "2" || actual === "away" || actual === wanted;
+  if (key === "DC_1X") return actual === "1x" || /home.*draw|draw.*home/.test(actual);
+  if (key === "DC_X2") return actual === "x2" || /away.*draw|draw.*away/.test(actual);
+  if (key === "DC_12") return actual === "12" || /home.*away|away.*home|either team/.test(actual);
+  if (/^(OVER|HOME_OVER|AWAY_OVER)_/.test(key)) return actual.startsWith("over");
+  if (/^(UNDER|HOME_UNDER|AWAY_UNDER)_/.test(key)) return actual.startsWith("under");
+  if (key === "BTTS_YES") return actual === "yes" || actual === "gg";
+  if (key === "BTTS_NO") return actual === "no" || actual === "ng";
+  return actual === wanted;
+}
+
 export function attachOdds(predictions, odds) {
   return predictions.map((prediction) => {
-    const selection = text(prediction.selection);
-    const name = text(prediction.name);
     const quote = odds.find((odd) => {
-      const oddMarket = text(odd.market);
-      const oddSelection = text(odd.selection);
-      const lineMatches = prediction.line == null || odd.line == null || Number(odd.line) === Number(prediction.line) || oddSelection.includes(String(prediction.line));
-      const selectionMatches = oddSelection === selection || oddSelection.includes(selection) || selection.includes(oddSelection) || (prediction.key === "MATCH_HOME" && ["1", "home"].includes(oddSelection)) || (prediction.key === "MATCH_DRAW" && ["x", "draw"].includes(oddSelection)) || (prediction.key === "MATCH_AWAY" && ["2", "away"].includes(oddSelection));
-      const marketMatches = oddMarket.includes(name.split(" ")[0]) || name.includes(oddMarket.split(" ")[0]) || prediction.category === "Goals" && /total|goals|over|under/.test(oddMarket);
-      return lineMatches && selectionMatches && marketMatches;
+      const line = quotedLine(odd);
+      const lineMatches = prediction.line == null || line != null && Math.abs(line - Number(prediction.line)) < .001;
+      return predictionFamily(prediction.key) === quoteFamily(odd.market) && lineMatches && selectionMatches(prediction, odd);
     });
     if (!quote) return prediction;
     const implied = 1 / quote.odds;
     const comparable = odds.filter((odd) => odd.marketId === quote.marketId && odd.odds > 1);
     const overround = comparable.reduce((sum, odd) => sum + 1 / odd.odds, 0);
     const consensus = comparable.length >= 2 && overround > 0 ? implied / overround : null;
-    const blendedProbability = consensus == null ? prediction.probability : clamp(prediction.probability * 0.84 + consensus * 0.16, 0.001, 0.999);
+    // The de-margined bookmaker market is the stronger baseline in our
+    // historical tests. The team model is a cautious adjustment, not an
+    // excuse to overrule the market or manufacture an edge.
+    const modelWeight = 0.2 + clamp(Number(prediction.dataQuality ?? 0), 0, 1) * 0.1;
+    const blendedProbability = consensus == null ? prediction.probability : clamp(prediction.probability * modelWeight + consensus * (1 - modelWeight), 0.001, 0.999);
     return {
       ...prediction,
       modelProbability: prediction.probability,
       probability: blendedProbability,
-      confidence: clamp(blendedProbability * (0.68 + prediction.dataQuality * 0.32), 0, 0.99),
+      confidence: clamp(blendedProbability * (0.85 + prediction.dataQuality * 0.15), 0, 0.99),
       fairOdds: Number((1 / blendedProbability).toFixed(2)),
       quotedOdds: quote.odds,
       oddsSource: quote.source,
       oddsProvider: quote.provider ?? null,
       providerDeepLink: quote.deepLink ?? null,
-      edge: blendedProbability - implied,
+      edge: consensus == null ? null : blendedProbability - consensus,
+      expectedValue: blendedProbability * quote.odds - 1,
       impliedProbability: implied,
-      consensusProbability: consensus,
+      marketProbability: consensus,
+      modelMarketGap: consensus == null ? null : Math.abs(prediction.probability - consensus),
       providerMarketId: quote.marketId,
       providerSelectionId: quote.selectionId,
     };
