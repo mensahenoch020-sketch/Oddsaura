@@ -1,3 +1,4 @@
+import { verifyCreatedCode, compareSelectionIds } from "./verification.js";
 import type { SportyBetCodeResult, SportyBetResolvedSelection, SportyBetSelectionInput } from "./sportybet.js";
 import { teamSimilarity } from "./team-matching.js";
 
@@ -114,11 +115,13 @@ export async function createBetKingCode(selections: SportyBetSelectionInput[], f
   const booked = await json(fetcher, "/en-ng/sports/action/bookbet", { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: form({ betCoupon: coupon, requestTransactionId: crypto.randomUUID() }) }, "BetKing's booking-code service is temporarily unavailable.");
   const code = isRecord(booked) ? str(booked.bookedCouponCode) : "";
   if (!isRecord(booked) || Number(booked.responseStatus) !== 1 || !/^[A-Z0-9]{5,12}$/i.test(code)) throw new BetKingIntegrationError("BetKing did not create a valid booking code.", 422, booked);
+  const verificationState = await verifyCreatedCode(async () => {
   const verifiedHtml = await response(fetcher, "/en-ng/widgets/bookBet", { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: form({ requestType: "load_booking_code", bookingCode: code }) }, "BetKing created a code but did not confirm it. Please try again.", true);
   const match = verifiedHtml.match(/window\.__remixContext\s*=\s*([\s\S]*?);<\/script>/);
-  let confirmed = 0;
-  try { const context = match ? JSON.parse(match[1]!) as Json : null; const state = context && isRecord(context.state) ? context.state : null; const action = state && isRecord(state.actionData) ? state.actionData : null; const route = action && isRecord(action["routes/($locale).widgets.bookBet"]) ? action["routes/($locale).widgets.bookBet"] : null; const checked = route && isRecord(route.bookedCoupon) ? route.bookedCoupon : null; confirmed = checked && Array.isArray(checked.odds) ? checked.odds.length : 0; }
-  catch { confirmed = 0; }
-  if (confirmed !== resolved.length) throw new BetKingIntegrationError("BetKing did not confirm every selection in the generated code.", 502, { code, expected: resolved.length, confirmed });
-  return { code, deepLink: `${ORIGIN}/en-ng/sports/book-bet/${encodeURIComponent(code)}`, resolved, partial: unmatched.length > 0, unmatched };
+  let ids: string[] | null = null;
+  try { const context = match ? JSON.parse(match[1]!) as Json : null; const state = context && isRecord(context.state) ? context.state : null; const action = state && isRecord(state.actionData) ? state.actionData : null; const route = action && isRecord(action["routes/($locale).widgets.bookBet"]) ? action["routes/($locale).widgets.bookBet"] : null; const checked = route && isRecord(route.bookedCoupon) ? route.bookedCoupon : null; ids = checked && Array.isArray(checked.odds) ? checked.odds.map(row => isRecord(row) ? str(row.selectionId) : "") : null; }
+  catch { return null; }
+  return ids ? compareSelectionIds(resolved.map(item => item.outcomeId), ids) : null;
+  });
+  return { ...verificationState, code, deepLink: `${ORIGIN}/en-ng/sports/book-bet/${encodeURIComponent(code)}`, resolved, partial: unmatched.length > 0, unmatched };
 }

@@ -225,7 +225,6 @@ for (const pick of [...predictions].filter((item) => item.confidence >= 0.62).so
 const marketCatalog = [...new Set([
   ...predictions.map((item) => item.name),
   ...events.flatMap((event) => event.odds.map((odd) => odd.market)),
-  "Corners", "Cards", "Shots and player props",
 ])].sort();
 
 const ticketArchive = new Map();

@@ -57,6 +57,15 @@ function inferMarket(marketName: string, outcomeName: string, home: string, away
   const homeNorm = norm(home), awayNorm = norm(away);
   const homeOutcome = outcome === "1" || outcome === "home" || homeNorm === outcome || Boolean(homeNorm && outcome.includes(homeNorm));
   const awayOutcome = outcome === "2" || outcome === "away" || awayNorm === outcome || Boolean(awayNorm && outcome.includes(awayNorm));
+  if (/handicap/.test(market)) {
+    // Score-format European handicap is expressed in home:away order.
+    // Never reinterpret Asian handicaps (push/split settlement) as three-way.
+    const score = marketName.match(/\((-?\d+)\s*:\s*(-?\d+)\)/);
+    if (!score || /asian|half|period/i.test(marketName)) return null;
+    const line = Number(score[1]) - Number(score[2]);
+    const side = homeOutcome ? "HOME" : awayOutcome ? "AWAY" : /^(x|draw)$/.test(outcome) ? "DRAW" : null;
+    return side ? { marketKey: `HCP_3WAY_${side}`, marketName: "European handicap", selection: side === "HOME" ? home : side === "AWAY" ? away : "Draw", line } : null;
+  }
   if (/2up|2 up/.test(market)) return homeOutcome ? { marketKey: "TWO_UP_HOME", marketName: "2UP", selection: home } : awayOutcome ? { marketKey: "TWO_UP_AWAY", marketName: "2UP", selection: away } : null;
   if (/1up|1 up/.test(market)) return homeOutcome ? { marketKey: "ONE_UP_HOME", marketName: "1UP", selection: home } : awayOutcome ? { marketKey: "ONE_UP_AWAY", marketName: "1UP", selection: away } : null;
   if (/double chance|\bdc\b/.test(market) || /^(1x|x2|12)$/.test(outcome.replace(/\s/g, ""))) {

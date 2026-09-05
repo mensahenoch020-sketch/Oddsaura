@@ -33,7 +33,9 @@ export function inspectProviderSlip(providerId: ProviderId, selections: Provider
 
 export type BookmakerCodeResponse = {
   provider: ProviderId;
-  verified: true;
+  verified: boolean;
+  verificationStatus?: "VERIFIED" | "UNVERIFIED" | "MISMATCH";
+  warning?: string;
   code: string;
   deepLink: string;
   resolved: Array<{ fixtureId: string; odds: number | null }>;
@@ -63,7 +65,7 @@ export async function generateBookmakerCode(provider: ProviderId, selections: Bo
     body: JSON.stringify({ selections, allowPartial }),
   });
   const payload = await response.json() as BookmakerCodeResponse & { error?: string };
-  if (!response.ok || !payload.verified || !payload.code) throw new Error(payload.error || `${provider} could not create this code.`);
+  if (!response.ok || !payload.code) throw new Error(payload.error || `${provider} could not create this code.`);
   return payload;
 }
 

@@ -50,6 +50,10 @@ function settlePersonal(selection: RequestedPick, fixture?: Fixture): Settlement
   if (fixture && ["CANCELLED", "POSTPONED"].includes(fixture.status)) return "VOID";
   if (!fixture || fixture.status !== "FINISHED" || fixture.homeScore == null || fixture.awayScore == null) return "PENDING";
   const home = Number(fixture.homeScore); const away = Number(fixture.awayScore); const total = home + away; const line = marketLine(selection); const key = selection.marketKey;
+  if (key.startsWith("HCP_3WAY_") && Number.isFinite(line)) {
+    const adjusted = home + line - away;
+    return (key === "HCP_3WAY_HOME" ? adjusted > 0 : key === "HCP_3WAY_AWAY" ? adjusted < 0 : key === "HCP_3WAY_DRAW" ? adjusted === 0 : false) ? "WON" : "LOST";
+  }
   if (key === "MATCH_HOME") return home > away ? "WON" : "LOST";
   if (key === "MATCH_DRAW") return home === away ? "WON" : "LOST";
   if (key === "MATCH_AWAY") return away > home ? "WON" : "LOST";

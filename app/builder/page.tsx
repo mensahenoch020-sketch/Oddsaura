@@ -248,13 +248,18 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
         providerOutcomeId: pick.fixtureId.startsWith("sr:match:") ? pick.providerSelectionId : null,
       })));
       setSportyCode(result);
+      if (!result.verified) {
+        setLiveOdds({});
+        setNotice(result.warning || "Code created, but verification is incomplete. Check every pick on the bookmaker.");
+        return;
+      }
       const currentLiveOdds = Object.fromEntries(result.resolved.flatMap((item) => item.odds ? [[item.fixtureId, item.odds]] : []));
       setLiveOdds(currentLiveOdds);
       const changed = picksToCheck.filter((pick) => currentLiveOdds[pick.fixtureId] && pick.quotedOdds && Math.abs(currentLiveOdds[pick.fixtureId] - pick.quotedOdds) > .001).length;
       const liveTotal = result.resolved.reduce((total, selection) => total * (selection.odds ?? 1), 1);
-      setNotice(result.partial
+      setNotice(result.warning || (result.partial
         ? `${result.resolved.length}/${picksToCheck.length} matched${changed ? ` · ${changed} prices updated` : ""}`
-        : `Verified ${activeProvider.label} code · live total ${liveTotal.toFixed(2)}${requestedTarget ? ` against ${requestedTarget.toFixed(2)} target` : ""}${changed ? ` · ${changed} prices updated` : ""}`);
+        : `Verified ${activeProvider.label} code · live total ${liveTotal.toFixed(2)}${requestedTarget ? ` against ${requestedTarget.toFixed(2)} target` : ""}${changed ? ` · ${changed} prices updated` : ""}`));
     } catch (error) {
       setNotice(error instanceof Error ? error.message : `${activeProvider.label} could not create this code.`);
     } finally {
