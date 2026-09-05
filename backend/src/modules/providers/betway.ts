@@ -1,3 +1,4 @@
+import { verifyCreatedCode, compareSelectionIds } from "./verification.js";
 import type { SportyBetCodeResult, SportyBetResolvedSelection, SportyBetSelectionInput } from "./sportybet.js";
 import { teamSearchTerms, teamSimilarity } from "./team-matching.js";
 
@@ -213,9 +214,10 @@ export async function createBetwayCode(selections: SportyBetSelectionInput[], fe
   const created = await request(fetcher, `${BETTING}/v1/Betting/BookABet`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ cultureCode: CULTURE, countryCode: COUNTRY, isSingleBet: resolved.length === 1, outcomes }) }, "Betway's booking-code service is temporarily unavailable.");
   const code = isRecord(created) ? str(created.bookingCode) : "";
   if (!/^[A-Z0-9]{6,16}$/i.test(code)) throw new BetwayIntegrationError("Betway rejected one or more selections.", 422, created);
+  const verificationState = await verifyCreatedCode(async () => {
   const checked = await request(fetcher, `${BETTING}/v2/Betting/FindBookABet`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ countryCode: COUNTRY, bookingCode: code, cultureCode: CULTURE }) }, "Betway created a code but did not confirm it. Please try again.");
   const confirmed = isRecord(checked) && Array.isArray(checked.selections) ? checked.selections.filter(isRecord) : [];
-  const confirmedIds = new Set(confirmed.map((item) => isRecord(item.outcome) ? str(item.outcome.outcomeId) : str(item.outcomeId)));
-  if (confirmed.length !== resolved.length || resolved.some((item) => !confirmedIds.has(item.outcomeId))) throw new BetwayIntegrationError("Betway did not confirm every selection in the generated code.", 502, { code, expected: resolved.length, confirmed: confirmed.length });
-  return { code, deepLink: `${ORIGIN}/book-a-bet`, resolved, partial: unmatched.length > 0, unmatched };
+  return compareSelectionIds(resolved.map(item => item.outcomeId), confirmed.map(item => isRecord(item.outcome) ? str(item.outcome.outcomeId) : str(item.outcomeId)));
+  });
+  return { ...verificationState, code, deepLink: `${ORIGIN}/book-a-bet`, resolved, partial: unmatched.length > 0, unmatched };
 }

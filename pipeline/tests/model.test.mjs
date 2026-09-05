@@ -53,6 +53,26 @@ test("quoted odds keep the provider mapping needed for future booking codes", ()
   assert.equal(priced.find((item) => item.key === "MATCH_HOME").providerDeepLink, "https://example.com/bet");
 });
 
+test("odds matching never confuses match totals with team totals or missing lines", () => {
+  const predictions = scoreEvent(fixture, history);
+  const wrongFamily = attachOdds(predictions, [{ market: "Home team goals", selection: "Over 1.5", line: 1.5, odds: 1.7, source: "test", marketId: "home-total", selectionId: "over" }]);
+  assert.equal(wrongFamily.find((item) => item.key === "OVER_1_5").quotedOdds, null);
+  const missingLine = attachOdds(predictions, [{ market: "Total goals", selection: "Over", odds: 1.7, source: "test", marketId: "total", selectionId: "over" }]);
+  assert.equal(missingLine.find((item) => item.key === "OVER_1_5").quotedOdds, null);
+});
+
+test("priced predictions use the de-margined market as the primary baseline", () => {
+  const predictions = scoreEvent(fixture, history);
+  const prices = [
+    { market: "Match result", selection: "1", odds: 1.8, source: "test", marketId: "result", selectionId: "home" },
+    { market: "Match result", selection: "X", odds: 3.5, source: "test", marketId: "result", selectionId: "draw" },
+    { market: "Match result", selection: "2", odds: 5, source: "test", marketId: "result", selectionId: "away" },
+  ];
+  const home = attachOdds(predictions, prices).find((item) => item.key === "MATCH_HOME");
+  assert.ok(home.marketProbability > 0);
+  assert.ok(Math.abs(home.probability - home.marketProbability) < Math.abs(home.modelProbability - home.marketProbability));
+});
+
 test("the global board normalizes broad fixtures and team badges", () => {
   const event = normalizeEspnGlobalEvent({
     id: "900", uid: "s:600~l:700~e:900", date: "2026-08-23T14:00:00Z", season: { year: 2026, slug: "2026-27-english-premier-league" },
@@ -68,7 +88,7 @@ test("the global board normalizes broad fixtures and team badges", () => {
 });
 
 test("ticket construction does not repeat a fixture", () => {
-  const candidates = Array.from({ length: 5 }, (_, index) => ({ fixtureId: `f${index}`, key: "DC_1X", name: "Double chance", category: "Result", selection: "1X", probability: 0.8, confidence: 0.8, quotedOdds: 1.35, fairOdds: 1.25, edge: 0.05, oddsSource: "public-json", factors: { homePlayed: 8, awayPlayed: 8 } }));
+  const candidates = Array.from({ length: 5 }, (_, index) => ({ fixtureId: `f${index}`, key: "DC_1X", name: "Double chance", category: "Result", selection: "1X", probability: 0.8, confidence: 0.8, quotedOdds: 1.35, fairOdds: 1.25, edge: 0.05, expectedValue: .08, marketProbability: .76, modelMarketGap: .04, oddsSource: "public-json", factors: { homePlayed: 8, awayPlayed: 8 } }));
   const fixtures = candidates.map((item) => ({ id: item.fixtureId, status: "SCHEDULED", kickoff: new Date(Date.now() + 86_400_000).toISOString(), league: { name: "League" }, homeTeam: { name: "Home" }, awayTeam: { name: "Away" } }));
   const ticket = buildTicket(candidates, "SAFE_2", fixtures);
   assert.ok(ticket);
@@ -76,7 +96,7 @@ test("ticket construction does not repeat a fixture", () => {
 });
 
 test("ticket construction does not fill a ticket with under markets", () => {
-  const candidates = Array.from({ length: 10 }, (_, index) => ({ fixtureId: `mix${index}`, key: index < 5 ? "UNDER_3_5" : "DC_1X", name: index < 5 ? "Under 3.5" : "Double chance", category: index < 5 ? "Goals" : "Result", selection: index < 5 ? "Under 3.5" : "1X", probability: .78, confidence: index < 5 ? .8 : .79, quotedOdds: 1.35, fairOdds: 1.28, edge: .03, oddsSource: "public-json", factors: { homePlayed: 8, awayPlayed: 8 } }));
+  const candidates = Array.from({ length: 10 }, (_, index) => ({ fixtureId: `mix${index}`, key: index < 5 ? "UNDER_3_5" : "DC_1X", name: index < 5 ? "Under 3.5" : "Double chance", category: index < 5 ? "Goals" : "Result", selection: index < 5 ? "Under 3.5" : "1X", probability: .78, confidence: index < 5 ? .8 : .79, quotedOdds: 1.35, fairOdds: 1.28, edge: .03, expectedValue: .05, marketProbability: .75, modelMarketGap: .03, oddsSource: "public-json", factors: { homePlayed: 8, awayPlayed: 8 } }));
   const fixtures = candidates.map((item) => ({ id: item.fixtureId, status: "SCHEDULED", kickoff: new Date(Date.now() + 86_400_000).toISOString(), league: { name: "League" }, homeTeam: { name: "Home" }, awayTeam: { name: "Away" } }));
   const ticket = buildTicket(candidates, "SAFE_2", fixtures);
   assert.ok(ticket);
@@ -104,4 +124,3 @@ test("the ESPN fallback normalizes fixtures and available moneyline prices", () 
   assert.equal(event.odds[0].odds, 1.67);
   assert.equal(event.odds.find((odd) => odd.selection === "Over 2.5").odds, 1.83);
 });
-

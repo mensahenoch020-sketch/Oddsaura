@@ -1,3 +1,4 @@
+import { verifyCreatedCode, compareSelectionIds } from "./verification.js";
 import type { SportyBetCodeResult, SportyBetResolvedSelection, SportyBetSelectionInput } from "./sportybet.js";
 import { teamSearchTerms, teamSimilarity } from "./team-matching.js";
 
@@ -188,8 +189,10 @@ export async function createBet9jaCode(selections: SportyBetSelectionInput[], fe
     const message = isRecord(created) && isRecord(created.error) ? str(created.error.message) : "";
     throw new Bet9jaIntegrationError(message || "Bet9ja rejected one or more selections.", 422, created);
   }
+  const verificationState = await verifyCreatedCode(async () => {
   const checked = unwrap(await request(fetcher, `${VERIFY_URL}?couponCode=${encodeURIComponent(code)}`, { method: "GET" }, "Bet9ja created a code but did not confirm it. Please try again."));
-  const confirmed = isRecord(checked) && isRecord(checked.O) ? Object.keys(checked.O).length : 0;
-  if (confirmed !== resolved.length) throw new Bet9jaIntegrationError("Bet9ja did not confirm every selection in the generated code.", 502, { code, expected: resolved.length, confirmed });
-  return { code, deepLink: `${LOAD_URL}?bookABetCode=${encodeURIComponent(code)}`, resolved, partial: unmatched.length > 0, unmatched };
+  if (!isRecord(checked) || !isRecord(checked.O)) return null;
+  return compareSelectionIds(resolved.map(item => item.oddsKey), Object.keys(checked.O));
+  });
+  return { ...verificationState, code, deepLink: `${LOAD_URL}?bookABetCode=${encodeURIComponent(code)}`, resolved, partial: unmatched.length > 0, unmatched };
 }

@@ -1,3 +1,4 @@
+import { verifyCreatedCode, compareSelectionIds } from "./verification.js";
 export type SportyBetSelectionInput = {
   fixtureId: string;
   homeTeam: string;
@@ -27,6 +28,9 @@ export type SportyBetResolvedSelection = {
 };
 
 export type SportyBetCodeResult = {
+  verified?: boolean;
+  verificationStatus?: "VERIFIED" | "UNVERIFIED" | "MISMATCH";
+  warning?: string;
   code: string;
   deepLink: string;
   resolved: SportyBetResolvedSelection[];
@@ -266,13 +270,22 @@ function marketRule(input: SportyBetSelectionInput): MarketRule {
 }
 
 function findMarket(event: JsonRecord, input: SportyBetSelectionInput) {
+  if (input.marketKey.startsWith("HCP_3WAY_")) {
+    return getMarkets(event).find(market => {
+      const name = marketText(market);
+      return (market.status == null || Number(market.status) === 0)
+        && /handicap/.test(name) && !/asian|half|period/.test(name)
+        && getOutcomes(market).length === 3
+        && input.line != null && specifierLine(market) === input.line;
+    });
+  }
   const rule = marketRule(input);
   const candidates = getMarkets(event).filter((market) => {
     const active = market.status == null || Number(market.status) === 0;
     const idMatches = !rule.marketId || stringValue(market.id || market.marketId) === rule.marketId;
     const textMatches = !rule.text || marketText(market).includes(normalize(rule.text));
     const line = specifierLine(market);
-    const lineMatches = rule.line == null || line == null || Math.abs(line - rule.line) < .001;
+    const lineMatches = rule.line == null || (line != null && Math.abs(line - rule.line) < .001);
     return active && idMatches && textMatches && lineMatches;
   });
   return candidates.find((market) => rule.line == null || specifierLine(market) === rule.line) ?? candidates[0];
@@ -281,6 +294,11 @@ function findMarket(event: JsonRecord, input: SportyBetSelectionInput) {
 function findOutcome(market: JsonRecord, input: SportyBetSelectionInput) {
   const rule = marketRule(input);
   const outcomes = getOutcomes(market).filter((outcome) => outcome.isActive == null || Number(outcome.isActive) === 1);
+  if (input.marketKey.startsWith("HCP_3WAY_")) {
+    const side = input.marketKey.slice("HCP_3WAY_".length);
+    const labels = side === "HOME" ? ["1", "home", normalize(input.homeTeam)] : side === "AWAY" ? ["2", "away", normalize(input.awayTeam)] : ["x", "draw"];
+    return outcomes.find(outcome => labels.includes(outcomeText(outcome)));
+  }
   if (rule.outcomeId) {
     const byId = outcomes.find((outcome) => stringValue(outcome.id || outcome.outcomeId) === rule.outcomeId);
     if (byId) return byId;
@@ -417,14 +435,6 @@ function directSelection(input: SportyBetSelectionInput): SportyBetResolvedSelec
   };
 }
 
-function verifiedSelectionCount(payload: JsonRecord) {
-  const data = isRecord(payload.data) ? payload.data : {};
-  const ticket = isRecord(data.ticket) ? data.ticket : {};
-  if (Array.isArray(ticket.selections)) return ticket.selections.length;
-  if (Array.isArray(data.outcomes)) return data.outcomes.length;
-  return 0;
-}
-
 function safeDeepLink(value: unknown, code: string) {
   const raw = stringValue(value).replace(/^http:/, "https:");
   try {
@@ -470,8 +480,14 @@ export async function createSportyBetCode(selections: SportyBetSelectionInput[],
   const data = isRecord(payload.data) ? payload.data : {};
   const code = stringValue(data.shareCode);
   if (!/^[A-Z0-9]{4,12}$/i.test(code)) throw new SportyBetIntegrationError(stringValue(payload.message) || "SportyBet rejected one or more selections.", 422, payload);
+  const verificationState = await verifyCreatedCode(async () => {
   const verification = await sportyRequest(fetcher, `${API_BASE}/orders/share/${encodeURIComponent(code)}`, { method: "GET" }, "SportyBet created a code but did not confirm it. Please try again.");
-  const confirmed = verifiedSelectionCount(verification);
-  if (confirmed !== resolved.length) throw new SportyBetIntegrationError("SportyBet did not confirm every selection in the generated code.", 502, { code, expected: resolved.length, confirmed });
-  return { code, deepLink: safeDeepLink(data.shareURL, code), resolved, partial: unmatched.length > 0, unmatched };
+  const data = isRecord(verification.data) ? verification.data : {};
+    const ticket = isRecord(data.ticket) ? data.ticket : data;
+    const rows = Array.isArray(ticket.selections) ? ticket.selections : Array.isArray(data.outcomes) ? data.outcomes : null;
+    if (!rows) return null;
+    const key = (e: unknown, m: unknown, o: unknown, s: unknown) => e && m && o ? [e,m,o,s ?? ""].join("|") : "";
+    return compareSelectionIds(resolved.map(r => key(r.eventId,r.marketId,r.outcomeId,r.specifier)), rows.map(row => isRecord(row) ? key(row.eventId,row.marketId,row.outcomeId,row.specifier) : ""));
+  });
+  return { ...verificationState, code, deepLink: safeDeepLink(data.shareURL, code), resolved, partial: unmatched.length > 0, unmatched };
 }

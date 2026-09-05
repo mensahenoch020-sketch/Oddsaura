@@ -156,9 +156,13 @@ async function bookmakerApi(req, res, user, provider) {
     body: JSON.stringify(body),
   });
   const payload = await response.json().catch(() => ({ error: "The bookmaker returned an invalid response." }));
-  if (response.ok && payload.verified && payload.code && pool) {
-    const selections = { requested: Array.isArray(body.selections) ? body.selections : [], resolved: payload.resolved ?? [], unmatched: payload.unmatched ?? [] };
-    await pool.query("INSERT INTO oa_generated_codes(id,user_email,provider,code,deep_link,selections_json,created_at) VALUES($1,$2,$3,$4,$5,$6,$7)", [crypto.randomUUID(), user.email, provider, payload.code, payload.deepLink ?? null, JSON.stringify(selections), Date.now()]);
+  if (response.ok && payload.code && pool) {
+    const selections = { verified: payload.verified === true, verificationStatus: payload.verificationStatus, requested: Array.isArray(body.selections) ? body.selections : [], resolved: payload.resolved ?? [], unmatched: payload.unmatched ?? [] };
+    await pool.query("INSERT INTO oa_generated_codes(id,user_email,provider,code,deep_link,selections_json,created_at) VALUES($1,$2,$3,$4,$5,$6,$7)", [crypto.randomUUID(), user.email, provider, payload.code, payload.deepLink ?? null, JSON.stringify(selections), Date.now()]).catch(() => {
+      payload.historySaved = false;
+      payload.warning = [payload.warning, "Code created, but account history could not be saved. Copy this code now."].filter(Boolean).join(" ");
+      console.error("Created booking code could not be saved to account history.");
+    });
   }
   return json(res, response.status, payload);
 }
@@ -181,7 +185,7 @@ async function converterApi(req, res, user) {
   let importedFrom = "bookmaker";
   if (stored.rowCount) {
     const parsed = JSON.parse(stored.rows[0].selections_json || "{}") || {};
-    if (Array.isArray(parsed.requested) && parsed.requested.length) {
+    if (parsed.verified === true && Array.isArray(parsed.requested) && parsed.requested.length) {
       upstreamPath = `/api/providers/${encodeURIComponent(destination)}/code`;
       upstreamBody = { selections: parsed.requested, allowPartial };
       importedFrom = "account";
@@ -189,9 +193,13 @@ async function converterApi(req, res, user) {
   }
   const response = await fetch(`http://127.0.0.1:${appPort}${upstreamPath}`, { method: "POST", headers: { "content-type": "application/json", "x-oddsaura-user-email": user.email, "x-oddsaura-user-name": user.name }, body: JSON.stringify(upstreamBody) });
   const payload = await response.json().catch(() => ({ error: "The bookmaker returned an invalid response." }));
-  if (response.ok && payload.verified && payload.code) {
+  if (response.ok && payload.code) {
     const requested = upstreamPath === "/api/providers/convert" ? (Array.isArray(payload.sourceSelections) ? payload.sourceSelections : []) : upstreamBody.selections;
-    await pool.query("INSERT INTO oa_generated_codes(id,user_email,provider,code,deep_link,selections_json,created_at) VALUES($1,$2,$3,$4,$5,$6,$7)", [crypto.randomUUID(), user.email, destination, payload.code, payload.deepLink ?? null, JSON.stringify({ requested, resolved: payload.resolved ?? [], unmatched: payload.unmatched ?? [], sourceIssues: payload.sourceIssues ?? [], convertedFrom: { provider: source, code } }), Date.now()]);
+    await pool.query("INSERT INTO oa_generated_codes(id,user_email,provider,code,deep_link,selections_json,created_at) VALUES($1,$2,$3,$4,$5,$6,$7)", [crypto.randomUUID(), user.email, destination, payload.code, payload.deepLink ?? null, JSON.stringify({ verified: payload.verified === true, verificationStatus: payload.verificationStatus, requested, resolved: payload.resolved ?? [], unmatched: payload.unmatched ?? [], sourceIssues: payload.sourceIssues ?? [], convertedFrom: { provider: source, code } }), Date.now()]).catch(() => {
+      payload.historySaved = false;
+      payload.warning = [payload.warning, "Code created, but account history could not be saved. Copy this code now."].filter(Boolean).join(" ");
+      console.error("Converted booking code could not be saved to account history.");
+    });
   }
   return json(res, response.status, { sourceProvider: source, destinationProvider: destination, sourceCode: code, importedFrom, ...payload });
 }

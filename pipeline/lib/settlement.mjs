@@ -20,6 +20,10 @@ export function settleSelection(selection, fixture) {
   if (!fixture || fixture.status !== "FINISHED" || fixture.homeScore == null || fixture.awayScore == null) return "PENDING";
   const home = Number(fixture.homeScore), away = Number(fixture.awayScore), total = home + away;
   const key = selection.market.key, line = marketLine(selection);
+  if (key.startsWith("HCP_3WAY_") && Number.isFinite(line)) {
+    const adjusted = home + line - away;
+    return (key === "HCP_3WAY_HOME" ? adjusted > 0 : key === "HCP_3WAY_AWAY" ? adjusted < 0 : key === "HCP_3WAY_DRAW" ? adjusted === 0 : false) ? "WON" : "LOST";
+  }
   if (key === "MATCH_HOME") return home > away ? "WON" : "LOST";
   if (key === "MATCH_DRAW") return home === away ? "WON" : "LOST";
   if (key === "MATCH_AWAY") return away > home ? "WON" : "LOST";

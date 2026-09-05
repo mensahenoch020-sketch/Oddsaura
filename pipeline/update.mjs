@@ -99,7 +99,11 @@ const upcoming = events.filter((event) => event.status === "SCHEDULED" && new Da
 const liveFixtures = events.filter((event) => event.status === "LIVE").sort((a, b) => a.kickoff.localeCompare(b.kickoff));
 const modelContext = buildModelContext(events, now.toISOString());
 const predictions = upcoming.flatMap((event) => attachOdds(scoreEvent(event, events, modelContext), event.odds));
-const tickets = ["SAFE_2", "VALUE_5", "BALANCED_10", "HIGH_RISK", "LONGSHOT_21"].map((category) => buildTicket(predictions, category, upcoming)).filter(Boolean);
+// Higher-risk and 21-leg tickets are withheld until the forward paper ledger
+// proves them. Reaching a large target is never more important than evidence.
+const ticketCategories = ["SAFE_2", "VALUE_5", "BALANCED_10"];
+const attemptedTickets = ticketCategories.map((category) => ({ category, ticket: buildTicket(predictions, category, upcoming) }));
+const tickets = attemptedTickets.flatMap((attempt) => attempt.ticket ? [attempt.ticket] : []);
 const fixtureMap = new Map(upcoming.map((fixture) => [fixture.id, fixture]));
 const predictedPicks = [];
 const predictionKeys = new Set();
@@ -141,23 +145,19 @@ function publishPick(pick, fixture) {
     providerDeepLink: pick.providerDeepLink,
     reasoning: pick.key.startsWith("ONE_UP_") || pick.key.startsWith("TWO_UP_")
       ? `Early-payout version of the modelled match result · confidence remains based on the full-time result, not a promised early lead`
-      : dataQuality === "LOW"
-      ? `Limited team history · cautious estimate uses league scoring priors${pick.quotedOdds ? " and the available market price" : ""}`
-      : `Modelled from ${historyMatches} recent team performances · expected goals ${pick.expectedHomeGoals}-${pick.expectedAwayGoals}`,
+      : `Bookmaker baseline ${Math.round((pick.marketProbability ?? 0) * 100)}% · OddsAura model difference ${Math.round((pick.modelMarketGap ?? 0) * 100)} points · ${historyMatches} recent team performances`,
   });
   predictionKeys.add(identity);
   fixturePickCounts.set(pick.fixtureId, (fixturePickCounts.get(pick.fixtureId) ?? 0) + 1);
   return true;
 }
 
-const fallbackKeys = new Set(["DC_1X", "DC_X2", "OVER_1_5", "UNDER_3_5", "MATCH_HOME", "MATCH_AWAY"]);
 const eligiblePicks = [...predictions]
   .filter((item) => {
     const fixture = fixtureMap.get(item.fixtureId);
     const history = (item.factors?.homePlayed ?? 0) + (item.factors?.awayPlayed ?? 0);
-    if (!fixture || !publicMarketKeys.test(item.key)) return false;
-    if (item.quotedOdds) return item.confidence >= 0.44 && (item.edge == null || item.edge >= -0.08);
-    return isPriorityLeague(fixture.league) && history >= 6 && item.confidence >= 0.58 && item.fairOdds <= 4;
+    if (!fixture || !publicMarketKeys.test(item.key) || !item.quotedOdds || item.marketProbability == null) return false;
+    return history >= 6 && item.confidence >= .5 && (item.modelMarketGap ?? 1) <= .15 && (item.expectedValue ?? -1) >= -.1;
   })
   .sort((a, b) => (b.confidence + Math.max(0, b.edge ?? 0)) - (a.confidence + Math.max(0, a.edge ?? 0)));
 const bestEligibleByFixture = new Map();
@@ -165,13 +165,11 @@ for (const pick of eligiblePicks) {
   if (!bestEligibleByFixture.has(pick.fixtureId)) bestEligibleByFixture.set(pick.fixtureId, pick);
 }
 
-// Coverage comes first: every upcoming fixture receives one selectable model
-// pick before extra markets are added. Fixtures without history or a public
-// bookmaker price use a cautious, clearly-labelled probability-only pick.
-for (const fixture of upcoming) {
-  const primary = bestEligibleByFixture.get(fixture.id)
-    ?? predictions.filter((item) => item.fixtureId === fixture.id && fallbackKeys.has(item.key)).sort((a, b) => b.confidence - a.confidence)[0];
-  if (primary) publishPick(primary, fixture);
+// Publish one market-confirmed pick per qualifying fixture first. A fixture
+// with no trustworthy price or model agreement is deliberately a no-bet.
+for (const [fixtureId, primary] of bestEligibleByFixture) {
+  const fixture = fixtureMap.get(fixtureId);
+  if (primary && fixture) publishPick(primary, fixture);
 }
 
 // Make the requested market families genuinely discoverable instead of
@@ -186,7 +184,8 @@ for (const key of showcaseKeys) {
     const fixture = fixtureMap.get(item.fixtureId);
     const history = (item.factors?.homePlayed ?? 0) + (item.factors?.awayPlayed ?? 0);
     const threshold = key.startsWith("ONE_UP_") || key.startsWith("TWO_UP_") ? .38 : .48;
-    return item.key === key && fixture && isPriorityLeague(fixture.league) && history >= 4 && item.confidence >= threshold;
+    return item.key === key && fixture && item.quotedOdds && item.marketProbability != null && isPriorityLeague(fixture.league)
+      && history >= 6 && item.confidence >= threshold && (item.modelMarketGap ?? 1) <= .15;
   }).sort((a, b) => b.confidence - a.confidence).slice(0, 12);
   for (const pick of strongest) {
     const fixture = fixtureMap.get(pick.fixtureId);
@@ -201,7 +200,7 @@ for (const pick of eligiblePicks) {
 }
 const watchlist = [];
 const usedFixtures = new Set();
-for (const pick of [...predictions].filter((item) => item.confidence >= 0.62).sort((a, b) => b.confidence - a.confidence)) {
+for (const pick of [...predictions].filter((item) => item.confidence >= 0.62 && item.quotedOdds && item.marketProbability != null && (item.modelMarketGap ?? 1) <= .12).sort((a, b) => b.confidence - a.confidence)) {
   if (usedFixtures.has(pick.fixtureId) || watchlist.length >= 12) continue;
   const fixture = fixtureMap.get(pick.fixtureId);
   if (!fixture) continue;
@@ -225,7 +224,6 @@ for (const pick of [...predictions].filter((item) => item.confidence >= 0.62).so
 const marketCatalog = [...new Set([
   ...predictions.map((item) => item.name),
   ...events.flatMap((event) => event.odds.map((odd) => odd.market)),
-  "Corners", "Cards", "Shots and player props",
 ])].sort();
 
 const ticketArchive = new Map();
@@ -250,6 +248,8 @@ const snapshot = {
     predictions: predictions.length,
     selectablePredictions: predictedPicks.length,
     publishedTickets: tickets.length,
+    noBetCategories: attemptedTickets.filter((attempt) => !attempt.ticket).map((attempt) => attempt.category),
+    strategyVersion: "reverse-market-v1",
   },
   fixtures: upcoming,
   liveFixtures: liveFixtures.slice(0, 200),

@@ -43,7 +43,10 @@ test("converter exposes verified codes and never offers a partial conversion", a
   assert.match(form, /Your \{destinationMeta\.label\} code/);
   assert.doesNotMatch(form, /Create code with available matches/);
   assert.match(form, /allowPartial: false/);
-  assert.match(form, /All \{transferSelections\.length\} selections preserved/);
+  assert.match(form, /\{transferSelections\.length\} readable selections listed/);
+  assert.match(form, /payload\.warning \|\|/);
+  assert.match(worker, /Code created, but account history could not be saved/);
+  assert.match(railway, /Code created, but account history could not be saved/);
   assert.match(worker, /decoded\.partial\) \{/);
   assert.match(railway, /const allowPartial = false/);
 });

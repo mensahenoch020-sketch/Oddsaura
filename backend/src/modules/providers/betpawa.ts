@@ -1,3 +1,4 @@
+import { verifyCreatedCode, compareSelectionIds } from "./verification.js";
 import type { SportyBetCodeResult, SportyBetResolvedSelection, SportyBetSelectionInput } from "./sportybet.js";
 import { teamSearchTerms, teamSimilarity } from "./team-matching.js";
 
@@ -190,8 +191,15 @@ export async function createBetPawaCode(selections: SportyBetSelectionInput[], f
   const created = await pawaRequest(fetcher, "/api/sportsbook/v3/booking-number", { method: "POST", body: JSON.stringify({ selections: { selections: resolved.map((item) => ({ type: "SINGLE", selections: [Number(item.outcomeId)] })) } }) }, "betPawa's booking-code service is temporarily unavailable.");
   const code = isRecord(created) ? str(created.code) : "";
   if (!/^[A-Z0-9]{4,12}$/i.test(code)) throw new BetPawaIntegrationError("betPawa rejected one or more selections.", 422, created);
+  const verificationState = await verifyCreatedCode(async () => {
   const checked = await pawaRequest(fetcher, `/api/sportsbook/v3/booking-number/${encodeURIComponent(code)}`, { method: "GET" }, "betPawa created a code but did not confirm it. Please try again.");
-  const confirmed = isRecord(checked) && Array.isArray(checked.items) ? checked.items.length : 0;
-  if (confirmed !== resolved.length) throw new BetPawaIntegrationError("betPawa did not confirm every selection in the generated code.", 502, { code, expected: resolved.length, confirmed });
-  return { code, deepLink: ORIGIN, resolved, partial: unmatched.length > 0, unmatched };
+  if (!isRecord(checked) || !Array.isArray(checked.items)) return null;
+  const ids = checked.items.flatMap(item => isRecord(item) && Array.isArray(item.selections) ? item.selections.map(selection => {
+    if (!isRecord(selection)) return "";
+    const info = isRecord(selection.selectionInfo) ? selection.selectionInfo : isRecord(selection.selection) ? selection.selection : selection;
+    return str(info.id ?? info.selectionId);
+  }) : [""]);
+  return compareSelectionIds(resolved.map(item => item.outcomeId), ids);
+  });
+  return { ...verificationState, code, deepLink: ORIGIN, resolved, partial: unmatched.length > 0, unmatched };
 }

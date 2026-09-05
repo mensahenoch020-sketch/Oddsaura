@@ -4,7 +4,7 @@ import { buildTargetSlip } from "../../app/builder/target-builder.js";
 import type { PredictedPick } from "../../app/data.js";
 
 function pick(id: string, odds: number, confidence = .7): PredictedPick {
-  return { id, fixtureId: id, kickoff: "2030-01-02T12:00:00Z", league: { name: "Test" }, homeTeam: { name: `${id} Home` }, awayTeam: { name: `${id} Away` }, market: { key: "OVER_1_5", name: "Over 1.5", category: "TOTALS", line: 1.5 }, selection: "Over 1.5", probability: confidence, confidence, quotedOdds: odds, fairOdds: odds, tier: "SAFE", dataQuality: "HIGH", historyMatches: 20, reasoning: "test" };
+  return { id, fixtureId: id, kickoff: "2030-01-02T12:00:00Z", league: { name: "Test" }, homeTeam: { name: `${id} Home` }, awayTeam: { name: `${id} Away` }, market: { key: "OVER_1_5", name: "Over 1.5", category: "TOTALS", line: 1.5 }, selection: "Over 1.5", probability: confidence, confidence, quotedOdds: odds, fairOdds: odds, tier: "SAFE", dataQuality: "HIGH", historyMatches: 20, marketProbability: confidence - .01, modelMarketGap: .03, expectedValue: -.01, reasoning: "test" };
 }
 
 test("target builder follows the requested total instead of returning two odds", () => {
@@ -22,4 +22,11 @@ test("target builder never repeats a fixture or includes a started match", () =>
   assert.ok(result);
   assert.equal(new Set(result.picks.map((item) => item.fixtureId)).size, result.picks.length);
   assert.equal(result.picks.some((item) => item.id === "started"), false);
+});
+
+test("target builder rejects unsupported bookmaker markets and unconfirmed prices", () => {
+  const unsupported = Array.from({ length: 4 }, (_, index) => ({ ...pick(`btts${index}`, 1.45, .72), market: { key: "BTTS_YES", name: "Both teams to score", category: "GOALS" }, selection: "Yes" }));
+  assert.equal(buildTargetSlip(unsupported, 2, Date.parse("2029-01-01"), "betway"), null);
+  const unconfirmed = Array.from({ length: 4 }, (_, index) => ({ ...pick(`raw${index}`, 1.45, .72), marketProbability: null }));
+  assert.equal(buildTargetSlip(unconfirmed, 2, Date.parse("2029-01-01"), "sportybet"), null);
 });

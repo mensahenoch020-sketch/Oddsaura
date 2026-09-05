@@ -377,8 +377,8 @@ const worker = {
         let selections: SportyBetSelectionInput[] = [];
         let importedFrom: "account" | "bookmaker" = "bookmaker";
         if (stored?.selectionsJson) {
-          const parsed = JSON.parse(stored.selectionsJson) as { requested?: SportyBetSelectionInput[] };
-          selections = Array.isArray(parsed.requested) ? parsed.requested : [];
+          const parsed = JSON.parse(stored.selectionsJson) as { requested?: SportyBetSelectionInput[]; verified?: boolean };
+          selections = parsed.verified === true && Array.isArray(parsed.requested) ? parsed.requested : [];
           importedFrom = "account";
         }
         let sourceIssues: Array<{ eventName?: string; marketName?: string; outcomeName?: string; reason?: string }> = [];
@@ -404,7 +404,10 @@ const worker = {
         }
         const now = Date.now();
         await env.DB.prepare("INSERT INTO generated_codes (id, user_email, provider, code, deep_link, selections_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
-          .bind(crypto.randomUUID(), identity.email, body.destinationProvider, result.code, result.deepLink ?? null, JSON.stringify({ requested: selections, resolved: result.resolved ?? [], unmatched: result.unmatched ?? [], sourceIssues, convertedFrom: { provider: body.sourceProvider, code } }), now).run();
+          .bind(crypto.randomUUID(), identity.email, body.destinationProvider, result.code, result.deepLink ?? null, JSON.stringify({ verified: result.verified === true, verificationStatus: result.verificationStatus, requested: selections, resolved: result.resolved ?? [], unmatched: result.unmatched ?? [], sourceIssues, convertedFrom: { provider: body.sourceProvider, code } }), now).run().catch(() => {
+            result.warning = [result.warning, "Code created, but account history could not be saved. Copy this code now."].filter(Boolean).join(" ");
+            console.error("Converted booking code could not be saved to account history.");
+          });
         return Response.json({ verified: true, sourceProvider: body.sourceProvider, destinationProvider: body.destinationProvider, sourceCode: code, importedFrom, decoded: selections.length, sourceIssues, ...result, partial: Boolean(result.partial || sourceIssues.length) }, { headers: { "cache-control": "no-store" } });
       } catch (error) {
         const typed = error instanceof BookmakerIntegrationError ? error : error instanceof Error && "status" in error ? error as BookmakerIntegrationError : new BookmakerIntegrationError("The code could not be converted.", 502);
@@ -421,7 +424,7 @@ const worker = {
         const body = await authenticatedRequest.json() as { selections?: SportyBetSelectionInput[]; allowPartial?: boolean };
         await ensureAccountTables(env.DB);
         const now = Date.now();
-        const requestHash = await digest(`${identity.email}|${provider}|${JSON.stringify({ selections: body.selections ?? [], allowPartial: body.allowPartial ?? false })}`);
+        const requestHash = await digest(`verification-v2|${identity.email}|${provider}|${JSON.stringify({ selections: body.selections ?? [], allowPartial: body.allowPartial ?? false })}`);
         const recent = await env.DB.prepare("SELECT COUNT(*) AS count FROM code_request_events WHERE user_email = ? AND created_at > ?")
           .bind(identity.email, now - 60_000).first<{ count: number }>();
         if (Number(recent?.count ?? 0) >= 6) {
@@ -438,18 +441,19 @@ const worker = {
           return Response.json({ provider, verified: true, cached: true, ...cachedResult }, { headers: { "cache-control": "no-store" } });
         }
         const result = await createBookmakerCode(provider, body.selections ?? [], fetch, body.allowPartial ?? false);
+        let historySaved = true;
         await env.DB.batch([
           env.DB.prepare("INSERT INTO generated_codes (id, user_email, provider, code, deep_link, selections_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
-            .bind(crypto.randomUUID(), identity.email, provider, result.code, result.deepLink ?? null, JSON.stringify({ requested: body.selections ?? [], resolved: result.resolved ?? [], unmatched: result.unmatched ?? [] }), now),
+            .bind(crypto.randomUUID(), identity.email, provider, result.code, result.deepLink ?? null, JSON.stringify({ verified: result.verified === true, verificationStatus: result.verificationStatus, requested: body.selections ?? [], resolved: result.resolved ?? [], unmatched: result.unmatched ?? [] }), now),
           env.DB.prepare("INSERT INTO sportybet_code_cache (request_hash, response_json, expires_at, created_at) VALUES (?, ?, ?, ?) ON CONFLICT(request_hash) DO UPDATE SET response_json = excluded.response_json, expires_at = excluded.expires_at, created_at = excluded.created_at")
             .bind(requestHash, JSON.stringify(result), now + 120_000, now),
           env.DB.prepare("UPDATE code_request_events SET status = 'SUCCEEDED' WHERE id = ?").bind(eventId),
-        ]);
+        ]).catch(() => { historySaved = false; console.error("Created booking code could not be saved to account history."); });
         ctx.waitUntil(env.DB.batch([
           env.DB.prepare("DELETE FROM code_request_events WHERE created_at < ?").bind(now - 86_400_000),
           env.DB.prepare("DELETE FROM sportybet_code_cache WHERE expires_at < ?").bind(now),
         ]).then(() => undefined));
-        return Response.json({ provider, verified: true, ...result }, { headers: { "cache-control": "no-store" } });
+        return Response.json({ provider, ...result, historySaved, ...(!historySaved ? { warning: [result.warning, "Code created, but account history could not be saved. Copy this code now."].filter(Boolean).join(" ") } : {}) }, { headers: { "cache-control": "no-store" } });
       } catch (error) {
         if (eventId) ctx.waitUntil(env.DB.prepare("UPDATE code_request_events SET status = 'FAILED' WHERE id = ?").bind(eventId).run().then(() => undefined));
         const typed = error instanceof BookmakerIntegrationError ? error : new BookmakerIntegrationError("Bookmaker code creation failed.", 502);
