@@ -1,9 +1,7 @@
 const bands = {
-  SAFE_2: { title: "Daily 2 Odds", min: 1.9, max: 3.2, confidence: 0.66, minOdds: 1.12, maxOdds: 2.2, selections: 5, minHistory: 5 },
-  VALUE_5: { title: "Daily 5 Odds", min: 4.5, max: 6.8, confidence: 0.64, minOdds: 1.18, maxOdds: 2.05, selections: 8, minHistory: 6 },
-  BALANCED_10: { title: "Balanced 10 Odds", min: 8, max: 13, confidence: 0.6, minOdds: 1.22, maxOdds: 2.45, selections: 10, minHistory: 5 },
-  HIGH_RISK: { title: "High Risk 15–35 Odds", min: 15, max: 35, confidence: 0.55, minOdds: 1.3, maxOdds: 3.5, selections: 12, minHistory: 4 },
-  LONGSHOT_21: { title: "Daily 21-Leg Longshot", min: 20, max: Number.POSITIVE_INFINITY, confidence: 0.53, minOdds: 1.12, maxOdds: 2.1, selections: 21, minHistory: 4, exactSelections: 21 },
+  SAFE_2: { title: "Daily 2 Odds", min: 1.75, max: 2.35, confidence: 0.66, minOdds: 1.12, maxOdds: 1.72, selections: 3, minHistory: 12, minMarketProbability: .62 },
+  VALUE_5: { title: "Daily 5 Odds", min: 4.3, max: 5.8, confidence: 0.62, minOdds: 1.15, maxOdds: 1.9, selections: 5, minHistory: 12, minMarketProbability: .57 },
+  BALANCED_10: { title: "Balanced 10 Odds", min: 8, max: 11.5, confidence: 0.6, minOdds: 1.18, maxOdds: 2, selections: 6, minHistory: 12, minMarketProbability: .54 },
 };
 
 const supportedKeys = /^(MATCH_(HOME|DRAW|AWAY)|DC_(1X|X2|12)|OVER_|UNDER_|BTTS_(YES|NO)|HOME_(OVER|UNDER)_|AWAY_(OVER|UNDER)_|DNB_(HOME|AWAY))/;
@@ -48,7 +46,11 @@ export function buildTicket(candidates, category, fixtures) {
     .filter((item) => {
       const odds = estimatedOdds(item);
       const history = (item.factors?.homePlayed ?? 0) + (item.factors?.awayPlayed ?? 0);
-      return supportedKeys.test(item.key) && odds && history >= band.minHistory && item.confidence >= band.confidence && odds >= band.minOdds && odds <= band.maxOdds && (item.edge == null || item.edge >= -0.035);
+      return supportedKeys.test(item.key) && odds && history >= band.minHistory && item.confidence >= band.confidence
+        && odds >= band.minOdds && odds <= band.maxOdds
+        && (item.marketProbability ?? 0) >= band.minMarketProbability
+        && (item.modelMarketGap ?? 1) <= .1
+        && (item.expectedValue ?? -1) >= -.075;
     })
     .sort((a, b) => {
       const leagueDelta = priorityLeague(fixtureMap.get(a.fixtureId)?.league) - priorityLeague(fixtureMap.get(b.fixtureId)?.league);
@@ -63,11 +65,11 @@ export function buildTicket(candidates, category, fixtures) {
   let totalOdds = 1;
   for (const item of eligible) {
     if (used.has(item.fixtureId) || selected.length >= band.selections) continue;
-    if (!band.exactSelections && totalOdds >= band.min) break;
+    if (totalOdds >= band.min) break;
     const fixture = fixtureMap.get(item.fixtureId);
     if (!fixture || fixture.status !== "SCHEDULED" || new Date(fixture.kickoff).getTime() <= Date.now() + 20 * 60 * 1000) continue;
     const odds = estimatedOdds(item);
-    if (!band.exactSelections && selected.length && totalOdds * odds > band.max) continue;
+    if (selected.length && totalOdds * odds > band.max) continue;
     const family = marketFamily(item.key);
     const familyLimit = family === "UNDER" ? Math.max(1, Math.ceil(band.selections * .25)) : Math.max(2, Math.ceil(band.selections * .55));
     if ((familyCounts.get(family) ?? 0) >= familyLimit) continue;
@@ -91,9 +93,10 @@ export function buildTicket(candidates, category, fixtures) {
     familyCounts.set(family, (familyCounts.get(family) ?? 0) + 1);
     totalOdds *= odds;
   }
-  if (band.exactSelections && selected.length !== band.exactSelections) return null;
-  if (!band.exactSelections && (selected.length < 2 || totalOdds < band.min || totalOdds > band.max)) return null;
+  if (selected.length < 2 || totalOdds < band.min || totalOdds > band.max) return null;
   const confidence = selected.reduce((sum, item) => sum + item.confidence, 0) / selected.length;
+  const estimatedWinChance = selected.reduce((chance, item) => chance * item.probability, 1);
+  if (estimatedWinChance < .88 / totalOdds) return null;
   return {
     id: `${category.toLowerCase()}-${new Date().toISOString().slice(0, 10)}`,
     title: band.title,
@@ -102,6 +105,10 @@ export function buildTicket(candidates, category, fixtures) {
     totalOdds: Number(totalOdds.toFixed(2)),
     priceStatus: "QUOTED",
     confidence,
+    estimatedWinChance,
+    breakEvenChance: 1 / totalOdds,
+    strategyVersion: "reverse-market-v1",
+    paper: true,
     publishedAt: new Date().toISOString(),
     bookingCodes: [],
     selections: selected,

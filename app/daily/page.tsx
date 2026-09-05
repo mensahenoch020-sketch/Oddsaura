@@ -7,7 +7,7 @@ import { generateSportyBetCode } from "../builder/providers";
 import { activeDailyTicket } from "./active-ticket";
 import "./daily.css";
 
-type CodeState = { code: string; deepLink: string; matched: number; total: number; liveTotalOdds: number };
+type CodeState = { code: string; deepLink: string; matched: number; total: number; liveTotalOdds: number; verified: boolean };
 type TicketControl = { ticketId: string; visible: boolean; titleOverride: string | null };
 
 const ticketOrder: Record<string, number> = { SAFE_2: 1, VALUE_5: 2, BALANCED_10: 3, HIGH_RISK: 4, LONGSHOT_21: 5 };
@@ -69,8 +69,8 @@ export default function DailyOddsPage() {
         providerEventId: selection.fixtureId.startsWith("sr:match:") ? selection.fixtureId : null,
       })));
       const liveTotalOdds = result.resolved.reduce((value, selection) => value * (selection.odds ?? 1), 1);
-      setCodes((current) => ({ ...current, [ticket.id]: { code: result.code, deepLink: result.deepLink, matched: result.resolved.length, total: ticket.selections.length, liveTotalOdds } }));
-      setNotice(result.partial ? `${result.resolved.length}/${ticket.selections.length} selections included.` : "SportyBet code verified.");
+      setCodes((current) => ({ ...current, [ticket.id]: { code: result.code, deepLink: result.deepLink, matched: result.resolved.length, total: ticket.selections.length, liveTotalOdds, verified: result.verified } }));
+      setNotice(result.warning || (result.verified ? "SportyBet code reload-verified." : "Code created. Check every selection before using it."));
     } catch (error) { setNotice(error instanceof Error ? error.message : "Code generation failed."); }
     finally { setCreating(null); }
   }
@@ -87,13 +87,13 @@ export default function DailyOddsPage() {
       {loading ? <div className="daily-loading" role="status">Loading today&apos;s available tickets…</div> : null}
       {tickets.map((ticket) => { const shown = open === ticket.id; const code = codes[ticket.id]; return <article key={ticket.id} className="daily-ticket">
         <header><div><span>{ticket.trimmed ? "Available picks" : ticket.category === "LONGSHOT_21" ? "Longshot" : ticket.title.replace("Daily ", "")}</span><h2>{code ? code.liveTotalOdds.toFixed(2) : ticket.totalOdds.toFixed(2)} <span>{code ? "SportyBet live" : ticket.priceStatus === "QUOTED" ? "latest quoted total" : "estimated · verify"}</span></h2></div><b className={`daily-status ${ticket.status.toLowerCase()}`}>{ticket.trimmed ? "Refreshed" : ticket.status === "PUBLISHED" ? "Open" : ticket.status}</b></header>
-        <div className="daily-meta"><span>{ticket.selections.length} picks</span><span>{Math.round(ticket.confidence * 100)}% confidence</span><span>{code ? `${code.matched}/${code.total} live prices` : "Rechecked when you generate the code"}</span></div>
+        <div className="daily-meta"><span>{ticket.selections.length} picks</span><span>{ticket.estimatedWinChance != null ? `About ${Math.round(ticket.estimatedWinChance * 100)}% combined chance` : `${Math.round(ticket.confidence * 100)}% average pick probability`}</span><span>{code ? `${code.matched}/${code.total} live prices · ${code.verified ? "verified" : "check slip"}` : "Rechecked when you generate the code"}</span></div>
         <button className="daily-view" type="button" onClick={() => setOpen(shown ? null : ticket.id)}>{shown ? "Hide picks" : "View picks"}<span>{shown ? "−" : "+"}</span></button>
         {shown ? <div className="daily-legs">{ticket.selections.map((selection) => <div key={selection.id}><span>{selection.homeTeam.name} vs {selection.awayTeam.name}</span><b>{selection.market.name}: {selection.selection}</b><strong>{selection.odds.toFixed(2)} quoted</strong></div>)}</div> : null}
         {code ? <div className="daily-code"><span>SportyBet</span><strong>{code.code}</strong><small>{code.matched}/{code.total} included</small><div><button type="button" onClick={() => void copy(code.code)}>Copy</button><a href={code.deepLink} target="_blank" rel="noreferrer">Open</a></div></div> : null}
         <footer><button type="button" onClick={() => addTicket(ticket)}>Add ticket</button><button className="primary" type="button" disabled={creating === ticket.id} onClick={() => void createCode(ticket)}>{creating === ticket.id ? "Checking…" : "Get code"}</button></footer>
       </article>; })}
-      {!loading && !tickets.length ? <div className="daily-empty"><strong>New tickets are being prepared.</strong><span>Started matches were removed automatically. You can build a fresh bookmaker ticket now.</span><a href="/builder">Open Smart Bet Router</a></div> : null}
+      {!loading && !tickets.length ? <div className="daily-empty"><strong>No evidence-backed ticket is ready.</strong><span>OddsAura found no complete ticket that passed the live-price, match-history and model-agreement checks. It will not publish weak selections just to fill this page.</span><a href="/builder">Check the Smart Bet Router</a></div> : null}
     </section>
   </main>;
 }
