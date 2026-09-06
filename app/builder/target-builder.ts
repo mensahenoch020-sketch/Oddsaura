@@ -15,13 +15,13 @@ export type TargetBuild = {
   mode: BuildMode;
 };
 
-const priceFor = (pick: PredictedPick) => pick.quotedOdds ?? pick.fairOdds ?? 0;
+const priceFor = (pick: PredictedPick, priceOverrides?: Record<string, number>) => priceOverrides?.[pick.fixtureId] ?? pick.quotedOdds ?? pick.fairOdds ?? 0;
 
-export function buildTargetSlip(predictions: PredictedPick[], requestedTarget: number, now = Date.now(), provider: ProviderId = "sportybet", mode: BuildMode = "target"): TargetBuild | null {
+export function buildTargetSlip(predictions: PredictedPick[], requestedTarget: number, now = Date.now(), provider: ProviderId = "sportybet", mode: BuildMode = "target", priceOverrides?: Record<string, number>): TargetBuild | null {
   const target = Math.max(1.2, Math.min(100, Number.isFinite(requestedTarget) ? requestedTarget : 5));
   const quality = { HIGH: .08, MEDIUM: .04, LOW: 0 } as const;
   const ranked = predictions.filter((pick) => {
-    const price = priceFor(pick);
+    const price = priceFor(pick, priceOverrides);
     if (Date.parse(pick.kickoff) <= now + 30 * 60_000 || price < 1.06 || price > 3 || !providerSupportsMarket(provider, pick.market.key)) return false;
     if (mode === "recommended") return pick.quotedOdds != null
       && pick.dataQuality === "HIGH"
@@ -57,7 +57,7 @@ export function buildTargetSlip(predictions: PredictedPick[], requestedTarget: n
     + Math.max(0, state.picks.length - (mode === "target" ? 12 : 8)) * .025
     - (state.picks.length ? state.confidence / state.picks.length : 0) * .35;
   for (const pick of candidates) {
-    const price = priceFor(pick);
+    const price = priceFor(pick, priceOverrides);
     const additions = beam.flatMap((state) => state.picks.length >= maxLegs || state.odds * price > target * 1.18 ? [] : [{
       picks: [...state.picks, pick],
       odds: state.odds * price,
