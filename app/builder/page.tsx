@@ -136,8 +136,12 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
     if (activeProvider.status !== "live") { setNotice(`${selected.length} picks built for ${activeProvider.label} at ${result.estimatedOdds.toFixed(2)} estimated odds. Copy the complete list to rebuild it without losing matches.`); return; }
     const first = await requestCode(selected, result.target);
     if (!first?.result.verified || Math.abs(first.liveTotal - result.target) / result.target <= .03) return;
-    const adjustedTarget = Math.max(1.2, Math.min(100, result.target * result.target / Math.max(first.liveTotal, 1.01)));
-    const retry = buildTargetSlip(providerPredictions, adjustedTarget, referenceTime, provider, buildMode);
+
+    // Rebuild against the prices the bookmaker actually returned. The old
+    // retry only inflated the estimated target, so it could choose the same
+    // under-priced legs and finish well below the user's requested total.
+    const livePrices = { ...first.currentLiveOdds };
+    const retry = buildTargetSlip(providerPredictions, result.target, referenceTime, provider, buildMode, livePrices);
     if (!retry || retry.picks.map((pick) => pick.id).join() === selected.map((pick) => pick.id).join()) return;
     const second = await requestCode(retry.picks, result.target);
     if (second?.result.verified && Math.abs(second.liveTotal - result.target) < Math.abs(first.liveTotal - result.target)) {
