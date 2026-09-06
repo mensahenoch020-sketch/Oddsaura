@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { collectEspn, collectEspnGlobal } from "./lib/espn.mjs";
 import { attachOdds, buildModelContext, scoreEvent } from "./lib/model.mjs";
 import { buildTicket } from "./lib/tickets.mjs";
-import { trackTicket } from "./lib/settlement.mjs";
+import { resultForSelection, settleSelection, trackTicket } from "./lib/settlement.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const output = resolve(root, "data/public/snapshot.json");
@@ -38,8 +38,8 @@ async function writePublicSnapshots(snapshot) {
     builder: { ...common, predictedPicks: routePicks },
     matches: { ...common, fixtures: (snapshot.fixtures ?? []).map(withoutOdds), liveFixtures: (snapshot.liveFixtures ?? []).map(withoutOdds), predictedPicks: routePicks },
     daily: { ...common, tickets: snapshot.tickets ?? [] },
-    results: { ...common, recentResults: (snapshot.recentResults ?? []).map(withoutOdds), tickets: snapshot.tickets ?? [], ticketHistory: snapshot.ticketHistory ?? [], modelPerformance },
-    admin: { ...common, sources: snapshot.sources ?? [], tickets: snapshot.tickets ?? [], marketCatalog: snapshot.marketCatalog ?? [] },
+    results: { ...common, recentResults: (snapshot.recentResults ?? []).map(withoutOdds), tickets: snapshot.tickets ?? [], ticketHistory: snapshot.ticketHistory ?? [], paperTrials: snapshot.paperTrials ?? [], modelPerformance },
+    admin: { ...common, sources: snapshot.sources ?? [], tickets: snapshot.tickets ?? [], marketCatalog: snapshot.marketCatalog ?? [], paperTrials: snapshot.paperTrials ?? [] },
   };
   await mkdir(dirname(output), { recursive: true });
   await Promise.all([
@@ -143,6 +143,11 @@ function publishPick(pick, fixture) {
     providerMarketId: pick.providerMarketId,
     providerSelectionId: pick.providerSelectionId,
     providerDeepLink: pick.providerDeepLink,
+    expectedValue: pick.expectedValue,
+    marketProbability: pick.marketProbability,
+    modelProbability: pick.modelProbability,
+    modelMarketGap: pick.modelMarketGap,
+    priceStatus: pick.quotedOdds ? "QUOTED" : "MODEL_ESTIMATE",
     reasoning: pick.key.startsWith("ONE_UP_") || pick.key.startsWith("TWO_UP_")
       ? `Early-payout version of the modelled match result · confidence remains based on the full-time result, not a promised early lead`
       : `Bookmaker baseline ${Math.round((pick.marketProbability ?? 0) * 100)}% · OddsAura model difference ${Math.round((pick.modelMarketGap ?? 0) * 100)} points · ${historyMatches} recent team performances`,
@@ -193,6 +198,20 @@ for (const key of showcaseKeys) {
   }
 }
 
+// The manual builder may show broader modelled markets when a public quote is
+// unavailable. They are labelled MODEL_ESTIMATE and must be verified against
+// the selected bookmaker before a code is accepted. Daily Odds remains strict.
+const modelEstimatePicks = predictions.filter((item) => {
+  const fixture = fixtureMap.get(item.fixtureId);
+  const history = (item.factors?.homePlayed ?? 0) + (item.factors?.awayPlayed ?? 0);
+  return fixture && isPriorityLeague(fixture.league) && publicMarketKeys.test(item.key)
+    && !item.quotedOdds && history >= 10 && item.confidence >= .58 && item.probability >= .58;
+}).sort((a, b) => b.confidence - a.confidence);
+for (const pick of modelEstimatePicks) {
+  const fixture = fixtureMap.get(pick.fixtureId);
+  if (fixture) publishPick(pick, fixture);
+}
+
 // After universal fixture coverage, publish the strongest additional markets.
 for (const pick of eligiblePicks) {
   const fixture = fixtureMap.get(pick.fixtureId);
@@ -226,6 +245,64 @@ const marketCatalog = [...new Set([
   ...events.flatMap((event) => event.odds.map((odd) => odd.market)),
 ])].sort();
 
+// Record forward predictions before kickoff, then settle them only when a
+// final result becomes available. Existing settled rows are never rewritten.
+const priorPaperTrials = Array.isArray(previous.paperTrials) ? previous.paperTrials : [];
+const paperTrialMap = new Map(priorPaperTrials.map((trial) => [trial.id, trial]));
+for (const trial of priorPaperTrials) {
+  if (trial.result && trial.result !== "PENDING") continue;
+  const fixture = resultForSelection(trial, events);
+  const result = settleSelection(trial, fixture);
+  if (result !== "PENDING") paperTrialMap.set(trial.id, { ...trial, result, settledAt: now.toISOString() });
+}
+const trialDay = now.toISOString().slice(0, 10);
+const trialCandidates = [...eligiblePicks]
+  .filter((pick) => pick.quotedOdds && new Date(pick.kickoff) > now)
+  .sort((a, b) => (b.confidence + Math.max(0, b.expectedValue ?? 0)) - (a.confidence + Math.max(0, a.expectedValue ?? 0)));
+const trialFixtures = new Set();
+for (const pick of trialCandidates) {
+  if (trialFixtures.has(pick.fixtureId) || trialFixtures.size >= 8) continue;
+  const fixture = fixtureMap.get(pick.fixtureId);
+  if (!fixture) continue;
+  const id = `${trialDay}-${pick.fixtureId}-${pick.key}`;
+  if (!paperTrialMap.has(id)) paperTrialMap.set(id, {
+    id,
+    fixtureId: pick.fixtureId,
+    league: fixture.league,
+    kickoff: fixture.kickoff,
+    homeTeam: fixture.homeTeam,
+    awayTeam: fixture.awayTeam,
+    market: { key: pick.key, name: pick.name, category: pick.category, line: pick.line ?? null },
+    selection: pick.selection,
+    odds: pick.quotedOdds,
+    probability: pick.probability,
+    confidence: pick.confidence,
+    expectedValue: pick.expectedValue,
+    marketProbability: pick.marketProbability,
+    modelProbability: pick.modelProbability,
+    modelMarketGap: pick.modelMarketGap,
+    predictedAt: now.toISOString(),
+    result: "PENDING",
+    settledAt: null,
+  });
+  trialFixtures.add(pick.fixtureId);
+}
+const paperTrials = [...paperTrialMap.values()]
+  .sort((a, b) => String(b.predictedAt).localeCompare(String(a.predictedAt)))
+  .slice(0, 500);
+const settledPaperTrials = paperTrials.filter((trial) => ["WON", "LOST", "VOID"].includes(trial.result));
+const wonPaperTrials = settledPaperTrials.filter((trial) => trial.result === "WON");
+const decidedPaperTrials = settledPaperTrials.filter((trial) => trial.result !== "VOID");
+const paperProfit = decidedPaperTrials.reduce((sum, trial) => sum + (trial.result === "WON" ? trial.odds - 1 : -1), 0);
+const paperMetrics = {
+  recorded: paperTrials.length,
+  settled: settledPaperTrials.length,
+  won: wonPaperTrials.length,
+  lost: decidedPaperTrials.length - wonPaperTrials.length,
+  hitRate: decidedPaperTrials.length ? wonPaperTrials.length / decidedPaperTrials.length : null,
+  flatStakeRoi: decidedPaperTrials.length ? paperProfit / decidedPaperTrials.length : null,
+};
+
 const ticketArchive = new Map();
 for (const ticket of [...tickets, ...(previous.tickets ?? []), ...(previous.ticketHistory ?? [])]) {
   if (!ticketArchive.has(ticket.id)) ticketArchive.set(ticket.id, ticket);
@@ -250,6 +327,7 @@ const snapshot = {
     publishedTickets: tickets.length,
     noBetCategories: attemptedTickets.filter((attempt) => !attempt.ticket).map((attempt) => attempt.category),
     strategyVersion: "reverse-market-v1",
+    paperTrials: paperMetrics,
   },
   fixtures: upcoming,
   liveFixtures: liveFixtures.slice(0, 200),
@@ -259,6 +337,7 @@ const snapshot = {
   watchlist,
   tickets,
   ticketHistory,
+  paperTrials,
 };
 await writePublicSnapshots(snapshot);
 console.log(`OddsAura updated: ${upcoming.length} fixtures, ${predictions.length} model scores, ${predictedPicks.length} selectable predictions, ${tickets.length} tickets`);

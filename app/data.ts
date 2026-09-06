@@ -40,6 +40,8 @@ export type PredictedPick = Omit<TicketSelection, "odds"> & {
   providerDeepLink?: string | null;
 };
 export type Ticket = { id: string; title: string; category: string; status: string; totalOdds: number; confidence: number; estimatedWinChance?: number; breakEvenChance?: number; strategyVersion?: string; paper?: boolean; priceStatus?: "QUOTED" | "MODEL_ESTIMATE"; publishedAt?: string; settledAt?: string | null; wonLegs?: number; lostLegs?: number; voidLegs?: number; bookingCodes: Array<{ provider: string; code: string; deepLink?: string }>; selections: TicketSelection[] };
+export type PaperTrial = TicketSelection & { predictedAt: string; settledAt: string | null };
+export type PaperMetrics = { recorded: number; settled: number; won: number; lost: number; hitRate: number | null; flatStakeRoi: number | null };
 export type Snapshot = {
   version: number;
   generatedAt: string | null;
@@ -47,7 +49,7 @@ export type Snapshot = {
   status: string;
   message: string;
   sources: Array<{ id: string; label: string; status: string; lastSuccessAt: string | null; records: number; warnings?: string[] }>;
-  metrics: { fixtures: number; live: number; completed: number; pricedMarkets: number; predictions: number; selectablePredictions?: number; publishedTickets: number; noBetCategories?: string[]; strategyVersion?: string };
+  metrics: { fixtures: number; live: number; completed: number; pricedMarkets: number; predictions: number; selectablePredictions?: number; publishedTickets: number; noBetCategories?: string[]; strategyVersion?: string; paperTrials?: PaperMetrics };
   fixtures?: Fixture[];
   liveFixtures?: Fixture[];
   recentResults?: Fixture[];
@@ -56,6 +58,7 @@ export type Snapshot = {
   watchlist?: WatchlistPick[];
   tickets: Ticket[];
   ticketHistory?: Ticket[];
+  paperTrials?: PaperTrial[];
   modelPerformance?: { matches: number; oneXTwoAccuracy: number; over25Accuracy: number; brierScore: number; generatedAt: string } | null;
 };
 
@@ -75,6 +78,7 @@ export const fallbackSnapshot: Snapshot = {
   watchlist: [],
   tickets: [],
   ticketHistory: [],
+  paperTrials: [],
 };
 export type SnapshotScope = "snapshot" | "builder" | "matches" | "daily" | "results" | "admin";
 const publicDataBase = "https://raw.githubusercontent.com/mensahenoch020-sketch/Oddsaura/main/data/public";

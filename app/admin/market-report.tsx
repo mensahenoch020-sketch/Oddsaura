@@ -6,7 +6,7 @@ const percent = (n: number | null | undefined) => n == null ? "Not tested" : `${
 export default function MarketReport({ performance }: { performance: ExpandedPerformance }) {
   return <section id="markets" className="adm-market-report">
     <h2>Market coverage and testing</h2>
-    <p>Prediction support, historical testing and bookmaker conversion are separate capabilities. A market listed here is not a guarantee that every bookmaker offers it.</p>
+    <p>Prediction support, historical testing and bookmaker conversion are separate capabilities. A market listed here is not a guarantee that every bookmaker offers it. Model-estimate prices in Build My Odds are always checked against the selected bookmaker before a generated code is treated as verified.</p>
     <h3>Historical tests by selection</h3>
     <p>Accuracy includes correctly predicting that a selection will lose. Pick hit rate only counts selections assigned at least 50% probability. Neither is accumulator win rate. The baseline uses the most frequent outcome in earlier matches.</p>
     <p>1X2 baseline: {performance.baseline?.label ?? "Not yet loaded"} · {percent(performance.baseline?.accuracy)}</p>
