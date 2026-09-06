@@ -1,6 +1,6 @@
 export type MarketTest = { key: string; matches: number; voids: number; accuracy: number | null; baselineAccuracy: number | null; selected: number; selectedHitRate: number | null };
 export type ExpandedPerformance = { markets?: MarketTest[]; baseline?: { label: string; accuracy: number | null }; limitations?: string[]; pricingAudit?: { methodology: string; conclusion: string; probabilityModels: Array<{modelWeight:number;matches:number;brier:number|null;logLoss:number|null}>; favoriteBands: Array<{threshold:number;picks:number;hitRate:number|null;roi:number|null}> }; builderAudit?: {strategyVersion?:string; limitation: string; rows: Array<{target:number;days:number;built:number;noTicket:number;won:number;lost:number}>} };
-const labels: Record<string, string> = { BTTS_YES: "Both teams to score", OVER_1_5: "Over 1.5", OVER_2_5: "Over 2.5", UNDER_3_5: "Under 3.5", DC_1X: "Home or draw", DC_X2: "Draw or away", DC_12: "Either team wins", DNB_HOME: "Home draw-no-bet", DNB_AWAY: "Away draw-no-bet", HOME_CLEAN: "Home clean sheet", AWAY_CLEAN: "Away clean sheet", HOME_WIN_NIL: "Home wins to nil", AWAY_WIN_NIL: "Away wins to nil" };
+const labels: Record<string, string> = { BTTS_YES: "Both teams to score", OVER_1_5: "Over 1.5", OVER_2_5: "Over 2.5", UNDER_3_5: "Under 3.5", DC_1X: "Home or draw", DC_X2: "Draw or away", DC_12: "Either team wins", DNB_HOME: "Home draw-no-bet", DNB_AWAY: "Away draw-no-bet", HOME_CLEAN: "Home clean sheet", AWAY_CLEAN: "Away clean sheet", HOME_WIN_NIL: "Home wins to nil", AWAY_WIN_NIL: "Away wins to nil", HCP_3WAY_HOME: "European handicap: home", HCP_3WAY_DRAW: "European handicap: draw", HCP_3WAY_AWAY: "European handicap: away" };
 const percent = (n: number | null | undefined) => n == null ? "Not tested" : `${(n * 100).toFixed(1)}%`;
 
 export default function MarketReport({ performance }: { performance: ExpandedPerformance }) {
@@ -11,9 +11,9 @@ export default function MarketReport({ performance }: { performance: ExpandedPer
     <p>Accuracy includes correctly predicting that a selection will lose. Pick hit rate only counts selections assigned at least 50% probability. Neither is accumulator win rate. The baseline uses the most frequent outcome in earlier matches.</p>
     <p>1X2 baseline: {performance.baseline?.label ?? "Not yet loaded"} · {percent(performance.baseline?.accuracy)}</p>
     {performance.markets?.length ? <div className="adm-table-scroll" tabIndex={0} aria-label="Historical market tests"><table><thead><tr><th>Selection</th><th>Matches</th><th>Voids</th><th>Accuracy</th><th>Baseline</th><th>Picked</th><th>Pick hit rate</th></tr></thead><tbody>{performance.markets.map(row => <tr key={row.key}><th>{labels[row.key] ?? row.key.replaceAll("_", " ")}</th><td>{row.matches}</td><td>{row.voids}</td><td>{percent(row.accuracy)}</td><td>{percent(row.baselineAccuracy)}</td><td>{row.selected}</td><td>{percent(row.selectedHitRate)}</td></tr>)}</tbody></table></div> : <p>The expanded test report has not loaded yet.</p>}
-    <h3>Predicted, but not covered by this report</h3>
-    <p>Other totals and team-goal lines, correct score, goal parity, first-half and combination markets. Early-payout estimates currently reuse match-result probabilities; they are not a separately validated early-payout model.</p>
-    <h3>Not modelled</h3><p>Corners, cards and player shots. European handicap import is a converter capability, not a handicap prediction model.</p>
+    <h3>Predicted, but not covered by every row in this report</h3>
+    <p>Additional total and team-total lines are produced from the same score distribution. Correct score has been removed from OddsAura recommendations. Early-payout, goal parity, first-half and combination markets are not recommended until they receive their own validation.</p>
+    <h3>Not modelled</h3><p>Corners, cards and player shots. The prediction engine now tests one adaptive European three-way handicap line (+1 or -1) when a fixture has a clear favourite.</p>
     <h3>Destination conversion rules implemented</h3>
     <p>These describe code mappings—not live-tested availability. Every requested fixture, line and outcome must still match exactly.</p>
     <dl>

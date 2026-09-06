@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-09-05T14:52:42.494Z",
+  "generatedAt": "2026-09-06T21:55:01.151Z",
   "methodology": "Walk-forward test: every prediction uses only earlier matches with a two-hour completion buffer before kickoff.",
   "matches": 2000,
-  "oneXTwoAccuracy": 0.5085,
-  "over25Accuracy": 0.5545,
-  "brierScore": 0.2005841658612923,
-  "logLoss": 1.0064595718093214,
+  "oneXTwoAccuracy": 0.5185,
+  "over25Accuracy": 0.56,
+  "brierScore": 0.19905664338354306,
+  "logLoss": 1.0000850881566057,
   "baseline": {
     "label": "Always predict home win",
     "matches": 2000,
@@ -23,14 +23,14 @@
       {
         "modelWeight": 0.25,
         "matches": 2000,
-        "brier": 0.19451846708281387,
-        "logLoss": 0.9796267729248308
+        "brier": 0.19436996905471093,
+        "logLoss": 0.9789659461308572
       },
       {
         "modelWeight": 1,
         "matches": 2000,
-        "brier": 0.2005841658612923,
-        "logLoss": 1.0064595718093214
+        "brier": 0.19905664338354306,
+        "logLoss": 1.0000850881566057
       }
     ],
     "favoriteBands": [
@@ -71,16 +71,16 @@
     {
       "key": "BTTS_YES",
       "matches": 2000,
-      "correct": 1096,
+      "correct": 1124,
       "baselineCorrect": 1104,
       "voids": 0,
-      "selected": 1490,
-      "wins": 845,
+      "selected": 1528,
+      "wins": 878,
       "status": "TESTED",
-      "accuracy": 0.548,
+      "accuracy": 0.562,
       "baselineAccuracy": 0.552,
-      "brier": 0.2459083799025151,
-      "selectedHitRate": 0.5671140939597316
+      "brier": 0.2449528658521621,
+      "selectedHitRate": 0.574607329842932
     },
     {
       "key": "OVER_1_5",
@@ -93,22 +93,22 @@
       "status": "TESTED",
       "accuracy": 0.7795,
       "baselineAccuracy": 0.7795,
-      "brier": 0.17063257161571357,
+      "brier": 0.169737995715494,
       "selectedHitRate": 0.7795
     },
     {
       "key": "OVER_2_5",
       "matches": 2000,
-      "correct": 1109,
+      "correct": 1120,
       "baselineCorrect": 1100,
       "voids": 0,
-      "selected": 1185,
-      "wins": 697,
+      "selected": 1236,
+      "wins": 728,
       "status": "TESTED",
-      "accuracy": 0.5545,
+      "accuracy": 0.56,
       "baselineAccuracy": 0.55,
-      "brier": 0.24526198181355002,
-      "selectedHitRate": 0.5881856540084388
+      "brier": 0.2441381451372304,
+      "selectedHitRate": 0.5889967637540453
     },
     {
       "key": "UNDER_3_5",
@@ -116,41 +116,41 @@
       "correct": 1371,
       "baselineCorrect": 1368,
       "voids": 0,
-      "selected": 1993,
-      "wins": 1366,
+      "selected": 1995,
+      "wins": 1367,
       "status": "TESTED",
       "accuracy": 0.6855,
       "baselineAccuracy": 0.684,
-      "brier": 0.2115393108862002,
-      "selectedHitRate": 0.6853988961364776
+      "brier": 0.2105965807371674,
+      "selectedHitRate": 0.6852130325814536
     },
     {
       "key": "DC_1X",
       "matches": 2000,
-      "correct": 1443,
+      "correct": 1461,
       "baselineCorrect": 1384,
       "voids": 0,
-      "selected": 1837,
-      "wins": 1332,
+      "selected": 1777,
+      "wins": 1311,
       "status": "TESTED",
-      "accuracy": 0.7215,
+      "accuracy": 0.7305,
       "baselineAccuracy": 0.692,
-      "brier": 0.18962232409249852,
-      "selectedHitRate": 0.7250952640174197
+      "brier": 0.1877171671273652,
+      "selectedHitRate": 0.7377602701181767
     },
     {
       "key": "DC_X2",
       "matches": 2000,
-      "correct": 1274,
+      "correct": 1304,
       "baselineCorrect": 1140,
       "voids": 0,
-      "selected": 1340,
-      "wins": 877,
+      "selected": 1398,
+      "wins": 921,
       "status": "TESTED",
-      "accuracy": 0.637,
+      "accuracy": 0.652,
       "baselineAccuracy": 0.57,
-      "brier": 0.2195539282266936,
-      "selectedHitRate": 0.6544776119402985
+      "brier": 0.21713417980655816,
+      "selectedHitRate": 0.6587982832618026
     },
     {
       "key": "DC_12",
@@ -163,134 +163,134 @@
       "status": "TESTED",
       "accuracy": 0.738,
       "baselineAccuracy": 0.738,
-      "brier": 0.19257624526468456,
+      "brier": 0.19231858321670642,
       "selectedHitRate": 0.738
     },
     {
       "key": "DNB_HOME",
       "matches": 1476,
-      "correct": 1017,
+      "correct": 1037,
       "baselineCorrect": 860,
       "voids": 524,
-      "selected": 1033,
-      "wins": 717,
+      "selected": 973,
+      "wins": 697,
       "status": "TESTED",
-      "accuracy": 0.6890243902439024,
+      "accuracy": 0.7025745257452575,
       "baselineAccuracy": 0.5826558265582655,
-      "brier": 0.2011661150636053,
-      "selectedHitRate": 0.6940948693126815
+      "brier": 0.19785216878548537,
+      "selectedHitRate": 0.7163412127440905
     },
     {
       "key": "DNB_AWAY",
       "matches": 1476,
-      "correct": 1017,
+      "correct": 1037,
       "baselineCorrect": 860,
       "voids": 524,
-      "selected": 443,
-      "wins": 300,
+      "selected": 503,
+      "wins": 340,
       "status": "TESTED",
-      "accuracy": 0.6890243902439024,
+      "accuracy": 0.7025745257452575,
       "baselineAccuracy": 0.5826558265582655,
-      "brier": 0.2011661150636053,
-      "selectedHitRate": 0.6772009029345373
+      "brier": 0.19785216878548534,
+      "selectedHitRate": 0.6759443339960238
     },
     {
       "key": "HOME_OVER_0_5",
       "matches": 2000,
-      "correct": 1558,
+      "correct": 1555,
       "baselineCorrect": 1555,
       "voids": 0,
-      "selected": 1993,
-      "wins": 1553,
+      "selected": 1990,
+      "wins": 1550,
       "status": "TESTED",
-      "accuracy": 0.779,
+      "accuracy": 0.7775,
       "baselineAccuracy": 0.7775,
-      "brier": 0.16257707124159265,
-      "selectedHitRate": 0.7792272955343703
+      "brier": 0.16179522876009145,
+      "selectedHitRate": 0.7788944723618091
     },
     {
       "key": "HOME_OVER_1_5",
       "matches": 2000,
-      "correct": 1228,
+      "correct": 1226,
       "baselineCorrect": 1075,
       "voids": 0,
-      "selected": 651,
-      "wins": 402,
+      "selected": 601,
+      "wins": 376,
       "status": "TESTED",
-      "accuracy": 0.614,
+      "accuracy": 0.613,
       "baselineAccuracy": 0.5375,
-      "brier": 0.23195180847737207,
-      "selectedHitRate": 0.6175115207373272
+      "brier": 0.2302865879538959,
+      "selectedHitRate": 0.6256239600665557
     },
     {
       "key": "AWAY_OVER_0_5",
       "matches": 2000,
-      "correct": 1422,
+      "correct": 1425,
       "baselineCorrect": 1423,
       "voids": 0,
-      "selected": 1931,
-      "wins": 1388,
+      "selected": 1938,
+      "wins": 1393,
       "status": "TESTED",
-      "accuracy": 0.711,
+      "accuracy": 0.7125,
       "baselineAccuracy": 0.7115,
-      "brier": 0.19844167247825498,
-      "selectedHitRate": 0.7187985499741066
+      "brier": 0.196836907398868,
+      "selectedHitRate": 0.7187822497420021
     },
     {
       "key": "AWAY_OVER_1_5",
       "matches": 2000,
-      "correct": 1314,
+      "correct": 1323,
       "baselineCorrect": 1269,
       "voids": 0,
-      "selected": 185,
-      "wins": 115,
+      "selected": 262,
+      "wins": 158,
       "status": "TESTED",
-      "accuracy": 0.657,
+      "accuracy": 0.6615,
       "baselineAccuracy": 0.6345,
-      "brier": 0.22169110708978074,
-      "selectedHitRate": 0.6216216216216216
+      "brier": 0.22016768454624586,
+      "selectedHitRate": 0.6030534351145038
     },
     {
       "key": "HOME_CLEAN",
       "matches": 2000,
-      "correct": 1422,
+      "correct": 1425,
       "baselineCorrect": 1423,
       "voids": 0,
-      "selected": 69,
-      "wins": 34,
+      "selected": 62,
+      "wins": 32,
       "status": "TESTED",
-      "accuracy": 0.711,
+      "accuracy": 0.7125,
       "baselineAccuracy": 0.7115,
-      "brier": 0.19844167247825498,
-      "selectedHitRate": 0.4927536231884058
+      "brier": 0.19683690739886794,
+      "selectedHitRate": 0.5161290322580645
     },
     {
       "key": "AWAY_CLEAN",
       "matches": 2000,
-      "correct": 1558,
+      "correct": 1555,
       "baselineCorrect": 1555,
       "voids": 0,
-      "selected": 7,
+      "selected": 10,
       "wins": 5,
       "status": "TESTED",
-      "accuracy": 0.779,
+      "accuracy": 0.7775,
       "baselineAccuracy": 0.7775,
-      "brier": 0.16257707124159265,
-      "selectedHitRate": 0.7142857142857143
+      "brier": 0.16179522876009148,
+      "selectedHitRate": 0.5
     },
     {
       "key": "HOME_WIN_NIL",
       "matches": 2000,
-      "correct": 1552,
+      "correct": 1549,
       "baselineCorrect": 1549,
       "voids": 0,
-      "selected": 11,
-      "wins": 7,
+      "selected": 12,
+      "wins": 6,
       "status": "TESTED",
-      "accuracy": 0.776,
+      "accuracy": 0.7745,
       "baselineAccuracy": 0.7745,
-      "brier": 0.16562994648939508,
-      "selectedHitRate": 0.6363636363636364
+      "brier": 0.1645074932740519,
+      "selectedHitRate": 0.5
     },
     {
       "key": "AWAY_WIN_NIL",
@@ -303,52 +303,95 @@
       "status": "TESTED",
       "accuracy": 0.8405,
       "baselineAccuracy": 0.8405,
-      "brier": 0.1253960698551129,
+      "brier": 0.1245460581280606,
       "selectedHitRate": null
+    },
+    {
+      "key": "HCP_3WAY_HOME",
+      "matches": 1586,
+      "correct": 1042,
+      "baselineCorrect": 584,
+      "voids": 0,
+      "selected": 306,
+      "wins": 173,
+      "status": "TESTED",
+      "accuracy": 0.6569987389659521,
+      "baselineAccuracy": 0.3682219419924338,
+      "brier": 0.21956194548258348,
+      "selectedHitRate": 0.565359477124183
+    },
+    {
+      "key": "HCP_3WAY_DRAW",
+      "matches": 1586,
+      "correct": 1201,
+      "baselineCorrect": 385,
+      "voids": 0,
+      "selected": 0,
+      "wins": 0,
+      "status": "TESTED",
+      "accuracy": 0.757250945775536,
+      "baselineAccuracy": 0.24274905422446405,
+      "brier": 0.1837782746749765,
+      "selectedHitRate": null
+    },
+    {
+      "key": "HCP_3WAY_AWAY",
+      "matches": 1586,
+      "correct": 1013,
+      "baselineCorrect": 617,
+      "voids": 0,
+      "selected": 482,
+      "wins": 263,
+      "status": "TESTED",
+      "accuracy": 0.6387137452711223,
+      "baselineAccuracy": 0.3890290037831021,
+      "brier": 0.2216376910959174,
+      "selectedHitRate": 0.5456431535269709
     }
   ],
   "limitations": [
     "Binary accuracy includes predicting that a selection will lose. It is not ticket win rate.",
     "Voids are excluded; draw-no-bet results are conditional on a non-draw.",
+    "Adaptive European-handicap rows test the model-selected +1 or -1 line; historic handicap prices are not yet available for ROI.",
     "Historical bookmaker quotes and archived prediction-time candidate pools are needed to backtest the actual target builder and ROI.",
     "Corners, cards, shots, early-payout and first-half markets are not evaluated by this full-time-score report."
   ],
   "calibration": [
     {
       "from": 0.3,
-      "predictions": 366,
-      "wins": 132,
-      "actualRate": 0.36065573770491804
+      "predictions": 379,
+      "wins": 154,
+      "actualRate": 0.40633245382585753
     },
     {
       "from": 0.4,
-      "predictions": 811,
-      "wins": 377,
-      "actualRate": 0.4648581997533909
+      "predictions": 796,
+      "wins": 350,
+      "actualRate": 0.4396984924623116
     },
     {
       "from": 0.5,
-      "predictions": 557,
-      "wins": 311,
-      "actualRate": 0.5583482944344704
+      "predictions": 553,
+      "wins": 331,
+      "actualRate": 0.5985533453887885
     },
     {
       "from": 0.6,
-      "predictions": 215,
-      "wins": 156,
-      "actualRate": 0.7255813953488373
+      "predictions": 212,
+      "wins": 154,
+      "actualRate": 0.7264150943396226
     },
     {
       "from": 0.7,
-      "predictions": 48,
-      "wins": 38,
-      "actualRate": 0.7916666666666666
+      "predictions": 56,
+      "wins": 45,
+      "actualRate": 0.8035714285714286
     },
     {
       "from": 0.8,
-      "predictions": 3,
+      "predictions": 4,
       "wins": 3,
-      "actualRate": 1
+      "actualRate": 0.75
     }
   ],
   "leagues": [
@@ -356,29 +399,29 @@
       "id": "eng.1",
       "name": "Premier League",
       "matches": 289,
-      "correct": 138,
-      "accuracy": 0.47750865051903113
+      "correct": 136,
+      "accuracy": 0.47058823529411764
     },
     {
       "id": "esp.1",
       "name": "La Liga",
       "matches": 289,
-      "correct": 143,
-      "accuracy": 0.49480968858131485
+      "correct": 151,
+      "accuracy": 0.5224913494809689
     },
     {
       "id": "ita.1",
       "name": "Serie A",
       "matches": 288,
-      "correct": 154,
-      "accuracy": 0.5347222222222222
+      "correct": 161,
+      "accuracy": 0.5590277777777778
     },
     {
       "id": "por-1",
       "name": "Primeira Liga",
       "matches": 240,
-      "correct": 136,
-      "accuracy": 0.5666666666666667
+      "correct": 137,
+      "accuracy": 0.5708333333333333
     },
     {
       "id": "ned-1",
@@ -391,72 +434,72 @@
       "id": "ger.1",
       "name": "Bundesliga",
       "matches": 224,
-      "correct": 121,
-      "accuracy": 0.5401785714285714
+      "correct": 122,
+      "accuracy": 0.5446428571428571
     },
     {
       "id": "tur-1",
       "name": "Süper Lig",
       "matches": 223,
-      "correct": 110,
-      "accuracy": 0.49327354260089684
+      "correct": 111,
+      "accuracy": 0.4977578475336323
     },
     {
       "id": "fra.1",
       "name": "Ligue 1",
       "matches": 216,
-      "correct": 101,
-      "accuracy": 0.4675925925925926
+      "correct": 105,
+      "accuracy": 0.4861111111111111
     }
   ],
   "builderAudit": {
-    "strategyVersion": "reverse-market-v1",
-    "generatedAt": "2026-09-05T14:24:39.743Z",
+    "strategyVersion": "history-market-v2",
+    "generatedAt": "2026-09-06T22:01:28.363Z",
     "matches": 2000,
     "rows": [
       {
         "target": 2,
-        "days": 156,
-        "built": 4,
-        "noTicket": 152,
-        "won": 3,
-        "lost": 1,
+        "days": 158,
+        "built": 157,
+        "noTicket": 1,
+        "won": 78,
+        "lost": 79,
         "unverified": 0
       },
       {
         "target": 5,
-        "days": 156,
-        "built": 0,
-        "noTicket": 156,
-        "won": 0,
-        "lost": 0,
+        "days": 158,
+        "built": 139,
+        "noTicket": 19,
+        "won": 31,
+        "lost": 108,
         "unverified": 0
       },
       {
         "target": 10,
-        "days": 156,
-        "built": 0,
-        "noTicket": 156,
-        "won": 0,
-        "lost": 0,
+        "days": 158,
+        "built": 139,
+        "noTicket": 19,
+        "won": 13,
+        "lost": 126,
         "unverified": 0
       },
       {
         "target": 20,
-        "days": 156,
-        "built": 0,
-        "noTicket": 156,
-        "won": 0,
-        "lost": 0,
+        "days": 158,
+        "built": 139,
+        "noTicket": 19,
+        "won": 5,
+        "lost": 134,
         "unverified": 0
       },
       {
         "target": 50,
-        "days": 156,
-        "built": 0,
-        "noTicket": 156,
-        "won": 0,
-        "lost": 0,
+        "days": 158,
+        "built": 139,
+        "noTicket": 19,
+        "won": 5,
+        "lost": 134,
         "unverified": 0
       }
     ],

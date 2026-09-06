@@ -1,8 +1,11 @@
 import { buildModelContext, scoreEvent } from "./model.mjs";
 import { settleSelection } from "./settlement.mjs";
 
-const testedKeys = ["BTTS_YES", "OVER_1_5", "OVER_2_5", "UNDER_3_5", "DC_1X", "DC_X2", "DC_12", "DNB_HOME", "DNB_AWAY", "HOME_OVER_0_5", "HOME_OVER_1_5", "AWAY_OVER_0_5", "AWAY_OVER_1_5", "HOME_CLEAN", "AWAY_CLEAN", "HOME_WIN_NIL", "AWAY_WIN_NIL"];
-const outcomeFor = (key, match) => settleSelection({ market: { key } }, match);
+const testedKeys = ["BTTS_YES", "OVER_1_5", "OVER_2_5", "UNDER_3_5", "DC_1X", "DC_X2", "DC_12", "DNB_HOME", "DNB_AWAY", "HOME_OVER_0_5", "HOME_OVER_1_5", "AWAY_OVER_0_5", "AWAY_OVER_1_5", "HOME_CLEAN", "AWAY_CLEAN", "HOME_WIN_NIL", "AWAY_WIN_NIL", "HCP_3WAY_HOME", "HCP_3WAY_DRAW", "HCP_3WAY_AWAY"];
+const outcomeFor = (selection, match) => {
+  const source = typeof selection === "string" ? { key: selection } : selection;
+  return settleSelection({ market: { key: source.key, line: source.line } }, match);
+};
 
 const clamp = (value) => Math.max(0.0001, Math.min(0.9999, value));
 
@@ -31,7 +34,7 @@ export function backtestHistory(events, { sampleSize = 800, minimumTraining = 25
     for (const key of testedKeys) {
       const pick = scored.find(item => item.key === key), row = markets.get(key), prior = counts.get(key);
       if (!pick || !Number.isFinite(pick.probability)) continue;
-      const result = outcomeFor(key, match);
+      const result = outcomeFor(pick, match);
       if (result === "VOID") { row.voids++; continue; }
       if (result !== "WON" && result !== "LOST") continue;
       const won = result === "WON";
@@ -89,7 +92,7 @@ export function backtestHistory(events, { sampleSize = 800, minimumTraining = 25
       conclusion: "The bookmaker price is the primary probability baseline. OddsAura acts as a cautious agreement and risk filter; it does not claim a proven pricing edge.",
     },
     markets: [...markets.values()].map(({ brierSum, ...row }) => ({ ...row, status: row.matches ? "TESTED" : "NOT_TESTED", accuracy: row.matches ? row.correct / row.matches : null, baselineAccuracy: row.matches ? row.baselineCorrect / row.matches : null, brier: row.matches ? brierSum / row.matches : null, selectedHitRate: row.selected ? row.wins / row.selected : null })),
-    limitations: ["Binary accuracy includes predicting that a selection will lose. It is not ticket win rate.", "Voids are excluded; draw-no-bet results are conditional on a non-draw.", "Historical bookmaker quotes and archived prediction-time candidate pools are needed to backtest the actual target builder and ROI.", "Corners, cards, shots, early-payout and first-half markets are not evaluated by this full-time-score report."],
+    limitations: ["Binary accuracy includes predicting that a selection will lose. It is not ticket win rate.", "Voids are excluded; draw-no-bet results are conditional on a non-draw.", "Adaptive European-handicap rows test the model-selected +1 or -1 line; historic handicap prices are not yet available for ROI.", "Historical bookmaker quotes and archived prediction-time candidate pools are needed to backtest the actual target builder and ROI.", "Corners, cards, shots, early-payout and first-half markets are not evaluated by this full-time-score report."],
     calibration: calibration.filter((bucket) => bucket.predictions).map((bucket) => ({ ...bucket, actualRate: bucket.wins / bucket.predictions })),
     leagues: [...leagues.entries()].map(([id, value]) => ({ id, ...value, accuracy: value.correct / value.matches })).sort((a, b) => b.matches - a.matches),
   };

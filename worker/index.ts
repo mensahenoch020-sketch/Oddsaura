@@ -408,7 +408,7 @@ const worker = {
             result.warning = [result.warning, "Code created, but account history could not be saved. Copy this code now."].filter(Boolean).join(" ");
             console.error("Converted booking code could not be saved to account history.");
           });
-        return Response.json({ verified: true, sourceProvider: body.sourceProvider, destinationProvider: body.destinationProvider, sourceCode: code, importedFrom, decoded: selections.length, sourceIssues, ...result, partial: Boolean(result.partial || sourceIssues.length) }, { headers: { "cache-control": "no-store" } });
+        return Response.json({ verified: true, sourceProvider: body.sourceProvider, destinationProvider: body.destinationProvider, sourceCode: code, importedFrom, decoded: selections.length, sourceSelections: selections, sourceIssues, ...result, partial: Boolean(result.partial || sourceIssues.length) }, { headers: { "cache-control": "no-store" } });
       } catch (error) {
         const typed = error instanceof BookmakerIntegrationError ? error : error instanceof Error && "status" in error ? error as BookmakerIntegrationError : new BookmakerIntegrationError("The code could not be converted.", 502);
         return Response.json({ error: typed.message, details: typed.details }, { status: typed.status, headers: { "cache-control": "no-store" } });

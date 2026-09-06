@@ -46,6 +46,9 @@ test("builder receives market evidence, wider estimates and forward proof", asyn
   assert.match(builder, /mode: BuildMode/);
   assert.match(builder, /maxLegs = mode === "target" \? 21 : 8/);
   assert.match(admin, /Forward prediction proof/);
+  assert.match(admin, /metricEntries/);
+  assert.match(pipeline, /homeHistoryMatches/);
+  assert.match(pipeline, /trialTier: "OBSERVATION"/);
 });
 
 test("converter exposes verified codes and never offers a partial conversion", async () => {
@@ -58,5 +61,6 @@ test("converter exposes verified codes and never offers a partial conversion", a
   assert.match(worker, /Code created, but account history could not be saved/);
   assert.match(railway, /Code created, but account history could not be saved/);
   assert.match(worker, /decoded\.partial\) \{/);
+  assert.match(worker, /sourceSelections: selections/);
   assert.match(railway, /const allowPartial = false/);
 });
