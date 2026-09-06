@@ -7,13 +7,16 @@ function pick(id: string, odds: number, confidence = .7): PredictedPick {
   return { id, fixtureId: id, kickoff: "2030-01-02T12:00:00Z", league: { name: "Test" }, homeTeam: { name: `${id} Home` }, awayTeam: { name: `${id} Away` }, market: { key: "OVER_1_5", name: "Over 1.5", category: "TOTALS", line: 1.5 }, selection: "Over 1.5", probability: confidence, confidence, quotedOdds: odds, fairOdds: odds, tier: "SAFE", dataQuality: "HIGH", historyMatches: 20, marketProbability: confidence - .01, modelMarketGap: .03, expectedValue: -.01, reasoning: "test" };
 }
 
-test("target builder follows the requested total instead of returning two odds", () => {
-  const rows = Array.from({ length: 12 }, (_, index) => pick(`f${index}`, 1.5 + (index % 3) * .08));
+test("target builder follows requested totals through 50 odds", () => {
+  const rows = Array.from({ length: 24 }, (_, index) => pick(`f${index}`, 1.35 + (index % 5) * .08));
   const five = buildTargetSlip(rows, 5, Date.parse("2029-01-01"));
   const twenty = buildTargetSlip(rows, 20, Date.parse("2029-01-01"));
-  assert.ok(five && Math.abs(five.estimatedOdds - 5) < 1.5);
-  assert.ok(twenty && twenty.estimatedOdds > 14);
+  const fifty = buildTargetSlip(rows, 50, Date.parse("2029-01-01"));
+  assert.ok(five && Math.abs(five.estimatedOdds - 5) / 5 < .08);
+  assert.ok(twenty && Math.abs(twenty.estimatedOdds - 20) / 20 < .08);
+  assert.ok(fifty && Math.abs(fifty.estimatedOdds - 50) / 50 < .08);
   assert.ok(twenty.picks.length > five.picks.length);
+  assert.ok(fifty.picks.length > twenty.picks.length);
 });
 
 test("target builder never repeats a fixture or includes a started match", () => {
@@ -27,6 +30,7 @@ test("target builder never repeats a fixture or includes a started match", () =>
 test("target builder rejects unsupported bookmaker markets and unconfirmed prices", () => {
   const unsupported = Array.from({ length: 4 }, (_, index) => ({ ...pick(`btts${index}`, 1.45, .72), market: { key: "BTTS_YES", name: "Both teams to score", category: "GOALS" }, selection: "Yes" }));
   assert.equal(buildTargetSlip(unsupported, 2, Date.parse("2029-01-01"), "betway"), null);
-  const unconfirmed = Array.from({ length: 4 }, (_, index) => ({ ...pick(`raw${index}`, 1.45, .72), marketProbability: null }));
-  assert.equal(buildTargetSlip(unconfirmed, 2, Date.parse("2029-01-01"), "sportybet"), null);
+  const estimated = Array.from({ length: 4 }, (_, index) => ({ ...pick(`raw${index}`, 1.45, .72), quotedOdds: null, marketProbability: null, expectedValue: null }));
+  assert.ok(buildTargetSlip(estimated, 2, Date.parse("2029-01-01"), "sportybet", "target"));
+  assert.equal(buildTargetSlip(estimated, 2, Date.parse("2029-01-01"), "sportybet", "recommended"), null);
 });

@@ -38,6 +38,16 @@ test("public football payloads are split, bundled and cached for faster mobile l
   for (const scope of ["builder", "matches", "daily", "results", "admin"]) assert.match(pipeline, new RegExp(`${scope}:`));
 });
 
+test("builder receives market evidence, wider estimates and forward proof", async () => {
+  const [pipeline, builder, admin] = await Promise.all([read("pipeline/update.mjs"), read("app/builder/target-builder.ts"), read("app/admin/page.tsx")]);
+  for (const field of ["expectedValue", "marketProbability", "modelProbability", "modelMarketGap"]) assert.match(pipeline, new RegExp(field));
+  assert.match(pipeline, /MODEL_ESTIMATE/);
+  assert.match(pipeline, /paperTrials/);
+  assert.match(builder, /mode: BuildMode/);
+  assert.match(builder, /maxLegs = mode === "target" \? 21 : 8/);
+  assert.match(admin, /Forward prediction proof/);
+});
+
 test("converter exposes verified codes and never offers a partial conversion", async () => {
   const [form, worker, railway] = await Promise.all([read("app/converter/converter-form.tsx"), read("worker/index.ts"), read("scripts/railway-server.mjs")]);
   assert.match(form, /Your \{destinationMeta\.label\} code/);
