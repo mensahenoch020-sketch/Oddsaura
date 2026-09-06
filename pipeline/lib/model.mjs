@@ -2,7 +2,7 @@ const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const factorial = (n) => { let out = 1; for (let i = 2; i <= n; i += 1) out *= i; return out; };
 const poisson = (lambda, goals) => Math.exp(-lambda) * Math.pow(lambda, goals) / factorial(goals);
 
-export function buildForm(teamId, events, before, limit = 12, venue = "ALL") {
+export function buildForm(teamId, events, before, limit = 12, venue = "ALL", decay = 0.9) {
   const matches = events
     .filter((event) => {
       if (event.status !== "FINISHED" || event.kickoff >= before || event.homeScore === null || event.awayScore === null) return false;
@@ -12,13 +12,18 @@ export function buildForm(teamId, events, before, limit = 12, venue = "ALL") {
     })
     .sort((a, b) => b.kickoff.localeCompare(a.kickoff))
     .slice(0, limit);
-  const form = { played: 0, weight: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, points: 0, lastKickoff: null };
+  const form = { played: 0, weight: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, points: 0, cleanSheets: 0, failedToScore: 0, btts: 0, over15: 0, over25: 0, lastKickoff: null };
   for (const [index, match] of matches.entries()) {
     const home = match.homeTeam.id === teamId;
     const gf = home ? match.homeScore : match.awayScore;
     const ga = home ? match.awayScore : match.homeScore;
-    const weight = Math.pow(0.9, index);
+    const weight = Math.pow(decay, index);
     form.played += 1; form.weight += weight; form.goalsFor += gf * weight; form.goalsAgainst += ga * weight;
+    form.cleanSheets += Number(ga === 0) * weight;
+    form.failedToScore += Number(gf === 0) * weight;
+    form.btts += Number(gf > 0 && ga > 0) * weight;
+    form.over15 += Number(gf + ga >= 2) * weight;
+    form.over25 += Number(gf + ga >= 3) * weight;
     if (index === 0) form.lastKickoff = match.kickoff;
     if (gf > ga) { form.wins += weight; form.points += 3 * weight; }
     else if (gf === ga) { form.draws += weight; form.points += weight; }
@@ -30,7 +35,9 @@ export function buildForm(teamId, events, before, limit = 12, venue = "ALL") {
 export function buildModelContext(events, before = "9999-12-31T00:00:00.000Z") {
   const ratings = new Map();
   const leagues = new Map();
+  const teamEvents = new Map();
   const finished = events.filter((event) => event.status === "FINISHED" && event.kickoff < before && event.homeScore != null && event.awayScore != null).sort((a, b) => a.kickoff.localeCompare(b.kickoff));
+  const referenceTime = Number.isFinite(Date.parse(before)) ? Date.parse(before) : Date.parse(finished.at(-1)?.kickoff ?? new Date().toISOString());
   for (const match of finished) {
     const homeId = match.homeTeam.id; const awayId = match.awayTeam.id;
     const homeRating = ratings.get(homeId) ?? 1500; const awayRating = ratings.get(awayId) ?? 1500;
@@ -40,11 +47,18 @@ export function buildModelContext(events, before = "9999-12-31T00:00:00.000Z") {
     const change = 22 * (1 + Math.min(3, margin) * 0.12) * (actual - expected);
     ratings.set(homeId, homeRating + change); ratings.set(awayId, awayRating - change);
     const leagueId = match.league?.id ?? match.league?.name ?? "football";
-    const league = leagues.get(leagueId) ?? { matches: 0, homeGoals: 0, awayGoals: 0 };
-    league.matches += 1; league.homeGoals += match.homeScore; league.awayGoals += match.awayScore;
+    const ageDays = Math.max(0, (referenceTime - Date.parse(match.kickoff)) / 86_400_000);
+    const leagueWeight = Math.pow(0.5, ageDays / 730);
+    const league = leagues.get(leagueId) ?? { matches: 0, weight: 0, homeGoals: 0, awayGoals: 0 };
+    league.matches += 1; league.weight += leagueWeight; league.homeGoals += match.homeScore * leagueWeight; league.awayGoals += match.awayScore * leagueWeight;
     leagues.set(leagueId, league);
+    for (const teamId of [homeId, awayId]) {
+      const matches = teamEvents.get(teamId) ?? [];
+      matches.push(match);
+      teamEvents.set(teamId, matches);
+    }
   }
-  return { ratings, leagues };
+  return { ratings, leagues, teamEvents };
 }
 
 function grid(homeLambda, awayLambda, maxGoals = 9, rho = -0.08) {
@@ -66,22 +80,38 @@ const sum = (rows, predicate) => rows.reduce((value, row) => value + (predicate(
 const market = (key, name, category, selection, probability, extra = {}) => ({ key, name, category, selection, probability: clamp(probability, 0.001, 0.999), ...extra });
 
 export function scoreEvent(event, allEvents, suppliedContext = null) {
-  const home = buildForm(event.homeTeam.id, allEvents, event.kickoff, 12);
-  const away = buildForm(event.awayTeam.id, allEvents, event.kickoff, 12);
-  const homeVenue = buildForm(event.homeTeam.id, allEvents, event.kickoff, 8, "HOME");
-  const awayVenue = buildForm(event.awayTeam.id, allEvents, event.kickoff, 8, "AWAY");
   const context = suppliedContext ?? buildModelContext(allEvents, event.kickoff);
+  const homeEvents = context.teamEvents?.get(event.homeTeam.id) ?? allEvents;
+  const awayEvents = context.teamEvents?.get(event.awayTeam.id) ?? allEvents;
+  const home = buildForm(event.homeTeam.id, homeEvents, event.kickoff, 16);
+  const away = buildForm(event.awayTeam.id, awayEvents, event.kickoff, 16);
+  const homeVenue = buildForm(event.homeTeam.id, homeEvents, event.kickoff, 12, "HOME");
+  const awayVenue = buildForm(event.awayTeam.id, awayEvents, event.kickoff, 12, "AWAY");
+  const homeLong = buildForm(event.homeTeam.id, homeEvents, event.kickoff, 60, "ALL", 0.97);
+  const awayLong = buildForm(event.awayTeam.id, awayEvents, event.kickoff, 60, "ALL", 0.97);
+  const headToHeadEvents = homeEvents.filter((match) => match.homeTeam.id === event.awayTeam.id || match.awayTeam.id === event.awayTeam.id);
+  const homeH2h = buildForm(event.homeTeam.id, headToHeadEvents, event.kickoff, 6, "ALL", 0.92);
+  const awayH2h = buildForm(event.awayTeam.id, headToHeadEvents, event.kickoff, 6, "ALL", 0.92);
   const league = context.leagues.get(event.league?.id ?? event.league?.name ?? "football");
-  const leagueHome = league?.matches >= 20 ? league.homeGoals / league.matches : 1.42;
-  const leagueAway = league?.matches >= 20 ? league.awayGoals / league.matches : 1.12;
+  const leagueHome = league?.matches >= 20 && league.weight ? league.homeGoals / league.weight : 1.42;
+  const leagueAway = league?.matches >= 20 && league.weight ? league.awayGoals / league.weight : 1.12;
   // Bayesian league priors keep every scheduled fixture modelled without
   // pretending that a team with little history has high-confidence evidence.
   const priorMatches = 4;
   const rate = (form, key, prior) => (form[key] + prior * priorMatches) / (form.weight + priorMatches);
-  const homeGF = 0.58 * rate(homeVenue, "goalsFor", leagueHome) + 0.42 * rate(home, "goalsFor", leagueHome);
-  const homeGA = 0.58 * rate(homeVenue, "goalsAgainst", leagueAway) + 0.42 * rate(home, "goalsAgainst", leagueAway);
-  const awayGF = 0.58 * rate(awayVenue, "goalsFor", leagueAway) + 0.42 * rate(away, "goalsFor", leagueAway);
-  const awayGA = 0.58 * rate(awayVenue, "goalsAgainst", leagueHome) + 0.42 * rate(away, "goalsAgainst", leagueHome);
+  const blendRate = (recent, venueForm, long, key, prior) => 0.38 * rate(venueForm, key, prior) + 0.37 * rate(recent, key, prior) + 0.25 * rate(long, key, prior);
+  let homeGF = blendRate(home, homeVenue, homeLong, "goalsFor", leagueHome);
+  let homeGA = blendRate(home, homeVenue, homeLong, "goalsAgainst", leagueAway);
+  let awayGF = blendRate(away, awayVenue, awayLong, "goalsFor", leagueAway);
+  let awayGA = blendRate(away, awayVenue, awayLong, "goalsAgainst", leagueHome);
+  // Direct meetings are useful context, but their small and often stale sample
+  // is capped at a five-percent adjustment.
+  if (homeH2h.played >= 3) {
+    homeGF = 0.95 * homeGF + 0.05 * rate(homeH2h, "goalsFor", leagueHome);
+    homeGA = 0.95 * homeGA + 0.05 * rate(homeH2h, "goalsAgainst", leagueAway);
+    awayGF = 0.95 * awayGF + 0.05 * rate(awayH2h, "goalsFor", leagueAway);
+    awayGA = 0.95 * awayGA + 0.05 * rate(awayH2h, "goalsAgainst", leagueHome);
+  }
   const homePPG = rate(home, "points", 1.45);
   const awayPPG = rate(away, "points", 1.1);
   const homeRating = context.ratings.get(event.homeTeam.id) ?? 1500;
@@ -102,15 +132,15 @@ export function scoreEvent(event, allEvents, suppliedContext = null) {
   const draw = sum(rows, (r) => r.home === r.away);
   const awayWin = sum(rows, (r) => r.home < r.away);
   const btts = sum(rows, (r) => r.home > 0 && r.away > 0);
-  const quality = clamp((home.played + away.played + homeVenue.played + awayVenue.played) / 36, 0.08, 1);
+  const minimumLongHistory = Math.min(homeLong.played, awayLong.played);
+  const recentCoverage = Math.min(home.played, away.played) / 16;
+  const venueCoverage = Math.min(homeVenue.played, awayVenue.played) / 12;
+  const longCoverage = minimumLongHistory / 40;
+  const quality = clamp(0.4 * Math.min(1, longCoverage) + 0.38 * Math.min(1, recentCoverage) + 0.22 * Math.min(1, venueCoverage), 0.08, 1);
   const predictions = [
     market("MATCH_HOME", "Match result", "Result", event.homeTeam.name, homeWin),
     market("MATCH_DRAW", "Match result", "Result", "Draw", draw),
     market("MATCH_AWAY", "Match result", "Result", event.awayTeam.name, awayWin),
-    market("ONE_UP_HOME", "1UP early payout", "Result", event.homeTeam.name, homeWin),
-    market("ONE_UP_AWAY", "1UP early payout", "Result", event.awayTeam.name, awayWin),
-    market("TWO_UP_HOME", "2UP early payout", "Result", event.homeTeam.name, homeWin),
-    market("TWO_UP_AWAY", "2UP early payout", "Result", event.awayTeam.name, awayWin),
     market("DC_1X", "Double chance", "Result", `${event.homeTeam.name} or draw`, homeWin + draw),
     market("DC_X2", "Double chance", "Result", `${event.awayTeam.name} or draw`, awayWin + draw),
     market("DC_12", "Double chance", "Result", "Either team to win", homeWin + awayWin),
@@ -138,6 +168,16 @@ export function scoreEvent(event, allEvents, suppliedContext = null) {
     predictions.push(market(`AWAY_OVER_${String(line).replace(".", "_")}`, "Away team goals", "Team", `Over ${line}`, awayOver, { line }));
     predictions.push(market(`AWAY_UNDER_${String(line).replace(".", "_")}`, "Away team goals", "Team", `Under ${line}`, 1 - awayOver, { line }));
   }
+  // Publish one meaningful European three-way handicap line. The favourite
+  // gives one goal; if there is no clear favourite, the market is withheld.
+  const favouriteGap = Math.abs(homeWin - awayWin);
+  if (favouriteGap >= 0.08) {
+    const line = homeWin > awayWin ? -1 : 1;
+    const adjusted = (row) => row.home + line - row.away;
+    predictions.push(market("HCP_3WAY_HOME", "European handicap", "Handicap", `${event.homeTeam.name} (${line > 0 ? "+" : ""}${line})`, sum(rows, (row) => adjusted(row) > 0), { line }));
+    predictions.push(market("HCP_3WAY_DRAW", "European handicap", "Handicap", `Draw (${line > 0 ? "+" : ""}${line})`, sum(rows, (row) => adjusted(row) === 0), { line }));
+    predictions.push(market("HCP_3WAY_AWAY", "European handicap", "Handicap", `${event.awayTeam.name} (${line > 0 ? "+" : ""}${line})`, sum(rows, (row) => adjusted(row) < 0), { line }));
+  }
   predictions.push(market("HOME_AND_O15", "Result and goals", "Combination", `${event.homeTeam.name} & over 1.5`, sum(rows, (r) => r.home > r.away && r.home + r.away >= 2)));
   predictions.push(market("AWAY_AND_O15", "Result and goals", "Combination", `${event.awayTeam.name} & over 1.5`, sum(rows, (r) => r.away > r.home && r.home + r.away >= 2)));
   predictions.push(market("DC1X_AND_O15", "Double chance and goals", "Combination", `${event.homeTeam.name}/draw & over 1.5`, sum(rows, (r) => r.home >= r.away && r.home + r.away >= 2)));
@@ -151,10 +191,6 @@ export function scoreEvent(event, allEvents, suppliedContext = null) {
   predictions.push(market("HT_OVER_0_5", "First-half goals", "Half", "Over 0.5", sum(firstHalf, (r) => r.home + r.away >= 1), { line: 0.5 }));
   predictions.push(market("HT_OVER_1_5", "First-half goals", "Half", "Over 1.5", sum(firstHalf, (r) => r.home + r.away >= 2), { line: 1.5 }));
 
-  for (const row of [...rows].sort((a, b) => b.probability - a.probability).slice(0, 5)) {
-    predictions.push(market(`CS_${row.home}_${row.away}`, "Correct score", "Score", `${row.home}-${row.away}`, row.probability, { score: [row.home, row.away] }));
-  }
-
   return predictions.map((item) => ({
     ...item,
     fixtureId: event.id,
@@ -166,7 +202,7 @@ export function scoreEvent(event, allEvents, suppliedContext = null) {
     quotedOdds: null,
     oddsSource: null,
     edge: null,
-    factors: { homePlayed: home.played, awayPlayed: away.played, homeVenuePlayed: homeVenue.played, awayVenuePlayed: awayVenue.played, homePPG, awayPPG, homeGF, awayGF, homeGA, awayGA, homeElo: Math.round(homeRating), awayElo: Math.round(awayRating), eloHome, homeRestDays: Number(restDays(home).toFixed(1)), awayRestDays: Number(restDays(away).toFixed(1)), leagueHomeGoals: leagueHome, leagueAwayGoals: leagueAway },
+    factors: { homePlayed: home.played, awayPlayed: away.played, homeVenuePlayed: homeVenue.played, awayVenuePlayed: awayVenue.played, homeHistoryPlayed: homeLong.played, awayHistoryPlayed: awayLong.played, headToHeadPlayed: homeH2h.played, minimumLongHistory, homePPG, awayPPG, homeGF, awayGF, homeGA, awayGA, homeCleanSheetRate: home.weight ? home.cleanSheets / home.weight : null, awayCleanSheetRate: away.weight ? away.cleanSheets / away.weight : null, homeBttsRate: home.weight ? home.btts / home.weight : null, awayBttsRate: away.weight ? away.btts / away.weight : null, homeElo: Math.round(homeRating), awayElo: Math.round(awayRating), eloHome, homeRestDays: Number(restDays(home).toFixed(1)), awayRestDays: Number(restDays(away).toFixed(1)), leagueHomeGoals: leagueHome, leagueAwayGoals: leagueAway },
   }));
 }
 
@@ -180,6 +216,7 @@ function predictionFamily(key = "") {
   if (/^BTTS_/.test(key)) return "BTTS";
   if (/^HOME_(OVER|UNDER)_/.test(key)) return "HOME_TOTAL";
   if (/^AWAY_(OVER|UNDER)_/.test(key)) return "AWAY_TOTAL";
+  if (/^HCP_3WAY_/.test(key)) return "HANDICAP_3WAY";
   if (/^(OVER|UNDER)_/.test(key)) return "TOTAL";
   return "OTHER";
 }
@@ -193,6 +230,7 @@ function quoteFamily(value = "") {
   if (/home (team )?(goals|total)|team 1 total/.test(name)) return "HOME_TOTAL";
   if (/away (team )?(goals|total)|team 2 total/.test(name)) return "AWAY_TOTAL";
   if (!/half|team/.test(name) && /total goals|match goals|over under|goals total|^total$/.test(name)) return "TOTAL";
+  if (/european handicap|3 way handicap|three way handicap/.test(name)) return "HANDICAP_3WAY";
   if (/match result|match winner|moneyline|win draw win|1x2/.test(name)) return "RESULT";
   return "OTHER";
 }
@@ -215,6 +253,9 @@ function selectionMatches(prediction, odd) {
   if (/^(UNDER|HOME_UNDER|AWAY_UNDER)_/.test(key)) return actual.startsWith("under");
   if (key === "BTTS_YES") return actual === "yes" || actual === "gg";
   if (key === "BTTS_NO") return actual === "no" || actual === "ng";
+  if (key === "HCP_3WAY_HOME") return actual === "1" || actual === "home" || actual.startsWith(text(prediction.selection).split(" ")[0]);
+  if (key === "HCP_3WAY_DRAW") return actual === "x" || actual.startsWith("draw");
+  if (key === "HCP_3WAY_AWAY") return actual === "2" || actual === "away" || actual.startsWith(text(prediction.selection).split(" ")[0]);
   return actual === wanted;
 }
 

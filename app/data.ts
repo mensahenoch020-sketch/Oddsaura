@@ -33,6 +33,9 @@ export type PredictedPick = Omit<TicketSelection, "odds"> & {
   tier: "SAFE" | "BALANCED" | "HIGH_RISK";
   dataQuality?: "LOW" | "MEDIUM" | "HIGH";
   historyMatches?: number;
+  homeHistoryMatches?: number;
+  awayHistoryMatches?: number;
+  recentHistoryMatches?: number;
   reasoning: string;
   oddsProvider?: string | null;
   providerMarketId?: string | null;
@@ -40,7 +43,7 @@ export type PredictedPick = Omit<TicketSelection, "odds"> & {
   providerDeepLink?: string | null;
 };
 export type Ticket = { id: string; title: string; category: string; status: string; totalOdds: number; confidence: number; estimatedWinChance?: number; breakEvenChance?: number; strategyVersion?: string; paper?: boolean; priceStatus?: "QUOTED" | "MODEL_ESTIMATE"; publishedAt?: string; settledAt?: string | null; wonLegs?: number; lostLegs?: number; voidLegs?: number; bookingCodes: Array<{ provider: string; code: string; deepLink?: string }>; selections: TicketSelection[] };
-export type PaperTrial = TicketSelection & { predictedAt: string; settledAt: string | null };
+export type PaperTrial = TicketSelection & { predictedAt: string; settledAt: string | null; trialTier?: "OBSERVATION" };
 export type PaperMetrics = { recorded: number; settled: number; won: number; lost: number; hitRate: number | null; flatStakeRoi: number | null };
 export type Snapshot = {
   version: number;
@@ -49,7 +52,7 @@ export type Snapshot = {
   status: string;
   message: string;
   sources: Array<{ id: string; label: string; status: string; lastSuccessAt: string | null; records: number; warnings?: string[] }>;
-  metrics: { fixtures: number; live: number; completed: number; pricedMarkets: number; predictions: number; selectablePredictions?: number; publishedTickets: number; noBetCategories?: string[]; strategyVersion?: string; paperTrials?: PaperMetrics };
+  metrics: { fixtures: number; live: number; completed: number; pricedMarkets: number; predictions: number; selectablePredictions?: number; publishedTickets: number; historicalMatches?: number; historicalTeams?: number; teamsWithDeepHistory?: number; noBetCategories?: string[]; strategyVersion?: string; paperTrials?: PaperMetrics };
   fixtures?: Fixture[];
   liveFixtures?: Fixture[];
   recentResults?: Fixture[];

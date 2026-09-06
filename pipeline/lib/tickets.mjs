@@ -107,7 +107,7 @@ export function buildTicket(candidates, category, fixtures) {
     confidence,
     estimatedWinChance,
     breakEvenChance: 1 / totalOdds,
-    strategyVersion: "reverse-market-v1",
+    strategyVersion: "history-market-v2",
     paper: true,
     publishedAt: new Date().toISOString(),
     bookingCodes: [],

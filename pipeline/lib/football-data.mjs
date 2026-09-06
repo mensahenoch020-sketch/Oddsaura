@@ -52,9 +52,23 @@ function historicalOdds(row, matchId, homeName, awayName) {
   const home = number(row.AvgH) ?? number(row.B365H) ?? number(row.MaxH);
   const draw = number(row.AvgD) ?? number(row.B365D) ?? number(row.MaxD);
   const away = number(row.AvgA) ?? number(row.B365A) ?? number(row.MaxA);
-  return [[homeName, home, "home"], ["Draw", draw, "draw"], [awayName, away, "away"]]
+  const result = [[homeName, home, "home"], ["Draw", draw, "draw"], [awayName, away, "away"]]
     .filter(([, odds]) => odds && odds > 1)
     .map(([selection, odds, id]) => ({ marketId: `${matchId}-historical-1x2`, market: "Match result", selectionId: id, selection, line: null, odds, source: "football-data-historical" }));
+  const over25 = number(row["Avg>2.5"]) ?? number(row["B365>2.5"]) ?? number(row["Max>2.5"]) ?? number(row["P>2.5"]);
+  const under25 = number(row["Avg<2.5"]) ?? number(row["B365<2.5"]) ?? number(row["Max<2.5"]) ?? number(row["P<2.5"]);
+  const totals = [["Over 2.5", over25, "over"], ["Under 2.5", under25, "under"]]
+    .filter(([, odds]) => odds && odds > 1)
+    .map(([selection, odds, id]) => ({ marketId: `${matchId}-historical-total-2.5`, market: "Total goals", selectionId: id, selection, line: 2.5, odds, source: "football-data-historical" }));
+  // Football-data's AH columns are a two-way Asian handicap. Preserve them
+  // for price research without labelling them as a European three-way line.
+  const asianLine = number(row.AHh);
+  const asianHome = number(row.AvgAHH) ?? number(row.B365AHH) ?? number(row.MaxAHH);
+  const asianAway = number(row.AvgAHA) ?? number(row.B365AHA) ?? number(row.MaxAHA);
+  const asian = asianLine == null ? [] : [[homeName, asianHome, "home"], [awayName, asianAway, "away"]]
+    .filter(([, odds]) => odds && odds > 1)
+    .map(([selection, odds, id]) => ({ marketId: `${matchId}-historical-asian-${asianLine}`, market: "Asian handicap", selectionId: id, selection, line: asianLine, odds, source: "football-data-historical" }));
+  return [...result, ...totals, ...asian];
 }
 
 export function normalizeFootballDataRow(row, league, season) {

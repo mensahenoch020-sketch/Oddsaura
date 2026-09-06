@@ -16,7 +16,19 @@ const historical = await readFile(resolve(root, "data/history/football-data.json
 
 async function writePublicSnapshots(snapshot) {
   const modelPerformance = await readFile(resolve(root, "data/public/model-performance.json"), "utf8").then(JSON.parse).catch(() => null);
-  const withoutOdds = (fixture) => ({ ...fixture, odds: [] });
+  const slimFixture = (fixture) => ({
+    id: fixture.id,
+    providerId: fixture.providerId,
+    source: fixture.source,
+    league: fixture.league,
+    kickoff: fixture.kickoff,
+    status: fixture.status,
+    homeTeam: fixture.homeTeam,
+    awayTeam: fixture.awayTeam,
+    homeScore: fixture.homeScore ?? null,
+    awayScore: fixture.awayScore ?? null,
+    odds: [],
+  });
   // Route payloads intentionally omit modelling fields their screens never
   // read. This keeps first paint quick on mobile without reducing the full
   // operational snapshot or the selectable bookmaker markets.
@@ -36,9 +48,9 @@ async function writePublicSnapshots(snapshot) {
   };
   const scoped = {
     builder: { ...common, predictedPicks: routePicks },
-    matches: { ...common, fixtures: (snapshot.fixtures ?? []).map(withoutOdds), liveFixtures: (snapshot.liveFixtures ?? []).map(withoutOdds), predictedPicks: routePicks },
+    matches: { ...common, fixtures: (snapshot.fixtures ?? []).map(slimFixture), liveFixtures: (snapshot.liveFixtures ?? []).map(slimFixture), predictedPicks: routePicks },
     daily: { ...common, tickets: snapshot.tickets ?? [] },
-    results: { ...common, recentResults: (snapshot.recentResults ?? []).map(withoutOdds), tickets: snapshot.tickets ?? [], ticketHistory: snapshot.ticketHistory ?? [], paperTrials: snapshot.paperTrials ?? [], modelPerformance },
+    results: { ...common, recentResults: (snapshot.recentResults ?? []).slice(-300).map(slimFixture), tickets: snapshot.tickets ?? [], ticketHistory: (snapshot.ticketHistory ?? []).slice(0, 40), paperTrials: snapshot.paperTrials ?? [], modelPerformance },
     admin: { ...common, sources: snapshot.sources ?? [], tickets: snapshot.tickets ?? [], marketCatalog: snapshot.marketCatalog ?? [], paperTrials: snapshot.paperTrials ?? [] },
   };
   await mkdir(dirname(output), { recursive: true });
@@ -60,6 +72,11 @@ const [historyRun, globalRun] = await Promise.allSettled([
 ]);
 const eventMap = new Map();
 for (const event of historical.events ?? []) eventMap.set(eventIdentity(event), event);
+// A temporary live-feed outage must not erase the last successful fixture
+// board. Fresh source rows replace these records whenever collection works.
+for (const event of [...(previous.fixtures ?? []), ...(previous.liveFixtures ?? []), ...(previous.recentResults ?? [])]) {
+  if (event?.kickoff && event?.homeTeam?.id && event?.awayTeam?.id) eventMap.set(eventIdentity(event), event);
+}
 sources.push({ id: "football-data-history", label: "Multi-season historical results and odds", status: historical.events?.length ? "healthy" : "waiting", lastSuccessAt: historical.generatedAt ?? null, records: historical.events?.length ?? 0, warnings: (historical.warnings ?? []).slice(0, 8) });
 if (historyRun.status === "fulfilled" && historyRun.value.events.length) {
   for (const event of historyRun.value.events) eventMap.set(eventIdentity(event), event);
@@ -109,20 +126,41 @@ const predictedPicks = [];
 const predictionKeys = new Set();
 const fixturePickCounts = new Map();
 const maxSelectablePicks = Math.min(5000, Math.max(2500, upcoming.length * 3));
-const publicMarketKeys = /^(MATCH_(HOME|DRAW|AWAY)|ONE_UP_(HOME|AWAY)|TWO_UP_(HOME|AWAY)|DC_(1X|X2|12)|OVER_|UNDER_|BTTS_(YES|NO)|HOME_(OVER|UNDER)_|AWAY_(OVER|UNDER)_|DNB_(HOME|AWAY))/;
+const publicMarketKeys = /^(MATCH_(HOME|DRAW|AWAY)|DC_(1X|X2|12)|OVER_|UNDER_|BTTS_(YES|NO)|HOME_(OVER|UNDER)_|AWAY_(OVER|UNDER)_|DNB_(HOME|AWAY)|HOME_CLEAN|AWAY_CLEAN|HCP_3WAY_(HOME|DRAW|AWAY))/;
 const priorityLeaguePattern = /eng\.1|english premier|premier league|esp\.1|la ?liga|ita\.1|italian serie a|\bserie a\b|ger\.1|bundesliga|fra\.1|ligue 1|ned\.1|eredivisie|ksa\.1|saudi pro|por\.1|primeira liga|liga portugal|tur\.1|super lig|süper lig/i;
 function isPriorityLeague(league) {
   return priorityLeaguePattern.test(`${league?.id ?? ""} ${league?.name ?? ""} ${league?.country ?? ""}`);
 }
+function historyEvidence(pick) {
+  const homeRecent = Number(pick.factors?.homePlayed ?? 0);
+  const awayRecent = Number(pick.factors?.awayPlayed ?? 0);
+  const homeVenue = Number(pick.factors?.homeVenuePlayed ?? 0);
+  const awayVenue = Number(pick.factors?.awayVenuePlayed ?? 0);
+  const homeLong = Number(pick.factors?.homeHistoryPlayed ?? homeRecent);
+  const awayLong = Number(pick.factors?.awayHistoryPlayed ?? awayRecent);
+  return {
+    homeRecent, awayRecent, homeVenue, awayVenue, homeLong, awayLong,
+    total: homeLong + awayLong,
+    minimum: Math.min(homeLong, awayLong),
+    ready: Math.min(homeLong, awayLong) >= 20 && Math.min(homeRecent, awayRecent) >= 8 && Math.min(homeVenue, awayVenue) >= 4,
+  };
+}
+function marketConfidenceFloor(key) {
+  if (/^(HOME|AWAY)_CLEAN$/.test(key)) return .64;
+  if (/^HCP_3WAY_/.test(key)) return .58;
+  return .5;
+}
 function publishPick(pick, fixture) {
-  const identity = `${pick.fixtureId}-${pick.providerMarketId ?? pick.key}-${pick.providerSelectionId ?? pick.selection}`;
+  const identity = `${pick.fixtureId}-${pick.providerMarketId ?? pick.key}-${pick.providerSelectionId ?? pick.selection}-${pick.line ?? "none"}`;
   const fixtureLimit = isPriorityLeague(fixture.league) ? 6 : 3;
   if (predictionKeys.has(identity) || (fixturePickCounts.get(pick.fixtureId) ?? 0) >= fixtureLimit || predictedPicks.length >= maxSelectablePicks) return false;
-  const historyMatches = (pick.factors?.homePlayed ?? 0) + (pick.factors?.awayPlayed ?? 0);
-  const dataQuality = historyMatches >= 14 ? "HIGH" : historyMatches >= 6 ? "MEDIUM" : "LOW";
+  const evidence = historyEvidence(pick);
+  const historyMatches = evidence.total;
+  const dataQuality = evidence.minimum >= 40 && Math.min(evidence.homeRecent, evidence.awayRecent) >= 12 ? "HIGH" : evidence.ready ? "MEDIUM" : "LOW";
   const tier = dataQuality === "LOW" ? "HIGH_RISK" : pick.confidence >= 0.72 && (pick.quotedOdds ?? 99) <= 1.8 ? "SAFE" : pick.confidence >= 0.62 ? "BALANCED" : "HIGH_RISK";
+  const lineId = pick.line == null ? "" : `-${String(pick.line).replace("-", "minus-").replace(".", "-")}`;
   predictedPicks.push({
-    id: `${pick.fixtureId}-${pick.key}`,
+    id: `${pick.fixtureId}-${pick.key}${lineId}`,
     fixtureId: pick.fixtureId,
     league: fixture.league,
     kickoff: fixture.kickoff,
@@ -138,6 +176,9 @@ function publishPick(pick, fixture) {
     tier,
     dataQuality,
     historyMatches,
+    homeHistoryMatches: evidence.homeLong,
+    awayHistoryMatches: evidence.awayLong,
+    recentHistoryMatches: evidence.homeRecent + evidence.awayRecent,
     oddsSource: pick.oddsSource,
     oddsProvider: pick.oddsProvider,
     providerMarketId: pick.providerMarketId,
@@ -148,9 +189,7 @@ function publishPick(pick, fixture) {
     modelProbability: pick.modelProbability,
     modelMarketGap: pick.modelMarketGap,
     priceStatus: pick.quotedOdds ? "QUOTED" : "MODEL_ESTIMATE",
-    reasoning: pick.key.startsWith("ONE_UP_") || pick.key.startsWith("TWO_UP_")
-      ? `Early-payout version of the modelled match result · confidence remains based on the full-time result, not a promised early lead`
-      : `Bookmaker baseline ${Math.round((pick.marketProbability ?? 0) * 100)}% · OddsAura model difference ${Math.round((pick.modelMarketGap ?? 0) * 100)} points · ${historyMatches} recent team performances`,
+    reasoning: `${evidence.homeLong} ${fixture.homeTeam.name} matches + ${evidence.awayLong} ${fixture.awayTeam.name} matches · ${evidence.homeRecent + evidence.awayRecent} recent performances · bookmaker baseline ${pick.marketProbability == null ? "not available" : `${Math.round(pick.marketProbability * 100)}%`} · model difference ${pick.modelMarketGap == null ? "awaiting live verification" : `${Math.round(pick.modelMarketGap * 100)} points`}`,
   });
   predictionKeys.add(identity);
   fixturePickCounts.set(pick.fixtureId, (fixturePickCounts.get(pick.fixtureId) ?? 0) + 1);
@@ -160,9 +199,8 @@ function publishPick(pick, fixture) {
 const eligiblePicks = [...predictions]
   .filter((item) => {
     const fixture = fixtureMap.get(item.fixtureId);
-    const history = (item.factors?.homePlayed ?? 0) + (item.factors?.awayPlayed ?? 0);
     if (!fixture || !publicMarketKeys.test(item.key) || !item.quotedOdds || item.marketProbability == null) return false;
-    return history >= 6 && item.confidence >= .5 && (item.modelMarketGap ?? 1) <= .15 && (item.expectedValue ?? -1) >= -.1;
+    return historyEvidence(item).ready && item.confidence >= marketConfidenceFloor(item.key) && (item.modelMarketGap ?? 1) <= .15 && (item.expectedValue ?? -1) >= -.1;
   })
   .sort((a, b) => (b.confidence + Math.max(0, b.edge ?? 0)) - (a.confidence + Math.max(0, a.edge ?? 0)));
 const bestEligibleByFixture = new Map();
@@ -180,17 +218,16 @@ for (const [fixtureId, primary] of bestEligibleByFixture) {
 // Make the requested market families genuinely discoverable instead of
 // allowing high-probability totals to crowd every other option off the board.
 const showcaseKeys = [
-  "ONE_UP_HOME", "ONE_UP_AWAY", "TWO_UP_HOME", "TWO_UP_AWAY", "MATCH_HOME", "MATCH_DRAW", "MATCH_AWAY",
+  "MATCH_HOME", "MATCH_DRAW", "MATCH_AWAY",
   "DC_1X", "DC_X2", "DC_12", "OVER_1_5", "OVER_2_5", "UNDER_2_5", "UNDER_3_5",
   "BTTS_YES", "BTTS_NO", "HOME_OVER_0_5", "AWAY_OVER_0_5", "DNB_HOME", "DNB_AWAY",
+  "HOME_CLEAN", "AWAY_CLEAN", "HCP_3WAY_HOME", "HCP_3WAY_DRAW", "HCP_3WAY_AWAY",
 ];
 for (const key of showcaseKeys) {
   const strongest = predictions.filter((item) => {
     const fixture = fixtureMap.get(item.fixtureId);
-    const history = (item.factors?.homePlayed ?? 0) + (item.factors?.awayPlayed ?? 0);
-    const threshold = key.startsWith("ONE_UP_") || key.startsWith("TWO_UP_") ? .38 : .48;
     return item.key === key && fixture && item.quotedOdds && item.marketProbability != null && isPriorityLeague(fixture.league)
-      && history >= 6 && item.confidence >= threshold && (item.modelMarketGap ?? 1) <= .15;
+      && historyEvidence(item).ready && item.confidence >= Math.max(.48, marketConfidenceFloor(item.key)) && (item.modelMarketGap ?? 1) <= .15;
   }).sort((a, b) => b.confidence - a.confidence).slice(0, 12);
   for (const pick of strongest) {
     const fixture = fixtureMap.get(pick.fixtureId);
@@ -203,9 +240,8 @@ for (const key of showcaseKeys) {
 // the selected bookmaker before a code is accepted. Daily Odds remains strict.
 const modelEstimatePicks = predictions.filter((item) => {
   const fixture = fixtureMap.get(item.fixtureId);
-  const history = (item.factors?.homePlayed ?? 0) + (item.factors?.awayPlayed ?? 0);
   return fixture && isPriorityLeague(fixture.league) && publicMarketKeys.test(item.key)
-    && !item.quotedOdds && history >= 10 && item.confidence >= .58 && item.probability >= .58;
+    && !item.quotedOdds && historyEvidence(item).ready && item.confidence >= Math.max(.58, marketConfidenceFloor(item.key)) && item.probability >= Math.max(.58, marketConfidenceFloor(item.key));
 }).sort((a, b) => b.confidence - a.confidence);
 for (const pick of modelEstimatePicks) {
   const fixture = fixtureMap.get(pick.fixtureId);
@@ -219,7 +255,7 @@ for (const pick of eligiblePicks) {
 }
 const watchlist = [];
 const usedFixtures = new Set();
-for (const pick of [...predictions].filter((item) => item.confidence >= 0.62 && item.quotedOdds && item.marketProbability != null && (item.modelMarketGap ?? 1) <= .12).sort((a, b) => b.confidence - a.confidence)) {
+for (const pick of [...predictions].filter((item) => publicMarketKeys.test(item.key) && historyEvidence(item).ready && item.confidence >= 0.62 && item.quotedOdds && item.marketProbability != null && (item.modelMarketGap ?? 1) <= .12).sort((a, b) => b.confidence - a.confidence)) {
   if (usedFixtures.has(pick.fixtureId) || watchlist.length >= 12) continue;
   const fixture = fixtureMap.get(pick.fixtureId);
   if (!fixture) continue;
@@ -256,15 +292,20 @@ for (const trial of priorPaperTrials) {
   if (result !== "PENDING") paperTrialMap.set(trial.id, { ...trial, result, settledAt: now.toISOString() });
 }
 const trialDay = now.toISOString().slice(0, 10);
-const trialCandidates = [...eligiblePicks]
-  .filter((pick) => pick.quotedOdds && new Date(pick.kickoff) > now)
+const trialCandidates = [...predictions]
+  .filter((pick) => {
+    const fixture = fixtureMap.get(pick.fixtureId);
+    return fixture && new Date(fixture.kickoff) > now && publicMarketKeys.test(pick.key) && historyEvidence(pick).ready
+      && pick.quotedOdds && pick.marketProbability != null && pick.confidence >= .45
+      && (pick.modelMarketGap ?? 1) <= .2 && (pick.expectedValue ?? -1) >= -.18;
+  })
   .sort((a, b) => (b.confidence + Math.max(0, b.expectedValue ?? 0)) - (a.confidence + Math.max(0, a.expectedValue ?? 0)));
 const trialFixtures = new Set();
 for (const pick of trialCandidates) {
-  if (trialFixtures.has(pick.fixtureId) || trialFixtures.size >= 8) continue;
+  if (trialFixtures.has(pick.fixtureId) || trialFixtures.size >= 12) continue;
   const fixture = fixtureMap.get(pick.fixtureId);
   if (!fixture) continue;
-  const id = `${trialDay}-${pick.fixtureId}-${pick.key}`;
+  const id = `${trialDay}-${pick.fixtureId}-${pick.key}-${pick.line ?? "none"}`;
   if (!paperTrialMap.has(id)) paperTrialMap.set(id, {
     id,
     fixtureId: pick.fixtureId,
@@ -282,6 +323,7 @@ for (const pick of trialCandidates) {
     modelProbability: pick.modelProbability,
     modelMarketGap: pick.modelMarketGap,
     predictedAt: now.toISOString(),
+    trialTier: "OBSERVATION",
     result: "PENDING",
     settledAt: null,
   });
@@ -326,7 +368,10 @@ const snapshot = {
     selectablePredictions: predictedPicks.length,
     publishedTickets: tickets.length,
     noBetCategories: attemptedTickets.filter((attempt) => !attempt.ticket).map((attempt) => attempt.category),
-    strategyVersion: "reverse-market-v1",
+    strategyVersion: "history-market-v2",
+    historicalMatches: historical.events?.length ?? 0,
+    historicalTeams: modelContext.teamEvents?.size ?? 0,
+    teamsWithDeepHistory: [...(modelContext.teamEvents?.values() ?? [])].filter((matches) => matches.length >= 30).length,
     paperTrials: paperMetrics,
   },
   fixtures: upcoming,

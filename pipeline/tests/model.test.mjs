@@ -17,7 +17,9 @@ test("the keyless model exposes many flexible markets", () => {
   const predictions = scoreEvent(fixture, history);
   assert.ok(predictions.length > 30);
   assert.ok(predictions.some((item) => item.key === "DC_1X"));
-  assert.ok(predictions.some((item) => item.name === "Correct score"));
+  assert.ok(predictions.some((item) => item.key.startsWith("HCP_3WAY_")));
+  assert.ok(!predictions.some((item) => item.name === "Correct score"));
+  assert.ok(!predictions.some((item) => item.key.startsWith("ONE_UP_") || item.key.startsWith("TWO_UP_")));
   assert.ok(predictions.find((item) => item.key === "MATCH_HOME").probability > predictions.find((item) => item.key === "MATCH_AWAY").probability);
 });
 
@@ -34,15 +36,19 @@ test("the model context adds opponent-adjusted Elo and venue history", () => {
   const home = scoreEvent(fixture, history, context).find((item) => item.key === "MATCH_HOME");
   assert.ok(home.factors.homeElo > home.factors.awayElo);
   assert.ok(home.factors.homeVenuePlayed > 0);
+  assert.equal(home.factors.homeHistoryPlayed, 3);
+  assert.ok(home.factors.minimumLongHistory > 0);
   assert.ok(Number.isFinite(home.factors.homeRestDays));
 });
 
 test("historical CSV rows normalize into the same permanent team identities", () => {
-  const rows = parseCsv("Date,Time,HomeTeam,AwayTeam,FTHG,FTAG,B365H,B365D,B365A\n20/08/2026,20:00,Wolves,Man United,2,1,2.4,3.2,2.9\n");
+  const rows = parseCsv("Date,Time,HomeTeam,AwayTeam,FTHG,FTAG,B365H,B365D,B365A,Avg>2.5,Avg<2.5,AHh,AvgAHH,AvgAHA\n20/08/2026,20:00,Wolves,Man United,2,1,2.4,3.2,2.9,1.8,2.1,-0.25,1.95,1.9\n");
   const event = normalizeFootballDataRow(rows[0], { code: "E0", id: "eng.1", name: "Premier League", country: "England" }, "2026-27");
   assert.equal(event.homeTeam.id, canonicalTeamId("Wolverhampton Wanderers"));
   assert.equal(event.awayTeam.id, canonicalTeamId("Manchester United"));
-  assert.equal(event.odds.length, 3);
+  assert.equal(event.odds.length, 7);
+  assert.equal(event.odds.find((odd) => odd.selection === "Over 2.5").odds, 1.8);
+  assert.equal(event.odds.find((odd) => odd.market === "Asian handicap").line, -0.25);
 });
 
 test("quoted odds keep the provider mapping needed for future booking codes", () => {
