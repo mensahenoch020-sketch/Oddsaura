@@ -34,3 +34,14 @@ test("target builder rejects unsupported bookmaker markets and unconfirmed price
   assert.ok(buildTargetSlip(estimated, 2, Date.parse("2029-01-01"), "sportybet", "target"));
   assert.equal(buildTargetSlip(estimated, 2, Date.parse("2029-01-01"), "sportybet", "recommended"), null);
 });
+
+test("target builder uses verified live prices when rebuilding a short slip", () => {
+  const rows = Array.from({ length: 24 }, (_, index) => pick(`live${index}`, 1.45, .72));
+  const first = buildTargetSlip(rows, 20, Date.parse("2029-01-01"));
+  assert.ok(first);
+  const livePrices = Object.fromEntries(first.picks.map((item) => [item.fixtureId, 1.25]));
+  const retry = buildTargetSlip(rows, 20, Date.parse("2029-01-01"), "sportybet", "target", livePrices);
+  assert.ok(retry);
+  assert.ok(retry.picks.length > first.picks.length);
+  assert.ok(Math.abs(retry.estimatedOdds - 20) < Math.abs(first.picks.reduce((odds) => odds * 1.25, 1) - 20));
+});
