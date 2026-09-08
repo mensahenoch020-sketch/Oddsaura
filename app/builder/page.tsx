@@ -5,8 +5,8 @@ import ProductNavigation from "../product-navigation";
 import ConverterForm from "../converter/converter-form";
 import { fallbackSnapshot, loadSnapshot, refreshSnapshot, type PredictedPick, type Snapshot, type Team } from "../data";
 import { LEAGUE_FILTERS, leagueMatches, type LeagueFilter } from "../leagues";
-import { generateBookmakerCode, providerAdapters, providerSupportsMarket, type BookmakerCodeResponse, type ProviderId } from "./providers";
-import { buildTargetSlip, type BuildMode } from "./target-builder";
+import { generateBookmakerCode, providerAdapters, providerSupportsMarket, unavailableFixtureId, type BookmakerCodeResponse, type ProviderId } from "./providers";
+import { buildTargetSlip, correctedSearchTarget, type BuildMode, type TargetBuild } from "./target-builder";
 import "./builder.css";
 import "./predictions.css";
 import "../filter-controls.css";
@@ -19,6 +19,7 @@ import "../converter/home-converter.css";
 
 type SavedPick = { predictionId: string };
 type Tier = "ALL" | PredictedPick["tier"];
+type CodeCheck = { result: BookmakerCodeResponse | null; currentLiveOdds: Record<string, number>; liveTotal: number; unavailableFixtureId: string | null };
 
 function serialize(picks: PredictedPick[]) {
   return btoa(JSON.stringify(picks.map((pick) => ({ predictionId: pick.id })) satisfies SavedPick[])).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
@@ -131,25 +132,56 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
     const selected = result?.picks ?? [];
     setPicks(selected); setSportyCode(null); setLiveOdds({}); setSlipOpen(true);
     if (!result) { setBuiltTarget(null); setNotice(buildMode === "recommended" ? `No strict Best Bet reaches that target. OddsAura will not force weak selections.` : `No compatible ${activeProvider.label} selections could build that target.`); return; }
-    const targetSummary = { requested: result.target, estimated: result.estimatedOdds, legs: selected.length, confidence: result.averageConfidence, winChance: result.estimatedWinChance, exact: result.exact, risk: result.risk, estimatedPrices: result.estimatedPriceCount };
+    const summaryFor = (build: TargetBuild, exact = build.exact) => ({ requested: result.target, estimated: build.estimatedOdds, legs: build.picks.length, confidence: build.averageConfidence, winChance: build.estimatedWinChance, exact, risk: build.risk, estimatedPrices: build.estimatedPriceCount });
+    const targetSummary = summaryFor(result);
     setBuiltTarget(targetSummary);
     if (activeProvider.status !== "live") { setNotice(`${selected.length} picks built for ${activeProvider.label} at ${result.estimatedOdds.toFixed(2)} estimated odds. Copy the complete list to rebuild it without losing matches.`); return; }
-    const first = await requestCode(selected, result.target);
-    if (!first?.result.verified || Math.abs(first.liveTotal - result.target) / result.target <= .03) return;
 
-    // Rebuild against the prices the bookmaker actually returned. The old
-    // retry only inflated the estimated target, so it could choose the same
-    // under-priced legs and finish well below the user's requested total.
-    const livePrices = { ...first.currentLiveOdds };
-    const retry = buildTargetSlip(providerPredictions, result.target, referenceTime, provider, buildMode, livePrices);
-    if (!retry || retry.picks.map((pick) => pick.id).join() === selected.map((pick) => pick.id).join()) return;
-    const second = await requestCode(retry.picks, result.target);
-    if (second?.result.verified && Math.abs(second.liveTotal - result.target) < Math.abs(first.liveTotal - result.target)) {
-      setPicks(retry.picks);
-      setBuiltTarget({ ...targetSummary, estimated: retry.estimatedOdds, legs: retry.picks.length, exact: Math.abs(second.liveTotal - result.target) / result.target <= .03, risk: retry.risk, estimatedPrices: retry.estimatedPriceCount });
-    } else {
-      setPicks(selected); setSportyCode(first.result); setLiveOdds(first.currentLiveOdds);
-      setNotice(`Verified ${activeProvider.label} code · live total ${first.liveTotal.toFixed(2)} against ${result.target.toFixed(2)} target.`);
+    const excludedFixtures = new Set<string>();
+    const knownLivePrices: Record<string, number> = {};
+    const signatures = new Set<string>();
+    let candidate = result;
+    let best: { build: TargetBuild; check: CodeCheck; distance: number } | null = null;
+
+    // Bookmaker feeds can remove fixtures or return very different prices
+    // between the snapshot and code creation. Retry a small, bounded number
+    // of times, excluding unavailable fixtures and correcting for live drift.
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      const signature = candidate.picks.map((pick) => pick.id).sort().join("|");
+      if (signatures.has(signature)) break;
+      signatures.add(signature);
+      setPicks(candidate.picks);
+      setBuiltTarget(summaryFor(candidate));
+      const checked = await requestCode(candidate.picks, result.target);
+      if (!checked.result?.verified) {
+        if (!checked.unavailableFixtureId || attempt === 3) break;
+        excludedFixtures.add(checked.unavailableFixtureId);
+        const retry = buildTargetSlip(providerPredictions.filter((pick) => !excludedFixtures.has(pick.fixtureId)), result.target, referenceTime, provider, buildMode, knownLivePrices);
+        if (!retry) break;
+        candidate = retry;
+        continue;
+      }
+
+      const distance = Math.abs(checked.liveTotal - result.target) / result.target;
+      if (!best || distance < best.distance) best = { build: candidate, check: checked, distance };
+      if (distance <= .03) {
+        setBuiltTarget(summaryFor(candidate, true));
+        return;
+      }
+
+      Object.assign(knownLivePrices, checked.currentLiveOdds);
+      const searchTarget = correctedSearchTarget(result.target, checked.liveTotal);
+      const retry = buildTargetSlip(providerPredictions.filter((pick) => !excludedFixtures.has(pick.fixtureId)), searchTarget, referenceTime, provider, buildMode, knownLivePrices);
+      if (!retry) break;
+      candidate = retry;
+    }
+
+    if (best?.check.result) {
+      setPicks(best.build.picks);
+      setSportyCode(best.check.result);
+      setLiveOdds(best.check.currentLiveOdds);
+      setBuiltTarget(summaryFor(best.build, best.distance <= .03));
+      setNotice(`Closest verified ${activeProvider.label} code · live total ${best.check.liveTotal.toFixed(2)} against ${result.target.toFixed(2)} target.`);
     }
   }
 
@@ -255,7 +287,7 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
     }
   }
 
-  async function requestCode(picksToCheck = picks, requestedTarget?: number) {
+  async function requestCode(picksToCheck = picks, requestedTarget?: number): Promise<CodeCheck> {
     setCreatingCode(true);
     setNotice(`Matching every pick against ${activeProvider.label}’s current markets…`);
     setSportyCode(null);
@@ -278,7 +310,7 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
       if (!result.verified) {
         setLiveOdds({});
         setNotice(result.warning || "Code created, but verification is incomplete. Check every pick on the bookmaker.");
-        return { result, currentLiveOdds: {}, liveTotal: 1 };
+        return { result, currentLiveOdds: {}, liveTotal: 1, unavailableFixtureId: null };
       }
       const currentLiveOdds = Object.fromEntries(result.resolved.flatMap((item) => item.odds ? [[item.fixtureId, item.odds]] : []));
       setLiveOdds(currentLiveOdds);
@@ -287,10 +319,10 @@ export default function BuilderPage({ activeArea = "slip" }: { activeArea?: "hom
       setNotice(result.warning || (result.partial
         ? `${result.resolved.length}/${picksToCheck.length} matched${changed ? ` · ${changed} prices updated` : ""}`
         : `Verified ${activeProvider.label} code · live total ${liveTotal.toFixed(2)}${requestedTarget ? ` against ${requestedTarget.toFixed(2)} target` : ""}${changed ? ` · ${changed} prices updated` : ""}`));
-      return { result, currentLiveOdds, liveTotal };
+      return { result, currentLiveOdds, liveTotal, unavailableFixtureId: null };
     } catch (error) {
       setNotice(error instanceof Error ? error.message : `${activeProvider.label} could not create this code.`);
-      return null;
+      return { result: null, currentLiveOdds: {}, liveTotal: 1, unavailableFixtureId: unavailableFixtureId(error) };
     } finally {
       setCreatingCode(false);
     }

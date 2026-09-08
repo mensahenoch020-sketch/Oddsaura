@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { fallbackSnapshot, loadSnapshot, type Snapshot } from "../data";
+import { fallbackSnapshot, loadSnapshot, refreshSnapshot, type Snapshot } from "../data";
 import "./admin.css";
 import "./admin-accessible.css";
 import MarketReport, { type ExpandedPerformance } from "./market-report";
@@ -16,6 +16,17 @@ type AdminOverview = {
 };
 const emptyPerformance: ModelPerformance = { generatedAt: null, matches: 0, oneXTwoAccuracy: null, over25Accuracy: null, brierScore: null, logLoss: null, methodology: "Walk-forward backtest pending historical refresh.", leagues: [] };
 const modelPerformanceUrl = process.env.NEXT_PUBLIC_MODEL_PERFORMANCE_URL ?? "https://raw.githubusercontent.com/mensahenoch020-sketch/Oddsaura/main/data/public/model-performance.json";
+const snapshotTime = (snapshot: Snapshot) => Date.parse(snapshot.generatedAt ?? "") || 0;
+
+async function freshestAdminSnapshot() {
+  const bundled = await loadSnapshot("admin");
+  try {
+    const live = await refreshSnapshot("admin");
+    return snapshotTime(live) >= snapshotTime(bundled) ? live : bundled;
+  } catch {
+    return bundled;
+  }
+}
 
 export default function AdminPage() {
   const [snapshot, setSnapshot] = useState<Snapshot>(fallbackSnapshot);
@@ -28,7 +39,7 @@ export default function AdminPage() {
   async function refresh() {
     setBusy(true); setMessage("");
     try {
-      const [nextSnapshot, adminResponse] = await Promise.all([loadSnapshot("admin"), fetch("/api/admin/overview", { cache: "no-store" })]);
+      const [nextSnapshot, adminResponse] = await Promise.all([freshestAdminSnapshot(), fetch("/api/admin/overview", { cache: "no-store" })]);
       setSnapshot(nextSnapshot);
       if (adminResponse.ok) setOverview(await adminResponse.json());
     }
@@ -38,7 +49,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     let active = true;
-    loadSnapshot("admin").then((data) => { if (active) setSnapshot(data); }).catch(() => { if (active) setMessage("The live GitHub snapshot could not be reached. The last bundled snapshot is still shown."); }).finally(() => { if (active) setBusy(false); });
+    freshestAdminSnapshot().then((data) => { if (active) setSnapshot(data); }).catch(() => { if (active) setMessage("The football snapshot could not be loaded."); }).finally(() => { if (active) setBusy(false); });
     return () => { active = false; };
   }, []);
   useEffect(() => {

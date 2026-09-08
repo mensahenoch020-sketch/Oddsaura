@@ -46,6 +46,7 @@ test("builder receives market evidence, wider estimates and forward proof", asyn
   assert.match(builder, /mode: BuildMode/);
   assert.match(builder, /maxLegs = mode === "target" \? 21 : 8/);
   assert.match(admin, /Forward prediction proof/);
+  assert.match(admin, /refreshSnapshot\("admin"\)/);
   assert.match(admin, /metricEntries/);
   assert.match(pipeline, /homeHistoryMatches/);
   assert.match(pipeline, /trialTier: "OBSERVATION"/);

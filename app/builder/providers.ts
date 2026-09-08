@@ -57,6 +57,21 @@ export type BookmakerCodeResponse = {
   unmatched: Array<{ fixtureId: string; homeTeam: string; awayTeam: string; reason: string }>;
 };
 
+export class BookmakerCodeError extends Error {
+  constructor(message: string, readonly details?: unknown) {
+    super(message);
+    this.name = "BookmakerCodeError";
+  }
+}
+
+export function unavailableFixtureId(error: unknown) {
+  if (!(error instanceof BookmakerCodeError) || !error.details || typeof error.details !== "object") return null;
+  const details = error.details as { fixtureId?: unknown; unmatched?: Array<{ fixtureId?: unknown }> };
+  if (typeof details.fixtureId === "string") return details.fixtureId;
+  const unmatched = Array.isArray(details.unmatched) ? details.unmatched.find((item) => typeof item?.fixtureId === "string") : null;
+  return typeof unmatched?.fixtureId === "string" ? unmatched.fixtureId : null;
+}
+
 export type BookmakerSelection = {
   fixtureId: string;
   homeTeam: string;
@@ -78,8 +93,8 @@ export async function generateBookmakerCode(provider: ProviderId, selections: Bo
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ selections, allowPartial }),
   });
-  const payload = await response.json() as BookmakerCodeResponse & { error?: string };
-  if (!response.ok || !payload.code) throw new Error(payload.error || `${provider} could not create this code.`);
+  const payload = await response.json() as BookmakerCodeResponse & { error?: string; details?: unknown };
+  if (!response.ok || !payload.code) throw new BookmakerCodeError(payload.error || `${provider} could not create this code.`, payload.details);
   return payload;
 }
 

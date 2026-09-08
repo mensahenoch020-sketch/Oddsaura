@@ -17,6 +17,13 @@ export type TargetBuild = {
 
 const priceFor = (pick: PredictedPick, priceOverrides?: Record<string, number>) => priceOverrides?.[pick.fixtureId] ?? pick.quotedOdds ?? pick.fairOdds ?? 0;
 
+export function correctedSearchTarget(requestedTarget: number, verifiedTotal: number) {
+  const requested = Math.max(1.2, Math.min(100, Number.isFinite(requestedTarget) ? requestedTarget : 5));
+  if (!Number.isFinite(verifiedTotal) || verifiedTotal <= 1) return requested;
+  const correction = Math.max(.75, Math.min(1.6, requested / verifiedTotal));
+  return Math.max(1.2, Math.min(100, requested * correction));
+}
+
 export function buildTargetSlip(predictions: PredictedPick[], requestedTarget: number, now = Date.now(), provider: ProviderId = "sportybet", mode: BuildMode = "target", priceOverrides?: Record<string, number>): TargetBuild | null {
   const target = Math.max(1.2, Math.min(100, Number.isFinite(requestedTarget) ? requestedTarget : 5));
   const quality = { HIGH: .08, MEDIUM: .04, LOW: 0 } as const;
