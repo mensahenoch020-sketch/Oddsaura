@@ -28,7 +28,7 @@ export default function DailyOddsPage() {
 
   useEffect(() => {
     let active = true; let hasData = false;
-    const apply = (data: Snapshot) => { if (!active) return; hasData = true; setSnapshot((current) => Date.parse(data.generatedAt ?? "") >= Date.parse(current.generatedAt ?? "") || !current.generatedAt ? data : current); setLoading(false); };
+    const apply = (data: Snapshot) => { if (!active) return; hasData = true; setSnapshot((current) => Date.parse(data.generatedAt ?? "") >= Date.parse(current.generatedAt ?? "") || !current.generatedAt ? { ...data, watchlist: data.watchlist?.length ? data.watchlist : current.watchlist } : current); setLoading(false); };
     loadSnapshot("daily").then(apply).catch(() => { if (active && !hasData) setNotice("Daily odds are refreshing. Try again shortly."); }).finally(() => { if (active) setLoading(false); });
     const refresh = () => refreshSnapshot("daily").then(apply).catch(() => { if (active && !hasData) setNotice("Daily odds are refreshing. Try again shortly."); });
     void refresh();
@@ -45,6 +45,10 @@ export default function DailyOddsPage() {
       return refreshed ? [{ ...refreshed, title: byId.get(ticket.id)?.titleOverride || ticket.title }] : [];
     }).sort((a, b) => (ticketOrder[a.category] ?? 99) - (ticketOrder[b.category] ?? 99));
   }, [snapshot.tickets, controls, referenceTime]);
+  const bestMatches = useMemo(() => (snapshot.watchlist ?? [])
+    .filter((pick) => Date.parse(pick.kickoff) > referenceTime + 5 * 60_000)
+    .sort((a, b) => b.confidence - a.confidence)
+    .slice(0, 8), [snapshot.watchlist, referenceTime]);
 
   function addTicket(ticket: Ticket) {
     const ids = ticket.selections.map((selection) => selection.id).filter(Boolean);
@@ -93,7 +97,8 @@ export default function DailyOddsPage() {
         {code ? <div className="daily-code"><span>SportyBet</span><strong>{code.code}</strong><small>{code.matched}/{code.total} included</small><div><button type="button" onClick={() => void copy(code.code)}>Copy</button><a href={code.deepLink} target="_blank" rel="noreferrer">Open</a></div></div> : null}
         <footer><button type="button" onClick={() => addTicket(ticket)}>Add ticket</button><button className="primary" type="button" disabled={creating === ticket.id} onClick={() => void createCode(ticket)}>{creating === ticket.id ? "Checking…" : "Get code"}</button></footer>
       </article>; })}
-      {!loading && !tickets.length ? <div className="daily-empty"><strong>No evidence-backed ticket is ready.</strong><span>OddsAura found no complete ticket that passed the live-price, match-history and model-agreement checks. It will not publish weak selections just to fill this page.</span><a href="/builder">Check the Smart Bet Router</a></div> : null}
+      {!loading && !tickets.length && !bestMatches.length ? <div className="daily-empty"><strong>No qualified odds are ready.</strong><span>No complete ticket or individual match currently passes the live-price, match-history and model-agreement checks.</span><a href="/builder">Check the Smart Bet Router</a></div> : null}
     </section>
+    {!loading && bestMatches.length ? <section className="daily-best" aria-label="Today's best individual matches"><header><div><span>Qualified individually</span><h2>Today&apos;s best matches</h2></div><p>{tickets.length ? "More model-approved selections available today." : "No full accumulator passed every check, but these individual selections did. Prices are rechecked when you build the slip."}</p></header><div>{bestMatches.map((pick) => <article key={pick.id}><span>{pick.league.name} · {new Date(pick.kickoff).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span><h3>{pick.homeTeam.name} vs {pick.awayTeam.name}</h3><div><p><small>{pick.market.name}</small><b>{pick.selection}</b></p><strong>{(pick.quotedOdds ?? pick.fairOdds).toFixed(2)}</strong></div><footer><span>{Math.round(pick.confidence * 100)}% model confidence</span><a href={`/builder?fixture=${encodeURIComponent(pick.fixtureId)}`}>Open match</a></footer></article>)}</div></section> : null}
   </main>;
 }

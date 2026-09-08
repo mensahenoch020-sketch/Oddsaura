@@ -17,17 +17,11 @@ export type TargetBuild = {
 
 const priceFor = (pick: PredictedPick, priceOverrides?: Record<string, number>) => priceOverrides?.[pick.fixtureId] ?? pick.quotedOdds ?? pick.fairOdds ?? 0;
 
-export function correctedSearchTarget(requestedTarget: number, verifiedTotal: number) {
-  const requested = Math.max(1.2, Math.min(100, Number.isFinite(requestedTarget) ? requestedTarget : 5));
-  if (!Number.isFinite(verifiedTotal) || verifiedTotal <= 1) return requested;
-  const correction = Math.max(.75, Math.min(1.6, requested / verifiedTotal));
-  return Math.max(1.2, Math.min(100, requested * correction));
-}
+const normalizeTarget = (requestedTarget: number, fallback = 5) => Number.isFinite(requestedTarget) && requestedTarget >= 1.2 ? requestedTarget : fallback;
 
-export function buildTargetSlip(predictions: PredictedPick[], requestedTarget: number, now = Date.now(), provider: ProviderId = "sportybet", mode: BuildMode = "target", priceOverrides?: Record<string, number>): TargetBuild | null {
-  const target = Math.max(1.2, Math.min(100, Number.isFinite(requestedTarget) ? requestedTarget : 5));
+function rankedPredictions(predictions: PredictedPick[], now: number, provider: ProviderId, mode: BuildMode, priceOverrides?: Record<string, number>) {
   const quality = { HIGH: .08, MEDIUM: .04, LOW: 0 } as const;
-  const ranked = predictions.filter((pick) => {
+  return predictions.filter((pick) => {
     const price = priceFor(pick, priceOverrides);
     if (Date.parse(pick.kickoff) <= now + 30 * 60_000 || price < 1.06 || price > 3 || !providerSupportsMarket(provider, pick.market.key)) return false;
     if (mode === "recommended") return pick.quotedOdds != null
@@ -54,6 +48,23 @@ export function buildTargetSlip(predictions: PredictedPick[], requestedTarget: n
     const scoreB = b.confidence + quality[b.dataQuality ?? "LOW"] + readinessB + (b.marketProbability ?? 0) * .18 + (b.expectedValue ?? 0) * .25 + (b.quotedOdds ? .03 : 0);
     return scoreB - scoreA;
   });
+}
+
+export function rankBestBets(predictions: PredictedPick[], now = Date.now(), provider: ProviderId = "sportybet") {
+  return [...new Map(rankedPredictions(predictions, now, provider, "recommended").map((pick) => [pick.fixtureId, pick])).values()];
+}
+
+export function correctedSearchTarget(requestedTarget: number, verifiedTotal: number) {
+  const requested = normalizeTarget(requestedTarget);
+  if (!Number.isFinite(verifiedTotal) || verifiedTotal <= 1) return requested;
+  const correction = Math.max(.75, Math.min(1.6, requested / verifiedTotal));
+  const corrected = requested * correction;
+  return Number.isFinite(corrected) ? corrected : requested;
+}
+
+export function buildTargetSlip(predictions: PredictedPick[], requestedTarget: number, now = Date.now(), provider: ProviderId = "sportybet", mode: BuildMode = "target", priceOverrides?: Record<string, number>): TargetBuild | null {
+  const target = normalizeTarget(requestedTarget);
+  const ranked = rankedPredictions(predictions, now, provider, mode, priceOverrides);
   const candidates = [...new Map(ranked.map((pick) => [pick.fixtureId, pick])).values()].slice(0, 500);
   if (!candidates.length) return null;
 
@@ -76,7 +87,6 @@ export function buildTargetSlip(predictions: PredictedPick[], requestedTarget: n
   const minLegs = target < 2.5 ? 1 : 2;
   const selected = beam.filter((state) => state.picks.length >= minLegs).sort((a, b) => score(a) - score(b))[0];
   if (!selected) return null;
-  if (mode === "recommended" && (selected.odds < target * .84 || selected.odds > target * 1.18 || selected.winChance < .88 / selected.odds)) return null;
   const distance = Math.abs(selected.odds - target) / target;
   return {
     picks: selected.picks,

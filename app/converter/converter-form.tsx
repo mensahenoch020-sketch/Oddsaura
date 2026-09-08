@@ -28,6 +28,8 @@ export default function ConverterForm({ embedded = false }: { embedded?: boolean
   const [copied, setCopied] = useState(false);
   const sourceMeta = useMemo(() => providers.find((item) => item.id === source)!, [source]);
   const destinationMeta = useMemo(() => providers.find((item) => item.id === destination)!, [destination]);
+  const convertedCount = result?.resolved?.length ?? Math.max(0, (result?.decoded ?? 0) - (result?.unmatched?.length ?? 0));
+  const originalCount = (result?.decoded ?? 0) + (result?.sourceIssues?.length ?? 0);
 
   function resetFeedback() { setResult(null); setMessage(""); setIssues([]); setTransferSelections([]); setCopied(false); }
   function swap() { setSource(destination); setDestination(source); resetFeedback(); }
@@ -35,7 +37,7 @@ export default function ConverterForm({ embedded = false }: { embedded?: boolean
   async function runConversion() {
     setBusy(true); resetFeedback();
     try {
-      const response = await fetch("/api/providers/convert", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ sourceProvider: source, destinationProvider: destination, code: code.trim(), allowPartial: false }) });
+      const response = await fetch("/api/providers/convert", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ sourceProvider: source, destinationProvider: destination, code: code.trim(), allowPartial: true }) });
       const text = await response.text();
       let payload: Result & { error?: string; details?: { skippedSelections?: ConversionIssue[]; sourceSelections?: SourceSelection[]; unmatched?: Unmatched[]; fixtureId?: string } };
       try { payload = JSON.parse(text) as typeof payload; }
@@ -46,7 +48,11 @@ export default function ConverterForm({ embedded = false }: { embedded?: boolean
         throw new Error(payload.error || "This code could not be converted.");
       }
       setResult(payload); setIssues(payload.sourceIssues ?? []);
-      setMessage(payload.warning || (payload.verified ? "Every selection was converted and the new code was reload-verified." : "Code created—verification incomplete. Check every selection on the bookmaker."));
+      const included = payload.resolved?.length ?? Math.max(0, payload.decoded - (payload.unmatched?.length ?? 0));
+      const total = payload.decoded + (payload.sourceIssues?.length ?? 0);
+      setMessage(payload.partial
+        ? `Partial code created: ${included} of ${total} selections converted. Review the selections not included below.${payload.warning ? ` ${payload.warning}` : ""}`
+        : payload.warning || (payload.verified ? "Every selection was converted and the new code was reload-verified." : "Code created—verification incomplete. Check every selection on the bookmaker."));
     } catch (error) { setMessage(error instanceof Error ? error.message : "This code could not be converted."); }
     finally { setBusy(false); }
   }
@@ -68,12 +74,12 @@ export default function ConverterForm({ embedded = false }: { embedded?: boolean
         </div>
         <label className="converter-code"><span>{sourceMeta.label} code</span><input disabled={busy} value={code} onChange={(event) => { setCode(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 16)); resetFeedback(); }} placeholder="Enter booking code" minLength={4} maxLength={16} required autoCapitalize="characters" /></label>
         <button className="converter-submit" disabled={busy || source === destination}>{source === destination ? "Choose a different bookmaker" : busy ? "Loading and matching…" : `Convert to ${destinationMeta.label}`}</button>
-        {message ? <p className={result?.verified ? "converter-message success" : "converter-message"} role="status">{message}</p> : null}
-        {result ? <section className="converter-result converter-result-inline" aria-live="polite"><div><span>Your {destinationMeta.label} code</span><strong>{result.code}</strong><small>{result.verified ? `${result.resolved?.length ?? result.decoded} selections verified` : result.verificationStatus === "MISMATCH" ? "Selection mismatch—do not use unchecked" : "Created—verification incomplete"}</small></div><div><button type="button" onClick={() => void copyCode()}>{copied ? "Copied ✓" : "Copy code"}</button><a href={result.deepLink} target="_blank" rel="noreferrer">Open {destinationMeta.label} ↗</a></div>{result.unmatched?.length ? <details open><summary>{result.unmatched.length} destination matches not included</summary>{result.unmatched.map((item, index) => <p key={`${item.fixtureId}-${index}`}><b>{item.homeTeam} vs {item.awayTeam}</b><span>{item.reason}</span></p>)}</details> : null}</section> : null}
-        {issues.length ? <div className="converter-issues"><strong>Source selections needing another market mapping</strong>{issues.slice(0, 12).map((issue, index) => <p key={`${issue.eventName}-${index}`}><b>{issue.eventName}</b><span>{issue.marketName}: {issue.outcomeName} · {issue.reason}</span></p>)}</div> : null}
+        {message ? <p className={`converter-message${result?.partial ? " partial" : result?.verified ? " success" : ""}`} role="status">{message}</p> : null}
+        {result ? <section className={`converter-result converter-result-inline${result.partial ? " partial" : ""}`} aria-live="polite"><div><span>{result.partial ? `Partial ${destinationMeta.label} code` : `Your ${destinationMeta.label} code`}</span><strong>{result.code}</strong><small>{result.partial ? `${convertedCount} of ${originalCount} selections converted` : result.verified ? `${result.resolved?.length ?? result.decoded} selections verified` : result.verificationStatus === "MISMATCH" ? "Selection mismatch—do not use unchecked" : "Created—verification incomplete"}</small></div><div><button type="button" onClick={() => void copyCode()}>{copied ? "Copied ✓" : "Copy code"}</button><a href={result.deepLink} target="_blank" rel="noreferrer">Open {destinationMeta.label} ↗</a></div>{result.unmatched?.length ? <details open><summary>{result.unmatched.length} destination selections not included</summary>{result.unmatched.map((item, index) => <p key={`${item.fixtureId}-${index}`}><b>{item.homeTeam} vs {item.awayTeam}</b><span>{item.reason}</span></p>)}</details> : null}</section> : null}
+        {issues.length ? <div className="converter-issues"><strong>{result?.partial ? "Source selections not included in the partial code" : "Source selections needing another market mapping"}</strong>{issues.slice(0, 12).map((issue, index) => <p key={`${issue.eventName}-${index}`}><b>{issue.eventName}</b><span>{issue.marketName}: {issue.outcomeName} · {issue.reason}</span></p>)}</div> : null}
         {destination === "bet9ja" && transferSelections.length ? <section className="converter-transfer"><header><div><span>Manual Bet9ja transfer</span><strong>{transferSelections.length} readable selections listed</strong><small>Bet9ja does not allow this page to fill another browser tab automatically. Copy the list and select each match on Bet9ja.</small></div><div><button type="button" onClick={() => void copyTransfer()}>{copied ? "Copied ✓" : "Copy listed selections"}</button><a href={destinationMeta.link} target="_blank" rel="noreferrer">Open Bet9ja ↗</a></div></header>{transferSelections.map((item, index) => <div key={`${item.fixtureId}-${index}`}><b>{index + 1}. {item.homeTeam} vs {item.awayTeam}</b><span>{item.marketName}: {item.selection}</span><small>{new Date(item.kickoff).toLocaleString()}</small></div>)}</section> : null}
       </form>
-      {!embedded ? <aside><span>How it works</span><ol><li>Loads the source bookmaker code.</li><li>Translates markets and finds the same matches.</li><li>Uses the destination&apos;s current odds.</li><li>Creates and reload-verifies the new code.</li></ol><p>OddsAura never removes a match. Every selection must convert exactly or the full slip is stopped and shown for assisted loading.</p></aside> : null}
+      {!embedded ? <aside><span>How it works</span><ol><li>Loads the source bookmaker code.</li><li>Translates markets and finds the same matches.</li><li>Uses the destination&apos;s current odds.</li><li>Creates and reload-verifies the new code.</li></ol><p>When some selections are unavailable, OddsAura creates a clearly labelled partial code from the selections it matched and lists everything it left out.</p></aside> : null}
     </section>
     {!embedded ? <section className="converter-support"><header><span>Live support</span><h2>Bookmaker connection status</h2></header><div>{providers.map((item) => <article key={item.id}><div><strong>{item.label}</strong><span className={item.output === "Automatic" ? "live" : "limited"}>{item.output}</span></div><p>{item.note}</p><a href={item.link} target="_blank" rel="noreferrer">Open bookmaker ↗</a></article>)}</div></section> : null}
   </>;

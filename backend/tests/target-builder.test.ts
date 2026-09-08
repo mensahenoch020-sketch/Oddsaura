@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildTargetSlip, correctedSearchTarget } from "../../app/builder/target-builder.js";
+import { buildTargetSlip, correctedSearchTarget, rankBestBets } from "../../app/builder/target-builder.js";
 import { BookmakerCodeError, unavailableFixtureId } from "../../app/builder/providers.js";
 import type { PredictedPick } from "../../app/data.js";
 
@@ -8,16 +8,30 @@ function pick(id: string, odds: number, confidence = .7): PredictedPick {
   return { id, fixtureId: id, kickoff: "2030-01-02T12:00:00Z", league: { name: "Test" }, homeTeam: { name: `${id} Home` }, awayTeam: { name: `${id} Away` }, market: { key: "OVER_1_5", name: "Over 1.5", category: "TOTALS", line: 1.5 }, selection: "Over 1.5", probability: confidence, confidence, quotedOdds: odds, fairOdds: odds, tier: "SAFE", dataQuality: "HIGH", historyMatches: 20, marketProbability: confidence - .01, modelMarketGap: .03, expectedValue: -.01, reasoning: "test" };
 }
 
-test("target builder follows requested totals through 50 odds", () => {
-  const rows = Array.from({ length: 24 }, (_, index) => pick(`f${index}`, 1.35 + (index % 5) * .08));
+test("target builder follows requested totals beyond the old 100 odds ceiling", () => {
+  const rows = Array.from({ length: 40 }, (_, index) => pick(`f${index}`, 1.35 + (index % 5) * .08));
   const five = buildTargetSlip(rows, 5, Date.parse("2029-01-01"));
   const twenty = buildTargetSlip(rows, 20, Date.parse("2029-01-01"));
   const fifty = buildTargetSlip(rows, 50, Date.parse("2029-01-01"));
+  const fiveHundred = buildTargetSlip(rows, 500, Date.parse("2029-01-01"));
+  const oneThousand = buildTargetSlip(rows, 1000, Date.parse("2029-01-01"));
   assert.ok(five && Math.abs(five.estimatedOdds - 5) / 5 < .08);
   assert.ok(twenty && Math.abs(twenty.estimatedOdds - 20) / 20 < .08);
   assert.ok(fifty && Math.abs(fifty.estimatedOdds - 50) / 50 < .08);
+  assert.ok(fiveHundred && Math.abs(fiveHundred.estimatedOdds - 500) / 500 < .08);
+  assert.ok(oneThousand && Math.abs(oneThousand.estimatedOdds - 1000) / 1000 < .08);
   assert.ok(twenty.picks.length > five.picks.length);
   assert.ok(fifty.picks.length > twenty.picks.length);
+  assert.equal(oneThousand.target, 1000);
+});
+
+test("Best Bet keeps individually qualified matches when the full target is unavailable", () => {
+  const rows = [pick("best", 1.57, .7)];
+  const ranked = rankBestBets(rows, Date.parse("2029-01-01"));
+  const result = buildTargetSlip(rows, 2, Date.parse("2029-01-01"), "sportybet", "recommended");
+  assert.equal(ranked.length, 1);
+  assert.equal(result?.picks[0]?.id, "best");
+  assert.equal(result?.exact, false);
 });
 
 test("target builder never repeats a fixture or includes a started match", () => {
@@ -51,6 +65,7 @@ test("target retry corrects its search total in the direction of live price drif
   assert.ok(correctedSearchTarget(2, 1.54) > 2);
   assert.ok(correctedSearchTarget(2, 2.12) < 2);
   assert.equal(correctedSearchTarget(2, Number.NaN), 2);
+  assert.ok(correctedSearchTarget(500, 350) > 500);
 });
 
 test("target retry can identify and exclude an unavailable bookmaker fixture", () => {

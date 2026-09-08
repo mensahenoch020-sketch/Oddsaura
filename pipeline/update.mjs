@@ -49,7 +49,7 @@ async function writePublicSnapshots(snapshot) {
   const scoped = {
     builder: { ...common, predictedPicks: routePicks },
     matches: { ...common, fixtures: (snapshot.fixtures ?? []).map(slimFixture), liveFixtures: (snapshot.liveFixtures ?? []).map(slimFixture), predictedPicks: routePicks },
-    daily: { ...common, tickets: snapshot.tickets ?? [] },
+    daily: { ...common, tickets: snapshot.tickets ?? [], watchlist: snapshot.watchlist ?? [] },
     results: { ...common, recentResults: (snapshot.recentResults ?? []).slice(-300).map(slimFixture), tickets: snapshot.tickets ?? [], ticketHistory: (snapshot.ticketHistory ?? []).slice(0, 40), paperTrials: snapshot.paperTrials ?? [], modelPerformance },
     admin: { ...common, sources: snapshot.sources ?? [], tickets: snapshot.tickets ?? [], marketCatalog: snapshot.marketCatalog ?? [], paperTrials: snapshot.paperTrials ?? [] },
   };
@@ -260,7 +260,7 @@ for (const pick of [...predictions].filter((item) => publicMarketKeys.test(item.
   const fixture = fixtureMap.get(pick.fixtureId);
   if (!fixture) continue;
   watchlist.push({
-    id: `${pick.fixtureId}-${pick.key}`,
+    id: `${pick.fixtureId}-${pick.key}${pick.line == null ? "" : `-${String(pick.line).replace("-", "minus-").replace(".", "-")}`}`,
     fixtureId: pick.fixtureId,
     league: fixture.league,
     kickoff: fixture.kickoff,
