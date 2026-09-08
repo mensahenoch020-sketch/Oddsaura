@@ -366,6 +366,7 @@ const worker = {
       if (!identity || !env.DB) return Response.json({ error: "Account storage is not ready yet." }, { status: 503 });
       try {
         const body = await authenticatedRequest.json() as { sourceProvider?: BookmakerId; destinationProvider?: BookmakerId; code?: string; allowPartial?: boolean };
+        const allowPartial = body.allowPartial === true;
         const providers = new Set<BookmakerId>(["sportybet", "betpawa", "bet9ja", "betking", "betway"]);
         if (!body.sourceProvider || !body.destinationProvider || !providers.has(body.sourceProvider) || !providers.has(body.destinationProvider)) return Response.json({ error: "Choose valid source and destination bookmakers." }, { status: 400 });
         if (body.sourceProvider === body.destinationProvider) return Response.json({ error: "Choose a different destination bookmaker." }, { status: 400 });
@@ -385,7 +386,7 @@ const worker = {
         if (!selections.length) {
           const decoded = await decodeBookmakerCode(body.sourceProvider, code, fetch);
           sourceIssues = decoded.skippedSelections;
-          if (decoded.partial) {
+          if (decoded.partial && !allowPartial) {
             const firstSkipped = decoded.skippedSelections[0];
             const subject = firstSkipped ? `${firstSkipped.eventName} — ${firstSkipped.marketName}: ${firstSkipped.outcomeName}` : `${decoded.skipped} selection${decoded.skipped === 1 ? "" : "s"}`;
             throw new BookmakerIntegrationError(`Could not safely translate ${subject}. No selections were removed and no partial code was created.`, 422, { skipped: decoded.skipped, skippedSelections: decoded.skippedSelections, sourceSelections: decoded.selections });
@@ -394,7 +395,7 @@ const worker = {
         }
         let result;
         try {
-          result = await createBookmakerCode(body.destinationProvider, selections, fetch, false);
+          result = await createBookmakerCode(body.destinationProvider, selections, fetch, allowPartial);
         } catch (error) {
           if (error instanceof BookmakerIntegrationError) {
             const existing = error.details && typeof error.details === "object" && !Array.isArray(error.details) ? error.details : {};

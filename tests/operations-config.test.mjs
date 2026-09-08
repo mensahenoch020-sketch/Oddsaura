@@ -24,7 +24,7 @@ test("Railway protects and serves account operations used by the live UI", async
   assert.match(server, /async function bookmakerApi/);
   assert.match(server, /async function adminApi/);
   assert.match(server, /\/api\/providers/);
-  assert.match(server, /const allowPartial = false/);
+  assert.match(server, /const allowPartial = body\.allowPartial === true/);
   assert.match(server, /allowPartial \}/);
 });
 
@@ -36,6 +36,7 @@ test("public football payloads are split, bundled and cached for faster mobile l
   assert.match(data, /\/data\/\$\{scope\}\.json/);
   assert.match(build, /build-public-data\.mjs/);
   for (const scope of ["builder", "matches", "daily", "results", "admin"]) assert.match(pipeline, new RegExp(`${scope}:`));
+  assert.match(pipeline, /daily: \{ \.\.\.common, tickets: snapshot\.tickets \?\? \[\], watchlist: snapshot\.watchlist \?\? \[\] \}/);
 });
 
 test("builder receives market evidence, wider estimates and forward proof", async () => {
@@ -45,6 +46,7 @@ test("builder receives market evidence, wider estimates and forward proof", asyn
   assert.match(pipeline, /paperTrials/);
   assert.match(builder, /mode: BuildMode/);
   assert.match(builder, /maxLegs = mode === "target" \? 21 : 8/);
+  assert.doesNotMatch(builder, /Math\.min\(100/);
   assert.match(admin, /Forward prediction proof/);
   assert.match(admin, /refreshSnapshot\("admin"\)/);
   assert.match(admin, /metricEntries/);
@@ -52,16 +54,17 @@ test("builder receives market evidence, wider estimates and forward proof", asyn
   assert.match(pipeline, /trialTier: "OBSERVATION"/);
 });
 
-test("converter exposes verified codes and never offers a partial conversion", async () => {
+test("converter exposes verified codes and clearly labelled partial conversion", async () => {
   const [form, worker, railway] = await Promise.all([read("app/converter/converter-form.tsx"), read("worker/index.ts"), read("scripts/railway-server.mjs")]);
-  assert.match(form, /Your \{destinationMeta\.label\} code/);
-  assert.doesNotMatch(form, /Create code with available matches/);
-  assert.match(form, /allowPartial: false/);
+  assert.match(form, /Partial \$\{destinationMeta\.label\} code/);
+  assert.match(form, /Partial code created/);
+  assert.match(form, /allowPartial: true/);
+  assert.match(await read("backend/src/modules/providers/routes.ts"), /body\.allowPartial \?\? false/);
   assert.match(form, /\{transferSelections\.length\} readable selections listed/);
   assert.match(form, /payload\.warning \|\|/);
   assert.match(worker, /Code created, but account history could not be saved/);
   assert.match(railway, /Code created, but account history could not be saved/);
-  assert.match(worker, /decoded\.partial\) \{/);
+  assert.match(worker, /decoded\.partial && !allowPartial/);
   assert.match(worker, /sourceSelections: selections/);
-  assert.match(railway, /const allowPartial = false/);
+  assert.match(railway, /const allowPartial = body\.allowPartial === true/);
 });

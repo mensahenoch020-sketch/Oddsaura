@@ -19,7 +19,7 @@ const generated = {
   snapshot,
   builder: { ...common, predictedPicks: routePicks },
   matches: { ...common, fixtures: (snapshot.fixtures ?? []).map(withoutOdds), liveFixtures: (snapshot.liveFixtures ?? []).map(withoutOdds), predictedPicks: routePicks },
-  daily: { ...common, tickets: snapshot.tickets ?? [] },
+  daily: { ...common, tickets: snapshot.tickets ?? [], watchlist: snapshot.watchlist ?? [] },
   results: { ...common, recentResults: (snapshot.recentResults ?? []).map(withoutOdds), tickets: snapshot.tickets ?? [], ticketHistory: snapshot.ticketHistory ?? [], modelPerformance },
   admin: { ...common, sources: snapshot.sources ?? [], tickets: snapshot.tickets ?? [], marketCatalog: snapshot.marketCatalog ?? [] },
 };
