@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildTargetSlip } from "../../app/builder/target-builder.js";
+import { buildTargetSlip, correctedSearchTarget } from "../../app/builder/target-builder.js";
+import { BookmakerCodeError, unavailableFixtureId } from "../../app/builder/providers.js";
 import type { PredictedPick } from "../../app/data.js";
 
 function pick(id: string, odds: number, confidence = .7): PredictedPick {
@@ -44,4 +45,16 @@ test("target builder uses verified live prices when rebuilding a short slip", ()
   assert.ok(retry);
   assert.ok(retry.picks.length > first.picks.length);
   assert.ok(Math.abs(retry.estimatedOdds - 20) < Math.abs(first.picks.reduce((odds) => odds * 1.25, 1) - 20));
+});
+
+test("target retry corrects its search total in the direction of live price drift", () => {
+  assert.ok(correctedSearchTarget(2, 1.54) > 2);
+  assert.ok(correctedSearchTarget(2, 2.12) < 2);
+  assert.equal(correctedSearchTarget(2, Number.NaN), 2);
+});
+
+test("target retry can identify and exclude an unavailable bookmaker fixture", () => {
+  assert.equal(unavailableFixtureId(new BookmakerCodeError("missing", { fixtureId: "fixture-7" })), "fixture-7");
+  assert.equal(unavailableFixtureId(new BookmakerCodeError("missing", { unmatched: [{ fixtureId: "fixture-8" }] })), "fixture-8");
+  assert.equal(unavailableFixtureId(new Error("missing")), null);
 });
