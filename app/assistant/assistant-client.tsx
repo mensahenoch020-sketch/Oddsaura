@@ -110,14 +110,14 @@ function partitionPicks(picks: PredictedPick[], requestedParts: number) {
   return groups;
 }
 
-export default function AssistantClient() {
+export default function AssistantClient({ initialRequest = "" }: { initialRequest?: string }) {
   const [snapshot, setSnapshot] = useState<Snapshot>(fallbackSnapshot);
   const [dailySnapshot, setDailySnapshot] = useState<Snapshot>(fallbackSnapshot);
   const [resultsSnapshot, setResultsSnapshot] = useState<Snapshot>(fallbackSnapshot);
   const [ticketControls, setTicketControls] = useState<TicketControl[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(initialRequest.slice(0, 500));
   const [pending, setPending] = useState<PendingIntent | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const nextId = useRef(1);
