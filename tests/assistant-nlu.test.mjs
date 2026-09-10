@@ -34,7 +34,8 @@ test("understands bookmaker conversion routes and codes", () => {
   assert.equal(intent.destinationProvider, "sportybet");
 });
 
-test("recognizes Best Bet and Daily Odds requests", () => {
+test("recognizes Best Bet, Daily Odds and result requests", () => {
   assert.equal(interpretAssistantRequest("Which prediction strong pass?").kind, "best");
   assert.equal(interpretAssistantRequest("Show today's ready made tickets").kind, "daily");
+  assert.equal(interpretAssistantRequest("Did the last odds win?").kind, "results");
 });
