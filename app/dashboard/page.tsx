@@ -1,8 +1,5 @@
-"use client";
-
-import BuilderPage from "../builder/page";
+import AssistantClient from "../assistant/assistant-client";
 
 export default function DashboardPage() {
-  return <BuilderPage activeArea="home" />;
+  return <AssistantClient />;
 }
-

@@ -36,3 +36,10 @@ test("protects the Daily Odds hub", async () => {
   assert.equal(response.status, 302);
   assert.equal(response.headers.get("location"), "http://localhost/login?next=%2Fdaily");
 });
+
+test("protects the conversational assistant", async () => {
+  const worker = await loadWorker();
+  const response = await worker.fetch(new Request("http://localhost/assistant"), env, ctx);
+  assert.equal(response.status, 302);
+  assert.equal(response.headers.get("location"), "http://localhost/login?next=%2Fassistant");
+});
