@@ -11,7 +11,7 @@ const cookieName = "oa_session";
 const sessionSeconds = 60 * 60 * 24 * 30;
 const passwordIterations = 100_000;
 const encoder = new TextEncoder();
-const protectedPages = ["/dashboard", "/daily", "/matches", "/builder", "/converter", "/results", "/account", "/admin"];
+const protectedPages = ["/dashboard", "/assistant", "/daily", "/matches", "/builder", "/converter", "/results", "/account", "/admin"];
 const protectedApis = ["/api/providers", "/api/sportybet/code", "/api/account", "/api/codes", "/api/slips", "/api/ticket-controls", "/api/admin"];
 const edgeOrigin = (process.env.ODDSAURA_EDGE_ORIGIN || "https://oddsaura.chipsofrio.chatgpt.site").replace(/\/$/, "");
 
