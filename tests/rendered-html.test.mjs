@@ -10,15 +10,17 @@ async function loadWorker() {
 const env = { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } };
 const ctx = { waitUntil() {}, passThroughOnException() {} };
 
-test("renders the public OddsAura landing page", async () => {
+test("renders the public chat-first OddsAura homepage", async () => {
   const worker = await loadWorker();
   const response = await worker.fetch(new Request("http://localhost/", { headers: { accept: "text/html" } }), env, ctx);
   const html = await response.text();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
-  assert.match(html, /Football predictions/);
+  assert.match(html, /What do you want to bet\?/);
+  assert.match(html, /Ask OddsAura anything/);
   assert.match(html, /Create account/);
-  assert.doesNotMatch(html, /Open code converter/i);
+  assert.match(html, /Give me 20 odds for Sporty/i);
+  assert.match(html, /Convert a Betway code to SportyBet/i);
   for (const bookmaker of ["SportyBet", "Bet9ja", "betPawa", "Betway", "BetKing"]) assert.match(html, new RegExp(bookmaker, "i"));
   assert.doesNotMatch(html, /codex-preview/);
 });
