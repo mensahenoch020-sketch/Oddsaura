@@ -6,6 +6,7 @@ export type AssistantIntent =
   | { kind: "convert"; confidence: number; code: string | null; sourceProvider: ProviderId | null; destinationProvider: ProviderId | null }
   | { kind: "best"; confidence: number; provider: ProviderId | null }
   | { kind: "daily"; confidence: number }
+  | { kind: "results"; confidence: number }
   | { kind: "unknown"; confidence: number };
 
 const providerAliases: Array<{ id: ProviderId; aliases: string[] }> = [
@@ -37,6 +38,10 @@ const examples = {
   daily: [
     "show daily odds", "today's tickets", "give me the daily accumulator",
     "what odds are available today", "show two odds and five odds", "today betting slips",
+  ],
+  results: [
+    "show recent results", "how did the predictions perform", "which tickets won",
+    "show settled bets", "check yesterday results", "did the last odds win",
   ],
 } as const;
 
@@ -188,6 +193,9 @@ export function interpretAssistantRequest(input: string): AssistantIntent {
   }
   if (scores.daily >= .6 || /\bdaily\b|\btoday.?s?(?:\s+[a-z]+){0,2}\s+(?:odds|tickets|slips)\b|\bready made (?:tickets|slips)\b/.test(text)) {
     return { kind: "daily", confidence: Math.min(1, scores.daily + .18) };
+  }
+  if (scores.results >= .58 || /\b(results?|settled|won|lost|performance|hit rate)\b/.test(text)) {
+    return { kind: "results", confidence: Math.min(1, scores.results + .18) };
   }
   const targetOdds = extractTarget(text, null);
   if (hasBuildLanguage || targetOdds || providers.length || scores.build >= .43) {
