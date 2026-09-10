@@ -337,7 +337,7 @@ export default function AssistantClient() {
         <div className="assistant-composer-dock">
           <form className="assistant-composer" onSubmit={submit}>
             <label htmlFor="assistant-request">Tell OddsAura what you want</label>
-            <textarea ref={inputRef} id="assistant-request" rows={1} value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }} placeholder={loading ? "Loading today’s football data…" : "Ask for odds, a split or a code conversion…"} disabled={busy || loading} />
+            <textarea ref={inputRef} id="assistant-request" rows={1} value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }} placeholder={loading ? "Loading football data…" : "Ask OddsAura anything…"} disabled={busy || loading} />
             <button type="submit" disabled={busy || loading || !input.trim()} aria-label="Send request"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 14-7-4 14-3-6z" /><path d="m12 13 7-8" /></svg></button>
           </form>
           <p>Verified selections only · Check every bookmaker slip · 18+</p>
