@@ -253,9 +253,36 @@ for (const pick of eligiblePicks) {
   const fixture = fixtureMap.get(pick.fixtureId);
   if (fixture) publishPick(pick, fixture);
 }
+function watchlistFamily(key) {
+  if (/^MATCH_/.test(key)) return "RESULT";
+  if (/^DC_/.test(key)) return "DOUBLE_CHANCE";
+  if (/^DNB_/.test(key)) return "DRAW_NO_BET";
+  if (/^BTTS_/.test(key)) return "BTTS";
+  if (/^(HOME|AWAY)_(OVER|UNDER)_/.test(key)) return "TEAM_GOALS";
+  if (/^(OVER|UNDER)_/.test(key)) return "TOTAL_GOALS";
+  if (/_(CLEAN|WIN_NIL)$/.test(key)) return "CLEAN_SHEET";
+  if (/^HCP_/.test(key)) return "HANDICAP";
+  return "OTHER";
+}
+const watchlistCandidates = [...predictions]
+  .filter((item) => publicMarketKeys.test(item.key) && historyEvidence(item).ready && item.confidence >= 0.62 && item.quotedOdds && item.marketProbability != null && (item.modelMarketGap ?? 1) <= .12 && (item.expectedValue ?? -1) >= -.075)
+  .sort((a, b) => (b.confidence + Math.max(0, b.expectedValue ?? 0)) - (a.confidence + Math.max(0, a.expectedValue ?? 0)));
+const watchlistFamilies = [...new Set(watchlistCandidates.map((pick) => watchlistFamily(pick.key)))];
+const watchlistBuckets = new Map(watchlistFamilies.map((family) => [family, watchlistCandidates.filter((pick) => watchlistFamily(pick.key) === family)]));
+const orderedWatchlistCandidates = [];
+let watchlistAdded = true;
+while (watchlistAdded) {
+  watchlistAdded = false;
+  for (const family of watchlistFamilies) {
+    const next = watchlistBuckets.get(family)?.shift();
+    if (!next) continue;
+    orderedWatchlistCandidates.push(next);
+    watchlistAdded = true;
+  }
+}
 const watchlist = [];
 const usedFixtures = new Set();
-for (const pick of [...predictions].filter((item) => publicMarketKeys.test(item.key) && historyEvidence(item).ready && item.confidence >= 0.62 && item.quotedOdds && item.marketProbability != null && (item.modelMarketGap ?? 1) <= .12).sort((a, b) => b.confidence - a.confidence)) {
+for (const pick of orderedWatchlistCandidates) {
   if (usedFixtures.has(pick.fixtureId) || watchlist.length >= 12) continue;
   const fixture = fixtureMap.get(pick.fixtureId);
   if (!fixture) continue;

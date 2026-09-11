@@ -34,6 +34,23 @@ test("Best Bet keeps individually qualified matches when the full target is unav
   assert.equal(result?.exact, false);
 });
 
+test("Best Bet rotates through equally qualified market families", () => {
+  const markets = [
+    ["MATCH_HOME", "Match result", "Home"],
+    ["OVER_2_5", "Total goals", "Over 2.5"],
+    ["DC_1X", "Double chance", "Home or draw"],
+    ["BTTS_YES", "Both teams to score", "Yes"],
+    ["HOME_OVER_0_5", "Home team goals", "Over 0.5"],
+  ] as const;
+  const rows = markets.flatMap(([key, name, selection], familyIndex) => Array.from({ length: 4 }, (_, index) => ({
+    ...pick(`${familyIndex}-${index}`, 1.42, .72 - index * .002),
+    market: { key, name, category: "TEST", line: null },
+    selection,
+  })));
+  const ranked = rankBestBets(rows, Date.parse("2029-01-01"));
+  assert.equal(new Set(ranked.slice(0, 5).map((item) => item.market.key.replace(/^(MATCH_|DC_|BTTS_|HOME_).*/, "$1"))).size, 5);
+});
+
 test("target builder never repeats a fixture or includes a started match", () => {
   const rows = [pick("same", 1.7), { ...pick("other-market", 1.8), fixtureId: "same" }, { ...pick("started", 2), kickoff: "2028-01-01T12:00:00Z" }, pick("future", 1.9)];
   const result = buildTargetSlip(rows, 3, Date.parse("2029-01-01"));
