@@ -12,7 +12,7 @@ import "./assistant.css";
 import "../compact-theme.css";
 
 type PendingIntent = Exclude<AssistantIntent, { kind: "unknown" | "daily" | "best" | "results" }>;
-type SelectionSummary = { id: string; match: string; market: string; selection: string; odds: number | null };
+type SelectionSummary = { id: string; match: string; market: string; selection: string; odds: number | null; priceStatus?: "QUOTED" | "MODEL_ESTIMATE" };
 type CodeSummary = {
   provider: ProviderId;
   requestedOdds?: number;
@@ -49,7 +49,8 @@ const pickPrice = (pick: PredictedPick) => pick.quotedOdds ?? pick.fairOdds ?? n
 
 function summarizeSelection(pick: PredictedPick | WatchlistPick | TicketSelection): SelectionSummary {
   const odds = "quotedOdds" in pick ? pick.quotedOdds ?? pick.fairOdds : pick.odds;
-  return { id: pick.id, match: `${pick.homeTeam.name} vs ${pick.awayTeam.name}`, market: pick.market.name, selection: pick.selection, odds };
+  const priceStatus = "priceStatus" in pick ? pick.priceStatus : "quotedOdds" in pick && pick.quotedOdds == null ? "MODEL_ESTIMATE" : "QUOTED";
+  return { id: pick.id, match: `${pick.homeTeam.name} vs ${pick.awayTeam.name}`, market: pick.market.name, selection: pick.selection, odds, priceStatus };
 }
 
 function bookmakerSelections(picks: PredictedPick[]) {
@@ -269,11 +270,16 @@ export default function AssistantClient({ initialRequest = "" }: { initialReques
         const ranked = rankBestBets(predictions.filter((pick) => providerSupportsMarket(provider, pick.market.key)), referenceTime, provider).slice(0, 5);
         const fallback = (dailySnapshot.watchlist ?? []).filter((pick) => Date.parse(pick.kickoff) > referenceTime + 5 * 60_000).sort((a, b) => b.confidence - a.confidence).slice(0, 5);
         const picks = ranked.length ? ranked.map(summarizeSelection) : fallback.map(summarizeSelection);
-        addMessage("assistant", picks.length ? `These are the strongest ${providerName(provider)}-compatible selections available now.` : `No ${providerName(provider)} match currently passes every Best Bet check. I won’t weaken the evidence rules just to fill the list.`, picks.length ? { kind: "best", picks } : undefined);
+        const estimates = picks.filter((pick) => pick.priceStatus === "MODEL_ESTIMATE").length;
+        addMessage("assistant", picks.length ? `These are the strongest ${providerName(provider)}-compatible selections available now.${estimates ? ` ${estimates} ${estimates === 1 ? "price is" : "prices are"} a model estimate and will be checked when a code is created.` : ""}` : `No ${providerName(provider)} match currently passes every Best Bet check. I won’t weaken the evidence rules just to fill the list.`, picks.length ? { kind: "best", picks } : undefined);
       } else if (intent.kind === "daily") {
         const tickets = dailyTickets.slice(0, 5).map((ticket) => ({ id: ticket.id, title: ticket.title, totalOdds: ticket.totalOdds, status: ticket.status, selections: ticket.selections.map(summarizeSelection), bookingCodes: ticket.bookingCodes }));
-        const watchlist = (dailySnapshot.watchlist ?? []).filter((pick) => Date.parse(pick.kickoff) > referenceTime + 5 * 60_000).sort((a, b) => b.confidence - a.confidence).slice(0, 6).map(summarizeSelection);
-        addMessage("assistant", tickets.length ? `I found ${tickets.length} qualified ready-made ${tickets.length === 1 ? "ticket" : "tickets"} for today.` : watchlist.length ? "No complete Daily Odds ticket passes every check right now. These individual matches do qualify." : "There are no qualified Daily Odds or individual matches right now. I’ll show them here when the checks pass.", { kind: "daily", tickets, watchlist });
+        const rankedDaily = rankBestBets(predictions.filter((pick) => providerSupportsMarket("sportybet", pick.market.key)), referenceTime, "sportybet").slice(0, 6);
+        const watchlist = rankedDaily.length
+          ? rankedDaily.map(summarizeSelection)
+          : (dailySnapshot.watchlist ?? []).filter((pick) => Date.parse(pick.kickoff) > referenceTime + 5 * 60_000).sort((a, b) => b.confidence - a.confidence).slice(0, 6).map(summarizeSelection);
+        const estimates = watchlist.filter((pick) => pick.priceStatus === "MODEL_ESTIMATE").length;
+        addMessage("assistant", tickets.length ? `I found ${tickets.length} qualified ready-made ${tickets.length === 1 ? "ticket" : "tickets"} for today.` : watchlist.length ? `No complete Daily Odds ticket passes every check right now. These individual matches qualify on the model.${estimates ? " Estimated prices are marked and checked when a code is created." : ""}` : "There are no qualified Daily Odds or individual matches right now. I’ll show them here when the checks pass.", { kind: "daily", tickets, watchlist });
       } else if (intent.kind === "results") {
         const history = [...(resultsSnapshot.ticketHistory ?? resultsSnapshot.tickets ?? [])].sort((a, b) => Date.parse(b.publishedAt ?? "") - Date.parse(a.publishedAt ?? ""));
         const tickets = history.slice(0, 8).map((ticket) => ({ id: ticket.id, title: ticket.title, totalOdds: ticket.totalOdds, status: ticket.status === "PUBLISHED" ? "PENDING" : ticket.status, publishedAt: ticket.publishedAt, selections: ticket.selections.length }));
@@ -315,7 +321,7 @@ export default function AssistantClient({ initialRequest = "" }: { initialReques
       <header className="assistant-toolbar">
         <span><i aria-hidden="true" /> Verified football data</span>
         <div>
-          <details className="assistant-tools"><summary>Tools</summary><nav><Link href="/builder">Manual builder</Link><Link href="/converter">Code converter</Link><Link href="/results">Full history</Link></nav></details>
+          <details className="assistant-tools"><summary>Tools</summary><nav><Link href="/converter">Code converter</Link><Link href="/results">Full history</Link></nav></details>
           <button type="button" onClick={startNewChat}>New chat</button>
         </div>
       </header>
@@ -351,11 +357,11 @@ function OutputView({ output }: { output: AssistantOutput }) {
   const [copied, setCopied] = useState("");
   async function copy(value: string) { await navigator.clipboard.writeText(value); setCopied(value); window.setTimeout(() => setCopied(""), 1600); }
 
-  if (output.kind === "best") return <div className="assistant-picks">{output.picks.map((pick, index) => <div key={pick.id}><span>#{index + 1}</span><div><b>{pick.match}</b><small>{pick.market}: {pick.selection}</small></div><strong>{pick.odds?.toFixed(2) ?? "—"}</strong></div>)}</div>;
+  if (output.kind === "best") return <details className="assistant-expandable"><summary><span>{output.picks.length} best selections</span><b>Show</b></summary><div className="assistant-picks">{output.picks.map((pick, index) => <div key={pick.id}><span>#{index + 1}</span><div><b>{pick.match}</b><small>{pick.market}: {pick.selection}{pick.priceStatus === "MODEL_ESTIMATE" ? " · model estimate" : ""}</small></div><strong>{pick.odds?.toFixed(2) ?? "—"}</strong></div>)}</div></details>;
 
   if (output.kind === "daily") return <div className="assistant-daily-output">
     {output.tickets.map((ticket) => <section className="assistant-ticket-card" key={ticket.id}><header><div><span>Qualified ticket</span><b>{ticket.title}</b></div><strong>{formatOdds(ticket.totalOdds)}</strong></header><small>{ticket.selections.length} picks · {ticket.status === "PUBLISHED" ? "Open" : ticket.status}</small><details><summary>View selections</summary>{ticket.selections.map((pick) => <SelectionRow key={pick.id} pick={pick} />)}</details>{ticket.bookingCodes.map((item) => <div className="assistant-inline-code" key={`${ticket.id}-${item.provider}`}><span>{item.provider}</span><b>{item.code}</b><button type="button" onClick={() => void copy(item.code)}>{copied === item.code ? "Copied ✓" : "Copy"}</button></div>)}</section>)}
-    {output.watchlist.length ? <section className="assistant-watchlist"><header><span>Qualified individually</span><b>{output.tickets.length ? "More strong matches" : "Available now"}</b></header>{output.watchlist.map((pick) => <SelectionRow key={pick.id} pick={pick} />)}</section> : null}
+    {output.watchlist.length ? <details className="assistant-watchlist assistant-expandable"><summary><span>{output.watchlist.length} qualified selections</span><b>Show</b></summary><div>{output.watchlist.map((pick) => <SelectionRow key={pick.id} pick={pick} />)}</div></details> : null}
   </div>;
 
   if (output.kind === "results") return <div className="assistant-results-output">
@@ -368,11 +374,11 @@ function OutputView({ output }: { output: AssistantOutput }) {
     <header><div><span>{providerName(card.provider)} {output.cards.length > 1 ? `code ${index + 1}` : "code"}</span>{card.code ? <strong>{card.code}</strong> : <strong className="unavailable">Not created</strong>}</div>{card.liveOdds ? <b>{formatOdds(card.liveOdds)}</b> : card.estimatedOdds ? <b>Est. {formatOdds(card.estimatedOdds)}</b> : null}</header>
     {card.code ? <div className="assistant-code-actions"><button type="button" onClick={() => void copy(card.code!)}>{copied === card.code ? "Copied ✓" : "Copy code"}</button>{card.deepLink ? <a href={card.deepLink} target="_blank" rel="noreferrer">Open {providerName(card.provider)} ↗</a> : null}</div> : card.deepLink ? <a className="assistant-open-manual" href={card.deepLink} target="_blank" rel="noreferrer">Open {providerName(card.provider)} ↗</a> : null}
     <details><summary>{card.selections.length} included {card.selections.length === 1 ? "selection" : "selections"}</summary>{card.selections.map((pick) => <SelectionRow key={pick.id} pick={pick} />)}</details>
-    {card.unmatched?.length ? <details open className="assistant-unmatched"><summary>{card.unmatched.length} not included</summary>{card.unmatched.map((row, rowIndex) => <p key={`${row.homeTeam}-${rowIndex}`}><b>{row.homeTeam} vs {row.awayTeam}</b><span>{row.reason}</span></p>)}</details> : null}
+    {card.unmatched?.length ? <details className="assistant-unmatched"><summary>{card.unmatched.length} not included</summary>{card.unmatched.map((row, rowIndex) => <p key={`${row.homeTeam}-${rowIndex}`}><b>{row.homeTeam} vs {row.awayTeam}</b><span>{row.reason}</span></p>)}</details> : null}
     {card.warning ? <p className="assistant-warning">{card.warning}</p> : null}
   </section>)}</div>;
 }
 
 function SelectionRow({ pick }: { pick: SelectionSummary }) {
-  return <div className="assistant-selection"><div><b>{pick.match}</b><small>{pick.market}: {pick.selection}</small></div><strong>{pick.odds?.toFixed(2) ?? "—"}</strong></div>;
+  return <div className="assistant-selection"><div><b>{pick.match}</b><small>{pick.market}: {pick.selection}{pick.priceStatus === "MODEL_ESTIMATE" ? " · model estimate" : ""}</small></div><strong>{pick.odds?.toFixed(2) ?? "—"}</strong></div>;
 }
