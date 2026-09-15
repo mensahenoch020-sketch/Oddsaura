@@ -4,7 +4,8 @@ import { attachOdds, buildModelContext, scoreEvent } from "../lib/model.mjs";
 import { buildTicket } from "../lib/tickets.mjs";
 import { normalizeEspnEvent, normalizeEspnGlobalEvent } from "../lib/espn.mjs";
 import { normalizeFootballDataRow, parseCsv } from "../lib/football-data.mjs";
-import { canonicalTeamId } from "../lib/identity.mjs";
+import { canonicalTeamId, normalizeEventIdentity } from "../lib/identity.mjs";
+import { historyEvidence, summarizeHistory } from "../lib/history-coverage.mjs";
 
 const finished = (id, days, homeId, awayId, homeScore, awayScore) => ({ id, kickoff: new Date(Date.now() - days * 86_400_000).toISOString(), status: "FINISHED", homeTeam: { id: homeId, name: homeId }, awayTeam: { id: awayId, name: awayId }, homeScore, awayScore });
 const history = [
@@ -31,6 +32,21 @@ test("fixtures with no team history still receive cautious model probabilities",
   assert.ok(predictions.some((item) => item.key === "OVER_1_5"));
 });
 
+test("the publication gate excludes either team when its history is insufficient", () => {
+  assert.equal(historyEvidence({ factors: { homeHistoryPlayed: 40, awayHistoryPlayed: 19, homePlayed: 12, awayPlayed: 12, homeVenuePlayed: 6, awayVenuePlayed: 6 } }).ready, false);
+  assert.equal(historyEvidence({ factors: { homeHistoryPlayed: 40, awayHistoryPlayed: 40, homePlayed: 12, awayPlayed: 12, homeVenuePlayed: 6, awayVenuePlayed: 6 } }).ready, true);
+});
+
+test("history coverage counts unique matches under actual competitions", () => {
+  const rows = [finished("same", 2, "A", "B", 1, 0), { ...finished("same-copy", 2, "A", "B", 1, 0), source: "other" }, finished("different", 1, "C", "D", 2, 2)]
+    .map((event, index) => ({ ...event, source: event.source ?? "test", league: { id: index === 2 ? "cup" : "league", name: index === 2 ? "Cup" : "League", country: "Test" } }));
+  rows[1].kickoff = rows[0].kickoff;
+  const report = summarizeHistory(rows, "2026-09-15T00:00:00.000Z");
+  assert.equal(report.matches, 2);
+  assert.equal(report.competitionCount, 2);
+  assert.deepEqual(report.competitions.map(item => item.matches), [1, 1]);
+});
+
 test("the model context adds opponent-adjusted Elo and venue history", () => {
   const context = buildModelContext(history, fixture.kickoff);
   const home = scoreEvent(fixture, history, context).find((item) => item.key === "MATCH_HOME");
@@ -39,6 +55,22 @@ test("the model context adds opponent-adjusted Elo and venue history", () => {
   assert.equal(home.factors.homeHistoryPlayed, 3);
   assert.ok(home.factors.minimumLongHistory > 0);
   assert.ok(Number.isFinite(home.factors.homeRestDays));
+});
+
+test("stored shots and shots-on-target contribute a bounded result signal", () => {
+  const shotHistory = history.map((match, index) => ({
+    ...match,
+    stats: {
+      homeShots: 12 + index,
+      awayShots: 8 + index,
+      homeShotsOnTarget: 5 + index % 2,
+      awayShotsOnTarget: 3,
+    },
+  }));
+  const home = scoreEvent(fixture, shotHistory).find((item) => item.key === "MATCH_HOME");
+  assert.ok(home.factors.homeShotMatches > 0);
+  assert.ok(Number.isFinite(home.factors.homeShotXg));
+  assert.ok(Number.isFinite(home.probability));
 });
 
 test("historical CSV rows normalize into the same permanent team identities", () => {
@@ -91,6 +123,35 @@ test("the global board normalizes broad fixtures and team badges", () => {
   assert.equal(event.source, "espn-global-json");
   assert.equal(event.league.name, "English Premier League");
   assert.equal(event.homeTeam.logo, "https://example.com/a.png");
+});
+
+test("the global board uses competition identity rather than a tournament round label", () => {
+  const event = normalizeEspnGlobalEvent({
+    id: "cup-1", uid: "s:600~l:3920~e:cup-1", date: "2026-09-15T18:00:00Z", season: { year: 2026, slug: "third-round" },
+    competitions: [{ venue: { address: { country: "England" } }, competitors: [
+      { homeAway: "home", team: { displayName: "Alpha" } }, { homeAway: "away", team: { displayName: "Beta" } },
+    ] }],
+  }, { "3920": { slug: "eng.league_cup", name: "English Carabao Cup", country: "England" } });
+  assert.equal(event.league.id, "eng-league-cup");
+  assert.equal(event.league.name, "English Carabao Cup");
+});
+
+test("a generic country fallback resolves to its known domestic competition", () => {
+  const event = normalizeEspnGlobalEvent({
+    id: "col-1", date: "2026-09-17T23:00:00Z", season: { year: 2026, slug: "2026-colombia-football" },
+    status: { type: { state: "pre" } },
+    competitions: [{ venue: { address: { country: "Colombia" } }, competitors: [
+      { homeAway: "home", team: { displayName: "Atlético Bucaramanga" } }, { homeAway: "away", team: { displayName: "Águilas Doradas" } },
+    ] }],
+  });
+  assert.equal(event.league.id, "col-1");
+  assert.equal(event.league.name, "Colombian Fútbol Profesional");
+});
+
+test("legacy generic competition labels migrate when cached fixtures reload", () => {
+  const event = normalizeEventIdentity({ ...fixture, league: { id: "colombia-football", name: "Colombia Football", country: "Colombia" } });
+  assert.equal(event.league.id, "col-1");
+  assert.equal(event.league.name, "Colombian Fútbol Profesional");
 });
 
 test("ticket construction does not repeat a fixture", () => {

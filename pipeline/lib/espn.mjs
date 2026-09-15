@@ -2,20 +2,27 @@ import { fetchJson, wait } from "./http.mjs";
 import { canonicalLeagueId, canonicalTeamId } from "./identity.mjs";
 
 const BASE = "https://site.api.espn.com/apis/site/v2/sports/soccer";
+const CORE = "https://sports.core.api.espn.com/v2/sports/soccer/leagues";
 const DEFAULT_LEAGUES = [
   "eng.1", "esp.1", "ger.1", "ita.1", "fra.1", "uefa.champions",
   "uefa.europa", "uefa.europa.conf", "ned.1", "por.1", "sco.1",
   "bel.1", "tur.1", "ksa.1", "usa.1", "mex.1", "bra.1", "arg.1",
 ];
+const COUNTRY_LEAGUE_FALLBACKS = {
+  Colombia: { id: "col.1", slug: "col.1", name: "Colombian Fútbol Profesional", country: "Colombia" },
+};
 
 const compactDate = (date) => date.toISOString().slice(0, 10).replaceAll("-", "");
 const displayName = (value) => String(value ?? "").split("-").filter(Boolean).map((part) => part.length <= 3 ? part.toUpperCase() : `${part[0].toUpperCase()}${part.slice(1)}`).join(" ");
 
-function globalLeague(raw) {
+function globalLeague(raw, leagueCatalog = {}) {
   const leagueId = String(raw?.uid ?? "").match(/~l:(\d+)/)?.[1] ?? "";
+  const catalog = leagueCatalog[leagueId];
+  if (catalog) return { id: catalog.slug, slug: catalog.slug, name: catalog.name, country: catalog.country ?? "", gender: catalog.gender ?? null };
   const rawSlug = String(raw?.season?.slug ?? "").replace(/^\d{4}(?:-\d{2})?-/, "");
   const generic = ["", "regular-season", "first-round", "second-round", "group-stage", "tournament", "apertura", "clausura", "torneo-apertura", "torneo-clausura"].includes(rawSlug);
   const country = raw?.competitions?.[0]?.venue?.address?.country ?? raw?.venue?.address?.country ?? "";
+  if (COUNTRY_LEAGUE_FALLBACKS[country] && (generic || /football$/.test(rawSlug))) return COUNTRY_LEAGUE_FALLBACKS[country];
   return {
     id: leagueId,
     slug: rawSlug || leagueId,
@@ -24,8 +31,30 @@ function globalLeague(raw) {
   };
 }
 
-export function normalizeEspnGlobalEvent(raw) {
-  return normalizeEspnEvent(raw, globalLeague(raw), "espn-global-json");
+export function normalizeEspnGlobalEvent(raw, leagueCatalog = {}) {
+  return normalizeEspnEvent(raw, globalLeague(raw, leagueCatalog), "espn-global-json");
+}
+
+export async function collectEspnLeagueCatalog() {
+  const index = await fetchJson(`${CORE}?limit=1000&lang=en&region=us`, { timeoutMs: 30_000 });
+  const refs = Array.isArray(index?.items) ? index.items.map(item => String(item?.$ref ?? "").replace(/^http:/, "https:")).filter(Boolean) : [];
+  const entries = [];
+  const warnings = [];
+  let cursor = 0;
+  async function worker() {
+    while (cursor < refs.length) {
+      const ref = refs[cursor++];
+      try {
+        const row = await fetchJson(ref, { retries: 1, timeoutMs: 20_000 });
+        if (!row?.id || !row?.slug || !row?.name) continue;
+        entries.push({ id: String(row.id), slug: String(row.slug), name: String(row.displayName ?? row.name), country: String(row.country?.name ?? ""), gender: String(row.gender ?? ""), isTournament: Boolean(row.isTournament) });
+      } catch (error) {
+        warnings.push(`${ref}: ${error instanceof Error ? error.message : "fetch failed"}`);
+      }
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(12, refs.length) }, () => worker()));
+  return { generatedAt: new Date().toISOString(), leagues: Object.fromEntries(entries.map(entry => [entry.id, entry])), warnings };
 }
 
 function decimalFromAmerican(value) {
@@ -147,26 +176,41 @@ export async function collectEspn({ historyDays = 35, futureDays = 7, leagues = 
   return { events: [...events.values()].sort((a, b) => a.kickoff.localeCompare(b.kickoff)), warnings };
 }
 
-export async function collectEspnGlobal({ historyDays = 14, futureDays = 7 } = {}) {
+export async function collectEspnGlobal({ historyDays = 14, futureDays = 7, startDate = null, endDate = null, leagueCatalog = {}, concurrency = 16 } = {}) {
   const now = new Date();
   const events = new Map();
   const warnings = [];
-  for (let offset = -historyDays; offset <= futureDays; offset += 1) {
-    const date = new Date(now);
-    date.setUTCDate(date.getUTCDate() + offset);
-    const day = compactDate(date);
-    try {
-      const payload = await fetchJson(`${BASE}/all/scoreboard?dates=${day}&limit=1000`, { timeoutMs: 20_000 });
-      const rows = Array.isArray(payload?.events) ? payload.events : [];
-      for (const raw of rows) {
-        const event = normalizeEspnGlobalEvent(raw);
-        if (event.id && Number.isFinite(new Date(event.kickoff).getTime())) events.set(event.id, event);
-      }
-      if (rows.length >= 1000) warnings.push(`${day}: the source reached its 1,000-match daily limit`);
-    } catch (error) {
-      warnings.push(`${day}: ${error instanceof Error ? error.message : "fetch failed"}`);
-    }
-    await wait(120);
+  const start = startDate ? new Date(startDate) : new Date(now);
+  const end = endDate ? new Date(endDate) : new Date(now);
+  if (!startDate) start.setUTCDate(start.getUTCDate() - historyDays);
+  if (!endDate) end.setUTCDate(end.getUTCDate() + futureDays);
+  start.setUTCHours(0, 0, 0, 0);
+  end.setUTCHours(0, 0, 0, 0);
+  if (!Number.isFinite(start.getTime()) || !Number.isFinite(end.getTime()) || start > end) {
+    throw new Error("Invalid ESPN global date range.");
   }
+  const days = [];
+  for (const cursorDate = new Date(start); cursorDate <= end; cursorDate.setUTCDate(cursorDate.getUTCDate() + 1)) {
+    days.push(compactDate(cursorDate));
+  }
+  let cursor = 0;
+  async function worker() {
+    while (cursor < days.length) {
+      const day = days[cursor++];
+      try {
+        const payload = await fetchJson(`${BASE}/all/scoreboard?dates=${day}&limit=1000`, { timeoutMs: 20_000 });
+        const rows = Array.isArray(payload?.events) ? payload.events : [];
+        for (const raw of rows) {
+          const event = normalizeEspnGlobalEvent(raw, leagueCatalog);
+          if (event.id && Number.isFinite(new Date(event.kickoff).getTime())) events.set(event.id, event);
+        }
+        if (rows.length >= 1000) warnings.push(`${day}: the source reached its 1,000-match daily limit`);
+      } catch (error) {
+        warnings.push(`${day}: ${error instanceof Error ? error.message : "fetch failed"}`);
+      }
+      await wait(75);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(Math.max(1, concurrency), days.length) }, () => worker()));
   return { events: [...events.values()].sort((a, b) => a.kickoff.localeCompare(b.kickoff)), warnings };
 }

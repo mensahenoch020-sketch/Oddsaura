@@ -479,6 +479,11 @@
 .assistant-ticket-card details { margin-top: 11px; border-top: 1px solid #2b323b; padding-top: 9px; }
 .assistant-code-card summary,
 .assistant-ticket-card summary { cursor: pointer; color: #aab4c0; font-size: .76rem; font-weight: 700; }
+.assistant-output-details > summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; list-style: none; }
+.assistant-output-details > summary::-webkit-details-marker { display: none; }
+.assistant-output-details > summary b { color: var(--chat-green); font-size: .66rem; text-transform: uppercase; letter-spacing: .06em; }
+.assistant-output-details[open] > summary b { font-size: 0; }
+.assistant-output-details[open] > summary b::after { content: "Hide"; font-size: .66rem; }
 .assistant-selection { grid-template-columns: minmax(0, 1fr) auto; }
 .assistant-unmatched p { display: grid; gap: 3px; margin: 9px 0 0; color: #e9c1c1; font-size: .74rem; }
 .assistant-unmatched p span { color: #b59090; }
@@ -507,27 +512,36 @@
 .assistant-results-output > a { display: inline-block; margin-top: 11px; color: var(--chat-green); text-decoration: none; font-size: .77rem; font-weight: 750; }
 
 @media (max-width: 760px) {
-  .assistant-shell { width: min(100% - 22px, 940px); min-height: calc(100dvh - 132px); }
-  .assistant-app:not(.landing-assistant) .assistant-shell { height: calc(100dvh - 131px - env(safe-area-inset-bottom)); min-height: 0; }
+  .assistant-app:not(.landing-assistant) { height: 100dvh; min-height: 100svh; overflow: hidden; }
+  .assistant-shell { width: min(100% - 22px, 940px); min-height: calc(100dvh - 124px); }
+  .assistant-app:not(.landing-assistant) .assistant-shell { height: calc(100dvh - 124px - env(safe-area-inset-bottom)); min-height: 0; }
   .assistant-toolbar { height: 50px; }
   .assistant-toolbar > span { font-size: .62rem; }
   .assistant-toolbar button,
   .assistant-tools summary { font-size: .69rem; padding: 7px 10px; }
-  .assistant-welcome { padding: 28px 2px 18px; }
+  .assistant-welcome { padding: 28px 2px 112px; }
   .assistant-orb { width: 52px; height: 52px; margin-bottom: 16px; }
   .assistant-welcome h1 { font-size: 2.35rem; }
   .assistant-welcome > p { font-size: .84rem; line-height: 1.52; }
   .assistant-prompts { margin-top: 22px; grid-template-columns: 1fr; gap: 7px; }
   .assistant-prompts button { min-height: 48px; padding: 8px 11px; font-size: .78rem; }
-  .assistant-thread { padding: 16px 0 12px; gap: 15px; }
+  .assistant-thread { padding: 16px 0 112px; gap: 15px; scroll-padding-bottom: 112px; }
   .assistant-message { gap: 7px; }
   .assistant-avatar { width: 29px; height: 29px; border-radius: 9px; font-size: .56rem; }
   .assistant-bubble { padding: 11px 12px; max-width: calc(100vw - 62px); }
   .assistant-bubble > p { font-size: .84rem; }
   .assistant-message.user .assistant-bubble { max-width: calc(100vw - 68px); }
-  .assistant-composer-dock { padding: 8px 0 max(8px, env(safe-area-inset-bottom)); }
+  .assistant-composer-dock {
+    position: fixed;
+    left: 11px;
+    right: 11px;
+    bottom: calc(62px + env(safe-area-inset-bottom));
+    z-index: 90;
+    padding: 8px 0 7px;
+    background: linear-gradient(180deg, rgba(9, 12, 15, 0), var(--chat-bg) 18%);
+  }
   .assistant-composer { padding: 6px 6px 6px 13px; border-radius: 16px; }
-  .assistant-composer textarea { font-size: .89rem; min-height: 42px; max-height: 88px; padding-top: 10px; }
+  .assistant-composer textarea { font-size: 16px; min-height: 42px; max-height: 88px; padding-top: 10px; }
   .assistant-composer button { width: 42px; height: 42px; border-radius: 11px; }
   .assistant-composer-dock > p { font-size: .58rem; margin-top: 6px; }
   .assistant-code-grid:has(.assistant-code-card:nth-child(2)) { grid-template-columns: 1fr; }

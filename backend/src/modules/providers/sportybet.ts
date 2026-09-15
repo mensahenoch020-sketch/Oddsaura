@@ -444,6 +444,12 @@ function safeDeepLink(value: unknown, code: string) {
   return `${SPORTY_ORIGIN}/ng/?shareCode=${encodeURIComponent(code)}`;
 }
 
+export async function collectSportyBetMarkets(inputs: SportyBetSelectionInput[], fetcher: FetchLike = fetch) {
+  if (!inputs.length) return [];
+  const event = await findEvent(fetcher, inputs[0]!);
+  return availableQuotes(inputs, input => resolveFromEvent(event, input));
+}
+
 export async function createSportyBetCode(selections: SportyBetSelectionInput[], fetcher: FetchLike = fetch, allowPartial = false): Promise<SportyBetCodeResult> {
   if (!Array.isArray(selections) || selections.length < 1 || selections.length > 50) throw new SportyBetIntegrationError("Choose between 1 and 50 selections.", 400);
   const attempts = await mapLimit(selections, 4, async (input) => {
@@ -491,3 +497,4 @@ export async function createSportyBetCode(selections: SportyBetSelectionInput[],
   });
   return { ...verificationState, code, deepLink: safeDeepLink(data.shareURL, code), resolved, partial: unmatched.length > 0, unmatched };
 }
+import { availableQuotes } from "./quote-helpers.js";

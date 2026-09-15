@@ -34,7 +34,7 @@ export function providerSupportsMarket(providerId: ProviderId, marketKey: string
 type ProviderSelection = { provider?: string; deepLink?: string | null };
 
 export function inspectProviderSlip(providerId: ProviderId, selections: ProviderSelection[]) {
-  const adapter = providerAdapters.find((item) => item.id === providerId) ?? providerAdapters[0];
+  const adapter = providerAdapters.find((item) => item.id === providerId) ?? providerAdapters[0]!;
   const linked = selections.filter((selection) => Boolean(selection.deepLink)).length;
   if (adapter.capability === "booking-code" && adapter.status === "live") {
     return `${adapter.label}: create a code by matching every selection against the bookmaker's live markets, then verifying the returned code.`;
@@ -55,6 +55,10 @@ export type BookmakerCodeResponse = {
   resolved: Array<{ fixtureId: string; odds: number | null }>;
   partial: boolean;
   unmatched: Array<{ fixtureId: string; homeTeam: string; awayTeam: string; reason: string }>;
+  decoded?: number;
+  sourceSelections?: BookmakerSelection[];
+  sourceIssues?: Array<{ eventName?: string; marketName?: string; outcomeName?: string; reason?: string }>;
+  conversionStage?: "INPUT" | "IMPORT" | "TRANSLATE" | "MATCH" | "CREATE" | "VERIFY";
 };
 
 export class BookmakerCodeError extends Error {
@@ -100,3 +104,14 @@ export async function generateBookmakerCode(provider: ProviderId, selections: Bo
 
 export const generateSportyBetCode = (selections: BookmakerSelection[], allowPartial = false) => generateBookmakerCode("sportybet", selections, allowPartial);
 export type SportyBetCodeResponse = BookmakerCodeResponse;
+
+export async function expandBookmakerMarkets(provider: ProviderId, start: string, end: string, marketKeys?: string[]) {
+  const response = await fetch(`/api/providers/${encodeURIComponent(provider)}/expand`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ start, end, ...(marketKeys?.length ? { marketKeys } : {}) }),
+  });
+  const payload = await response.json() as { picks?: import("../data").PredictedPick[]; error?: string };
+  if (!response.ok) throw new BookmakerCodeError(payload.error || `${provider} could not expand its live match pool.`);
+  return payload.picks ?? [];
+}

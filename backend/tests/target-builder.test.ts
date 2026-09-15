@@ -3,9 +3,10 @@ import assert from "node:assert/strict";
 import { buildTargetSlip, correctedSearchTarget, rankBestBets } from "../../app/builder/target-builder.js";
 import { BookmakerCodeError, unavailableFixtureId } from "../../app/builder/providers.js";
 import type { PredictedPick } from "../../app/data.js";
+import { interpretAssistantRequest, matchesRequestedMarket } from "../../app/assistant/nlu.js";
 
 function pick(id: string, odds: number, confidence = .7): PredictedPick {
-  return { id, fixtureId: id, kickoff: "2030-01-02T12:00:00Z", league: { name: "Test" }, homeTeam: { name: `${id} Home` }, awayTeam: { name: `${id} Away` }, market: { key: "OVER_1_5", name: "Over 1.5", category: "TOTALS", line: 1.5 }, selection: "Over 1.5", probability: confidence, confidence, quotedOdds: odds, fairOdds: odds, tier: "SAFE", dataQuality: "HIGH", historyMatches: 20, marketProbability: confidence - .01, modelMarketGap: .03, expectedValue: -.01, reasoning: "test" };
+  return { id, fixtureId: id, kickoff: "2030-01-02T12:00:00Z", league: { name: "Test" }, homeTeam: { name: `${id} Home` }, awayTeam: { name: `${id} Away` }, market: { key: "OVER_1_5", name: "Over 1.5", category: "TOTALS", line: 1.5 }, selection: "Over 1.5", probability: confidence, confidence, quotedOdds: odds, fairOdds: odds, tier: "SAFE", dataQuality: "HIGH", historyMatches: 80, marketProbability: confidence - .01, modelMarketGap: .03, expectedValue: -.01, reasoning: "test" };
 }
 
 test("target builder follows requested totals beyond the old 100 odds ceiling", () => {
@@ -34,13 +35,12 @@ test("Best Bet keeps individually qualified matches when the full target is unav
   assert.equal(result?.exact, false);
 });
 
-test("Best Bet rotates through equally qualified market families", () => {
+test("Best Bet rotates through equally qualified evidence-approved market families", () => {
   const markets = [
     ["MATCH_HOME", "Match result", "Home"],
-    ["OVER_2_5", "Total goals", "Over 2.5"],
+    ["OVER_1_5", "Total goals", "Over 1.5"],
     ["DC_1X", "Double chance", "Home or draw"],
-    ["BTTS_YES", "Both teams to score", "Yes"],
-    ["HOME_OVER_0_5", "Home team goals", "Over 0.5"],
+    ["DNB_HOME", "Draw no bet", "Home"],
   ] as const;
   const rows = markets.flatMap(([key, name, selection], familyIndex) => Array.from({ length: 4 }, (_, index) => ({
     ...pick(`${familyIndex}-${index}`, 1.42, .72 - index * .002),
@@ -48,7 +48,13 @@ test("Best Bet rotates through equally qualified market families", () => {
     selection,
   })));
   const ranked = rankBestBets(rows, Date.parse("2029-01-01"));
-  assert.equal(new Set(ranked.slice(0, 5).map((item) => item.market.key.replace(/^(MATCH_|DC_|BTTS_|HOME_).*/, "$1"))).size, 5);
+  assert.equal(new Set(ranked.slice(0, 4).map((item) => item.market.key.replace(/^(MATCH_|DC_|DNB_|OVER_).*/, "$1"))).size, 4);
+});
+
+test("removed 2.5 totals never appear in target or recommended slips", () => {
+  const rows = ['OVER_2_5', 'UNDER_2_5'].map(key => ({ ...pick(key, 1.5, .8), market: { key, name: 'Total goals', category: 'TOTALS', line: 2.5 } }));
+  for (const mode of ['target', 'recommended'] as const) assert.equal(buildTargetSlip(rows, 2, Date.parse('2029-01-01'), 'sportybet', mode), null);
+  assert.deepEqual(rankBestBets(rows, Date.parse('2029-01-01')), []);
 });
 
 test("target builder never repeats a fixture or includes a started match", () => {
@@ -59,12 +65,54 @@ test("target builder never repeats a fixture or includes a started match", () =>
   assert.equal(result.picks.some((item) => item.id === "started"), false);
 });
 
+test("target builder evaluates alternative qualified markets without repeating a fixture", () => {
+  const rows = [
+    { ...pick("a-top", 1.2, .82), fixtureId: "a" },
+    { ...pick("a-alt", 2, .7), fixtureId: "a", market: { key: "MATCH_HOME", name: "Match result", category: "RESULT" }, selection: "Home" },
+    { ...pick("b-top", 1.2, .81), fixtureId: "b" },
+    { ...pick("b-alt", 2, .69), fixtureId: "b", market: { key: "MATCH_AWAY", name: "Match result", category: "RESULT" }, selection: "Away" },
+  ];
+  const result = buildTargetSlip(rows, 4, Date.parse("2029-01-01"));
+  assert.ok(result);
+  assert.equal(result.exact, true);
+  assert.equal(result.estimatedOdds, 4);
+  assert.equal(new Set(result.picks.map(item => item.fixtureId)).size, result.picks.length);
+});
+
+test("request market restriction reaches builder and never substitutes another market", () => {
+  const request = interpretAssistantRequest('20 odds sporty over 1.5 only');
+  assert.equal(request.kind, 'build');
+  if (request.kind !== 'build') return;
+  const rows = [pick('total', 1.4), { ...pick('home', 1.5), market: { key: 'MATCH_HOME', name: 'Result', category: 'RESULT' } }];
+  const filtered = rows.filter(row => matchesRequestedMarket(row.market.key, request.marketKeys));
+  assert.deepEqual(filtered.map(row => row.id), ['total']);
+  assert.equal(buildTargetSlip(filtered, 20, Date.parse('2029-01-01')), null);
+});
+
+test("eligibility changes with current time and rejects malformed kickoff or price", () => {
+  const row = { ...pick('clock', 1.6), kickoff: '2030-01-02T12:00:00Z' };
+  assert.equal(rankBestBets([row], Date.parse('2030-01-02T11:00:00Z')).length, 1);
+  assert.equal(rankBestBets([row], Date.parse('2030-01-02T11:31:00Z')).length, 0);
+  assert.equal(rankBestBets([{ ...row, kickoff: 'invalid' }], Date.parse('2029-01-01')).length, 0);
+  assert.equal(buildTargetSlip([{ ...row, quotedOdds: NaN }], 1.6, Date.parse('2029-01-01')), null);
+});
+
 test("target builder rejects unsupported bookmaker markets and unconfirmed prices", () => {
   const unsupported = Array.from({ length: 4 }, (_, index) => ({ ...pick(`btts${index}`, 1.45, .72), market: { key: "BTTS_YES", name: "Both teams to score", category: "GOALS" }, selection: "Yes" }));
   assert.equal(buildTargetSlip(unsupported, 2, Date.parse("2029-01-01"), "betway"), null);
   const estimated = Array.from({ length: 4 }, (_, index) => ({ ...pick(`raw${index}`, 1.45, .72), quotedOdds: null, marketProbability: null, expectedValue: null }));
-  assert.ok(buildTargetSlip(estimated, 2, Date.parse("2029-01-01"), "sportybet", "target"));
+  assert.equal(buildTargetSlip(estimated, 2, Date.parse("2029-01-01"), "sportybet", "target"), null);
   assert.equal(buildTargetSlip(estimated, 2, Date.parse("2029-01-01"), "sportybet", "recommended"), null);
+});
+
+test("published markets add tested BTTS and team-goal variety while weak markets stay blocked", () => {
+  const tested = [
+    { ...pick("btts", 1.55, .7), market: { key: "BTTS_YES", name: "Both teams to score", category: "GOALS" }, selection: "Yes" },
+    { ...pick("team-goal", 1.32, .72), market: { key: "HOME_OVER_0_5", name: "Home team goals", category: "TEAM", line: .5 }, selection: "Over 0.5" },
+  ];
+  assert.ok(buildTargetSlip(tested, 2, Date.parse("2029-01-01"), "sportybet"));
+  const weak = { ...pick("clean", 1.7, .72), market: { key: "HOME_CLEAN", name: "Clean sheet", category: "TEAM" }, selection: "Home" };
+  assert.equal(buildTargetSlip([weak], 1.7, Date.parse("2029-01-01"), "sportybet"), null);
 });
 
 test("target builder uses verified live prices when rebuilding a short slip", () => {

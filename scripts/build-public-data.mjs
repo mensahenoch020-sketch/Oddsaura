@@ -7,6 +7,7 @@ const sourceDir = resolve(root, "data/public");
 const targetDir = resolve(root, "public/data");
 const snapshot = JSON.parse(await readFile(resolve(sourceDir, "snapshot.json"), "utf8"));
 const modelPerformance = await readFile(resolve(sourceDir, "model-performance.json"), "utf8").then(JSON.parse).catch(() => null);
+const expansion = await readFile(resolve(sourceDir, "expansion.json"), "utf8").then(JSON.parse).catch(() => ({ version: snapshot.version, generatedAt: snapshot.generatedAt, candidates: [] }));
 const withoutOdds = (fixture) => ({ ...fixture, odds: [] });
 const slimPick = (source) => {
   const pick = { ...source };
@@ -22,6 +23,7 @@ const generated = {
   daily: { ...common, tickets: snapshot.tickets ?? [], watchlist: snapshot.watchlist ?? [] },
   results: { ...common, recentResults: (snapshot.recentResults ?? []).map(withoutOdds), tickets: snapshot.tickets ?? [], ticketHistory: snapshot.ticketHistory ?? [], modelPerformance },
   admin: { ...common, sources: snapshot.sources ?? [], tickets: snapshot.tickets ?? [], marketCatalog: snapshot.marketCatalog ?? [] },
+  expansion,
 };
 
 await mkdir(targetDir, { recursive: true });

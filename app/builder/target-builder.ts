@@ -15,7 +15,13 @@ export type TargetBuild = {
   mode: BuildMode;
 };
 
-const priceFor = (pick: PredictedPick, priceOverrides?: Record<string, number>) => priceOverrides?.[pick.fixtureId] ?? pick.quotedOdds ?? pick.fairOdds ?? 0;
+const priceFor = (pick: PredictedPick, priceOverrides?: Record<string, number>) => priceOverrides?.[pick.fixtureId] ?? pick.quotedOdds ?? 0;
+
+// Only markets with usable historical price evidence are eligible for public
+// recommendations. The wider model catalog remains available for research,
+// but it must not be promoted merely to make the screen look varied.
+const publishedMarket = /^(MATCH_(HOME|DRAW|AWAY)|DC_(1X|X2|12)|DNB_(HOME|AWAY)|BTTS_YES|(HOME|AWAY)_OVER_(0_5|1_5)|OVER_1_5|UNDER_3_5)$/;
+export const isPublishedMarket = (key: string) => publishedMarket.test(key);
 
 const normalizeTarget = (requestedTarget: number, fallback = 5) => Number.isFinite(requestedTarget) && requestedTarget >= 1.2 ? requestedTarget : fallback;
 
@@ -39,9 +45,13 @@ function predictionScore(pick: PredictedPick, provider: ProviderId) {
 
 function rankedPredictions(predictions: PredictedPick[], now: number, provider: ProviderId, mode: BuildMode, priceOverrides?: Record<string, number>) {
   return predictions.filter((pick) => {
+    // A different bookmaker's price cannot fulfil this bookmaker's request.
+    if (pick.oddsProvider && pick.oddsProvider.toLowerCase() !== provider) return false;
+    if (pick.quoteObservedAt && (!Number.isFinite(Date.parse(pick.quoteObservedAt)) || now - Date.parse(pick.quoteObservedAt) > 30 * 60_000 || Date.parse(pick.quoteObservedAt) > now)) return false;
     const price = priceFor(pick, priceOverrides);
     const minimumPrice = mode === "recommended" ? 1.1 : 1.06;
-    if (Date.parse(pick.kickoff) <= now + 30 * 60_000 || price < minimumPrice || price > 3 || !providerSupportsMarket(provider, pick.market.key)) return false;
+    const hasVerifiedPrice = priceOverrides?.[pick.fixtureId] != null || pick.quotedOdds != null;
+    if (!hasVerifiedPrice || !Number.isFinite(price) || !Number.isFinite(Date.parse(pick.kickoff)) || !isPublishedMarket(pick.market.key) || Date.parse(pick.kickoff) <= now + 30 * 60_000 || price < minimumPrice || price > 3 || !providerSupportsMarket(provider, pick.market.key)) return false;
     if (mode === "recommended") {
       const strongHistory = pick.dataQuality === "HIGH" && (pick.historyMatches == null || pick.historyMatches >= 40);
       const marketConfirmed = pick.quotedOdds != null
@@ -50,12 +60,11 @@ function rankedPredictions(predictions: PredictedPick[], now: number, provider: 
         && (pick.marketProbability ?? 0) >= .58
         && (pick.modelMarketGap ?? 1) <= .1
         && (pick.expectedValue ?? -1) >= -.075;
-      const modelOnly = pick.quotedOdds == null && pick.confidence >= .68 && pick.probability >= .7;
-      return strongHistory && (marketConfirmed || modelOnly);
+      return strongHistory && marketConfirmed;
     }
 
-    // Manual target mode may use a clearly labelled model-estimate price. It
-    // still rejects weak/low-history picks and never repeats a fixture.
+    // Target mode can be broader than Best Bet, but it still requires a
+    // bookmaker quote (or a price just verified during a retry).
     const legacyQuotedPick = pick.quotedOdds != null && pick.marketProbability == null && pick.expectedValue == null;
     return pick.dataQuality !== "LOW"
       && (pick.historyMatches == null || pick.historyMatches >= 6)
@@ -112,8 +121,14 @@ export function correctedSearchTarget(requestedTarget: number, verifiedTotal: nu
 export function buildTargetSlip(predictions: PredictedPick[], requestedTarget: number, now = Date.now(), provider: ProviderId = "sportybet", mode: BuildMode = "target", priceOverrides?: Record<string, number>): TargetBuild | null {
   const target = normalizeTarget(requestedTarget);
   const ranked = rankedPredictions(predictions, now, provider, mode, priceOverrides);
-  const candidates = [...new Map(ranked.map((pick) => [pick.fixtureId, pick])).values()].slice(0, 500);
+  // Keep alternative markets during the search. A fixture is still limited
+  // to one final leg below, but collapsing it here prevented the solver from
+  // finding a closer target with another qualified market on the same match.
+  const candidates = ranked.slice(0, 500);
   if (!candidates.length) return null;
+  const fixtureGroups = [...new Map(candidates.map((pick) => [pick.fixtureId, [] as PredictedPick[]])).entries()];
+  const groupMap = new Map(fixtureGroups);
+  for (const pick of candidates) groupMap.get(pick.fixtureId)!.push(pick);
 
   type State = { picks: PredictedPick[]; odds: number; confidence: number; winChance: number };
   let beam: State[] = [{ picks: [], odds: 1, confidence: 0, winChance: 1 }];
@@ -121,14 +136,16 @@ export function buildTargetSlip(predictions: PredictedPick[], requestedTarget: n
   const score = (state: State) => Math.abs(Math.log(Math.max(state.odds, 1.001) / target)) * 3
     + Math.max(0, state.picks.length - (mode === "target" ? 12 : 8)) * .025
     - (state.picks.length ? state.confidence / state.picks.length : 0) * .35;
-  for (const pick of candidates) {
-    const price = priceFor(pick, priceOverrides);
-    const additions = beam.flatMap((state) => state.picks.length >= maxLegs || state.odds * price > target * 1.18 ? [] : [{
-      picks: [...state.picks, pick],
-      odds: state.odds * price,
-      confidence: state.confidence + pick.confidence,
-      winChance: state.winChance * pick.probability,
-    }]);
+  for (const alternatives of groupMap.values()) {
+    const additions = beam.flatMap((state) => state.picks.length >= maxLegs ? [] : alternatives.flatMap((pick) => {
+      const price = priceFor(pick, priceOverrides);
+      return state.odds * price > target * 1.18 ? [] : [{
+        picks: [...state.picks, pick],
+        odds: state.odds * price,
+        confidence: state.confidence + pick.confidence,
+        winChance: state.winChance * pick.probability,
+      }];
+    }));
     beam = [...beam, ...additions].sort((a, b) => score(a) - score(b)).slice(0, mode === "target" ? 1200 : 420);
   }
   const minLegs = target < 2.5 ? 1 : 2;
@@ -143,7 +160,7 @@ export function buildTargetSlip(predictions: PredictedPick[], requestedTarget: n
     estimatedWinChance: selected.winChance,
     exact: distance <= .05,
     risk: target >= 20 || selected.picks.length >= 9 ? "HIGH" : target >= 5 || selected.picks.length >= 5 ? "MEDIUM" : "LOW",
-    estimatedPriceCount: selected.picks.filter((pick) => pick.quotedOdds == null).length,
+    estimatedPriceCount: 0,
     mode,
   };
 }

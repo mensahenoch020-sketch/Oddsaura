@@ -112,7 +112,7 @@ export async function adminRoutes(app: FastifyInstance) {
       include: { fixture: true },
       orderBy: { confidenceScore: "desc" },
     });
-    const candidates = predictions.map((item) => ({ predictionId: item.id, fixtureId: item.fixtureId, probability: item.modelProbability, confidence: item.confidenceScore, odds: item.recommendedOdds ?? 1 }));
+    const candidates = predictions.filter(item => !["OVER_2_5", "UNDER_2_5"].includes(item.market)).map((item) => ({ predictionId: item.id, fixtureId: item.fixtureId, probability: item.modelProbability, confidence: item.confidenceScore, odds: item.recommendedOdds ?? 1 }));
     const created: unknown[] = [];
     for (const band of ["SAFE", "BALANCED", "HIGH_RISK"] as TicketBand[]) {
       const generated = buildTicket(candidates, band);

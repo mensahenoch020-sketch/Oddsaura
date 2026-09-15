@@ -163,6 +163,12 @@ async function mapLimit<T, R>(items: T[], mapper: (item: T) => Promise<R>) {
   await Promise.all(Array.from({ length: Math.min(4, items.length) }, worker)); return output;
 }
 
+export async function collectBet9jaMarkets(inputs: SportyBetSelectionInput[], fetcher: FetchLike = fetch) {
+  if (!inputs.length) return [];
+  const event = await findEvent(fetcher, inputs[0]!);
+  return availableQuotes(inputs, input => resolve(event, input));
+}
+
 export async function createBet9jaCode(selections: SportyBetSelectionInput[], fetcher: FetchLike = fetch, allowPartial = false): Promise<SportyBetCodeResult> {
   if (!Array.isArray(selections) || selections.length < 1 || selections.length > 50) throw new Bet9jaIntegrationError("Choose between 1 and 50 selections.", 400);
   const attempts = await mapLimit(selections, async (input) => {
@@ -196,3 +202,4 @@ export async function createBet9jaCode(selections: SportyBetSelectionInput[], fe
   });
   return { ...verificationState, code, deepLink: `${LOAD_URL}?bookABetCode=${encodeURIComponent(code)}`, resolved, partial: unmatched.length > 0, unmatched };
 }
+import { availableQuotes } from "./quote-helpers.js";

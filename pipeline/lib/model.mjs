@@ -12,7 +12,7 @@ export function buildForm(teamId, events, before, limit = 12, venue = "ALL", dec
     })
     .sort((a, b) => b.kickoff.localeCompare(a.kickoff))
     .slice(0, limit);
-  const form = { played: 0, weight: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, points: 0, cleanSheets: 0, failedToScore: 0, btts: 0, over15: 0, over25: 0, lastKickoff: null };
+  const form = { played: 0, weight: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, points: 0, cleanSheets: 0, failedToScore: 0, btts: 0, over15: 0, over25: 0, shotWeight: 0, shotXgFor: 0, shotXgAgainst: 0, shotsFor: 0, shotsAgainst: 0, shotsOnTargetFor: 0, shotsOnTargetAgainst: 0, lastKickoff: null };
   for (const [index, match] of matches.entries()) {
     const home = match.homeTeam.id === teamId;
     const gf = home ? match.homeScore : match.awayScore;
@@ -24,6 +24,25 @@ export function buildForm(teamId, events, before, limit = 12, venue = "ALL", dec
     form.btts += Number(gf > 0 && ga > 0) * weight;
     form.over15 += Number(gf + ga >= 2) * weight;
     form.over25 += Number(gf + ga >= 3) * weight;
+    const stats = match.stats ?? {};
+    const numericStat = (value) => value == null || value === "" ? Number.NaN : Number(value);
+    const shotsFor = numericStat(home ? stats.homeShots : stats.awayShots);
+    const shotsAgainst = numericStat(home ? stats.awayShots : stats.homeShots);
+    const shotsOnTargetFor = numericStat(home ? stats.homeShotsOnTarget : stats.awayShotsOnTarget);
+    const shotsOnTargetAgainst = numericStat(home ? stats.awayShotsOnTarget : stats.homeShotsOnTarget);
+    if ([shotsFor, shotsAgainst, shotsOnTargetFor, shotsOnTargetAgainst].every(Number.isFinite)) {
+      // A deliberately conservative xG proxy. It uses information already in
+      // the free archive and receives only a small share of the final rate.
+      const shotXgFor = shotsOnTargetFor * 0.25 + Math.max(0, shotsFor - shotsOnTargetFor) * 0.025;
+      const shotXgAgainst = shotsOnTargetAgainst * 0.25 + Math.max(0, shotsAgainst - shotsOnTargetAgainst) * 0.025;
+      form.shotWeight += weight;
+      form.shotXgFor += shotXgFor * weight;
+      form.shotXgAgainst += shotXgAgainst * weight;
+      form.shotsFor += shotsFor * weight;
+      form.shotsAgainst += shotsAgainst * weight;
+      form.shotsOnTargetFor += shotsOnTargetFor * weight;
+      form.shotsOnTargetAgainst += shotsOnTargetAgainst * weight;
+    }
     if (index === 0) form.lastKickoff = match.kickoff;
     if (gf > ga) { form.wins += weight; form.points += 3 * weight; }
     else if (gf === ga) { form.draws += weight; form.points += weight; }
@@ -104,6 +123,14 @@ export function scoreEvent(event, allEvents, suppliedContext = null) {
   let homeGA = blendRate(home, homeVenue, homeLong, "goalsAgainst", leagueAway);
   let awayGF = blendRate(away, awayVenue, awayLong, "goalsFor", leagueAway);
   let awayGA = blendRate(away, awayVenue, awayLong, "goalsAgainst", leagueHome);
+  const shotRate = (form, key, prior) => form.shotWeight >= 4 ? form[key] / form.shotWeight : prior;
+  const blendShotRate = (recent, venueForm, long, key, prior) => 0.38 * shotRate(venueForm, key, prior) + 0.37 * shotRate(recent, key, prior) + 0.25 * shotRate(long, key, prior);
+  const homeShotAttack = blendShotRate(home, homeVenue, homeLong, "shotXgFor", leagueHome);
+  const homeShotDefence = blendShotRate(home, homeVenue, homeLong, "shotXgAgainst", leagueAway);
+  const awayShotAttack = blendShotRate(away, awayVenue, awayLong, "shotXgFor", leagueAway);
+  const awayShotDefence = blendShotRate(away, awayVenue, awayLong, "shotXgAgainst", leagueHome);
+  const homeShotEvidence = Math.min(home.shotWeight, homeVenue.shotWeight, homeLong.shotWeight);
+  const awayShotEvidence = Math.min(away.shotWeight, awayVenue.shotWeight, awayLong.shotWeight);
   // Direct meetings are useful context, but their small and often stale sample
   // is capped at a five-percent adjustment.
   if (homeH2h.played >= 3) {
@@ -111,6 +138,16 @@ export function scoreEvent(event, allEvents, suppliedContext = null) {
     homeGA = 0.95 * homeGA + 0.05 * rate(homeH2h, "goalsAgainst", leagueAway);
     awayGF = 0.95 * awayGF + 0.05 * rate(awayH2h, "goalsFor", leagueAway);
     awayGA = 0.95 * awayGA + 0.05 * rate(awayH2h, "goalsAgainst", leagueHome);
+  }
+  // Goal markets retain the historically validated score rates. Shot quality
+  // is used as a separate, small result-strength signal so it cannot silently
+  // reduce the tested totals performance.
+  const goalRates = { homeGF, homeGA, awayGF, awayGA };
+  if (homeShotEvidence >= 4 && awayShotEvidence >= 4) {
+    homeGF = 0.9 * homeGF + 0.1 * homeShotAttack;
+    homeGA = 0.9 * homeGA + 0.1 * homeShotDefence;
+    awayGF = 0.9 * awayGF + 0.1 * awayShotAttack;
+    awayGA = 0.9 * awayGA + 0.1 * awayShotDefence;
   }
   const homePPG = rate(home, "points", 1.45);
   const awayPPG = rate(away, "points", 1.1);
@@ -121,17 +158,26 @@ export function scoreEvent(event, allEvents, suppliedContext = null) {
   const ratingDelta = clamp((eloHome - 0.5) * 0.48, -0.22, 0.22);
   const restDays = (form) => form.lastKickoff ? (new Date(event.kickoff).getTime() - new Date(form.lastKickoff).getTime()) / 86_400_000 : 7;
   const restDelta = clamp((restDays(home) - restDays(away)) * 0.012, -0.06, 0.06);
-  const homeAttack = clamp(homeGF / Math.max(0.45, leagueHome), 0.35, 2.4);
-  const awayDefence = clamp(awayGA / Math.max(0.45, leagueHome), 0.35, 2.4);
-  const awayAttack = clamp(awayGF / Math.max(0.35, leagueAway), 0.35, 2.4);
-  const homeDefence = clamp(homeGA / Math.max(0.35, leagueAway), 0.35, 2.4);
-  const homeLambda = clamp(leagueHome * Math.sqrt(homeAttack * awayDefence) + formDelta + ratingDelta + restDelta, 0.25, 3.8);
-  const awayLambda = clamp(leagueAway * Math.sqrt(awayAttack * homeDefence) - formDelta - ratingDelta - restDelta, 0.2, 3.5);
+  const expectedGoals = (rates) => {
+    const homeAttack = clamp(rates.homeGF / Math.max(0.45, leagueHome), 0.35, 2.4);
+    const awayDefence = clamp(rates.awayGA / Math.max(0.45, leagueHome), 0.35, 2.4);
+    const awayAttack = clamp(rates.awayGF / Math.max(0.35, leagueAway), 0.35, 2.4);
+    const homeDefence = clamp(rates.homeGA / Math.max(0.35, leagueAway), 0.35, 2.4);
+    return {
+      home: clamp(leagueHome * Math.sqrt(homeAttack * awayDefence) + formDelta + ratingDelta + restDelta, 0.25, 3.8),
+      away: clamp(leagueAway * Math.sqrt(awayAttack * homeDefence) - formDelta - ratingDelta - restDelta, 0.2, 3.5),
+    };
+  };
+  const resultGoals = expectedGoals({ homeGF, homeGA, awayGF, awayGA });
+  const goalMarketGoals = expectedGoals(goalRates);
+  const homeLambda = resultGoals.home;
+  const awayLambda = resultGoals.away;
   const rows = grid(homeLambda, awayLambda);
+  const goalRows = grid(goalMarketGoals.home, goalMarketGoals.away);
   const homeWin = sum(rows, (r) => r.home > r.away);
   const draw = sum(rows, (r) => r.home === r.away);
   const awayWin = sum(rows, (r) => r.home < r.away);
-  const btts = sum(rows, (r) => r.home > 0 && r.away > 0);
+  const btts = sum(goalRows, (r) => r.home > 0 && r.away > 0);
   const minimumLongHistory = Math.min(homeLong.played, awayLong.played);
   const recentCoverage = Math.min(home.played, away.played) / 16;
   const venueCoverage = Math.min(homeVenue.played, awayVenue.played) / 12;
@@ -148,21 +194,21 @@ export function scoreEvent(event, allEvents, suppliedContext = null) {
     market("DNB_AWAY", "Draw no bet", "Result", event.awayTeam.name, awayWin / (homeWin + awayWin)),
     market("BTTS_YES", "Both teams to score", "Goals", "Yes", btts),
     market("BTTS_NO", "Both teams to score", "Goals", "No", 1 - btts),
-    market("ODD_GOALS", "Goal parity", "Goals", "Odd", sum(rows, (r) => (r.home + r.away) % 2 === 1)),
-    market("EVEN_GOALS", "Goal parity", "Goals", "Even", sum(rows, (r) => (r.home + r.away) % 2 === 0)),
-    market("HOME_CLEAN", "Clean sheet", "Team", event.homeTeam.name, sum(rows, (r) => r.away === 0)),
-    market("AWAY_CLEAN", "Clean sheet", "Team", event.awayTeam.name, sum(rows, (r) => r.home === 0)),
-    market("HOME_WIN_NIL", "Win to nil", "Team", event.homeTeam.name, sum(rows, (r) => r.home > r.away && r.away === 0)),
-    market("AWAY_WIN_NIL", "Win to nil", "Team", event.awayTeam.name, sum(rows, (r) => r.away > r.home && r.home === 0)),
+    market("ODD_GOALS", "Goal parity", "Goals", "Odd", sum(goalRows, (r) => (r.home + r.away) % 2 === 1)),
+    market("EVEN_GOALS", "Goal parity", "Goals", "Even", sum(goalRows, (r) => (r.home + r.away) % 2 === 0)),
+    market("HOME_CLEAN", "Clean sheet", "Team", event.homeTeam.name, sum(goalRows, (r) => r.away === 0)),
+    market("AWAY_CLEAN", "Clean sheet", "Team", event.awayTeam.name, sum(goalRows, (r) => r.home === 0)),
+    market("HOME_WIN_NIL", "Win to nil", "Team", event.homeTeam.name, sum(goalRows, (r) => r.home > r.away && r.away === 0)),
+    market("AWAY_WIN_NIL", "Win to nil", "Team", event.awayTeam.name, sum(goalRows, (r) => r.away > r.home && r.home === 0)),
   ];
   for (const line of [0.5, 1.5, 2.5, 3.5, 4.5]) {
-    const over = sum(rows, (r) => r.home + r.away > line);
+    const over = sum(goalRows, (r) => r.home + r.away > line);
     predictions.push(market(`OVER_${String(line).replace(".", "_")}`, "Total goals", "Goals", `Over ${line}`, over, { line }));
     predictions.push(market(`UNDER_${String(line).replace(".", "_")}`, "Total goals", "Goals", `Under ${line}`, 1 - over, { line }));
   }
   for (const line of [0.5, 1.5, 2.5]) {
-    const homeOver = sum(rows, (r) => r.home > line);
-    const awayOver = sum(rows, (r) => r.away > line);
+    const homeOver = sum(goalRows, (r) => r.home > line);
+    const awayOver = sum(goalRows, (r) => r.away > line);
     predictions.push(market(`HOME_OVER_${String(line).replace(".", "_")}`, "Home team goals", "Team", `Over ${line}`, homeOver, { line }));
     predictions.push(market(`HOME_UNDER_${String(line).replace(".", "_")}`, "Home team goals", "Team", `Under ${line}`, 1 - homeOver, { line }));
     predictions.push(market(`AWAY_OVER_${String(line).replace(".", "_")}`, "Away team goals", "Team", `Over ${line}`, awayOver, { line }));
@@ -184,7 +230,7 @@ export function scoreEvent(event, allEvents, suppliedContext = null) {
   predictions.push(market("DCX2_AND_O15", "Double chance and goals", "Combination", `${event.awayTeam.name}/draw & over 1.5`, sum(rows, (r) => r.away >= r.home && r.home + r.away >= 2)));
   predictions.push(market("BTTS_AND_O25", "BTTS and goals", "Combination", "BTTS & over 2.5", sum(rows, (r) => r.home > 0 && r.away > 0 && r.home + r.away >= 3)));
 
-  const firstHalf = grid(homeLambda * 0.46, awayLambda * 0.46, 6);
+  const firstHalf = grid(goalMarketGoals.home * 0.46, goalMarketGoals.away * 0.46, 6);
   predictions.push(market("HT_HOME", "First-half result", "Half", event.homeTeam.name, sum(firstHalf, (r) => r.home > r.away)));
   predictions.push(market("HT_DRAW", "First-half result", "Half", "Draw", sum(firstHalf, (r) => r.home === r.away)));
   predictions.push(market("HT_AWAY", "First-half result", "Half", event.awayTeam.name, sum(firstHalf, (r) => r.away > r.home)));
@@ -194,15 +240,15 @@ export function scoreEvent(event, allEvents, suppliedContext = null) {
   return predictions.map((item) => ({
     ...item,
     fixtureId: event.id,
-    expectedHomeGoals: Number(homeLambda.toFixed(2)),
-    expectedAwayGoals: Number(awayLambda.toFixed(2)),
+    expectedHomeGoals: Number(goalMarketGoals.home.toFixed(2)),
+    expectedAwayGoals: Number(goalMarketGoals.away.toFixed(2)),
     dataQuality: quality,
     confidence: clamp(item.probability * (0.68 + quality * 0.32), 0, 0.99),
     fairOdds: Number((1 / item.probability).toFixed(2)),
     quotedOdds: null,
     oddsSource: null,
     edge: null,
-    factors: { homePlayed: home.played, awayPlayed: away.played, homeVenuePlayed: homeVenue.played, awayVenuePlayed: awayVenue.played, homeHistoryPlayed: homeLong.played, awayHistoryPlayed: awayLong.played, headToHeadPlayed: homeH2h.played, minimumLongHistory, homePPG, awayPPG, homeGF, awayGF, homeGA, awayGA, homeCleanSheetRate: home.weight ? home.cleanSheets / home.weight : null, awayCleanSheetRate: away.weight ? away.cleanSheets / away.weight : null, homeBttsRate: home.weight ? home.btts / home.weight : null, awayBttsRate: away.weight ? away.btts / away.weight : null, homeElo: Math.round(homeRating), awayElo: Math.round(awayRating), eloHome, homeRestDays: Number(restDays(home).toFixed(1)), awayRestDays: Number(restDays(away).toFixed(1)), leagueHomeGoals: leagueHome, leagueAwayGoals: leagueAway },
+    factors: { homePlayed: home.played, awayPlayed: away.played, homeVenuePlayed: homeVenue.played, awayVenuePlayed: awayVenue.played, homeHistoryPlayed: homeLong.played, awayHistoryPlayed: awayLong.played, headToHeadPlayed: homeH2h.played, minimumLongHistory, homePPG, awayPPG, homeGF, awayGF, homeGA, awayGA, homeShotMatches: home.shotWeight, awayShotMatches: away.shotWeight, homeShotXg: homeShotAttack, awayShotXg: awayShotAttack, homeCleanSheetRate: home.weight ? home.cleanSheets / home.weight : null, awayCleanSheetRate: away.weight ? away.cleanSheets / away.weight : null, homeBttsRate: home.weight ? home.btts / home.weight : null, awayBttsRate: away.weight ? away.btts / away.weight : null, homeElo: Math.round(homeRating), awayElo: Math.round(awayRating), eloHome, homeRestDays: Number(restDays(home).toFixed(1)), awayRestDays: Number(restDays(away).toFixed(1)), leagueHomeGoals: leagueHome, leagueAwayGoals: leagueAway },
   }));
 }
 
