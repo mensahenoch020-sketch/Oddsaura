@@ -4,7 +4,7 @@ const bands = {
   BALANCED_10: { title: "Balanced 10 Odds", min: 8, max: 11.5, confidence: 0.6, minOdds: 1.18, maxOdds: 2, selections: 6, minHistory: 12, minMarketProbability: .54 },
 };
 
-const supportedKeys = /^(MATCH_(HOME|DRAW|AWAY)|DC_(1X|X2|12)|OVER_|UNDER_|BTTS_(YES|NO)|HOME_(OVER|UNDER)_|AWAY_(OVER|UNDER)_|DNB_(HOME|AWAY))/;
+const supportedKeys = /^(MATCH_(HOME|DRAW|AWAY)|DC_(1X|X2|12)|DNB_(HOME|AWAY)|BTTS_YES|(HOME|AWAY)_OVER_(0_5|1_5)|OVER_1_5|UNDER_3_5)$/;
 
 function priorityLeague(league) {
   const value = `${league?.id ?? ""} ${league?.name ?? ""} ${league?.country ?? ""}`;
@@ -88,6 +88,12 @@ export function buildTicket(candidates, category, fixtures) {
       confidence: item.confidence,
       edge: item.edge,
       oddsSource: item.oddsSource,
+      oddsProvider: item.oddsProvider,
+      quoteObservedAt: item.quoteObservedAt,
+      providerEventId: item.providerEventId,
+      providerMarketId: item.providerMarketId,
+      providerSelectionId: item.providerSelectionId,
+      providerSpecifier: item.providerSpecifier,
     });
     used.add(item.fixtureId);
     familyCounts.set(family, (familyCounts.get(family) ?? 0) + 1);

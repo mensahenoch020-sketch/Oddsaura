@@ -1,9 +1,10 @@
 /** Cloudflare Worker entry point for the vinext-starter template. */
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
-import { BookmakerIntegrationError, createBookmakerCode, type BookmakerId } from "../backend/src/modules/providers/controller";
-import { decodeBookmakerCode } from "../backend/src/modules/providers/decoder";
+import { BookmakerIntegrationError, createBookmakerCode, providerHealthReport, type BookmakerId } from "../backend/src/modules/providers/controller";
+import { BookmakerDecodeError, decodeBookmakerCode } from "../backend/src/modules/providers/decoder";
 import type { SportyBetSelectionInput } from "../backend/src/modules/providers/sportybet";
+import { expandProviderMarkets, type ExpansionCandidate } from "../backend/src/modules/providers/market-expansion";
 
 interface Env {
   ASSETS: Fetcher;
@@ -335,7 +336,8 @@ const worker = {
     const protectedPages = ["/dashboard", "/assistant", "/daily", "/matches", "/builder", "/converter", "/results", "/account", "/admin"];
     const isProtectedPage = protectedPages.some((path) => url.pathname === path || url.pathname.startsWith(`${path}/`));
     const providerCodeMatch = url.pathname.match(/^\/api\/providers\/(sportybet|betpawa|bet9ja|betking|betway)\/code$/);
-    const isProtectedApi = Boolean(providerCodeMatch) || url.pathname === "/api/providers/convert" || url.pathname === "/api/sportybet/code" || url.pathname === "/api/account" || url.pathname === "/api/codes" || url.pathname === "/api/slips" || url.pathname.startsWith("/api/slips/") || url.pathname === "/api/ticket-controls" || url.pathname.startsWith("/api/admin/");
+    const providerExpandMatch = url.pathname.match(/^\/api\/providers\/(sportybet|betpawa|bet9ja|betking|betway)\/expand$/);
+    const isProtectedApi = Boolean(providerCodeMatch) || Boolean(providerExpandMatch) || url.pathname === "/api/providers/convert" || url.pathname === "/api/providers/health" || url.pathname === "/api/sportybet/code" || url.pathname === "/api/account" || url.pathname === "/api/codes" || url.pathname === "/api/slips" || url.pathname.startsWith("/api/slips/") || url.pathname === "/api/ticket-controls" || url.pathname.startsWith("/api/admin/");
     const identity = isProtectedPage || isProtectedApi ? await sessionIdentity(request, env) : null;
     if ((isProtectedPage || isProtectedApi) && !identity) {
       if (isProtectedApi) return Response.json({ error: "Log in to continue." }, { status: 401, headers: { "cache-control": "no-store" } });
@@ -361,6 +363,30 @@ const worker = {
     if (url.pathname === "/api/ticket-controls") return ticketControlsApi(env);
     if (url.pathname.startsWith("/api/admin/")) return adminApi(authenticatedRequest, env, url, identity);
 
+    if (url.pathname === "/api/providers/health") {
+      if (request.method !== "GET") return Response.json({ error: "Method not allowed" }, { status: 405, headers: { allow: "GET" } });
+      return Response.json({ providers: providerHealthReport(), scope: "latest operation on this server instance" }, { headers: { "cache-control": "no-store" } });
+    }
+
+    if (providerExpandMatch) {
+      if (request.method !== "POST") return Response.json({ error: "Method not allowed" }, { status: 405, headers: { allow: "POST" } });
+      try {
+        const body = await authenticatedRequest.json() as { start?: string; end?: string; marketKeys?: string[] };
+        const start = Date.parse(String(body.start ?? "")), end = Date.parse(String(body.end ?? ""));
+        if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start || end - start > 8 * 86_400_000) return Response.json({ error: "Choose a valid period of no more than eight days." }, { status: 400 });
+        const assetUrl = new URL("/data/expansion.json", request.url);
+        const asset = await env.ASSETS.fetch(new Request(assetUrl));
+        if (!asset.ok) return Response.json({ error: "The expanded prediction pool has not been published yet." }, { status: 503 });
+        const payload = await asset.json() as { candidates?: ExpansionCandidate[] };
+        const allowed = Array.isArray(body.marketKeys) && body.marketKeys.length ? new Set(body.marketKeys.slice(0, 40)) : null;
+        const candidates = (payload.candidates ?? []).filter(candidate => Date.parse(candidate.kickoff) >= start && Date.parse(candidate.kickoff) < end && (!allowed || allowed.has(candidate.key)));
+        const result = await expandProviderMarkets(providerExpandMatch[1] as BookmakerId, candidates, fetch);
+        return Response.json(result, { headers: { "cache-control": "no-store" } });
+      } catch {
+        return Response.json({ error: "The live bookmaker expansion could not finish. The saved verified pool is still available." }, { status: 502 });
+      }
+    }
+
     if (url.pathname === "/api/providers/convert") {
       if (request.method !== "POST") return Response.json({ error: "Method not allowed" }, { status: 405, headers: { allow: "POST" } });
       if (!identity || !env.DB) return Response.json({ error: "Account storage is not ready yet." }, { status: 503 });
@@ -368,28 +394,28 @@ const worker = {
         const body = await authenticatedRequest.json() as { sourceProvider?: BookmakerId; destinationProvider?: BookmakerId; code?: string; allowPartial?: boolean };
         const allowPartial = body.allowPartial === true;
         const providers = new Set<BookmakerId>(["sportybet", "betpawa", "bet9ja", "betking", "betway"]);
-        if (!body.sourceProvider || !body.destinationProvider || !providers.has(body.sourceProvider) || !providers.has(body.destinationProvider)) return Response.json({ error: "Choose valid source and destination bookmakers." }, { status: 400 });
-        if (body.sourceProvider === body.destinationProvider) return Response.json({ error: "Choose a different destination bookmaker." }, { status: 400 });
+        if (!body.sourceProvider || !body.destinationProvider || !providers.has(body.sourceProvider) || !providers.has(body.destinationProvider)) return Response.json({ error: "Choose valid source and destination bookmakers.", details: { stage: "INPUT" } }, { status: 400 });
+        if (body.sourceProvider === body.destinationProvider) return Response.json({ error: "Choose a different destination bookmaker.", details: { stage: "INPUT" } }, { status: 400 });
         const code = String(body.code || "").trim().toUpperCase();
-        if (!/^[A-Z0-9]{4,16}$/.test(code)) return Response.json({ error: "Enter a valid bookmaker code." }, { status: 400 });
+        if (!/^[A-Z0-9]{4,16}$/.test(code)) return Response.json({ error: "Enter a valid bookmaker code.", details: { stage: "INPUT" } }, { status: 400 });
         await ensureAccountTables(env.DB);
-        const stored = await env.DB.prepare("SELECT selections_json AS selectionsJson FROM generated_codes WHERE user_email = ? AND lower(provider) = ? AND upper(code) = ? ORDER BY created_at DESC LIMIT 1")
-          .bind(identity.email, body.sourceProvider, code).first<{ selectionsJson: string }>();
         let selections: SportyBetSelectionInput[] = [];
-        let importedFrom: "account" | "bookmaker" = "bookmaker";
-        if (stored?.selectionsJson) {
-          const parsed = JSON.parse(stored.selectionsJson) as { requested?: SportyBetSelectionInput[]; verified?: boolean };
-          selections = parsed.verified === true && Array.isArray(parsed.requested) ? parsed.requested : [];
-          importedFrom = "account";
-        }
+        // A saved request can include legs omitted from a partial booking code.
+        // Always load the bookmaker's actual slip, just as Railway does.
+        const importedFrom = "bookmaker";
         let sourceIssues: Array<{ eventName?: string; marketName?: string; outcomeName?: string; reason?: string }> = [];
         if (!selections.length) {
-          const decoded = await decodeBookmakerCode(body.sourceProvider, code, fetch);
+          let decoded: Awaited<ReturnType<typeof decodeBookmakerCode>>;
+          try { decoded = await decodeBookmakerCode(body.sourceProvider, code, fetch); }
+          catch (error) {
+            if (error instanceof BookmakerDecodeError) throw new BookmakerIntegrationError(error.message, error.status, { ...(error.details && typeof error.details === "object" ? error.details : {}), stage: "IMPORT" });
+            throw new BookmakerIntegrationError("The original bookmaker could not load that code right now.", 502, { stage: "IMPORT" });
+          }
           sourceIssues = decoded.skippedSelections;
           if (decoded.partial && !allowPartial) {
             const firstSkipped = decoded.skippedSelections[0];
             const subject = firstSkipped ? `${firstSkipped.eventName} — ${firstSkipped.marketName}: ${firstSkipped.outcomeName}` : `${decoded.skipped} selection${decoded.skipped === 1 ? "" : "s"}`;
-            throw new BookmakerIntegrationError(`Could not safely translate ${subject}. No selections were removed and no partial code was created.`, 422, { skipped: decoded.skipped, skippedSelections: decoded.skippedSelections, sourceSelections: decoded.selections });
+            throw new BookmakerIntegrationError(`Could not safely translate ${subject}. No selections were removed and no partial code was created.`, 422, { stage: "TRANSLATE", skipped: decoded.skipped, skippedSelections: decoded.skippedSelections, sourceSelections: decoded.selections });
           }
           selections = decoded.selections;
         }
@@ -399,7 +425,8 @@ const worker = {
         } catch (error) {
           if (error instanceof BookmakerIntegrationError) {
             const existing = error.details && typeof error.details === "object" && !Array.isArray(error.details) ? error.details : {};
-            throw new BookmakerIntegrationError(error.message, error.status, { ...existing, sourceSelections: selections });
+            const stage = "fixtureId" in existing || Array.isArray((existing as { unmatched?: unknown[] }).unmatched) && (existing as { unmatched?: unknown[] }).unmatched!.length ? "MATCH" : "CREATE";
+            throw new BookmakerIntegrationError(error.message, error.status, { ...existing, stage, sourceSelections: selections });
           }
           throw error;
         }
@@ -409,7 +436,7 @@ const worker = {
             result.warning = [result.warning, "Code created, but account history could not be saved. Copy this code now."].filter(Boolean).join(" ");
             console.error("Converted booking code could not be saved to account history.");
           });
-        return Response.json({ verified: true, sourceProvider: body.sourceProvider, destinationProvider: body.destinationProvider, sourceCode: code, importedFrom, decoded: selections.length, sourceSelections: selections, sourceIssues, ...result, partial: Boolean(result.partial || sourceIssues.length) }, { headers: { "cache-control": "no-store" } });
+        return Response.json({ verified: true, sourceProvider: body.sourceProvider, destinationProvider: body.destinationProvider, sourceCode: code, importedFrom, decoded: selections.length, sourceSelections: selections, sourceIssues, conversionStage: result.verificationStatus === "VERIFIED" ? "VERIFY" : "CREATE", ...result, partial: Boolean(result.partial || sourceIssues.length) }, { headers: { "cache-control": "no-store" } });
       } catch (error) {
         const typed = error instanceof BookmakerIntegrationError ? error : error instanceof Error && "status" in error ? error as BookmakerIntegrationError : new BookmakerIntegrationError("The code could not be converted.", 502);
         return Response.json({ error: typed.message, details: typed.details }, { status: typed.status, headers: { "cache-control": "no-store" } });

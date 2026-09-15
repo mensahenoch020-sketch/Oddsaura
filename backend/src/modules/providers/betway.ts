@@ -192,6 +192,22 @@ async function mapLimit<T, R>(items: T[], mapper: (item: T) => Promise<R>) {
   await Promise.all(Array.from({ length: Math.min(4, items.length) }, worker)); return output;
 }
 
+export async function collectBetwayMarkets(inputs: SportyBetSelectionInput[], fetcher: FetchLike = fetch) {
+  if (!inputs.length) return [];
+  const groups = new Map<string, SportyBetSelectionInput[]>();
+  for (const input of inputs) {
+    const wanted = rule(input);
+    if (wanted) groups.set(wanted.marketName, [...(groups.get(wanted.marketName) ?? []), input]);
+  }
+  const quotes: MarketQuote[] = [];
+  for (const group of groups.values()) {
+    const data = await findBundle(fetcher, group[0]!, rule(group[0]!)!);
+    const event = findEvent(data.events, group[0]!);
+    quotes.push(...availableQuotes(group, input => resolve(data, event, input, rule(input)!)));
+  }
+  return quotes;
+}
+
 export async function createBetwayCode(selections: SportyBetSelectionInput[], fetcher: FetchLike = fetch, allowPartial = false): Promise<SportyBetCodeResult> {
   if (!Array.isArray(selections) || selections.length < 1 || selections.length > 50) throw new BetwayIntegrationError("Choose between 1 and 50 selections.", 400);
   const attempts = await mapLimit(selections, async (input) => {
@@ -221,3 +237,4 @@ export async function createBetwayCode(selections: SportyBetSelectionInput[], fe
   });
   return { ...verificationState, code, deepLink: `${ORIGIN}/book-a-bet`, resolved, partial: unmatched.length > 0, unmatched };
 }
+import { availableQuotes, type MarketQuote } from "./quote-helpers.js";

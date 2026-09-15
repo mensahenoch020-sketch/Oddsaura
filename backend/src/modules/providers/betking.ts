@@ -98,6 +98,12 @@ function resolve(event: Json, input: SportyBetSelectionInput): SportyBetResolved
 
 function form(data: unknown) { return new URLSearchParams({ data: JSON.stringify(data) }).toString(); }
 
+export async function collectBetKingMarkets(inputs: SportyBetSelectionInput[], fetcher: FetchLike = fetch) {
+  if (!inputs.length) return [];
+  const event = findEvent(await events(fetcher), inputs[0]!);
+  return availableQuotes(inputs, input => resolve(event, input));
+}
+
 export async function createBetKingCode(selections: SportyBetSelectionInput[], fetcher: FetchLike = fetch, allowPartial = false): Promise<SportyBetCodeResult> {
   if (!Array.isArray(selections) || selections.length < 1 || selections.length > 50) throw new BetKingIntegrationError("Choose between 1 and 50 selections.", 400);
   const rows = await events(fetcher);
@@ -125,3 +131,4 @@ export async function createBetKingCode(selections: SportyBetSelectionInput[], f
   });
   return { ...verificationState, code, deepLink: `${ORIGIN}/en-ng/sports/book-bet/${encodeURIComponent(code)}`, resolved, partial: unmatched.length > 0, unmatched };
 }
+import { availableQuotes } from "./quote-helpers.js";

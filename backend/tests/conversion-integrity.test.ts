@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { decodeLoadedPayload } from "../src/modules/providers/decoder.js";
 import { createSportyBetCode } from "../src/modules/providers/sportybet.js";
 import { compareSelectionIds, verifyCreatedCode } from "../src/modules/providers/verification.js";
+import { BookmakerIntegrationError, convertBookmakerCode } from "../src/modules/providers/controller.js";
 
 test("Betway European handicap retains home-relative line and away selection", () => {
   const result = decodeLoadedPayload("betway", "BW6F135922", { selections: [{ sportEvent: { homeTeam: "TSG Hoffenheim", awayTeam: "Borussia Dortmund", eventId: 99 }, market: { displayName: "Handicap (0:1)" }, outcome: { displayName: "Borussia Dortmund" } }] });
@@ -31,4 +32,12 @@ test("SportyBet keeps a created code after timeout or same-count wrong selection
     assert.equal(result.code, "KEEP99");
     assert.equal(result.verificationStatus, mode === "timeout" ? "UNVERIFIED" : mode === "wrong" ? "MISMATCH" : "VERIFIED");
   }
+});
+
+test("conversion failures identify the exact failed stage", async () => {
+  const fetcher = (async () => new Response("unavailable", { status: 503 })) as typeof fetch;
+  await assert.rejects(
+    () => convertBookmakerCode("sportybet", "betpawa", "TEST12", fetcher, true),
+    (error: unknown) => error instanceof BookmakerIntegrationError && (error.details as { stage?: string })?.stage === "IMPORT",
+  );
 });

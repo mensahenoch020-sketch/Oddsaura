@@ -20,6 +20,12 @@ export type TicketSelection = {
   modelProbability?: number | null;
   modelMarketGap?: number | null;
   oddsSource?: string | null;
+  oddsProvider?: string | null;
+  quoteObservedAt?: string | null;
+  providerEventId?: string | null;
+  providerMarketId?: string | null;
+  providerSelectionId?: string | null;
+  providerSpecifier?: string | null;
   priceStatus?: "QUOTED" | "MODEL_ESTIMATE";
   result?: "PENDING" | "WON" | "LOST" | "VOID" | "UNVERIFIED";
 };
@@ -37,12 +43,9 @@ export type PredictedPick = Omit<TicketSelection, "odds"> & {
   awayHistoryMatches?: number;
   recentHistoryMatches?: number;
   reasoning: string;
-  oddsProvider?: string | null;
-  providerMarketId?: string | null;
-  providerSelectionId?: string | null;
   providerDeepLink?: string | null;
 };
-export type Ticket = { id: string; title: string; category: string; status: string; totalOdds: number; confidence: number; estimatedWinChance?: number; breakEvenChance?: number; strategyVersion?: string; paper?: boolean; priceStatus?: "QUOTED" | "MODEL_ESTIMATE"; publishedAt?: string; settledAt?: string | null; wonLegs?: number; lostLegs?: number; voidLegs?: number; bookingCodes: Array<{ provider: string; code: string; deepLink?: string }>; selections: TicketSelection[] };
+export type Ticket = { id: string; title: string; category: string; status: string; totalOdds: number; confidence: number; oddsProvider?: string | null; estimatedWinChance?: number; breakEvenChance?: number; strategyVersion?: string; paper?: boolean; priceStatus?: "QUOTED" | "MODEL_ESTIMATE"; publishedAt?: string; settledAt?: string | null; wonLegs?: number; lostLegs?: number; voidLegs?: number; bookingCodes: Array<{ provider: string; code: string; deepLink?: string }>; selections: TicketSelection[] };
 export type PaperTrial = TicketSelection & { predictedAt: string; settledAt: string | null; trialTier?: "OBSERVATION" };
 export type PaperMetrics = { recorded: number; settled: number; won: number; lost: number; hitRate: number | null; flatStakeRoi: number | null };
 export type Snapshot = {
@@ -52,7 +55,7 @@ export type Snapshot = {
   status: string;
   message: string;
   sources: Array<{ id: string; label: string; status: string; lastSuccessAt: string | null; records: number; warnings?: string[] }>;
-  metrics: { fixtures: number; live: number; completed: number; pricedMarkets: number; predictions: number; selectablePredictions?: number; publishedTickets: number; historicalMatches?: number; historicalTeams?: number; teamsWithDeepHistory?: number; noBetCategories?: string[]; strategyVersion?: string; paperTrials?: PaperMetrics };
+  metrics: { fixtures: number; live: number; completed: number; pricedMarkets: number; predictions: number; modelScores?: number; selectablePredictions?: number; priceConfirmedPredictions?: number; modelEstimatePredictions?: number; dailyFixtures?: number; shotHistoryMatches?: number; publishedTickets: number; historicalMatches?: number; globalHistoricalMatches?: number; historicalTeams?: number; teamsWithDeepHistory?: number; bookmakerFixtureLimit?: number; qualifiedFixturesCollected?: number; noBetCategories?: string[]; lockedCategories?: string[]; strategyVersion?: string; paperTrials?: PaperMetrics };
   fixtures?: Fixture[];
   liveFixtures?: Fixture[];
   recentResults?: Fixture[];

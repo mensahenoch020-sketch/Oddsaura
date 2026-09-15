@@ -11,6 +11,19 @@ const leagues = [
   { code: "N1", id: "ned.1", name: "Eredivisie", country: "Netherlands" },
   { code: "P1", id: "por.1", name: "Primeira Liga", country: "Portugal" },
   { code: "T1", id: "tur.1", name: "Süper Lig", country: "Türkiye" },
+  // Additional free archive coverage used when the worldwide board has too
+  // little depth for teams outside the original top-flight set.
+  { code: "E1", id: "eng.2", name: "Championship", country: "England" },
+  { code: "E2", id: "eng.3", name: "League One", country: "England" },
+  { code: "E3", id: "eng.4", name: "League Two", country: "England" },
+  { code: "SC0", id: "sco.1", name: "Scottish Premiership", country: "Scotland" },
+  { code: "SC1", id: "sco.2", name: "Scottish Championship", country: "Scotland" },
+  { code: "SP2", id: "esp.2", name: "Segunda División", country: "Spain" },
+  { code: "D2", id: "ger.2", name: "2. Bundesliga", country: "Germany" },
+  { code: "I2", id: "ita.2", name: "Serie B", country: "Italy" },
+  { code: "F2", id: "fra.2", name: "Ligue 2", country: "France" },
+  { code: "B1", id: "bel.1", name: "Belgian Pro League", country: "Belgium" },
+  { code: "G1", id: "gre.1", name: "Greek Super League", country: "Greece" },
 ];
 
 export function parseCsv(input) {

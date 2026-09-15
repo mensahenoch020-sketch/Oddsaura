@@ -60,7 +60,6 @@ export function scoreFixture(input: PredictionInput): ScoredMarket[] {
   let draw = 0;
   let awayWin = 0;
   let over15 = 0;
-  let over25 = 0;
   let btts = 0;
   for (let homeGoals = 0; homeGoals <= 8; homeGoals += 1) {
     for (let awayGoals = 0; awayGoals <= 8; awayGoals += 1) {
@@ -69,7 +68,6 @@ export function scoreFixture(input: PredictionInput): ScoredMarket[] {
       else if (homeGoals === awayGoals) draw += p;
       else awayWin += p;
       if (homeGoals + awayGoals >= 2) over15 += p;
-      if (homeGoals + awayGoals >= 3) over25 += p;
       if (homeGoals > 0 && awayGoals > 0) btts += p;
     }
   }
@@ -89,8 +87,6 @@ export function scoreFixture(input: PredictionInput): ScoredMarket[] {
     ["HOME_OR_DRAW", "Home or draw", homeWin + draw],
     ["AWAY_OR_DRAW", "Away or draw", awayWin + draw],
     ["OVER_1_5", "Over 1.5 goals", over15],
-    ["OVER_2_5", "Over 2.5 goals", over25],
-    ["UNDER_2_5", "Under 2.5 goals", 1 - over25],
     ["BTTS_YES", "Both teams to score", btts],
     ["BTTS_NO", "Both teams not to score", 1 - btts],
   ];

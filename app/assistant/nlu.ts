@@ -1,12 +1,26 @@
 import type { ProviderId } from "../builder/providers";
 
+export const ASSISTANT_TIME_ZONE = "Africa/Lagos";
+
+export type DateWindow = {
+  kind: "TODAY" | "TOMORROW" | "DAY" | "WEEKEND" | "NEXT_DAYS";
+  label: string;
+  start: string;
+  end: string;
+};
+
+type RequestContext = {
+  dateWindow: DateWindow | null;
+  marketKeys?: string[];
+};
+
 export type AssistantIntent =
-  | { kind: "build"; confidence: number; targetOdds: number | null; provider: ProviderId | null }
-  | { kind: "split"; confidence: number; targetOdds: number | null; parts: number | null; provider: ProviderId | null }
+  | { kind: "build"; confidence: number; targetOdds: number | null; provider: ProviderId | null } & RequestContext
+  | { kind: "split"; confidence: number; targetOdds: number | null; parts: number | null; provider: ProviderId | null } & RequestContext
   | { kind: "convert"; confidence: number; code: string | null; sourceProvider: ProviderId | null; destinationProvider: ProviderId | null }
-  | { kind: "best"; confidence: number; provider: ProviderId | null }
-  | { kind: "daily"; confidence: number }
-  | { kind: "results"; confidence: number }
+  | { kind: "best"; confidence: number; provider: ProviderId | null } & RequestContext
+  | { kind: "daily"; confidence: number; provider: ProviderId | null } & RequestContext
+  | { kind: "results"; confidence: number } & RequestContext
   | { kind: "unknown"; confidence: number };
 
 const providerAliases: Array<{ id: ProviderId; aliases: string[] }> = [
@@ -46,7 +60,7 @@ const examples = {
 } as const;
 
 function normalize(value: string) {
-  return value.toLowerCase().replace(/[’']/g, "").replace(/[^a-z0-9.]+/g, " ").trim();
+  return value.toLowerCase().replace(/\btoday[’']s\b/g, "today").replace(/[’']/g, "").replace(/[^a-z0-9.\/-]+/g, " ").trim();
 }
 
 function features(value: string) {
@@ -108,7 +122,15 @@ function mentionedProviders(input: string) {
 
 function extractCode(input: string) {
   const candidates = input.toUpperCase().match(/\b[A-Z0-9]{4,16}\b/g) ?? [];
-  return candidates.find((candidate) => /[A-Z]/.test(candidate) && /\d/.test(candidate) && !providerAliases.some((provider) => provider.aliases.some((alias) => normalize(alias).replaceAll(" ", "") === candidate.toLowerCase()))) ?? null;
+  const excluded = new Set('convert conversion transfer move from into code codes booking sporty sportybet betway betpawa betking bet9ja please this that give odds today tomorrow'.split(' '));
+  const valid = (candidate: string) => !excluded.has(candidate.toLowerCase()) && !providerAliases.some(provider => provider.aliases.some(alias => normalize(alias).replaceAll(' ', '') === candidate.toLowerCase()));
+  const mixed = candidates.find(candidate => /[A-Z]/.test(candidate) && /\d/.test(candidate) && valid(candidate));
+  if (mixed) return mixed;
+  // Real share codes can contain letters only. Prefer explicitly labelled codes,
+  // otherwise accept uppercase tokens rather than ordinary words in the request.
+  const explicit = input.match(/\b(?:booking\s+code|code)\s*[:#]?\s*([a-z0-9]{4,16})\b/i)?.[1];
+  if (explicit && valid(explicit)) return explicit.toUpperCase();
+  return (input.match(/\b[A-Z]{4,16}\b/g) ?? []).find(valid) ?? null;
 }
 
 function extractNumbers(input: string) {
@@ -141,13 +163,129 @@ function extractParts(input: string) {
 }
 
 function extractTarget(input: string, parts: number | null) {
-  const numbers = extractNumbers(input).filter((item) => item.value >= 1.2);
+  const withoutDates = input
+    .replace(/\b(?:next|coming)\s+(\d+|two|three|four|five|six|seven)\s+days?\b/g, " ")
+    .replace(/\b(?:over|under)\s+\d+(?:\.\d+)?\b/g, " ")
+    .replace(/\b20\d{2}[\/.\-]\d{1,2}[\/.\-]\d{1,2}\b/g, " ")
+    .replace(/\b\d{1,2}[\/.\-]\d{1,2}[\/.\-]20\d{2}\b/g, " ")
+    .replace(/\b\d{1,2}(?:st|nd|rd|th)?\s+(?:january|february|march|april|may|june|july|august|september|october|november|december)(?:\s+20\d{2})?\b/g, " ")
+    .replace(/\b(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}(?:st|nd|rd|th)?(?:\s+20\d{2})?\b/g, " ");
+  const numbers = extractNumbers(withoutDates).filter((item) => item.value >= 1.2);
   if (!numbers.length) return null;
   if (parts != null) {
     const nonParts = numbers.find((item) => item.value !== parts);
     if (nonParts) return nonParts.value;
   }
   return numbers[0].value;
+}
+
+const DAY_MS = 86_400_000;
+const LAGOS_OFFSET_MS = 60 * 60_000;
+const weekdays = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+const months = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+
+function lagosDateParts(referenceTime: number) {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: ASSISTANT_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    weekday: "long",
+  }).formatToParts(referenceTime);
+  const value = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)?.value ?? "";
+  return { year: Number(value("year")), month: Number(value("month")), day: Number(value("day")), weekday: value("weekday").toLowerCase() };
+}
+
+function lagosStart(year: number, month: number, day: number) {
+  return Date.UTC(year, month - 1, day) - LAGOS_OFFSET_MS;
+}
+
+function dayWindow(timestamp: number, kind: DateWindow["kind"], label: string, days = 1): DateWindow {
+  const date = new Date(timestamp + LAGOS_OFFSET_MS);
+  const start = lagosStart(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate());
+  return { kind, label, start: new Date(start).toISOString(), end: new Date(start + days * DAY_MS).toISOString() };
+}
+
+function calendarDateWindow(year: number, month: number, day: number, label: string) {
+  const timestamp = lagosStart(year, month, day);
+  const date = new Date(timestamp + LAGOS_OFFSET_MS);
+  if (date.getUTCFullYear() !== year || date.getUTCMonth() + 1 !== month || date.getUTCDate() !== day) return null;
+  return dayWindow(timestamp, "DAY", label);
+}
+
+export function extractDateWindow(input: string, referenceTime = Date.now()): DateWindow | null {
+  const text = normalize(input);
+  const today = lagosDateParts(referenceTime);
+  const todayStart = lagosStart(today.year, today.month, today.day);
+
+  if (/\bday after tomorrow\b/.test(text)) return dayWindow(todayStart + 2 * DAY_MS, "DAY", "the day after tomorrow");
+  if (/\byesterday\b/.test(text)) return dayWindow(todayStart - DAY_MS, "DAY", "yesterday");
+  if (/\btomorrow\b|\btmrw\b|\btomoro\b/.test(text)) return dayWindow(todayStart + DAY_MS, "TOMORROW", "tomorrow");
+  if (/\btoday\b|\btonight\b|\bthis evening\b/.test(text)) return dayWindow(todayStart, "TODAY", "today");
+  if (/\b(?:upcoming|future)\b/.test(text)) return dayWindow(todayStart, "NEXT_DAYS", "the next 7 days", 7);
+
+  const nextDays = text.match(/\b(?:next|coming)\s+(\d+|two|three|four|five|six|seven)\s+days?\b/);
+  if (nextDays) {
+    const words: Record<string, number> = { two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7 };
+    const days = Math.max(1, Math.min(7, Number(nextDays[1]) || words[nextDays[1]] || 1));
+    return dayWindow(todayStart, "NEXT_DAYS", `the next ${days} days`, days);
+  }
+
+  if (/\b(?:this|coming) weekend\b|\bweekend\b/.test(text)) {
+    const todayIndex = weekdays.indexOf(today.weekday);
+    const daysUntilSaturday = todayIndex === 0 ? -1 : (6 - todayIndex + 7) % 7;
+    const start = todayStart + daysUntilSaturday * DAY_MS;
+    return dayWindow(start, "WEEKEND", "this weekend", 2);
+  }
+
+  const iso = text.match(/\b(20\d{2})[\/.\-](\d{1,2})[\/.\-](\d{1,2})\b/);
+  if (iso) return calendarDateWindow(Number(iso[1]), Number(iso[2]), Number(iso[3]), iso[0]);
+  const dmy = text.match(/\b(\d{1,2})[\/.\-](\d{1,2})[\/.\-](20\d{2})\b/);
+  if (dmy) return calendarDateWindow(Number(dmy[3]), Number(dmy[2]), Number(dmy[1]), dmy[0]);
+
+  const dayMonth = text.match(new RegExp(`\\b(\\d{1,2})(?:st|nd|rd|th)?\\s+(${months.join("|")})(?:\\s+(20\\d{2}))?\\b`));
+  const monthDay = text.match(new RegExp(`\\b(${months.join("|")})\\s+(\\d{1,2})(?:st|nd|rd|th)?(?:\\s+(20\\d{2}))?\\b`));
+  if (dayMonth || monthDay) {
+    const monthName = dayMonth?.[2] ?? monthDay?.[1] ?? "";
+    const day = Number(dayMonth?.[1] ?? monthDay?.[2]);
+    let year = Number(dayMonth?.[3] ?? monthDay?.[3] ?? today.year);
+    const month = months.indexOf(monthName) + 1;
+    let window = calendarDateWindow(year, month, day, `${monthName} ${day}`);
+    if (window && !dayMonth?.[3] && !monthDay?.[3] && Date.parse(window.end) <= referenceTime) window = calendarDateWindow(++year, month, day, `${monthName} ${day}`);
+    return window;
+  }
+
+  for (const [index, weekday] of weekdays.entries()) {
+    if (!new RegExp(`\\b(?:this|next|on)?\\s*${weekday}\\b`).test(text)) continue;
+    const todayIndex = weekdays.indexOf(today.weekday);
+    let delta = (index - todayIndex + 7) % 7;
+    if (new RegExp(`\\bnext\\s+${weekday}\\b`).test(text)) delta = delta === 0 ? 7 : delta;
+    return dayWindow(todayStart + delta * DAY_MS, "DAY", weekday);
+  }
+  return null;
+}
+
+export function isWithinDateWindow(kickoff: string, window: DateWindow | null) {
+  if (!window) return true;
+  const timestamp = Date.parse(kickoff);
+  return Number.isFinite(timestamp) && timestamp >= Date.parse(window.start) && timestamp < Date.parse(window.end);
+}
+
+export function requestedMarketKeys(input: string): string[] | undefined {
+  const text = normalize(input);
+  const total = text.match(/\b(over|under)\s+(\d+(?:\.\d+)?)\b/);
+  if (total) {
+    const team = /\bhome\b/.test(text) ? 'HOME_' : /\baway\b/.test(text) ? 'AWAY_' : '';
+    return [`${team}${total[1].toUpperCase()}_${total[2].replace('.', '_')}`];
+  }
+  if (/\bbtts\b|both teams to score/.test(text)) return [/\bno\b/.test(text) ? 'BTTS_NO' : 'BTTS_YES'];
+  if (/double chance/.test(text)) return ['DC_1X', 'DC_X2', 'DC_12'];
+  if (/draw no bet/.test(text)) return ['DNB_HOME', 'DNB_AWAY'];
+  return undefined;
+}
+
+export function matchesRequestedMarket(key: string, keys?: string[]) {
+  return !keys || keys.includes(key);
 }
 
 function conversionProviders(input: string, providers: ReturnType<typeof mentionedProviders>) {
@@ -170,13 +308,16 @@ function conversionProviders(input: string, providers: ReturnType<typeof mention
   return { sourceProvider, destinationProvider };
 }
 
-export function interpretAssistantRequest(input: string): AssistantIntent {
+export function interpretAssistantRequest(input: string, referenceTime = Date.now()): AssistantIntent {
   const text = normalize(input);
   if (!text) return { kind: "unknown", confidence: 0 };
   const scores = intentScores(text);
   const providers = mentionedProviders(text);
   const code = extractCode(input);
   const parts = extractParts(text);
+  const dateWindow = extractDateWindow(text, referenceTime);
+  if (!dateWindow && /\b(?:20\d{2}[\/-]\d{1,2}[\/-]\d{1,2}|\d{1,2}[\/-]\d{1,2}[\/-]20\d{2})\b/.test(text)) return { kind: "unknown", confidence: 0 };
+  const context = { dateWindow, marketKeys: requestedMarketKeys(text) };
   const hasSplitLanguage = /\b(split|divide|break|separate|smaller|across)\b/.test(text);
   const hasConversionLanguage = /\b(convert|change|move|transfer|translate|turn)\b/.test(text);
   const hasBuildLanguage = /\b(odds?|bet|slip|ticket|games?|matches?|booking)\b/.test(text);
@@ -186,20 +327,23 @@ export function interpretAssistantRequest(input: string): AssistantIntent {
     return { kind: "convert", confidence: Math.min(1, scores.convert + (code ? .22 : 0) + (hasConversionLanguage ? .18 : 0)), code, ...routes };
   }
   if (hasSplitLanguage || parts || scores.split >= .62) {
-    return { kind: "split", confidence: Math.min(1, scores.split + (hasSplitLanguage ? .2 : 0)), targetOdds: extractTarget(text, parts), parts, provider: providers[0]?.id ?? null };
+    return { kind: "split", confidence: Math.min(1, scores.split + (hasSplitLanguage ? .2 : 0)), targetOdds: extractTarget(text, parts), parts, provider: providers[0]?.id ?? null, ...context };
   }
+  if (/\b(results?|settled|won|lost|performance|hit rate)\b/.test(text)) return { kind: "results", confidence: 1, ...context };
+  const explicitTarget = extractTarget(text, null);
+  if (explicitTarget && /\bodds?\b/.test(text)) return { kind: "build", confidence: 1, targetOdds: explicitTarget, provider: providers[0]?.id ?? null, ...context };
   if (scores.best >= .58 || /\b(best|safest|strongest|strong|reliable|top)\b/.test(text)) {
-    return { kind: "best", confidence: Math.min(1, scores.best + .18), provider: providers[0]?.id ?? null };
+    return { kind: "best", confidence: Math.min(1, scores.best + .18), provider: providers[0]?.id ?? null, ...context };
   }
-  if (scores.daily >= .6 || /\bdaily\b|\btoday.?s?(?:\s+[a-z]+){0,2}\s+(?:odds|tickets|slips)\b|\bready made (?:tickets|slips)\b/.test(text)) {
-    return { kind: "daily", confidence: Math.min(1, scores.daily + .18) };
+  if (scores.daily >= .6 || /\bdaily\b|\btoday.?s?(?:\s+[a-z]+){0,2}\s+(?:odds|tickets|slips)\b|\bready made (?:tickets|slips)\b/.test(text) || Boolean(dateWindow && /\b(?:matches|games|odds|picks|predictions)\b/.test(text) && !extractTarget(text, parts))) {
+    return { kind: "daily", confidence: Math.min(1, scores.daily + .18), provider: providers[0]?.id ?? null, ...context };
   }
   if (scores.results >= .58 || /\b(results?|settled|won|lost|performance|hit rate)\b/.test(text)) {
-    return { kind: "results", confidence: Math.min(1, scores.results + .18) };
+    return { kind: "results", confidence: Math.min(1, scores.results + .18), dateWindow };
   }
   const targetOdds = extractTarget(text, null);
   if (hasBuildLanguage || targetOdds || providers.length || scores.build >= .43) {
-    return { kind: "build", confidence: Math.min(1, scores.build + (targetOdds ? .18 : 0) + (providers.length ? .12 : 0)), targetOdds, provider: providers[0]?.id ?? null };
+    return { kind: "build", confidence: Math.min(1, scores.build + (targetOdds ? .18 : 0) + (providers.length ? .12 : 0)), targetOdds, provider: providers[0]?.id ?? null, ...context };
   }
   return { kind: "unknown", confidence: Math.max(...Object.values(scores)) };
 }

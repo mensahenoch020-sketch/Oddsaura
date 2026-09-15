@@ -179,22 +179,15 @@ async function converterApi(req, res, user) {
   if (!providers.has(source) || !providers.has(destination)) return json(res, 400, { error: "Choose valid source and destination bookmakers." });
   if (source === destination) return json(res, 400, { error: "Choose a different destination bookmaker." });
   if (!/^[A-Z0-9]{4,16}$/.test(code)) return json(res, 400, { error: "Enter a valid bookmaker code." });
-  const stored = await pool.query("SELECT selections_json FROM oa_generated_codes WHERE user_email=$1 AND lower(provider)=$2 AND upper(code)=$3 ORDER BY created_at DESC LIMIT 1", [user.email, source, code]);
-  let upstreamPath = "/api/providers/convert";
-  let upstreamBody = { sourceProvider: source, destinationProvider: destination, code, allowPartial };
-  let importedFrom = "bookmaker";
-  if (stored.rowCount) {
-    const parsed = JSON.parse(stored.rows[0].selections_json || "{}") || {};
-    if (parsed.verified === true && Array.isArray(parsed.requested) && parsed.requested.length) {
-      upstreamPath = `/api/providers/${encodeURIComponent(destination)}/code`;
-      upstreamBody = { selections: parsed.requested, allowPartial };
-      importedFrom = "account";
-    }
-  }
+  // Reload the actual source code. Account history may contain requested legs
+  // omitted from a partial code and is not an authoritative conversion source.
+  const upstreamPath = "/api/providers/convert";
+  const upstreamBody = { sourceProvider: source, destinationProvider: destination, code, allowPartial };
+  const importedFrom = "bookmaker";
   const response = await fetch(`http://127.0.0.1:${appPort}${upstreamPath}`, { method: "POST", headers: { "content-type": "application/json", "x-oddsaura-user-email": user.email, "x-oddsaura-user-name": user.name }, body: JSON.stringify(upstreamBody) });
   const payload = await response.json().catch(() => ({ error: "The bookmaker returned an invalid response." }));
   if (response.ok && payload.code) {
-    const requested = upstreamPath === "/api/providers/convert" ? (Array.isArray(payload.sourceSelections) ? payload.sourceSelections : []) : upstreamBody.selections;
+    const requested = Array.isArray(payload.sourceSelections) ? payload.sourceSelections : [];
     await pool.query("INSERT INTO oa_generated_codes(id,user_email,provider,code,deep_link,selections_json,created_at) VALUES($1,$2,$3,$4,$5,$6,$7)", [crypto.randomUUID(), user.email, destination, payload.code, payload.deepLink ?? null, JSON.stringify({ verified: payload.verified === true, verificationStatus: payload.verificationStatus, requested, resolved: payload.resolved ?? [], unmatched: payload.unmatched ?? [], sourceIssues: payload.sourceIssues ?? [], convertedFrom: { provider: source, code } }), Date.now()]).catch(() => {
       payload.historySaved = false;
       payload.warning = [payload.warning, "Code created, but account history could not be saved. Copy this code now."].filter(Boolean).join(" ");
