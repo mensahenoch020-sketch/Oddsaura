@@ -46,7 +46,7 @@ export function priceModelPredictions(predictions, quotes, now = Date.now()) {
     const quality = typeof model.dataQuality === 'string'
       ? ({ LOW: 0, MEDIUM: .5, HIGH: 1 }[model.dataQuality] ?? 0)
       : Math.min(1, Math.max(0, Number(model.dataQuality) || 0));
-    const weight = .2 + quality * .1;
+    const weight = Math.max(0, Math.min(.4, Number(model.marketModelWeight ?? (.05 + quality * .05))));
     const probability = model.probability * weight + marketProbability * (1 - weight);
     return [{ ...model, modelProbability: model.probability, probability,
       confidence: probability * (.85 + quality * .15), fairOdds: Number((1 / probability).toFixed(2)),
@@ -55,6 +55,7 @@ export function priceModelPredictions(predictions, quotes, now = Date.now()) {
       providerMarketId: quote.marketId, providerSelectionId: quote.outcomeId, providerSpecifier: quote.specifier,
       marketProbability, impliedProbability: 1 / quote.odds, edge: probability - marketProbability,
       modelMarketGap: Math.abs(model.probability - marketProbability), expectedValue: probability * quote.odds - 1,
+      marketModelWeight: weight,
     }];
   });
 }

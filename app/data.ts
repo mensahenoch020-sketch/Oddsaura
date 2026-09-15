@@ -19,6 +19,14 @@ export type TicketSelection = {
   marketProbability?: number | null;
   modelProbability?: number | null;
   modelMarketGap?: number | null;
+  engineVersion?: string;
+  calibrated?: boolean;
+  calibrationSamples?: number;
+  calibrationGain?: number;
+  marketModelWeight?: number;
+  marketWeightLearned?: boolean;
+  marketWeightSamples?: number;
+  reasoning?: string;
   oddsSource?: string | null;
   oddsProvider?: string | null;
   quoteObservedAt?: string | null;
@@ -69,7 +77,7 @@ export type Snapshot = {
 };
 
 export const fallbackSnapshot: Snapshot = {
-  version: 4,
+  version: 5,
   generatedAt: null,
   stale: true,
   status: "waiting",

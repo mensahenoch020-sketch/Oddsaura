@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "updatedAt": "2026-09-15T00:00:00.000Z",
+  "sources": {
+    "football-data.co.uk": {
+      "status": "owner-confirmed",
+      "permittedUses": ["historical-training", "probability-calibration", "internal-backtesting"],
+      "note": "The OddsAura project owner confirmed authorization on 2026-09-15. The underlying permission record remains with the project owner."
+    },
+    "thestatsapi.com": {
+      "status": "not-configured",
+      "permittedUses": [],
+      "note": "Documented bearer-token API only. Scraping is prohibited by the provider terms; enable only after a paid API key is supplied."
+    }
+  }
+}

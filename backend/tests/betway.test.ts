@@ -34,7 +34,23 @@ test("does not create a partial Betway code by default", async () => {
     return Response.json([{ event, markets: [market], outcomes: [outcome], prices: [price] }]);
   };
   await assert.rejects(() => createBetwayCode([{ fixtureId: "source-one", homeTeam: "FC Copenhagen", awayTeam: "Sonderjyske", kickoff: new Date(1_800_000_000_000).toISOString(),
-    marketKey: "BTTS_YES", marketName: "Both teams to score", selection: "Yes" }], fakeFetch as typeof fetch), /not supported/i);
+    marketKey: "BTTS_YES", marketName: "Both teams to score", selection: "Yes" }], fakeFetch as typeof fetch), /not currently priced/i);
+});
+
+test("matches a non-whitelisted market from Betway's live catalogue", async () => {
+  const rawMarket = { ...market, marketId: "719249989", name: "[First Throw-In]", displayName: "First Throw-In" };
+  const rawOutcome = { ...outcome, marketId: rawMarket.marketId, originalMarketId: rawMarket.marketId, outcomeId: "7192499891", displayName: "FC Copenhagen" };
+  const rawPrice = { outcomeId: rawOutcome.outcomeId, priceDecimal: 1.75 };
+  const fakeFetch = async (input: string | URL | Request) => {
+    const url = String(input);
+    if (url.includes("FeedsSearch/EventSearch")) return Response.json([{ eventId: 71924998 }]);
+    if (url.includes("Feeds/EMOP")) return Response.json([{ event, markets: [rawMarket], outcomes: [rawOutcome], prices: [rawPrice] }]);
+    if (url.includes("/v1/Betting/BookABet")) return Response.json({ bookingCode: "BWRAW123" });
+    return Response.json({ selections: [{ sportEvent: event, market: rawMarket, outcome: rawOutcome, price: rawPrice }] });
+  };
+  const result = await createBetwayCode([{ fixtureId: "raw-one", homeTeam: "FC Copenhagen", awayTeam: "Sonderjyske", kickoff: new Date(1_800_000_000_000).toISOString(),
+    marketKey: "RAW_EXACT", marketName: "First Throw-In", selection: "FC Copenhagen", sourceMarketName: "First Throw-In", sourceOutcomeName: "FC Copenhagen" }], fakeFetch as typeof fetch);
+  assert.equal(result.resolved[0]?.outcomeId, rawOutcome.outcomeId);
 });
 
 test("uses the event id from scored Betway search results, not the decimal score", async () => {

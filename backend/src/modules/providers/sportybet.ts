@@ -8,6 +8,9 @@ export type SportyBetSelectionInput = {
   marketName: string;
   selection: string;
   line?: number | null;
+  sourceMarketName?: string | null;
+  sourceOutcomeName?: string | null;
+  sourceSpecifier?: string | null;
   providerEventId?: string | null;
   providerMarketId?: string | null;
   providerOutcomeId?: string | null;
@@ -283,7 +286,9 @@ function findMarket(event: JsonRecord, input: SportyBetSelectionInput) {
   const candidates = getMarkets(event).filter((market) => {
     const active = market.status == null || Number(market.status) === 0;
     const idMatches = !rule.marketId || stringValue(market.id || market.marketId) === rule.marketId;
-    const textMatches = !rule.text || marketText(market).includes(normalize(rule.text));
+    const actualText = marketText(market);
+    const wantedText = normalize(rule.text || "");
+    const textMatches = !rule.text || (input.marketKey === "RAW_EXACT" ? actualText === wantedText : actualText.includes(wantedText));
     const line = specifierLine(market);
     const lineMatches = rule.line == null || (line != null && Math.abs(line - rule.line) < .001);
     return active && idMatches && textMatches && lineMatches;
@@ -306,6 +311,7 @@ function findOutcome(market: JsonRecord, input: SportyBetSelectionInput) {
   const wanted = rule.outcomeText.map(normalize).filter(Boolean);
   return outcomes.find((outcome) => {
     const actual = outcomeText(outcome);
+    if (input.marketKey === "RAW_EXACT") return wanted.includes(actual);
     return wanted.some((candidate) => actual === candidate || actual.includes(candidate) || candidate.includes(actual));
   });
 }

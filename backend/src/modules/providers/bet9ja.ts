@@ -119,7 +119,7 @@ async function findEvent(fetcher: FetchLike, input: SportyBetSelectionInput) {
 }
 
 type Rule = { className: string; sign: string; market: string; line?: number | null };
-function rule(input: SportyBetSelectionInput): Rule | null {
+function rule(input: SportyBetSelectionInput): Rule {
   const fixed: Record<string, Rule> = {
     MATCH_HOME: { className: "1X2", sign: "1", market: "S_1X2" }, MATCH_DRAW: { className: "1X2", sign: "X", market: "S_1X2" }, MATCH_AWAY: { className: "1X2", sign: "2", market: "S_1X2" },
     ONE_UP_HOME: { className: "1X2 1UP", sign: "1", market: "S_1X21" }, ONE_UP_AWAY: { className: "1X2 1UP", sign: "2", market: "S_1X21" },
@@ -133,12 +133,11 @@ function rule(input: SportyBetSelectionInput): Rule | null {
   if (fixed[input.marketKey]) return fixed[input.marketKey]!;
   if (/^OVER_/.test(input.marketKey)) return { className: `O/U ${input.line}`, sign: "Over", market: "S_OU", line: input.line };
   if (/^UNDER_/.test(input.marketKey)) return { className: `O/U ${input.line}`, sign: "Under", market: "S_OU", line: input.line };
-  return null;
+  return { className: input.sourceMarketName || input.marketName, sign: input.sourceOutcomeName || input.selection, market: "", line: input.line };
 }
 
 function resolve(event: Json, input: SportyBetSelectionInput): SportyBetResolvedSelection & { oddsKey: string; eventCode: string; startDate: string; league: string; sport: string } {
   const wanted = rule(input);
-  if (!wanted) throw new Bet9jaIntegrationError(`The ${input.marketName} market is not supported for automatic Bet9ja codes yet.`, 422, { marketKey: input.marketKey });
   const classes = Array.isArray(event.ClassiQuotaList) ? event.ClassiQuotaList.filter(isRecord) : [];
   const market = classes.find((item) => norm(str(item.ClasseQuota)).replace(/\s+/g, " ") === norm(wanted.className).replace(/\s+/g, " ") ||
     (wanted.line != null && norm(str(item.ClasseQuota)).includes(`o u ${wanted.line}`) && Number(item.ValoreHND) === wanted.line));
@@ -147,9 +146,11 @@ function resolve(event: Json, input: SportyBetSelectionInput): SportyBetResolved
   const quote = quotes.find((item) => norm(str(item.TipoQuotaBreve)) === norm(wanted.sign) && (wanted.line == null || Math.abs(Number(item.hnd) - wanted.line) < .001));
   if (!quote || Number(quote.Giocabilita) !== 1) throw new Bet9jaIntegrationError(`The ${input.selection} price is not currently available on Bet9ja for ${input.homeTeam} vs ${input.awayTeam}.`, 422);
   const eventId = str(event.IDSottoEvento), eventCode = str(event.CodPubblicazione), pair = splitTeams(str(event.SottoEvento));
+  const marketCode = wanted.market || str(market.MarketCode ?? market.CodiceMercato ?? market.Sigla ?? market.Codice);
+  if (!marketCode) throw new Bet9jaIntegrationError(`Bet9ja lists ${input.marketName}, but did not expose the identifier required to place it in a booking code.`, 422, { marketKey: input.marketKey });
   const sign = str(quote.TipoQuotaBreve).replace(/\s+DNB$/i, "").trim();
   const suffix = wanted.line == null ? `_${sign}` : `@${wanted.line}_${sign.slice(0, 1).toUpperCase()}`;
-  const oddsKey = `${eventId}$${wanted.market}${suffix}`;
+  const oddsKey = `${eventId}$${marketCode}${suffix}`;
   const odds = Number(quote.QuotaValore);
   return { fixtureId: input.fixtureId, eventId, marketId: str(market.IDClasseQuota), outcomeId: oddsKey, specifier: wanted.line == null ? null : `total=${wanted.line}`,
     odds: Number.isFinite(odds) ? odds : null, homeTeam: pair.home || input.homeTeam, awayTeam: pair.away || input.awayTeam,

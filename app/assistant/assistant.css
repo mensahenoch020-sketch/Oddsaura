@@ -446,6 +446,7 @@
 .assistant-selection b { font-size: .82rem; color: #fff; }
 .assistant-picks small,
 .assistant-selection small { color: #929da9; font-size: .73rem; line-height: 1.35; }
+.assistant-selection em,.assistant-picks em { color: #728091; font-size: .66rem; line-height: 1.35; font-style: normal; }
 .assistant-picks strong,
 .assistant-selection strong { color: var(--chat-green); font-size: .82rem; }
 

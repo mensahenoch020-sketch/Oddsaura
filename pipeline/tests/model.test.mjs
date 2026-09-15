@@ -97,6 +97,8 @@ test("odds matching never confuses match totals with team totals or missing line
   assert.equal(wrongFamily.find((item) => item.key === "OVER_1_5").quotedOdds, null);
   const missingLine = attachOdds(predictions, [{ market: "Total goals", selection: "Over", odds: 1.7, source: "test", marketId: "total", selectionId: "over" }]);
   assert.equal(missingLine.find((item) => item.key === "OVER_1_5").quotedOdds, null);
+  const unrelated = attachOdds(predictions, [{ market: "Asian handicap", selection: "Alpha", line: -0.25, odds: 1.9, source: "test", marketId: "asian", selectionId: "home" }]);
+  assert.equal(unrelated.find((item) => item.key === "HOME_CLEAN").quotedOdds, null);
 });
 
 test("priced predictions use the de-margined market as the primary baseline", () => {

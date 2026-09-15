@@ -7,6 +7,8 @@ const detail = {
   ClassiQuotaList: [{ IDClasseQuota: 1, ClasseQuota: "1X2", QuoteList: [
     { IDQuota: 1, TipoQuotaBreve: "1", QuotaValore: 1.54, Giocabilita: 1 },
     { IDQuota: 2, TipoQuotaBreve: "X", QuotaValore: 4.6, Giocabilita: 1 },
+  ] }, { IDClasseQuota: 99001, ClasseQuota: "First Throw-In", MarketCode: "S_THROW", QuoteList: [
+    { IDQuota: 990011, TipoQuotaBreve: "Liverpool", QuotaValore: 1.75, Giocabilita: 1 },
   ] }],
 };
 
@@ -62,4 +64,18 @@ test("retries Bet9ja search after bootstrapping the public session", async () =>
   const result = await createBet9jaCode([{ fixtureId: "session-test", homeTeam: "Arsenal FC", awayTeam: "Chelsea FC", kickoff: "2026-08-29T11:30:00Z", marketKey: "MATCH_HOME", marketName: "Match result", selection: "Arsenal" }], fakeFetch as typeof fetch);
   assert.equal(result.code, "SESSION9");
   assert.ok(searchCalls > 1);
+});
+
+test("matches a non-whitelisted market when Bet9ja exposes its booking identifier", async () => {
+  const fakeFetch = async (input: string | URL | Request) => {
+    const url = String(input);
+    if (url.endsWith("GetSearchBoxData")) return Response.json({ d: { SearchResults: [{ ID: 825252096, Type: "SE", Area: "Liverpool - Nottingham Forest", DataInizio: "/Date(1788003000000)/" }] } });
+    if (url.endsWith("GetSubEventDetails")) return Response.json({ d: detail });
+    if (url.includes("BookABetV2")) return Response.json({ status: 1, data: [{ RIS: "RAW9JA" }] });
+    return Response.json({ R: "OK", D: { O: { "825252096$S_THROW_Liverpool": {} } } });
+  };
+  const result = await createBet9jaCode([{ fixtureId: "raw", homeTeam: "Liverpool", awayTeam: "Nottingham Forest", kickoff: "2026-08-29T11:30:00Z",
+    marketKey: "RAW_EXACT", marketName: "First Throw-In", selection: "Liverpool", sourceMarketName: "First Throw-In", sourceOutcomeName: "Liverpool" }], fakeFetch as typeof fetch);
+  assert.equal(result.resolved[0]?.marketId, "99001");
+  assert.equal(result.resolved[0]?.outcomeId, "825252096$S_THROW_Liverpool");
 });

@@ -1,3 +1,5 @@
+import { ENGINE_VERSION, calibratePrediction, modelBlendWeight } from "./calibration.mjs";
+
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const factorial = (n) => { let out = 1; for (let i = 2; i <= n; i += 1) out *= i; return out; };
 const poisson = (lambda, goals) => Math.exp(-lambda) * Math.pow(lambda, goals) / factorial(goals);
@@ -51,7 +53,7 @@ export function buildForm(teamId, events, before, limit = 12, venue = "ALL", dec
   return form;
 }
 
-export function buildModelContext(events, before = "9999-12-31T00:00:00.000Z") {
+export function buildModelContext(events, before = "9999-12-31T00:00:00.000Z", engineParameters = null) {
   const ratings = new Map();
   const leagues = new Map();
   const teamEvents = new Map();
@@ -77,7 +79,7 @@ export function buildModelContext(events, before = "9999-12-31T00:00:00.000Z") {
       teamEvents.set(teamId, matches);
     }
   }
-  return { ratings, leagues, teamEvents };
+  return { ratings, leagues, teamEvents, engineParameters };
 }
 
 function grid(homeLambda, awayLambda, maxGoals = 9, rho = -0.08) {
@@ -183,7 +185,7 @@ export function scoreEvent(event, allEvents, suppliedContext = null) {
   const venueCoverage = Math.min(homeVenue.played, awayVenue.played) / 12;
   const longCoverage = minimumLongHistory / 40;
   const quality = clamp(0.4 * Math.min(1, longCoverage) + 0.38 * Math.min(1, recentCoverage) + 0.22 * Math.min(1, venueCoverage), 0.08, 1);
-  const predictions = [
+  let predictions = [
     market("MATCH_HOME", "Match result", "Result", event.homeTeam.name, homeWin),
     market("MATCH_DRAW", "Match result", "Result", "Draw", draw),
     market("MATCH_AWAY", "Match result", "Result", event.awayTeam.name, awayWin),
@@ -237,19 +239,48 @@ export function scoreEvent(event, allEvents, suppliedContext = null) {
   predictions.push(market("HT_OVER_0_5", "First-half goals", "Half", "Over 0.5", sum(firstHalf, (r) => r.home + r.away >= 1), { line: 0.5 }));
   predictions.push(market("HT_OVER_1_5", "First-half goals", "Half", "Over 1.5", sum(firstHalf, (r) => r.home + r.away >= 2), { line: 1.5 }));
 
-  return predictions.map((item) => ({
-    ...item,
-    fixtureId: event.id,
-    expectedHomeGoals: Number(goalMarketGoals.home.toFixed(2)),
-    expectedAwayGoals: Number(goalMarketGoals.away.toFixed(2)),
-    dataQuality: quality,
-    confidence: clamp(item.probability * (0.68 + quality * 0.32), 0, 0.99),
-    fairOdds: Number((1 / item.probability).toFixed(2)),
-    quotedOdds: null,
-    oddsSource: null,
-    edge: null,
-    factors: { homePlayed: home.played, awayPlayed: away.played, homeVenuePlayed: homeVenue.played, awayVenuePlayed: awayVenue.played, homeHistoryPlayed: homeLong.played, awayHistoryPlayed: awayLong.played, headToHeadPlayed: homeH2h.played, minimumLongHistory, homePPG, awayPPG, homeGF, awayGF, homeGA, awayGA, homeShotMatches: home.shotWeight, awayShotMatches: away.shotWeight, homeShotXg: homeShotAttack, awayShotXg: awayShotAttack, homeCleanSheetRate: home.weight ? home.cleanSheets / home.weight : null, awayCleanSheetRate: away.weight ? away.cleanSheets / away.weight : null, homeBttsRate: home.weight ? home.btts / home.weight : null, awayBttsRate: away.weight ? away.btts / away.weight : null, homeElo: Math.round(homeRating), awayElo: Math.round(awayRating), eloHome, homeRestDays: Number(restDays(home).toFixed(1)), awayRestDays: Number(restDays(away).toFixed(1)), leagueHomeGoals: leagueHome, leagueAwayGoals: leagueAway },
-  }));
+  const leagueId = event.league?.id ?? event.league?.name ?? "football";
+  predictions = predictions.map((item) => {
+    const calibration = calibratePrediction(item.probability, item.key, leagueId, context.engineParameters);
+    return { ...item, uncalibratedProbability: item.probability, probability: calibration.probability, ...calibration };
+  });
+  // Preserve a coherent 1X2 book after independent calibration, then derive
+  // double-chance and draw-no-bet from the same three probabilities.
+  const resultRows = ["MATCH_HOME", "MATCH_DRAW", "MATCH_AWAY"].map(key => predictions.find(item => item.key === key));
+  const resultTotal = resultRows.reduce((total, item) => total + Number(item?.probability ?? 0), 0);
+  if (resultRows.every(Boolean) && resultTotal > 0) {
+    for (const item of resultRows) item.probability /= resultTotal;
+    const [calibratedHome, calibratedDraw, calibratedAway] = resultRows.map(item => item.probability);
+    const coherent = {
+      DC_1X: calibratedHome + calibratedDraw,
+      DC_X2: calibratedAway + calibratedDraw,
+      DC_12: calibratedHome + calibratedAway,
+      DNB_HOME: calibratedHome / Math.max(0.001, calibratedHome + calibratedAway),
+      DNB_AWAY: calibratedAway / Math.max(0.001, calibratedHome + calibratedAway),
+    };
+    predictions = predictions.map(item => coherent[item.key] == null ? item : { ...item, probability: coherent[item.key] });
+  }
+
+  return predictions.map((item) => {
+    const blend = modelBlendWeight(item.key, quality, context.engineParameters);
+    return {
+      ...item,
+      fixtureId: event.id,
+      expectedHomeGoals: Number(goalMarketGoals.home.toFixed(2)),
+      expectedAwayGoals: Number(goalMarketGoals.away.toFixed(2)),
+      dataQuality: quality,
+      confidence: clamp(item.probability * (0.68 + quality * 0.32), 0, 0.99),
+      fairOdds: Number((1 / item.probability).toFixed(2)),
+      quotedOdds: null,
+      oddsSource: null,
+      edge: null,
+      engineVersion: context.engineParameters?.version === ENGINE_VERSION ? ENGINE_VERSION : "structural-v2",
+      marketModelWeight: blend.weight,
+      marketWeightLearned: blend.learned,
+      marketWeightSamples: blend.samples,
+      factors: { homePlayed: home.played, awayPlayed: away.played, homeVenuePlayed: homeVenue.played, awayVenuePlayed: awayVenue.played, homeHistoryPlayed: homeLong.played, awayHistoryPlayed: awayLong.played, headToHeadPlayed: homeH2h.played, minimumLongHistory, homePPG, awayPPG, homeGF, awayGF, homeGA, awayGA, homeShotMatches: home.shotWeight, awayShotMatches: away.shotWeight, homeShotXg: homeShotAttack, awayShotXg: awayShotAttack, homeCleanSheetRate: home.weight ? home.cleanSheets / home.weight : null, awayCleanSheetRate: away.weight ? away.cleanSheets / away.weight : null, homeBttsRate: home.weight ? home.btts / home.weight : null, awayBttsRate: away.weight ? away.btts / away.weight : null, homeElo: Math.round(homeRating), awayElo: Math.round(awayRating), eloHome, homeRestDays: Number(restDays(home).toFixed(1)), awayRestDays: Number(restDays(away).toFixed(1)), leagueHomeGoals: leagueHome, leagueAwayGoals: leagueAway, calibrationSamples: item.calibrationSamples, calibrationGain: item.calibrationGain },
+    };
+  });
 }
 
 function text(value) { return String(value ?? "").toLowerCase().replace(/[^a-z0-9.]+/g, " ").trim(); }
@@ -308,9 +339,11 @@ function selectionMatches(prediction, odd) {
 export function attachOdds(predictions, odds) {
   return predictions.map((prediction) => {
     const quote = odds.find((odd) => {
+      const wantedFamily = predictionFamily(prediction.key);
+      const actualFamily = quoteFamily(odd.market);
       const line = quotedLine(odd);
       const lineMatches = prediction.line == null || line != null && Math.abs(line - Number(prediction.line)) < .001;
-      return predictionFamily(prediction.key) === quoteFamily(odd.market) && lineMatches && selectionMatches(prediction, odd);
+      return wantedFamily !== "OTHER" && actualFamily !== "OTHER" && wantedFamily === actualFamily && lineMatches && selectionMatches(prediction, odd);
     });
     if (!quote) return prediction;
     const implied = 1 / quote.odds;
@@ -320,7 +353,7 @@ export function attachOdds(predictions, odds) {
     // The de-margined bookmaker market is the stronger baseline in our
     // historical tests. The team model is a cautious adjustment, not an
     // excuse to overrule the market or manufacture an edge.
-    const modelWeight = 0.2 + clamp(Number(prediction.dataQuality ?? 0), 0, 1) * 0.1;
+    const modelWeight = clamp(Number(prediction.marketModelWeight ?? (0.2 + clamp(Number(prediction.dataQuality ?? 0), 0, 1) * 0.1)), 0, 0.4);
     const blendedProbability = consensus == null ? prediction.probability : clamp(prediction.probability * modelWeight + consensus * (1 - modelWeight), 0.001, 0.999);
     return {
       ...prediction,
@@ -337,6 +370,7 @@ export function attachOdds(predictions, odds) {
       impliedProbability: implied,
       marketProbability: consensus,
       modelMarketGap: consensus == null ? null : Math.abs(prediction.probability - consensus),
+      marketModelWeight: modelWeight,
       providerMarketId: quote.marketId,
       providerSelectionId: quote.selectionId,
     };

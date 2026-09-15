@@ -8,10 +8,13 @@ on:
       - "pipeline/lib/espn.mjs"
       - "pipeline/lib/identity.mjs"
       - "pipeline/lib/model.mjs"
+      - "pipeline/lib/calibration.mjs"
       - "pipeline/lib/backtest.mjs"
       - "pipeline/lib/history-coverage.mjs"
+      - "pipeline/lib/source-policy.mjs"
       - "pipeline/update-history.mjs"
       - "pipeline/update-coverage.mjs"
+      - "data/source-authorizations.json"
       - ".github/workflows/update-football-history.yml"
   schedule:
     - cron: "41 3 * * 1"
@@ -47,7 +50,7 @@ jobs:
           fi
           git config user.name "OddsAura Data Bot"
           git config user.email "actions@users.noreply.github.com"
-          git add -- data/history data/public/model-performance.json data/public/history-coverage.json
+          git add -- data/history data/public/model-performance.json data/public/model-parameters.json data/public/history-coverage.json
           git commit -m "data: refresh historical football model"
           git pull --rebase origin main
           git push
