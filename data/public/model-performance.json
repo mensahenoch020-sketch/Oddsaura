@@ -1,68 +1,68 @@
 {
-  "generatedAt": "2026-09-14T09:14:48.853Z",
+  "generatedAt": "2026-09-15T02:18:24.009Z",
   "methodology": "Walk-forward test: every prediction uses only earlier matches with a two-hour completion buffer before kickoff.",
   "matches": 2000,
-  "oneXTwoAccuracy": 0.515,
-  "over25Accuracy": 0.562,
-  "brierScore": 0.1995406204931106,
-  "logLoss": 1.001992574870831,
+  "oneXTwoAccuracy": 0.493,
+  "over25Accuracy": 0.589,
+  "brierScore": 0.20316833304164475,
+  "logLoss": 1.0171004471003462,
   "baseline": {
     "label": "Always predict home win",
     "matches": 2000,
-    "accuracy": 0.4255
+    "accuracy": 0.458
   },
   "pricingAudit": {
     "methodology": "Historical 1X2 closing prices are de-margined before comparison. Model weight 0 is bookmaker-only; 1 is OddsAura-only.",
     "probabilityModels": [
       {
         "modelWeight": 0,
-        "matches": 2000,
-        "brier": 0.1940716765271472,
-        "logLoss": 0.9773872694019461
+        "matches": 202,
+        "brier": 0.2055956152437229,
+        "logLoss": 1.026073500522834
       },
       {
         "modelWeight": 0.25,
-        "matches": 2000,
-        "brier": 0.19476137784210124,
-        "logLoss": 0.980682480641338
+        "matches": 202,
+        "brier": 0.2055982114043081,
+        "logLoss": 1.026153999484316
       },
       {
         "modelWeight": 1,
-        "matches": 2000,
-        "brier": 0.1995406204931106,
-        "logLoss": 1.001992574870831
+        "matches": 202,
+        "brier": 0.21016513542097162,
+        "logLoss": 1.0466248222602927
       }
     ],
     "favoriteBands": [
       {
         "threshold": 0.55,
-        "picks": 739,
-        "hitRate": 0.6806495263870095,
-        "roi": -0.03454668470906581
+        "picks": 47,
+        "hitRate": 0.6170212765957447,
+        "roi": -0.11808510638297866
       },
       {
         "threshold": 0.6,
-        "picks": 514,
-        "hitRate": 0.7159533073929961,
-        "roi": -0.03908560311284042
+        "picks": 28,
+        "hitRate": 0.6785714285714286,
+        "roi": -0.09642857142857153
       },
       {
         "threshold": 0.65,
-        "picks": 346,
-        "hitRate": 0.7485549132947977,
-        "roi": -0.04338150289017289
+        "picks": 19,
+        "hitRate": 0.7368421052631579,
+        "roi": -0.06210526315789472
       },
       {
         "threshold": 0.7,
-        "picks": 225,
-        "hitRate": 0.7733333333333333,
-        "roi": -0.051600000000000694
+        "picks": 11,
+        "hitRate": 0.7272727272727273,
+        "roi": -0.13545454545454547
       },
       {
         "threshold": 0.75,
-        "picks": 121,
-        "hitRate": 0.8181818181818182,
-        "roi": -0.036280991735537664
+        "picks": 9,
+        "hitRate": 0.7777777777777778,
+        "roi": -0.07999999999999988
       }
     ],
     "conclusion": "The bookmaker price is the primary probability baseline. OddsAura acts as a cautious agreement and risk filter; it does not claim a proven pricing edge."
@@ -71,282 +71,282 @@
     {
       "key": "BTTS_YES",
       "matches": 2000,
-      "correct": 1127,
-      "baselineCorrect": 1106,
+      "correct": 1074,
+      "baselineCorrect": 1013,
       "voids": 0,
-      "selected": 1535,
-      "wins": 884,
+      "selected": 1453,
+      "wins": 770,
       "status": "TESTED",
-      "accuracy": 0.5635,
-      "baselineAccuracy": 0.553,
-      "brier": 0.2445191955851089,
-      "selectedHitRate": 0.5758957654723127
+      "accuracy": 0.537,
+      "baselineAccuracy": 0.5065,
+      "brier": 0.25032094790385523,
+      "selectedHitRate": 0.5299380591878872
     },
     {
       "key": "OVER_1_5",
       "matches": 2000,
-      "correct": 1561,
-      "baselineCorrect": 1561,
+      "correct": 1507,
+      "baselineCorrect": 1508,
       "voids": 0,
-      "selected": 2000,
-      "wins": 1561,
+      "selected": 1997,
+      "wins": 1506,
       "status": "TESTED",
-      "accuracy": 0.7805,
-      "baselineAccuracy": 0.7805,
-      "brier": 0.1692227478963058,
-      "selectedHitRate": 0.7805
+      "accuracy": 0.7535,
+      "baselineAccuracy": 0.754,
+      "brier": 0.18091792339049784,
+      "selectedHitRate": 0.7541311967951928
     },
     {
       "key": "OVER_2_5",
       "matches": 2000,
-      "correct": 1124,
-      "baselineCorrect": 1107,
+      "correct": 1178,
+      "baselineCorrect": 1094,
       "voids": 0,
-      "selected": 1241,
-      "wins": 736,
+      "selected": 1188,
+      "wins": 730,
       "status": "TESTED",
-      "accuracy": 0.562,
-      "baselineAccuracy": 0.5535,
-      "brier": 0.24354834169180953,
-      "selectedHitRate": 0.5930701047542305
+      "accuracy": 0.589,
+      "baselineAccuracy": 0.547,
+      "brier": 0.23781047729465543,
+      "selectedHitRate": 0.6144781144781145
     },
     {
       "key": "UNDER_3_5",
       "matches": 2000,
-      "correct": 1362,
-      "baselineCorrect": 1360,
+      "correct": 1329,
+      "baselineCorrect": 1330,
       "voids": 0,
-      "selected": 1994,
-      "wins": 1358,
+      "selected": 1957,
+      "wins": 1308,
       "status": "TESTED",
-      "accuracy": 0.681,
-      "baselineAccuracy": 0.68,
-      "brier": 0.21165975133514003,
-      "selectedHitRate": 0.6810431293881645
+      "accuracy": 0.6645,
+      "baselineAccuracy": 0.665,
+      "brier": 0.2165379918318589,
+      "selectedHitRate": 0.6683699540112417
     },
     {
       "key": "DC_1X",
       "matches": 2000,
-      "correct": 1457,
-      "baselineCorrect": 1379,
+      "correct": 1383,
+      "baselineCorrect": 1375,
       "voids": 0,
-      "selected": 1774,
-      "wins": 1305,
+      "selected": 1904,
+      "wins": 1331,
       "status": "TESTED",
-      "accuracy": 0.7285,
-      "baselineAccuracy": 0.6895,
-      "brier": 0.188277484791581,
-      "selectedHitRate": 0.7356257046223225
+      "accuracy": 0.6915,
+      "baselineAccuracy": 0.6875,
+      "brier": 0.20212371412874147,
+      "selectedHitRate": 0.6990546218487395
     },
     {
       "key": "DC_X2",
       "matches": 2000,
-      "correct": 1306,
-      "baselineCorrect": 1149,
+      "correct": 1234,
+      "baselineCorrect": 1084,
       "voids": 0,
-      "selected": 1405,
-      "wins": 930,
+      "selected": 1368,
+      "wins": 843,
       "status": "TESTED",
-      "accuracy": 0.653,
-      "baselineAccuracy": 0.5745,
-      "brier": 0.21704286861431207,
-      "selectedHitRate": 0.6619217081850534
+      "accuracy": 0.617,
+      "baselineAccuracy": 0.542,
+      "brier": 0.23141509346804828,
+      "selectedHitRate": 0.6162280701754386
     },
     {
       "key": "DC_12",
       "matches": 2000,
-      "correct": 1472,
-      "baselineCorrect": 1472,
+      "correct": 1541,
+      "baselineCorrect": 1541,
       "voids": 0,
       "selected": 2000,
-      "wins": 1472,
+      "wins": 1541,
       "status": "TESTED",
-      "accuracy": 0.736,
-      "baselineAccuracy": 0.736,
-      "brier": 0.19330150807343954,
-      "selectedHitRate": 0.736
+      "accuracy": 0.7705,
+      "baselineAccuracy": 0.7705,
+      "brier": 0.17596619152814333,
+      "selectedHitRate": 0.7705
     },
     {
       "key": "DNB_HOME",
-      "matches": 1472,
-      "correct": 1030,
-      "baselineCorrect": 851,
-      "voids": 528,
-      "selected": 965,
-      "wins": 687,
+      "matches": 1541,
+      "correct": 984,
+      "baselineCorrect": 916,
+      "voids": 459,
+      "selected": 1147,
+      "wins": 753,
       "status": "TESTED",
-      "accuracy": 0.6997282608695652,
-      "baselineAccuracy": 0.578125,
-      "brier": 0.1984061809809533,
-      "selectedHitRate": 0.7119170984455958
+      "accuracy": 0.6385463984425698,
+      "baselineAccuracy": 0.5944192083062946,
+      "brier": 0.217507686617038,
+      "selectedHitRate": 0.6564952048823016
     },
     {
       "key": "DNB_AWAY",
-      "matches": 1472,
-      "correct": 1030,
-      "baselineCorrect": 851,
-      "voids": 528,
-      "selected": 507,
-      "wins": 343,
+      "matches": 1541,
+      "correct": 984,
+      "baselineCorrect": 916,
+      "voids": 459,
+      "selected": 394,
+      "wins": 231,
       "status": "TESTED",
-      "accuracy": 0.6997282608695652,
-      "baselineAccuracy": 0.578125,
-      "brier": 0.19840618098095328,
-      "selectedHitRate": 0.6765285996055227
+      "accuracy": 0.6385463984425698,
+      "baselineAccuracy": 0.5944192083062946,
+      "brier": 0.21750768661703804,
+      "selectedHitRate": 0.5862944162436549
     },
     {
       "key": "HOME_OVER_0_5",
       "matches": 2000,
-      "correct": 1557,
-      "baselineCorrect": 1557,
+      "correct": 1535,
+      "baselineCorrect": 1538,
       "voids": 0,
-      "selected": 1990,
-      "wins": 1552,
+      "selected": 1997,
+      "wins": 1535,
       "status": "TESTED",
-      "accuracy": 0.7785,
-      "baselineAccuracy": 0.7785,
-      "brier": 0.16120273430246645,
-      "selectedHitRate": 0.7798994974874371
+      "accuracy": 0.7675,
+      "baselineAccuracy": 0.769,
+      "brier": 0.17184207671542104,
+      "selectedHitRate": 0.7686529794692039
     },
     {
       "key": "HOME_OVER_1_5",
       "matches": 2000,
-      "correct": 1216,
-      "baselineCorrect": 1074,
+      "correct": 1246,
+      "baselineCorrect": 1101,
       "voids": 0,
-      "selected": 592,
-      "wins": 367,
+      "selected": 645,
+      "wins": 395,
       "status": "TESTED",
-      "accuracy": 0.608,
-      "baselineAccuracy": 0.537,
-      "brier": 0.23085824462397114,
-      "selectedHitRate": 0.6199324324324325
+      "accuracy": 0.623,
+      "baselineAccuracy": 0.5505,
+      "brier": 0.2313102554060855,
+      "selectedHitRate": 0.6124031007751938
     },
     {
       "key": "AWAY_OVER_0_5",
       "matches": 2000,
-      "correct": 1427,
-      "baselineCorrect": 1422,
+      "correct": 1334,
+      "baselineCorrect": 1336,
       "voids": 0,
-      "selected": 1939,
-      "wins": 1394,
+      "selected": 1892,
+      "wins": 1281,
       "status": "TESTED",
-      "accuracy": 0.7135,
-      "baselineAccuracy": 0.711,
-      "brier": 0.1968234457565702,
-      "selectedHitRate": 0.7189272821041774
+      "accuracy": 0.667,
+      "baselineAccuracy": 0.668,
+      "brier": 0.21686137669191938,
+      "selectedHitRate": 0.677061310782241
     },
     {
       "key": "AWAY_OVER_1_5",
       "matches": 2000,
-      "correct": 1319,
-      "baselineCorrect": 1259,
+      "correct": 1332,
+      "baselineCorrect": 1301,
       "voids": 0,
-      "selected": 264,
-      "wins": 162,
+      "selected": 177,
+      "wins": 104,
       "status": "TESTED",
-      "accuracy": 0.6595,
-      "baselineAccuracy": 0.6295,
-      "brier": 0.2198662689206869,
-      "selectedHitRate": 0.6136363636363636
+      "accuracy": 0.666,
+      "baselineAccuracy": 0.6505,
+      "brier": 0.21621752715066422,
+      "selectedHitRate": 0.5875706214689266
     },
     {
       "key": "HOME_CLEAN",
       "matches": 2000,
-      "correct": 1427,
-      "baselineCorrect": 1422,
+      "correct": 1334,
+      "baselineCorrect": 1336,
       "voids": 0,
-      "selected": 61,
-      "wins": 33,
+      "selected": 108,
+      "wins": 53,
       "status": "TESTED",
-      "accuracy": 0.7135,
-      "baselineAccuracy": 0.711,
-      "brier": 0.1968234457565702,
-      "selectedHitRate": 0.5409836065573771
+      "accuracy": 0.667,
+      "baselineAccuracy": 0.668,
+      "brier": 0.2168613766919194,
+      "selectedHitRate": 0.49074074074074076
     },
     {
       "key": "AWAY_CLEAN",
       "matches": 2000,
-      "correct": 1557,
-      "baselineCorrect": 1557,
+      "correct": 1535,
+      "baselineCorrect": 1538,
       "voids": 0,
-      "selected": 10,
-      "wins": 5,
+      "selected": 3,
+      "wins": 0,
       "status": "TESTED",
-      "accuracy": 0.7785,
-      "baselineAccuracy": 0.7785,
-      "brier": 0.16120273430246643,
-      "selectedHitRate": 0.5
+      "accuracy": 0.7675,
+      "baselineAccuracy": 0.769,
+      "brier": 0.171842076715421,
+      "selectedHitRate": 0
     },
     {
       "key": "HOME_WIN_NIL",
       "matches": 2000,
-      "correct": 1549,
-      "baselineCorrect": 1549,
+      "correct": 1473,
+      "baselineCorrect": 1475,
       "voids": 0,
-      "selected": 12,
-      "wins": 6,
+      "selected": 8,
+      "wins": 3,
       "status": "TESTED",
-      "accuracy": 0.7745,
-      "baselineAccuracy": 0.7745,
-      "brier": 0.1644195624590182,
-      "selectedHitRate": 0.5
+      "accuracy": 0.7365,
+      "baselineAccuracy": 0.7375,
+      "brier": 0.18825738553868232,
+      "selectedHitRate": 0.375
     },
     {
       "key": "AWAY_WIN_NIL",
       "matches": 2000,
-      "correct": 1684,
-      "baselineCorrect": 1684,
+      "correct": 1677,
+      "baselineCorrect": 1677,
       "voids": 0,
       "selected": 0,
       "wins": 0,
       "status": "TESTED",
-      "accuracy": 0.842,
-      "baselineAccuracy": 0.842,
-      "brier": 0.12336106849936389,
+      "accuracy": 0.8385,
+      "baselineAccuracy": 0.8385,
+      "brier": 0.1318376227521956,
       "selectedHitRate": null
     },
     {
       "key": "HCP_3WAY_HOME",
-      "matches": 1582,
-      "correct": 1045,
-      "baselineCorrect": 575,
+      "matches": 1574,
+      "correct": 1044,
+      "baselineCorrect": 544,
       "voids": 0,
-      "selected": 300,
-      "wins": 169,
+      "selected": 264,
+      "wins": 139,
       "status": "TESTED",
-      "accuracy": 0.6605562579013906,
-      "baselineAccuracy": 0.3634639696586599,
-      "brier": 0.218314356358352,
-      "selectedHitRate": 0.5633333333333334
+      "accuracy": 0.6632782719186785,
+      "baselineAccuracy": 0.34561626429479037,
+      "brier": 0.21084361008854424,
+      "selectedHitRate": 0.5265151515151515
     },
     {
       "key": "HCP_3WAY_DRAW",
-      "matches": 1582,
-      "correct": 1200,
-      "baselineCorrect": 382,
+      "matches": 1574,
+      "correct": 1217,
+      "baselineCorrect": 357,
       "voids": 0,
       "selected": 0,
       "wins": 0,
       "status": "TESTED",
-      "accuracy": 0.7585335018963337,
-      "baselineAccuracy": 0.24146649810366624,
-      "brier": 0.18298805231644946,
+      "accuracy": 0.7731893265565438,
+      "baselineAccuracy": 0.22681067344345615,
+      "brier": 0.17541703189165614,
       "selectedHitRate": null
     },
     {
       "key": "HCP_3WAY_AWAY",
-      "matches": 1582,
-      "correct": 1008,
-      "baselineCorrect": 625,
+      "matches": 1574,
+      "correct": 969,
+      "baselineCorrect": 673,
       "voids": 0,
-      "selected": 487,
-      "wins": 269,
+      "selected": 604,
+      "wins": 336,
       "status": "TESTED",
-      "accuracy": 0.6371681415929203,
-      "baselineAccuracy": 0.3950695322376738,
-      "brier": 0.22191617732662877,
-      "selectedHitRate": 0.5523613963039015
+      "accuracy": 0.6156289707750953,
+      "baselineAccuracy": 0.4275730622617535,
+      "brier": 0.22985280331253316,
+      "selectedHitRate": 0.5562913907284768
     }
   ],
   "limitations": [
@@ -359,33 +359,33 @@
   "calibration": [
     {
       "from": 0.3,
-      "predictions": 384,
-      "wins": 155,
-      "actualRate": 0.4036458333333333
+      "predictions": 403,
+      "wins": 151,
+      "actualRate": 0.3746898263027295
     },
     {
       "from": 0.4,
-      "predictions": 795,
-      "wins": 347,
-      "actualRate": 0.43647798742138366
+      "predictions": 869,
+      "wins": 392,
+      "actualRate": 0.45109321058688145
     },
     {
       "from": 0.5,
-      "predictions": 551,
-      "wins": 329,
-      "actualRate": 0.5970961887477314
+      "predictions": 519,
+      "wins": 296,
+      "actualRate": 0.5703275529865125
     },
     {
       "from": 0.6,
-      "predictions": 209,
-      "wins": 151,
-      "actualRate": 0.722488038277512
+      "predictions": 173,
+      "wins": 125,
+      "actualRate": 0.7225433526011561
     },
     {
       "from": 0.7,
-      "predictions": 57,
-      "wins": 45,
-      "actualRate": 0.7894736842105263
+      "predictions": 32,
+      "wins": 19,
+      "actualRate": 0.59375
     },
     {
       "from": 0.8,
@@ -396,60 +396,592 @@
   ],
   "leagues": [
     {
+      "id": "scoped-ncaa-women-s-soccer-usa-ncaa-w-1",
+      "name": "NCAA Women's Soccer",
+      "matches": 375,
+      "correct": 220,
+      "accuracy": 0.5866666666666667
+    },
+    {
+      "id": "usa-ncaa-m-1",
+      "name": "NCAA Men's Soccer",
+      "matches": 225,
+      "correct": 117,
+      "accuracy": 0.52
+    },
+    {
+      "id": "eng-fa-qual",
+      "name": "English FA Cup Qualifying",
+      "matches": 72,
+      "correct": 28,
+      "accuracy": 0.3888888888888889
+    },
+    {
+      "id": "caf-champions",
+      "name": "CAF Champions League",
+      "matches": 52,
+      "correct": 24,
+      "accuracy": 0.46153846153846156
+    },
+    {
+      "id": "eng-2",
+      "name": "Championship",
+      "matches": 48,
+      "correct": 24,
+      "accuracy": 0.5
+    },
+    {
+      "id": "usa-1",
+      "name": "MLS",
+      "matches": 42,
+      "correct": 16,
+      "accuracy": 0.38095238095238093
+    },
+    {
+      "id": "caf-confed",
+      "name": "CAF Confederation Cup",
+      "matches": 35,
+      "correct": 17,
+      "accuracy": 0.4857142857142857
+    },
+    {
+      "id": "arg-2",
+      "name": "Nacional B de Argentina",
+      "matches": 35,
+      "correct": 18,
+      "accuracy": 0.5142857142857142
+    },
+    {
       "id": "esp.1",
-      "name": "La Liga",
-      "matches": 288,
-      "correct": 148,
-      "accuracy": 0.5138888888888888
+      "name": "LALIGA",
+      "matches": 33,
+      "correct": 11,
+      "accuracy": 0.3333333333333333
     },
     {
-      "id": "ita.1",
-      "name": "Serie A",
-      "matches": 287,
-      "correct": 160,
-      "accuracy": 0.5574912891986062
+      "id": "bel-1",
+      "name": "Belgian Pro League",
+      "matches": 32,
+      "correct": 17,
+      "accuracy": 0.53125
     },
     {
-      "id": "eng.1",
-      "name": "Premier League",
-      "matches": 287,
-      "correct": 132,
-      "accuracy": 0.45993031358885017
+      "id": "eng-3",
+      "name": "League One",
+      "matches": 31,
+      "correct": 8,
+      "accuracy": 0.25806451612903225
     },
     {
-      "id": "por-1",
-      "name": "Primeira Liga",
-      "matches": 249,
-      "correct": 142,
-      "accuracy": 0.570281124497992
+      "id": "esp-2",
+      "name": "Spanish LALIGA 2",
+      "matches": 30,
+      "correct": 14,
+      "accuracy": 0.4666666666666667
     },
     {
-      "id": "ned-1",
-      "name": "Eredivisie",
-      "matches": 232,
-      "correct": 118,
-      "accuracy": 0.5086206896551724
+      "id": "eng-4",
+      "name": "League Two",
+      "matches": 30,
+      "correct": 15,
+      "accuracy": 0.5
     },
     {
-      "id": "tur-1",
-      "name": "Süper Lig",
-      "matches": 222,
-      "correct": 110,
-      "accuracy": 0.4954954954954955
+      "id": "por.1",
+      "name": "Portuguese Liga",
+      "matches": 28,
+      "correct": 14,
+      "accuracy": 0.5
     },
     {
       "id": "ger.1",
       "name": "Bundesliga",
-      "matches": 220,
-      "correct": 118,
-      "accuracy": 0.5363636363636364
+      "matches": 27,
+      "correct": 14,
+      "accuracy": 0.5185185185185185
+    },
+    {
+      "id": "ned.1",
+      "name": "Dutch Eredivisie",
+      "matches": 27,
+      "correct": 12,
+      "accuracy": 0.4444444444444444
+    },
+    {
+      "id": "tur.1",
+      "name": "Süper Lig",
+      "matches": 27,
+      "correct": 8,
+      "accuracy": 0.2962962962962963
+    },
+    {
+      "id": "arg-1",
+      "name": "Argentine Primera División",
+      "matches": 27,
+      "correct": 11,
+      "accuracy": 0.4074074074074074
+    },
+    {
+      "id": "ger-2",
+      "name": "German 2. Bundesliga",
+      "matches": 26,
+      "correct": 11,
+      "accuracy": 0.4230769230769231
+    },
+    {
+      "id": "ita-2",
+      "name": "Italian Serie B",
+      "matches": 23,
+      "correct": 7,
+      "accuracy": 0.30434782608695654
+    },
+    {
+      "id": "eng.1",
+      "name": "Premier League",
+      "matches": 22,
+      "correct": 6,
+      "accuracy": 0.2727272727272727
+    },
+    {
+      "id": "gre-1",
+      "name": "Greek Super League",
+      "matches": 22,
+      "correct": 8,
+      "accuracy": 0.36363636363636365
+    },
+    {
+      "id": "arg-3",
+      "name": "Primera División B de Argentina",
+      "matches": 22,
+      "correct": 7,
+      "accuracy": 0.3181818181818182
+    },
+    {
+      "id": "bra-2",
+      "name": "Brasileirao B",
+      "matches": 22,
+      "correct": 12,
+      "accuracy": 0.5454545454545454
+    },
+    {
+      "id": "usa-usl-1",
+      "name": "USL Championship",
+      "matches": 22,
+      "correct": 6,
+      "accuracy": 0.2727272727272727
     },
     {
       "id": "fra.1",
-      "name": "Ligue 1",
-      "matches": 215,
-      "correct": 102,
-      "accuracy": 0.4744186046511628
+      "name": "French Ligue 1",
+      "matches": 21,
+      "correct": 8,
+      "accuracy": 0.38095238095238093
+    },
+    {
+      "id": "ksa.1",
+      "name": "Saudi Pro League",
+      "matches": 21,
+      "correct": 10,
+      "accuracy": 0.47619047619047616
+    },
+    {
+      "id": "ita.1",
+      "name": "Italian Serie A",
+      "matches": 20,
+      "correct": 10,
+      "accuracy": 0.5
+    },
+    {
+      "id": "bra-1",
+      "name": "Brazilian Futebol",
+      "matches": 20,
+      "correct": 9,
+      "accuracy": 0.45
+    },
+    {
+      "id": "fra-2",
+      "name": "French Ligue 2",
+      "matches": 19,
+      "correct": 10,
+      "accuracy": 0.5263157894736842
+    },
+    {
+      "id": "jpn-1",
+      "name": "Japanese J League",
+      "matches": 19,
+      "correct": 10,
+      "accuracy": 0.5263157894736842
+    },
+    {
+      "id": "sco-challenge",
+      "name": "Scottish League Challenge Cup",
+      "matches": 19,
+      "correct": 9,
+      "accuracy": 0.47368421052631576
+    },
+    {
+      "id": "uefa-champions",
+      "name": "UEFA Champions League",
+      "matches": 18,
+      "correct": 13,
+      "accuracy": 0.7222222222222222
+    },
+    {
+      "id": "ned-w-knvb-cup",
+      "name": "Dutch KNVB Beker Vrouwen",
+      "matches": 17,
+      "correct": 8,
+      "accuracy": 0.47058823529411764
+    },
+    {
+      "id": "col-1",
+      "name": "Colombian Fútbol Profesional",
+      "matches": 17,
+      "correct": 5,
+      "accuracy": 0.29411764705882354
+    },
+    {
+      "id": "sco-2",
+      "name": "Scottish Championship",
+      "matches": 16,
+      "correct": 11,
+      "accuracy": 0.6875
+    },
+    {
+      "id": "ned-2",
+      "name": "Dutch Eerste Divisie",
+      "matches": 16,
+      "correct": 10,
+      "accuracy": 0.625
+    },
+    {
+      "id": "gua-1",
+      "name": "Liga Nacional de Guatemala",
+      "matches": 16,
+      "correct": 5,
+      "accuracy": 0.3125
+    },
+    {
+      "id": "usa-usl-l1",
+      "name": "USL League One",
+      "matches": 16,
+      "correct": 8,
+      "accuracy": 0.5
+    },
+    {
+      "id": "esp-copa-de-la-reina",
+      "name": "Spanish Copa de la Reina",
+      "matches": 16,
+      "correct": 3,
+      "accuracy": 0.1875
+    },
+    {
+      "id": "uru-1",
+      "name": "Liga AUF Uruguaya",
+      "matches": 15,
+      "correct": 6,
+      "accuracy": 0.4
+    },
+    {
+      "id": "per-1",
+      "name": "Peruvian Primera Profesional",
+      "matches": 15,
+      "correct": 8,
+      "accuracy": 0.5333333333333333
+    },
+    {
+      "id": "ecu-1",
+      "name": "Ecuadoran Primera A",
+      "matches": 15,
+      "correct": 8,
+      "accuracy": 0.5333333333333333
+    },
+    {
+      "id": "swe-1",
+      "name": "Swedish Allsvenskanliga",
+      "matches": 14,
+      "correct": 8,
+      "accuracy": 0.5714285714285714
+    },
+    {
+      "id": "rus-1",
+      "name": "Russian Premier League",
+      "matches": 14,
+      "correct": 8,
+      "accuracy": 0.5714285714285714
+    },
+    {
+      "id": "esp-w-1",
+      "name": "Liga F",
+      "matches": 14,
+      "correct": 9,
+      "accuracy": 0.6428571428571429
+    },
+    {
+      "id": "bol-1",
+      "name": "Bolivian Liga Profesional",
+      "matches": 14,
+      "correct": 11,
+      "accuracy": 0.7857142857142857
+    },
+    {
+      "id": "slv-1",
+      "name": "Primera División de El Salvador",
+      "matches": 14,
+      "correct": 6,
+      "accuracy": 0.42857142857142855
+    },
+    {
+      "id": "chi-1",
+      "name": "Chilean Primera División",
+      "matches": 14,
+      "correct": 7,
+      "accuracy": 0.5
+    },
+    {
+      "id": "ven-1",
+      "name": "Primera División de Venezuela",
+      "matches": 14,
+      "correct": 6,
+      "accuracy": 0.42857142857142855
+    },
+    {
+      "id": "usa-nwsl",
+      "name": "NWSL",
+      "matches": 14,
+      "correct": 6,
+      "accuracy": 0.42857142857142855
+    },
+    {
+      "id": "nor-1",
+      "name": "Norwegian Tippeligaen",
+      "matches": 13,
+      "correct": 8,
+      "accuracy": 0.6153846153846154
+    },
+    {
+      "id": "eng-5",
+      "name": "English Conference",
+      "matches": 13,
+      "correct": 7,
+      "accuracy": 0.5384615384615384
+    },
+    {
+      "id": "mex-1",
+      "name": "Mexican Liga MX",
+      "matches": 13,
+      "correct": 7,
+      "accuracy": 0.5384615384615384
+    },
+    {
+      "id": "mex-2",
+      "name": "Mexican Ascenso MX",
+      "matches": 13,
+      "correct": 8,
+      "accuracy": 0.6153846153846154
+    },
+    {
+      "id": "par-1",
+      "name": "Primera División de Paraguay",
+      "matches": 12,
+      "correct": 9,
+      "accuracy": 0.75
+    },
+    {
+      "id": "scoped-fa-women-s-super-league-eng-w-1",
+      "name": "FA Women's Super League",
+      "matches": 12,
+      "correct": 5,
+      "accuracy": 0.4166666666666667
+    },
+    {
+      "id": "rsa-1",
+      "name": "South African Premier",
+      "matches": 11,
+      "correct": 5,
+      "accuracy": 0.45454545454545453
+    },
+    {
+      "id": "fra-w-1",
+      "name": "Division 1 Féminine",
+      "matches": 11,
+      "correct": 8,
+      "accuracy": 0.7272727272727273
+    },
+    {
+      "id": "den-1",
+      "name": "Danish SAS-Ligaen",
+      "matches": 11,
+      "correct": 5,
+      "accuracy": 0.45454545454545453
+    },
+    {
+      "id": "hon-1",
+      "name": "Primera División de Honduras",
+      "matches": 10,
+      "correct": 6,
+      "accuracy": 0.6
+    },
+    {
+      "id": "ned-w-1",
+      "name": "Dutch Vrouwen Eredivisie",
+      "matches": 10,
+      "correct": 6,
+      "accuracy": 0.6
+    },
+    {
+      "id": "sco-tennents-qual",
+      "name": "Scottish Cup Qualifying",
+      "matches": 10,
+      "correct": 5,
+      "accuracy": 0.5
+    },
+    {
+      "id": "crc-1",
+      "name": "Primera División de Costa Rica",
+      "matches": 9,
+      "correct": 3,
+      "accuracy": 0.3333333333333333
+    },
+    {
+      "id": "club-friendly",
+      "name": "Club Friendly",
+      "matches": 8,
+      "correct": 5,
+      "accuracy": 0.625
+    },
+    {
+      "id": "bol-copa",
+      "name": "Copa Bolivia",
+      "matches": 8,
+      "correct": 4,
+      "accuracy": 0.5
+    },
+    {
+      "id": "sco-1",
+      "name": "Scottish Premiership",
+      "matches": 6,
+      "correct": 6,
+      "accuracy": 1
+    },
+    {
+      "id": "usa-w-usl-1",
+      "name": "USL Super League",
+      "matches": 6,
+      "correct": 4,
+      "accuracy": 0.6666666666666666
+    },
+    {
+      "id": "can-w-nsl",
+      "name": "Northern Super League",
+      "matches": 6,
+      "correct": 1,
+      "accuracy": 0.16666666666666666
+    },
+    {
+      "id": "chn-1",
+      "name": "Chinese Super League",
+      "matches": 6,
+      "correct": 4,
+      "accuracy": 0.6666666666666666
+    },
+    {
+      "id": "eng-league-cup",
+      "name": "English Carabao Cup",
+      "matches": 6,
+      "correct": 2,
+      "accuracy": 0.3333333333333333
+    },
+    {
+      "id": "aut-1",
+      "name": "Austrian Bundesliga",
+      "matches": 6,
+      "correct": 3,
+      "accuracy": 0.5
+    },
+    {
+      "id": "champions",
+      "name": "AFC Champions League",
+      "matches": 6,
+      "correct": 3,
+      "accuracy": 0.5
+    },
+    {
+      "id": "col-copa",
+      "name": "Copa Águila",
+      "matches": 5,
+      "correct": 4,
+      "accuracy": 0.8
+    },
+    {
+      "id": "conmebol-libertadores",
+      "name": "CONMEBOL Libertadores",
+      "matches": 4,
+      "correct": 2,
+      "accuracy": 0.5
+    },
+    {
+      "id": "conmebol-sudamericana",
+      "name": "CONMEBOL Sudamericana",
+      "matches": 4,
+      "correct": 1,
+      "accuracy": 0.25
+    },
+    {
+      "id": "concacaf-central-american-cup",
+      "name": "Central American Cup",
+      "matches": 4,
+      "correct": 1,
+      "accuracy": 0.25
+    },
+    {
+      "id": "sco-cis",
+      "name": "Scottish Communities League Cup",
+      "matches": 4,
+      "correct": 0,
+      "accuracy": 0
+    },
+    {
+      "id": "por-taca-portugal",
+      "name": "Taca de Portugal",
+      "matches": 2,
+      "correct": 2,
+      "accuracy": 1
+    },
+    {
+      "id": "concacaf-leagues-cup",
+      "name": "Leagues Cup",
+      "matches": 2,
+      "correct": 1,
+      "accuracy": 0.5
+    },
+    {
+      "id": "eng-trophy",
+      "name": "Johnstone's Paint Trophy",
+      "matches": 2,
+      "correct": 2,
+      "accuracy": 1
+    },
+    {
+      "id": "usa-usl-l1-cup",
+      "name": "USL Cup",
+      "matches": 2,
+      "correct": 1,
+      "accuracy": 0.5
+    },
+    {
+      "id": "scoped-women-s-international-friendly-fifa-friendly-w",
+      "name": "Women's International Friendly",
+      "matches": 1,
+      "correct": 1,
+      "accuracy": 1
+    },
+    {
+      "id": "arg-copa",
+      "name": "Copa Argentina",
+      "matches": 1,
+      "correct": 0,
+      "accuracy": 0
     }
   ],
   "builderAudit": {
