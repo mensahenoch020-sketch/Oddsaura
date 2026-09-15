@@ -118,8 +118,8 @@ async function findEvent(fetcher: FetchLike, input: SportyBetSelectionInput) {
   cache.set(key, { until: Date.now() + 300_000, event }); return event;
 }
 
-type Rule = { market: string; outcome: string; line?: number | null };
-function rule(input: SportyBetSelectionInput): Rule | null {
+type Rule = { market: string; marketLabel?: string; outcome: string; line?: number | null };
+function rule(input: SportyBetSelectionInput): Rule {
   const k = input.marketKey;
   const fixed: Record<string, [string, string]> = {
     MATCH_HOME: ["3743", "1"], MATCH_DRAW: ["3743", "X"], MATCH_AWAY: ["3743", "2"],
@@ -140,14 +140,18 @@ function rule(input: SportyBetSelectionInput): Rule | null {
   if (k === "AWAY_AND_O15") return { market: "1096755", outcome: "2 - Over", line: 1.5 };
   if (/^HT_OVER_/.test(k)) return { market: "4958", outcome: "Over", line: input.line };
   if (/^CS_/.test(k)) return { market: "28000869", outcome: input.selection };
-  return null;
+  return { market: "", marketLabel: input.sourceMarketName || input.marketName, outcome: input.sourceOutcomeName || input.selection, line: input.line };
 }
 
 function resolve(event: RecordValue, input: SportyBetSelectionInput): SportyBetResolvedSelection {
   const wanted = rule(input);
-  if (!wanted) throw new BetPawaIntegrationError(`The ${input.marketName} market is not supported for automatic betPawa codes yet.`, 422, { marketKey: input.marketKey });
   const markets = Array.isArray(event.markets) ? event.markets.filter(isRecord) : [];
-  const market = markets.find((item) => isRecord(item.marketType) && str(item.marketType.id) === wanted.market);
+  const market = markets.find((item) => {
+    if (!isRecord(item.marketType)) return false;
+    if (wanted.market) return str(item.marketType.id) === wanted.market;
+    const label = str(item.marketType.displayName || item.marketType.name);
+    return norm(label) === norm(wanted.marketLabel || "");
+  });
   if (!market) throw new BetPawaIntegrationError(`The ${input.marketName} market is not currently available on betPawa for ${input.homeTeam} vs ${input.awayTeam}.`, 422);
   const rows = Array.isArray(market.row) ? market.row.filter(isRecord) : [];
   const row = rows.find((item) => {
@@ -159,7 +163,8 @@ function resolve(event: RecordValue, input: SportyBetSelectionInput): SportyBetR
   const price = prices.find((item) => norm(str(item.name)) === norm(wanted.outcome));
   if (!price) throw new BetPawaIntegrationError(`The ${input.selection} price is not currently available on betPawa for ${input.homeTeam} vs ${input.awayTeam}.`, 422);
   const pair = teams(event), odds = Number(price.odds), info = isRecord(market.marketType) ? market.marketType : {};
-  return { fixtureId: input.fixtureId, eventId: str(event.id), marketId: wanted.market, outcomeId: str(price.id), specifier: wanted.line == null ? null : `total=${wanted.line}`,
+  const marketId = str(info.id) || wanted.market;
+  return { fixtureId: input.fixtureId, eventId: str(event.id), marketId, outcomeId: str(price.id), specifier: wanted.line == null ? null : `total=${wanted.line}`,
     odds: Number.isFinite(odds) ? odds : null, homeTeam: pair.home || input.homeTeam, awayTeam: pair.away || input.awayTeam,
     market: str(info.displayName || info.name) || input.marketName, outcome: str(price.name) || input.selection };
 }

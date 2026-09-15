@@ -21,6 +21,13 @@ export type ExpansionCandidate = {
   homeHistoryMatches?: number;
   awayHistoryMatches?: number;
   recentHistoryMatches?: number;
+  engineVersion?: string;
+  calibrated?: boolean;
+  calibrationSamples?: number;
+  calibrationGain?: number;
+  marketModelWeight?: number;
+  marketWeightLearned?: boolean;
+  marketWeightSamples?: number;
 };
 
 const family = (key: string) => {
@@ -64,7 +71,7 @@ export async function expandProviderMarkets(provider: QuoteProvider, candidates:
     const marketProbability = (1 / price) / totalImplied * (quote.marketKey.startsWith("DC_") ? 2 : 1);
     if (!(marketProbability > 0 && marketProbability < 1)) return [];
     const quality = candidate.dataQuality === "HIGH" ? 1 : .5;
-    const modelWeight = .2 + quality * .1;
+    const modelWeight = Math.max(0, Math.min(.4, candidate.marketModelWeight ?? (.05 + quality * .05)));
     const probability = candidate.probability * modelWeight + marketProbability * (1 - modelWeight);
     return [{
       ...candidate,
@@ -89,7 +96,7 @@ export async function expandProviderMarkets(provider: QuoteProvider, candidates:
       expectedValue: probability * price - 1,
       tier: "BALANCED" as const,
       priceStatus: "QUOTED" as const,
-      reasoning: `${candidate.historyMatches} historical matches · fresh ${provider} market price`,
+      reasoning: `${candidate.engineVersion ?? "structural model"} · ${candidate.historyMatches} historical matches · fresh ${provider} market price · model contribution ${Math.round(modelWeight * 100)}%`,
     }];
   });
   return { generatedAt: collected.completedAt, provider, fixturesAvailable: byFixture.size, fixturesChecked: groups.length, picks, coverage: collected.providers[0] };

@@ -9,7 +9,9 @@ test("Betway European handicap retains home-relative line and away selection", (
   const result = decodeLoadedPayload("betway", "BW6F135922", { selections: [{ sportEvent: { homeTeam: "TSG Hoffenheim", awayTeam: "Borussia Dortmund", eventId: 99 }, market: { displayName: "Handicap (0:1)" }, outcome: { displayName: "Borussia Dortmund" } }] });
   assert.equal(result.selections[0].marketKey, "HCP_3WAY_AWAY");
   assert.equal(result.selections[0].line, -1);
-  assert.throws(() => decodeLoadedPayload("betway", "TEST99", { selections: [{ sportEvent: { homeTeam: "A", awayTeam: "B" }, market: { displayName: "Asian Handicap (0:1)" }, outcome: { displayName: "B" } }] }));
+  const asian = decodeLoadedPayload("betway", "TEST99", { selections: [{ sportEvent: { homeTeam: "A", awayTeam: "B" }, market: { displayName: "Asian Handicap (0:1)" }, outcome: { displayName: "B" } }] });
+  assert.equal(asian.selections[0]?.marketKey, "RAW_EXACT");
+  assert.equal(asian.selections[0]?.sourceMarketName, "Asian Handicap (0:1)");
 });
 
 test("verification does not confuse missing identity, wrong identity and exact identity", async () => {
@@ -40,4 +42,31 @@ test("conversion failures identify the exact failed stage", async () => {
     () => convertBookmakerCode("sportybet", "betpawa", "TEST12", fetcher, true),
     (error: unknown) => error instanceof BookmakerIntegrationError && (error.details as { stage?: string })?.stage === "IMPORT",
   );
+});
+test("converts a Betway European handicap through SportyBet's live market catalogue", async () => {
+  const kickoffSeconds = 1_900_000_000;
+  const sportyEvent = {
+    eventId: "sr:match:hcp", homeTeamName: "Ajax Amsterdam", awayTeamName: "Willem II Tilburg", estimateStartTime: kickoffSeconds * 1000,
+    markets: [{ id: "99", desc: "European Handicap", specifier: "hcp=-4", status: 0, outcomes: [
+      { id: "1", desc: "Home", odds: "5.5", isActive: 1 }, { id: "2", desc: "Draw", odds: "4.2", isActive: 1 }, { id: "3", desc: "Away", odds: "1.6", isActive: 1 },
+    ] }],
+  };
+  const fetcher = (async (input: string | URL | Request) => {
+    const url = String(input);
+    if (url.includes("FindBookABet")) return Response.json({ selections: [{
+      sportEvent: { eventId: 71924998, homeTeam: "Ajax Amsterdam", awayTeam: "Willem II Tilburg", expectedStartEpoch: kickoffSeconds },
+      market: { displayName: "Handicap (0:4)" }, outcome: { displayName: "Willem II Tilburg" },
+    }] });
+    if (url.includes("firstSearch")) return Response.json({ bizCode: 10000, data: { preMatch: [sportyEvent] } });
+    if (url.includes("factsCenter/event?")) return Response.json({ bizCode: 10000, data: sportyEvent });
+    if (url.includes("/orders/share?")) return Response.json({ bizCode: 10000, data: { shareCode: "HCP123" } });
+    if (url.includes("/orders/share/HCP123")) return Response.json({ bizCode: 10000, data: { ticket: { selections: [{ eventId: sportyEvent.eventId, marketId: "99", outcomeId: "3", specifier: "hcp=-4" }] } } });
+    throw new Error(`Unexpected request: ${url}`);
+  }) as typeof fetch;
+  const result = await convertBookmakerCode("betway", "sportybet", "BW726419C0", fetcher, true);
+  assert.equal(result.code, "HCP123");
+  assert.equal(result.partial, false);
+  assert.equal(result.resolved[0]?.marketId, "99");
+  assert.equal(result.resolved[0]?.outcomeId, "3");
+  assert.equal(result.verificationStatus, "VERIFIED");
 });

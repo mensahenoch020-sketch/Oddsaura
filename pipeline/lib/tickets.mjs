@@ -50,7 +50,7 @@ export function buildTicket(candidates, category, fixtures) {
         && odds >= band.minOdds && odds <= band.maxOdds
         && (item.marketProbability ?? 0) >= band.minMarketProbability
         && (item.modelMarketGap ?? 1) <= .1
-        && (item.expectedValue ?? -1) >= -.075;
+        && (item.expectedValue ?? -1) >= 0;
     })
     .sort((a, b) => {
       const leagueDelta = priorityLeague(fixtureMap.get(a.fixtureId)?.league) - priorityLeague(fixtureMap.get(b.fixtureId)?.league);
@@ -94,6 +94,11 @@ export function buildTicket(candidates, category, fixtures) {
       providerMarketId: item.providerMarketId,
       providerSelectionId: item.providerSelectionId,
       providerSpecifier: item.providerSpecifier,
+      engineVersion: item.engineVersion,
+      calibrated: item.calibrated,
+      calibrationSamples: item.calibrationSamples,
+      marketModelWeight: item.marketModelWeight,
+      reasoning: item.reasoning,
     });
     used.add(item.fixtureId);
     familyCounts.set(family, (familyCounts.get(family) ?? 0) + 1);
@@ -113,7 +118,7 @@ export function buildTicket(candidates, category, fixtures) {
     confidence,
     estimatedWinChance,
     breakEvenChance: 1 / totalOdds,
-    strategyVersion: "history-market-v2",
+    strategyVersion: "ensemble-calibrated-v3",
     paper: true,
     publishedAt: new Date().toISOString(),
     bookingCodes: [],

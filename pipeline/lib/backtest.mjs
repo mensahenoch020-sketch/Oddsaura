@@ -1,5 +1,6 @@
-import { buildModelContext, scoreEvent } from "./model.mjs";
+import { attachOdds, buildModelContext, scoreEvent } from "./model.mjs";
 import { settleSelection } from "./settlement.mjs";
+import { buildEngineParameters } from "./calibration.mjs";
 
 const testedKeys = ["BTTS_YES", "OVER_1_5", "OVER_2_5", "UNDER_3_5", "DC_1X", "DC_X2", "DC_12", "DNB_HOME", "DNB_AWAY", "HOME_OVER_0_5", "HOME_OVER_1_5", "AWAY_OVER_0_5", "AWAY_OVER_1_5", "HOME_CLEAN", "AWAY_CLEAN", "HOME_WIN_NIL", "AWAY_WIN_NIL", "HCP_3WAY_HOME", "HCP_3WAY_DRAW", "HCP_3WAY_AWAY"];
 const outcomeFor = (selection, match) => {
@@ -19,6 +20,8 @@ export function backtestHistory(events, { sampleSize = 800, minimumTraining = 25
   const leagues = new Map(); const calibration = Array.from({ length: 10 }, (_, index) => ({ from: index / 10, predictions: 0, wins: 0 }));
   const priceModels = [0, .25, 1].map(modelWeight => ({ modelWeight, matches: 0, brier: 0, logLoss: 0 }));
   const favoriteBands = [.55, .6, .65, .7, .75].map(threshold => ({ threshold, picks: 0, wins: 0, returns: 0 }));
+  const calibrationRows = [];
+  const priceRows = [];
   for (const match of candidates) {
     while (trainingCursor < finished.length && Date.parse(finished[trainingCursor].kickoff) + 120 * 60_000 < Date.parse(match.kickoff)) {
       const past = finished[trainingCursor++];
@@ -38,11 +41,19 @@ export function backtestHistory(events, { sampleSize = 800, minimumTraining = 25
       if (result === "VOID") { row.voids++; continue; }
       if (result !== "WON" && result !== "LOST") continue;
       const won = result === "WON";
+      calibrationRows.push({ key, leagueId: match.league?.id ?? match.league?.name ?? "football", kickoff: match.kickoff, probability: pick.uncalibratedProbability ?? pick.probability, outcome: Number(won) });
       row.matches++;
       row.correct += Number((pick.probability >= .5) === won);
       row.baselineCorrect += Number((prior.settled ? prior.wins / prior.settled >= .5 : true) === won);
       row.brierSum += (pick.probability - Number(won)) ** 2;
       if (pick.probability >= .5) { row.selected++; row.wins += Number(won); }
+    }
+    const historicallyPriced = attachOdds(scored, match.odds ?? []);
+    for (const pick of historicallyPriced) {
+      if (pick.quotedOdds == null || pick.marketProbability == null || pick.modelProbability == null || !testedKeys.includes(pick.key)) continue;
+      const result = outcomeFor(pick, match);
+      if (result !== "WON" && result !== "LOST") continue;
+      priceRows.push({ key: pick.key, leagueId: match.league?.id ?? match.league?.name ?? "football", kickoff: match.kickoff, modelProbability: pick.modelProbability, marketProbability: pick.marketProbability, outcome: Number(result === "WON") });
     }
     const resultMarkets = ["MATCH_HOME", "MATCH_DRAW", "MATCH_AWAY"].map((key) => scored.find((item) => item.key === key));
     if (resultMarkets.some((item) => !item)) continue;
@@ -95,5 +106,6 @@ export function backtestHistory(events, { sampleSize = 800, minimumTraining = 25
     limitations: ["Binary accuracy includes predicting that a selection will lose. It is not ticket win rate.", "Voids are excluded; draw-no-bet results are conditional on a non-draw.", "Adaptive European-handicap rows test the model-selected +1 or -1 line; historic handicap prices are not yet available for ROI.", "Historical bookmaker quotes and archived prediction-time candidate pools are needed to backtest the actual target builder and ROI.", "Corners, cards, shots, early-payout and first-half markets are not evaluated by this full-time-score report."],
     calibration: calibration.filter((bucket) => bucket.predictions).map((bucket) => ({ ...bucket, actualRate: bucket.wins / bucket.predictions })),
     leagues: [...leagues.entries()].map(([id, value]) => ({ id, ...value, accuracy: value.correct / value.matches })).sort((a, b) => b.matches - a.matches),
+    engineParameters: buildEngineParameters(calibrationRows, priceRows),
   };
 }

@@ -13,7 +13,7 @@ const passwordIterations = 100_000;
 const encoder = new TextEncoder();
 const protectedPages = ["/dashboard", "/assistant", "/daily", "/matches", "/builder", "/converter", "/results", "/account", "/admin"];
 const protectedApis = ["/api/providers", "/api/sportybet/code", "/api/account", "/api/codes", "/api/slips", "/api/ticket-controls", "/api/admin"];
-const edgeOrigin = (process.env.ODDSAURA_EDGE_ORIGIN || "https://oddsaura.chipsofrio.chatgpt.site").replace(/\/$/, "");
+const edgeOrigin = process.env.ODDSAURA_EDGE_ORIGIN?.replace(/\/$/, "") || null;
 
 const pool = process.env.DATABASE_URL ? new Pool({ connectionString: process.env.DATABASE_URL }) : null;
 
@@ -207,6 +207,7 @@ function proxy(req, res, user) {
 }
 
 async function proxyEdge(req, res) {
+  if (!edgeOrigin) return json(res, 503, { error: "The configured edge fallback is unavailable." });
   const target = new URL(req.url || "/", edgeOrigin);
   const headers = new Headers();
   for (const [name, value] of Object.entries(req.headers)) {
@@ -236,8 +237,19 @@ vinext.on("exit", (code) => { if (code) process.exit(code); });
 
 createServer(async (req, res) => {
   try {
-    if (!pool) return await proxyEdge(req, res);
     const url = new URL(req.url || "/", `https://${req.headers.host || "oddsaura.local"}`);
+    if (!pool) {
+      if (edgeOrigin) return await proxyEdge(req, res);
+      const pageProtected = protectedPages.some((path) => url.pathname === path || url.pathname.startsWith(`${path}/`));
+      const apiProtected = url.pathname.startsWith("/api/auth/") || protectedApis.some((path) => url.pathname === path || url.pathname.startsWith(`${path}/`));
+      if (apiProtected) return json(res, 503, { error: "Account storage is not configured yet." });
+      if (pageProtected) {
+        const next = encodeURIComponent(`${url.pathname}${url.search}`);
+        res.writeHead(302, { location: `/login?next=${next}`, "cache-control": "no-store" });
+        return res.end();
+      }
+      return proxy(req, res, null);
+    }
     if (url.pathname.startsWith("/api/auth/")) return await authApi(req, res, url);
     const pageProtected = protectedPages.some((path) => url.pathname === path || url.pathname.startsWith(`${path}/`));
     const apiProtected = protectedApis.some((path) => url.pathname === path || url.pathname.startsWith(`${path}/`));

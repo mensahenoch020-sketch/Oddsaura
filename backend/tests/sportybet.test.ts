@@ -102,3 +102,21 @@ test("creates a partial code and reports legs SportyBet cannot list", async () =
   assert.equal(result.unmatched.length, 1);
   assert.equal(result.unmatched[0]?.fixtureId, "missing");
 });
+
+test("matches a non-whitelisted market from SportyBet's live event catalogue", async () => {
+  const rawEvent = {
+    eventId: "sr:match:raw", homeTeamName: "Liverpool", awayTeamName: "Everton", estimateStartTime: Date.parse("2030-08-24T15:00:00Z"),
+    markets: [{ id: "99001", desc: "First Throw-In", status: 0, outcomes: [{ id: "990011", desc: "Liverpool", odds: "1.70", isActive: 1 }] }],
+  };
+  const fakeFetch = async (input: string | URL | Request) => {
+    const url = String(input);
+    if (url.includes("firstSearch")) return Response.json({ bizCode: 10000, data: { preMatch: [rawEvent] } });
+    if (url.includes("factsCenter/event?")) return Response.json({ bizCode: 10000, data: rawEvent });
+    if (url.includes("/orders/share?")) return Response.json({ bizCode: 10000, data: { shareCode: "RAW123" } });
+    return Response.json({ bizCode: 10000, data: { ticket: { selections: [{ eventId: rawEvent.eventId, marketId: "99001", outcomeId: "990011", specifier: "" }] } } });
+  };
+  const result = await createSportyBetCode([{ fixtureId: "raw", homeTeam: "Liverpool", awayTeam: "Everton", kickoff: "2030-08-24T15:00:00Z",
+    marketKey: "RAW_EXACT", marketName: "First Throw-In", selection: "Liverpool", sourceMarketName: "First Throw-In", sourceOutcomeName: "Liverpool" }], fakeFetch as typeof fetch);
+  assert.equal(result.resolved[0]?.marketId, "99001");
+  assert.equal(result.resolved[0]?.outcomeId, "990011");
+});

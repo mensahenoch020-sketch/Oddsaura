@@ -70,9 +70,9 @@ function inferMarket(marketName: string, outcomeName: string, home: string, away
   if (/1up|1 up/.test(market)) return homeOutcome ? { marketKey: "ONE_UP_HOME", marketName: "1UP", selection: home } : awayOutcome ? { marketKey: "ONE_UP_AWAY", marketName: "1UP", selection: away } : null;
   if (/double chance|\bdc\b/.test(market) || /^(1x|x2|12)$/.test(outcome.replace(/\s/g, ""))) {
     const compact = outcome.replace(/\s/g, "").toUpperCase();
-    if (compact === "1X" || /home.*draw|draw.*home/.test(outcome)) return { marketKey: "DC_1X", marketName: "Double chance", selection: `${home} or draw` };
-    if (compact === "X2" || /away.*draw|draw.*away/.test(outcome)) return { marketKey: "DC_X2", marketName: "Double chance", selection: `Draw or ${away}` };
-    if (compact === "12" || /home.*away|away.*home/.test(outcome)) return { marketKey: "DC_12", marketName: "Double chance", selection: `${home} or ${away}` };
+    if (compact === "1X" || /home.*draw|draw.*home/.test(outcome) || (homeOutcome && /draw/.test(outcome))) return { marketKey: "DC_1X", marketName: "Double chance", selection: `${home} or draw` };
+    if (compact === "X2" || /away.*draw|draw.*away/.test(outcome) || (awayOutcome && /draw/.test(outcome))) return { marketKey: "DC_X2", marketName: "Double chance", selection: `Draw or ${away}` };
+    if (compact === "12" || /home.*away|away.*home/.test(outcome) || (homeOutcome && awayOutcome)) return { marketKey: "DC_12", marketName: "Double chance", selection: `${home} or ${away}` };
   }
   if (/draw no bet|\bdnb\b/.test(combined)) return homeOutcome ? { marketKey: "DNB_HOME", marketName: "Draw no bet", selection: home } : awayOutcome ? { marketKey: "DNB_AWAY", marketName: "Draw no bet", selection: away } : null;
   if (/both teams.*score|gg.?ng|\bbtts\b/.test(market)) {
@@ -147,13 +147,24 @@ function toInput(row: Json, provider: DecodableBookmaker, index: number): Sporty
   const marketName = first(marketRows, ["marketName", "market", "marketLabel", "marketTypeName", "groupName", "M_NAME", "M", "displayName", "name"]);
   const outcomeName = first(outcomeRows, ["outcomeName", "selectionName", "selection", "outcome", "sign", "signName", "pickName", "SGN", "S", "displayName", "name"]);
   const specifier = first(nested, ["specifier", "specialValue", "handicap", "hnd", "H"]);
-  const inferred = inferMarket(marketName, outcomeName, homeTeam, awayTeam, specifier) || (provider === "sportybet" ? inferSportyIds(row, homeTeam, awayTeam) : null);
+  const inferred = inferMarket(marketName, outcomeName, homeTeam, awayTeam, specifier)
+    || (provider === "sportybet" ? inferSportyIds(row, homeTeam, awayTeam) : null)
+    || (marketName && outcomeName ? { marketKey: "RAW_EXACT", marketName, selection: outcomeName, line: lineFrom(specifier) } : null);
   if (!homeTeam || !awayTeam || !inferred) return null;
   const rawKickoff = first(nested, ["startTime", "startDate", "startdate", "STARTDATEUTC", "STARTDATE", "kickoff", "scheduled", "eventDate"]);
   const numericTime = Number(rawKickoff);
   const timestamp = Number.isFinite(numericTime) && numericTime > 0 ? (numericTime > 10_000_000_000 ? numericTime : numericTime * 1000) : Date.parse(rawKickoff);
   const eventId = first(nested, ["eventId", "fixtureId", "matchId", "E_ID", "id", "E"]);
-  const input: SportyBetSelectionInput = { fixtureId: `${provider}-${eventId || index + 1}`, homeTeam, awayTeam, kickoff: Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : new Date().toISOString(), ...inferred };
+  const input: SportyBetSelectionInput = {
+    fixtureId: `${provider}-${eventId || index + 1}`,
+    homeTeam,
+    awayTeam,
+    kickoff: Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : new Date().toISOString(),
+    ...inferred,
+    sourceMarketName: marketName,
+    sourceOutcomeName: outcomeName,
+    sourceSpecifier: specifier || null,
+  };
   if (provider === "sportybet") {
     input.providerEventId = eventId || null;
     input.providerMarketId = first(nested, ["marketId", "marketID", "MID", "sid"]) || null;

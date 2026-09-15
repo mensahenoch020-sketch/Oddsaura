@@ -12,7 +12,7 @@ import "./assistant.css";
 import "../compact-theme.css";
 
 type PendingIntent = Exclude<AssistantIntent, { kind: "unknown" | "daily" | "best" | "results" }>;
-type SelectionSummary = { id: string; match: string; market: string; selection: string; odds: number | null; priceStatus?: "QUOTED" | "MODEL_ESTIMATE" };
+type SelectionSummary = { id: string; match: string; market: string; selection: string; odds: number | null; priceStatus?: "QUOTED" | "MODEL_ESTIMATE"; evidence?: string };
 type CodeSummary = {
   provider: ProviderId;
   requestedOdds?: number;
@@ -50,7 +50,7 @@ const pickPrice = (pick: PredictedPick) => pick.quotedOdds ?? pick.fairOdds ?? n
 function summarizeSelection(pick: PredictedPick | WatchlistPick | TicketSelection): SelectionSummary {
   const odds = "quotedOdds" in pick ? pick.quotedOdds ?? pick.fairOdds : pick.odds;
   const priceStatus = "priceStatus" in pick ? pick.priceStatus : "quotedOdds" in pick && pick.quotedOdds == null ? "MODEL_ESTIMATE" : "QUOTED";
-  return { id: pick.id, match: `${pick.homeTeam.name} vs ${pick.awayTeam.name}`, market: pick.market.name, selection: pick.selection, odds, priceStatus };
+  return { id: pick.id, match: `${pick.homeTeam.name} vs ${pick.awayTeam.name}`, market: pick.market.name, selection: pick.selection, odds, priceStatus, evidence: pick.reasoning };
 }
 
 function bookmakerSelections(picks: PredictedPick[], provider: ProviderId) {
@@ -408,7 +408,7 @@ function OutputView({ output }: { output: AssistantOutput }) {
   const [copied, setCopied] = useState("");
   async function copy(value: string) { await navigator.clipboard.writeText(value); setCopied(value); window.setTimeout(() => setCopied(""), 1600); }
 
-  if (output.kind === "best") return <details className="assistant-expandable"><summary><span>{output.picks.length} best selections</span><b>Show</b></summary><div className="assistant-picks">{output.picks.map((pick, index) => <div key={pick.id}><span>#{index + 1}</span><div><b>{pick.match}</b><small>{pick.market}: {pick.selection}{pick.priceStatus === "MODEL_ESTIMATE" ? " · model estimate" : ""}</small></div><strong>{pick.odds?.toFixed(2) ?? "—"}</strong></div>)}</div></details>;
+  if (output.kind === "best") return <details className="assistant-expandable"><summary><span>{output.picks.length} best selections</span><b>Show</b></summary><div className="assistant-picks">{output.picks.map((pick, index) => <div key={pick.id}><span>#{index + 1}</span><div><b>{pick.match}</b><small>{pick.market}: {pick.selection}{pick.priceStatus === "MODEL_ESTIMATE" ? " · model estimate" : ""}</small>{pick.evidence ? <em>{pick.evidence}</em> : null}</div><strong>{pick.odds?.toFixed(2) ?? "—"}</strong></div>)}</div></details>;
 
   if (output.kind === "daily") return <div className="assistant-daily-output">
     {output.tickets.map((ticket) => <section className="assistant-ticket-card" key={ticket.id}>
@@ -437,5 +437,5 @@ function OutputView({ output }: { output: AssistantOutput }) {
 }
 
 function SelectionRow({ pick }: { pick: SelectionSummary }) {
-  return <div className="assistant-selection"><div><b>{pick.match}</b><small>{pick.market}: {pick.selection}{pick.priceStatus === "MODEL_ESTIMATE" ? " · model estimate" : ""}</small></div><strong>{pick.odds?.toFixed(2) ?? "—"}</strong></div>;
+  return <div className="assistant-selection"><div><b>{pick.match}</b><small>{pick.market}: {pick.selection}{pick.priceStatus === "MODEL_ESTIMATE" ? " · model estimate" : ""}</small>{pick.evidence ? <em>{pick.evidence}</em> : null}</div><strong>{pick.odds?.toFixed(2) ?? "—"}</strong></div>;
 }

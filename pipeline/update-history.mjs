@@ -6,18 +6,22 @@ import { collectEspnGlobal, collectEspnLeagueCatalog } from "./lib/espn.mjs";
 import { backtestHistory } from "./lib/backtest.mjs";
 import { canonicalEventIdentity, normalizeEventIdentity } from "./lib/identity.mjs";
 import { summarizeHistory } from "./lib/history-coverage.mjs";
+import { assertSourceAuthorized } from "./lib/source-policy.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const strategyVersion = "history-market-v2";
+const strategyVersion = "ensemble-calibrated-v3";
 const historyPath = resolve(root, "data/history/football-data.json");
 const globalHistoryPath = resolve(root, "data/history/global-football.json");
 const leagueCatalogPath = resolve(root, "data/history/espn-leagues.json");
 const performancePath = resolve(root, "data/public/model-performance.json");
+const parametersPath = resolve(root, "data/public/model-parameters.json");
 const coveragePath = resolve(root, "data/public/history-coverage.json");
+const sourcePolicyPath = resolve(root, "data/source-authorizations.json");
 const previous = await readFile(historyPath, "utf8").then(JSON.parse).catch(() => ({ events: [] }));
 const previousGlobal = await readFile(globalHistoryPath, "utf8").then(JSON.parse).catch(() => ({ events: [] }));
 const previousCatalog = await readFile(leagueCatalogPath, "utf8").then(JSON.parse).catch(() => ({ leagues: {}, warnings: [] }));
 const previousPerformance = await readFile(performancePath, "utf8").then(JSON.parse).catch(() => ({}));
+const sourcePolicy = await readFile(sourcePolicyPath, "utf8").then(JSON.parse);
 const compactGlobalEvent = event => {
   const normalized = normalizeEventIdentity(event);
   return {
@@ -47,13 +51,18 @@ if (process.env.HISTORY_USE_CACHE === "1") {
   if (!previous.events?.length) throw new Error("Cached history is unavailable.");
   const cached = [...new Map([...(previous.events ?? []), ...(previousGlobal.events ?? [])].map(event => [canonicalEventIdentity(event), normalizeEventIdentity(event)])).values()];
   const performance = backtestHistory(cached, { sampleSize: Number(process.env.BACKTEST_MATCHES ?? 2000) });
+  const engineParameters = performance.engineParameters;
+  delete performance.engineParameters;
+  performance.strategyVersion = strategyVersion;
   const coverage = summarizeHistory(cached);
   if (previousPerformance.builderAudit?.strategyVersion === strategyVersion) performance.builderAudit = previousPerformance.builderAudit;
   await writeFile(performancePath, `${JSON.stringify(performance, null, 2)}\n`);
+  await writeFile(parametersPath, `${JSON.stringify(engineParameters, null, 2)}\n`);
   await writeFile(coveragePath, `${JSON.stringify(coverage, null, 2)}\n`);
   console.log(`OddsAura cached-history backtest complete: ${previous.events.length} matches available; ${performance.matches} walk-forward predictions tested.`);
   process.exit(0);
 }
+assertSourceAuthorized(sourcePolicy, "football-data.co.uk", "historical-training");
 const result = await collectFootballDataHistory({ seasons: Number(process.env.HISTORY_SEASONS ?? 8) });
 if (result.events.length < 500) {
   if (previous.events?.length) {
@@ -112,10 +121,14 @@ if (globalDays) {
 const globalPayload = { version: 2, generatedAt: new Date().toISOString(), source: "espn-global-json", warnings: [...new Set(globalWarnings)].slice(-500), coverageStart: coveredStart, coverageEnd: coveredEnd, complete: globalDays ? Boolean(coveredStart && coveredStart <= shiftDay(new Date(), -globalDays) && coveredEnd >= dayText(new Date())) : Boolean(previousGlobal.complete), events: worldwide };
 const combined = [...new Map([...result.events, ...worldwide].map(event => [canonicalEventIdentity(event), normalizeEventIdentity(event)])).values()];
 const performance = backtestHistory(combined, { sampleSize: Number(process.env.BACKTEST_MATCHES ?? 2000) });
+const engineParameters = performance.engineParameters;
+delete performance.engineParameters;
+performance.strategyVersion = strategyVersion;
 const coverage = summarizeHistory(combined);
 if (previousPerformance.builderAudit?.strategyVersion === strategyVersion) performance.builderAudit = previousPerformance.builderAudit;
 await writeFile(globalHistoryPath, `${JSON.stringify(globalPayload)}\n`);
 await writeFile(leagueCatalogPath, `${JSON.stringify(leagueCatalog)}\n`);
 await writeFile(performancePath, `${JSON.stringify(performance, null, 2)}\n`);
+await writeFile(parametersPath, `${JSON.stringify(engineParameters, null, 2)}\n`);
 await writeFile(coveragePath, `${JSON.stringify(coverage, null, 2)}\n`);
 console.log(`OddsAura history updated: ${result.events.length} archive + ${worldwide.length} worldwide matches; ${performance.matches} walk-forward predictions tested.`);

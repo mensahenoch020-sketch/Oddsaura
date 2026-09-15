@@ -21,6 +21,8 @@ const previous = JSON.parse(await readFile(output, "utf8"));
 const historical = await readFile(resolve(root, "data/history/football-data.json"), "utf8").then(JSON.parse).catch(() => ({ events: [], generatedAt: null, warnings: ["Historical cache unavailable"] }));
 const globalHistorical = await readFile(resolve(root, "data/history/global-football.json"), "utf8").then(JSON.parse).catch(() => ({ events: [], generatedAt: null, warnings: ["Worldwide historical backfill pending"] }));
 const espnLeagueCatalog = await readFile(resolve(root, "data/history/espn-leagues.json"), "utf8").then(JSON.parse).catch(() => ({ leagues: {} }));
+const engineParameters = await readFile(resolve(root, "data/public/model-parameters.json"), "utf8").then(JSON.parse).catch(() => null);
+const sourcePolicy = await readFile(resolve(root, "data/source-authorizations.json"), "utf8").then(JSON.parse).catch(() => ({ sources: {} }));
 
 async function writePublicSnapshots(snapshot) {
   const modelPerformance = await readFile(resolve(root, "data/public/model-performance.json"), "utf8").then(JSON.parse).catch(() => null);
@@ -96,7 +98,8 @@ for (const sourceEvent of [...(previous.fixtures ?? []), ...(previous.liveFixtur
   const event = normalizeEventIdentity(sourceEvent);
   if (event?.kickoff && event?.homeTeam?.id && event?.awayTeam?.id) eventMap.set(eventIdentity(event), event);
 }
-sources.push({ id: "football-data-history", label: "Multi-season historical results and odds", status: historical.events?.length ? "healthy" : "waiting", lastSuccessAt: historical.generatedAt ?? null, records: historical.events?.length ?? 0, warnings: (historical.warnings ?? []).slice(0, 8) });
+const footballDataAuthorization = sourcePolicy.sources?.["football-data.co.uk"]?.status === "owner-confirmed";
+sources.push({ id: "football-data-history", label: "Authorized multi-season historical results and odds", status: historical.events?.length && footballDataAuthorization ? "healthy" : historical.events?.length ? "partial" : "waiting", lastSuccessAt: historical.generatedAt ?? null, records: historical.events?.length ?? 0, warnings: [...(!footballDataAuthorization ? ["Source authorization is not recorded"] : []), ...(historical.warnings ?? [])].slice(0, 8) });
 sources.push({ id: "global-football-history", label: "Worldwide historical results", status: globalHistorical.events?.length ? "healthy" : "waiting", lastSuccessAt: globalHistorical.generatedAt ?? null, records: globalHistorical.events?.length ?? 0, warnings: (globalHistorical.warnings ?? []).slice(0, 8) });
 if (historyRun.status === "fulfilled" && historyRun.value.events.length) {
   for (const sourceEvent of historyRun.value.events) {
@@ -138,7 +141,7 @@ if (!events.length) {
 
 const upcoming = events.filter((event) => event.status === "SCHEDULED" && new Date(event.kickoff) > now && new Date(event.kickoff).getTime() < horizon);
 const liveFixtures = events.filter((event) => event.status === "LIVE").sort((a, b) => a.kickoff.localeCompare(b.kickoff));
-const modelContext = buildModelContext(events, now.toISOString());
+const modelContext = buildModelContext(events, now.toISOString(), engineParameters);
 const modelPredictions = upcoming.flatMap((event) => scoreEvent(event, events, modelContext));
 const bookmakerIds = ['sportybet', 'betpawa', 'betking', 'betway', 'bet9ja'];
 // Collect only complete market families that the prediction engine can
@@ -237,8 +240,15 @@ function publishPick(pick, fixture) {
     marketProbability: pick.marketProbability,
     modelProbability: pick.modelProbability,
     modelMarketGap: pick.modelMarketGap,
+    engineVersion: pick.engineVersion,
+    calibrated: pick.calibrated,
+    calibrationSamples: pick.calibrationSamples,
+    calibrationGain: pick.calibrationGain,
+    marketModelWeight: pick.marketModelWeight,
+    marketWeightLearned: pick.marketWeightLearned,
+    marketWeightSamples: pick.marketWeightSamples,
     priceStatus: "QUOTED",
-    reasoning: `${evidence.homeLong} ${fixture.homeTeam.name} matches + ${evidence.awayLong} ${fixture.awayTeam.name} matches · ${evidence.homeRecent + evidence.awayRecent} recent performances · bookmaker baseline ${pick.marketProbability == null ? "not available" : `${Math.round(pick.marketProbability * 100)}%`} · model difference ${pick.modelMarketGap == null ? "awaiting live verification" : `${Math.round(pick.modelMarketGap * 100)} points`}`,
+    reasoning: `${pick.engineVersion ?? "structural model"} · ${evidence.homeLong} ${fixture.homeTeam.name} matches + ${evidence.awayLong} ${fixture.awayTeam.name} matches · ${evidence.homeRecent + evidence.awayRecent} recent performances · bookmaker baseline ${pick.marketProbability == null ? "not available" : `${Math.round(pick.marketProbability * 100)}%`} · model contribution ${Math.round((pick.marketModelWeight ?? 0) * 100)}% · ${pick.calibrated ? `${pick.calibrationSamples ?? 0} calibration observations` : "calibration fallback"}`,
   });
   predictionKeys.add(identity);
   fixturePickCounts.set(providerFixture, (fixturePickCounts.get(providerFixture) ?? 0) + 1);
@@ -249,7 +259,7 @@ const eligiblePicks = [...predictions]
   .filter((item) => {
     const fixture = fixtureMap.get(item.fixtureId);
     if (!fixture || !publicMarketKeys.test(item.key) || !item.quotedOdds || item.marketProbability == null) return false;
-    return historyEvidence(item).ready && item.confidence >= marketConfidenceFloor(item.key) && (item.modelMarketGap ?? 1) <= .15 && (item.expectedValue ?? -1) >= -.1;
+    return historyEvidence(item).ready && item.confidence >= marketConfidenceFloor(item.key) && (item.modelMarketGap ?? 1) <= .1 && (item.expectedValue ?? -1) >= 0;
   })
   .sort((a, b) => (b.confidence + Math.max(0, b.edge ?? 0)) - (a.confidence + Math.max(0, a.edge ?? 0)));
 const bestEligibleByFixture = new Map();
@@ -276,7 +286,7 @@ for (const provider of bookmakerIds) for (const key of showcaseKeys) {
   const strongest = predictions.filter((item) => {
     const fixture = fixtureMap.get(item.fixtureId);
     return item.oddsProvider === provider && item.key === key && fixture && item.quotedOdds && item.marketProbability != null && isPriorityLeague(fixture.league)
-      && historyEvidence(item).ready && item.confidence >= Math.max(.48, marketConfidenceFloor(item.key)) && (item.modelMarketGap ?? 1) <= .15;
+      && historyEvidence(item).ready && item.confidence >= Math.max(.48, marketConfidenceFloor(item.key)) && (item.modelMarketGap ?? 1) <= .1 && (item.expectedValue ?? -1) >= 0;
   }).sort((a, b) => b.confidence - a.confidence).slice(0, 12);
   for (const pick of strongest) {
     const fixture = fixtureMap.get(pick.fixtureId);
@@ -301,7 +311,7 @@ function watchlistFamily(key) {
   return "OTHER";
 }
 const watchlistCandidates = [...predictions]
-  .filter((item) => dailyFixtureIds.has(item.fixtureId) && publicMarketKeys.test(item.key) && historyEvidence(item).ready && item.confidence >= 0.62 && item.quotedOdds >= 1.1 && item.quotedOdds <= 3 && item.marketProbability != null && (item.modelMarketGap ?? 1) <= .12 && (item.expectedValue ?? -1) >= -.075)
+  .filter((item) => dailyFixtureIds.has(item.fixtureId) && publicMarketKeys.test(item.key) && historyEvidence(item).ready && item.confidence >= 0.62 && item.quotedOdds >= 1.1 && item.quotedOdds <= 3 && item.marketProbability != null && (item.modelMarketGap ?? 1) <= .1 && (item.expectedValue ?? -1) >= 0)
   .sort((a, b) => (b.confidence + Math.max(0, b.expectedValue ?? 0)) - (a.confidence + Math.max(0, a.expectedValue ?? 0)));
 const watchlistFamilies = [...new Set(watchlistCandidates.map((pick) => watchlistFamily(pick.key)))];
 const watchlistBuckets = new Map(watchlistFamilies.map((family) => [family, watchlistCandidates.filter((pick) => watchlistFamily(pick.key) === family)]));
@@ -381,6 +391,13 @@ const expansionCandidates = modelPredictions.filter((pick) => {
     homeHistoryMatches: evidence.homeLong,
     awayHistoryMatches: evidence.awayLong,
     recentHistoryMatches: evidence.homeRecent + evidence.awayRecent,
+    engineVersion: pick.engineVersion,
+    calibrated: pick.calibrated,
+    calibrationSamples: pick.calibrationSamples,
+    calibrationGain: pick.calibrationGain,
+    marketModelWeight: pick.marketModelWeight,
+    marketWeightLearned: pick.marketWeightLearned,
+    marketWeightSamples: pick.marketWeightSamples,
   };
 });
 
@@ -457,7 +474,7 @@ const ticketHistory = [...ticketArchive.values()].map((ticket) => trackTicket(ti
   .sort((a, b) => String(b.publishedAt ?? "").localeCompare(String(a.publishedAt ?? "")))
   .slice(0, 90);
 const snapshot = {
-  version: 4,
+  version: 5,
   generatedAt: now.toISOString(),
   stale: false,
   status: sourceStatus,
@@ -478,7 +495,7 @@ const snapshot = {
     publishedTickets: tickets.length,
     noBetCategories: attemptedTickets.filter((attempt) => !attempt.ticket).map((attempt) => attempt.category),
     lockedCategories: ["BALANCED_10", "LONGSHOT_21"],
-    strategyVersion: "history-market-v2",
+    strategyVersion: engineParameters?.version ?? "ensemble-calibrated-v3-pending-training",
     historicalMatches: new Set([...(historical.events ?? []), ...(globalHistorical.events ?? [])].map(canonicalEventIdentity)).size,
     globalHistoricalMatches: globalHistorical.events?.length ?? 0,
     bookmakerFixtureLimit: marketFixtureLimit,

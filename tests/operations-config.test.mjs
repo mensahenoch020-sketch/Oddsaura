@@ -43,6 +43,9 @@ test("Railway protects and serves account operations used by the live UI", async
   assert.match(server, /\/api\/providers/);
   assert.match(server, /const allowPartial = body\.allowPartial === true/);
   assert.match(server, /allowPartial \}/);
+  assert.match(server, /process\.env\.ODDSAURA_EDGE_ORIGIN\?\.replace/);
+  assert.doesNotMatch(server, /oddsaura\.chipsofrio\.chatgpt\.site/);
+  assert.match(server, /if \(edgeOrigin\) return await proxyEdge/);
 });
 
 test("public football payloads are split, bundled and cached for faster mobile loading", async () => {

@@ -59,7 +59,7 @@ function rankedPredictions(predictions: PredictedPick[], now: number, provider: 
         && pick.probability >= .62
         && (pick.marketProbability ?? 0) >= .58
         && (pick.modelMarketGap ?? 1) <= .1
-        && (pick.expectedValue ?? -1) >= -.075;
+        && (pick.expectedValue ?? -1) >= 0;
       return strongHistory && marketConfirmed;
     }
 
@@ -70,7 +70,7 @@ function rankedPredictions(predictions: PredictedPick[], now: number, provider: 
       && (pick.historyMatches == null || pick.historyMatches >= 6)
       && pick.confidence >= .5
       && pick.probability >= .5
-      && (legacyQuotedPick || ((pick.modelMarketGap ?? 0) <= .18 && (pick.expectedValue ?? -.1) >= -.18));
+      && (legacyQuotedPick || ((pick.modelMarketGap ?? 0) <= .12 && (pick.expectedValue ?? -1) >= 0));
   }).sort((a, b) => predictionScore(b, provider) - predictionScore(a, provider));
 }
 

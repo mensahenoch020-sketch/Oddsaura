@@ -64,8 +64,8 @@ function findEvent(rows: Json[], input: SportyBetSelectionInput) {
   return ranked.event;
 }
 
-type Rule = { typeId: number; outcome: string; line?: number | null };
-function rule(input: SportyBetSelectionInput): Rule | null {
+type Rule = { typeId?: number; marketLabel?: string; outcome: string; line?: number | null };
+function rule(input: SportyBetSelectionInput): Rule {
   const fixed: Record<string, Rule> = {
     MATCH_HOME: { typeId: 110, outcome: "1" }, MATCH_DRAW: { typeId: 110, outcome: "X" }, MATCH_AWAY: { typeId: 110, outcome: "2" },
     ONE_UP_HOME: { typeId: 10974, outcome: "1" }, ONE_UP_AWAY: { typeId: 10974, outcome: "2" },
@@ -78,14 +78,16 @@ function rule(input: SportyBetSelectionInput): Rule | null {
   if (/^UNDER_/.test(input.marketKey)) return { typeId: 160, outcome: "Under", line: input.line };
   if (/^HOME_(?:OVER|UNDER)_/.test(input.marketKey)) return { typeId: 10283, outcome: input.marketKey.includes("OVER") ? "Over" : "Under", line: input.line };
   if (/^AWAY_(?:OVER|UNDER)_/.test(input.marketKey)) return { typeId: 10284, outcome: input.marketKey.includes("OVER") ? "Over" : "Under", line: input.line };
-  return null;
+  return { marketLabel: input.sourceMarketName || input.marketName, outcome: input.sourceOutcomeName || input.selection, line: input.line };
 }
 
 function resolve(event: Json, input: SportyBetSelectionInput): SportyBetResolvedSelection {
   const wanted = rule(input);
-  if (!wanted) throw new BetKingIntegrationError(`The ${input.marketName} market is not supported for automatic BetKing codes yet.`, 422, { marketKey: input.marketKey });
   const markets = Array.isArray(event.markets) ? event.markets.filter(isRecord).flatMap((item) => [item, ...(Array.isArray(item.spreadMarkets) ? item.spreadMarkets.filter(isRecord) : [])]) : [];
-  const market = markets.find((item) => Number(item.typeId) === wanted.typeId && (wanted.line == null || Math.abs(Number(item.specialValue) - wanted.line) < .001));
+  const market = markets.find((item) => {
+    const identityMatches = wanted.typeId != null ? Number(item.typeId) === wanted.typeId : norm(str(item.name)) === norm(wanted.marketLabel || "");
+    return identityMatches && (wanted.line == null || Math.abs(Number(item.specialValue) - wanted.line) < .001);
+  });
   if (!market) throw new BetKingIntegrationError(`The ${input.marketName} market is not currently available on BetKing for ${input.homeTeam} vs ${input.awayTeam}.`, 422);
   const prices = Array.isArray(market.selections) ? market.selections.filter(isRecord) : [];
   const price = prices.find((item) => norm(str(item.name)) === norm(wanted.outcome) && str(item.status) === "VALID" && isRecord(item.odd));

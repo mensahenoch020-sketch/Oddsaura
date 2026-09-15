@@ -63,3 +63,18 @@ test("falls back to betPawa's public event list when search returns no fixture",
   assert.equal(result.code, "FALL777");
   assert.equal(result.resolved[0]?.eventId, "777001");
 });
+
+test("matches a non-whitelisted market from betPawa's live event catalogue", async () => {
+  const rawEvent = { ...event, id: "raw-event", participants: [{ name: "Falcons", position: 1 }, { name: "Panthers", position: 2 }], markets: [{ marketType: { id: "99001", name: "First Throw-In", displayName: "First Throw-In" }, row: [{ prices: [{ id: "990011", name: "Falcons", odds: 1.75 }] }] }] };
+  const fakeFetch = async (input: string | URL | Request) => {
+    const url = String(input);
+    if (url.includes("/search?")) return Response.json({ events: [rawEvent] });
+    if (url.includes("/events/")) return Response.json(rawEvent);
+    if (url.endsWith("/booking-number")) return Response.json({ code: "RAWPAWA" });
+    return Response.json({ items: [{ selections: [{ selectionInfo: { id: "990011" } }] }] });
+  };
+  const result = await createBetPawaCode([{ fixtureId: "raw", homeTeam: "Falcons", awayTeam: "Panthers", kickoff: event.startTime,
+    marketKey: "RAW_EXACT", marketName: "First Throw-In", selection: "Falcons", sourceMarketName: "First Throw-In", sourceOutcomeName: "Falcons" }], fakeFetch as typeof fetch);
+  assert.equal(result.resolved[0]?.marketId, "99001");
+  assert.equal(result.resolved[0]?.outcomeId, "990011");
+});

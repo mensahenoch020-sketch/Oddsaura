@@ -13,7 +13,7 @@ const CULTURE = "en-US";
 const cache = new Map<string, { until: number; bundle: Bundle }>();
 
 type Bundle = { events: Json[]; markets: Json[]; outcomes: Json[]; prices: Json[] };
-type Rule = { marketName: string; kind: "HOME" | "DRAW" | "AWAY" | "1X" | "12" | "X2" | "OVER" | "UNDER"; line?: number | null };
+type Rule = { marketName: string; kind: "HOME" | "DRAW" | "AWAY" | "1X" | "12" | "X2" | "OVER" | "UNDER" | "EXACT"; line?: number | null };
 
 export class BetwayIntegrationError extends Error {
   constructor(message: string, readonly status = 422, readonly details?: unknown) {
@@ -46,7 +46,7 @@ async function request(fetcher: FetchLike, url: string, init: RequestInit, failu
   return payload;
 }
 
-function rule(input: SportyBetSelectionInput): Rule | null {
+function rule(input: SportyBetSelectionInput): Rule {
   const fixed: Record<string, Rule> = {
     MATCH_HOME: { marketName: "[Win/Draw/Win]", kind: "HOME" }, MATCH_DRAW: { marketName: "[Win/Draw/Win]", kind: "DRAW" }, MATCH_AWAY: { marketName: "[Win/Draw/Win]", kind: "AWAY" },
     DC_1X: { marketName: "[Double Chance]", kind: "1X" }, DC_12: { marketName: "[Double Chance]", kind: "12" }, DC_X2: { marketName: "[Double Chance]", kind: "X2" },
@@ -54,7 +54,8 @@ function rule(input: SportyBetSelectionInput): Rule | null {
   if (fixed[input.marketKey]) return fixed[input.marketKey]!;
   if (/^OVER_/.test(input.marketKey)) return { marketName: "[Total Goals]", kind: "OVER", line: input.line };
   if (/^UNDER_/.test(input.marketKey)) return { marketName: "[Total Goals]", kind: "UNDER", line: input.line };
-  return null;
+  const label = input.sourceMarketName || input.marketName;
+  return { marketName: label.startsWith("[") ? label : `[${label}]`, kind: "EXACT", line: input.line };
 }
 
 function safeEventId(value: unknown) {
@@ -168,13 +169,16 @@ function resolve(data: Bundle, event: Json, input: SportyBetSelectionInput, want
     const name = norm(`${str(item.displayName ?? item.name)} ${str(item.sbv)}`);
     const handicap = Number(item.handicap);
     if ((wanted.kind === "OVER" || wanted.kind === "UNDER") && (line == null || Math.abs(handicap - line) > .001)) return false;
+    if (wanted.kind === "EXACT" && line != null && (!Number.isFinite(handicap) || Math.abs(handicap - line) > .001)) return false;
     if (wanted.kind === "HOME") return teamScore(name, home) >= .7 && !/\bor\b/.test(name);
     if (wanted.kind === "AWAY") return teamScore(name, away) >= .7 && !/\bor\b/.test(name);
     if (wanted.kind === "DRAW") return /^draw$/.test(name);
     if (wanted.kind === "1X") return name.includes(norm(home)) && /\bor draw\b/.test(name);
     if (wanted.kind === "X2") return name.includes(norm(away)) && /draw or/.test(name);
     if (wanted.kind === "12") return name.includes(norm(home)) && name.includes(norm(away)) && /\bor\b/.test(name);
-    return wanted.kind === "OVER" ? /^over\b/.test(name) : /^under\b/.test(name);
+    if (wanted.kind === "OVER") return /^over\b/.test(name);
+    if (wanted.kind === "UNDER") return /^under\b/.test(name);
+    return name === norm(input.sourceOutcomeName || input.selection);
   });
   if (!outcome) throw new BetwayIntegrationError(`The ${input.marketName}: ${input.selection} pick is not currently priced on Betway for ${input.homeTeam} vs ${input.awayTeam}.`, 422, { fixtureId: input.fixtureId, marketKey: input.marketKey });
   const price = data.prices.find((item) => str(item.outcomeId) === str(outcome.outcomeId));
@@ -213,7 +217,6 @@ export async function createBetwayCode(selections: SportyBetSelectionInput[], fe
   const attempts = await mapLimit(selections, async (input) => {
     try {
       const wanted = rule(input);
-      if (!wanted) throw new BetwayIntegrationError(`The ${input.marketName} market is not supported for automatic Betway codes yet.`, 422, { marketKey: input.marketKey });
       const data = await findBundle(fetcher, input, wanted);
       return { input, resolved: resolve(data, findEvent(data.events, input), input, wanted), error: null };
     } catch (error) {
