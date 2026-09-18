@@ -10,6 +10,7 @@ export type ProductArea = "home" | "daily" | "results" | "slip" | "converter" | 
 
 const items: Array<{ id: ProductArea; href: string; label: string; icon: React.ReactNode }> = [
   { id: "home", href: "/dashboard", label: "Ask", icon: <><path d="M4 5.5h16v11H9l-5 3z" /><path d="M8 9h8M8 12.5h5" /></> },
+  { id: "converter", href: "/dashboard?tool=converter", label: "Convert", icon: <><path d="M5 8h13" /><path d="m15 5 3 3-3 3" /><path d="M19 16H6" /><path d="m9 13-3 3 3 3" /></> },
   { id: "profile", href: "/account", label: "Account", icon: <><circle cx="12" cy="8" r="3.5" /><path d="M5 20c.5-4 2.8-6 7-6s6.5 2 7 6" /></> },
 ];
 
@@ -34,7 +35,7 @@ export default function ProductNavigation({ active, initialName = "", initialRol
     <header className="product-header">
       <Brand href="/dashboard" className="product-brand" />
       <nav className="product-desktop-nav" aria-label="Main navigation">
-        {items.filter((item) => item.id !== "profile").map((item) => <Link key={item.id} href={item.href} aria-current={active === item.id ? "page" : undefined} className={active === item.id ? "active" : ""}>New request</Link>)}
+        {items.filter((item) => item.id !== "profile").map((item) => <Link key={item.id} href={item.href} aria-current={active === item.id ? "page" : undefined} className={active === item.id ? "active" : ""}>{item.id === "home" ? "New request" : "Convert code"}</Link>)}
         {role === "ADMIN" ? <Link href="/admin">Admin</Link> : null}
       </nav>
       <Link className="product-profile" href="/account" aria-label="Open profile and settings"><span>{name || "Profile"}</span><i aria-hidden="true">{badge}</i></Link>

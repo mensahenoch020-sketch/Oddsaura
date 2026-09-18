@@ -16,14 +16,17 @@ test("target builder follows requested totals beyond the old 100 odds ceiling", 
   const fifty = buildTargetSlip(rows, 50, Date.parse("2029-01-01"));
   const fiveHundred = buildTargetSlip(rows, 500, Date.parse("2029-01-01"));
   const oneThousand = buildTargetSlip(rows, 1000, Date.parse("2029-01-01"));
+  const oneMillion = buildTargetSlip(rows, 1_000_000, Date.parse("2029-01-01"));
   assert.ok(five && Math.abs(five.estimatedOdds - 5) / 5 < .08);
   assert.ok(twenty && Math.abs(twenty.estimatedOdds - 20) / 20 < .08);
   assert.ok(fifty && Math.abs(fifty.estimatedOdds - 50) / 50 < .08);
   assert.ok(fiveHundred && Math.abs(fiveHundred.estimatedOdds - 500) / 500 < .08);
   assert.ok(oneThousand && Math.abs(oneThousand.estimatedOdds - 1000) / 1000 < .08);
+  assert.ok(oneMillion && Math.abs(oneMillion.estimatedOdds - 1_000_000) / 1_000_000 < .08);
   assert.ok(twenty.picks.length > five.picks.length);
   assert.ok(fifty.picks.length > twenty.picks.length);
   assert.equal(oneThousand.target, 1000);
+  assert.equal(oneMillion.target, 1_000_000);
 });
 
 test("Best Bet keeps individually qualified matches when the full target is unavailable", () => {
@@ -105,10 +108,19 @@ test("target builder rejects unsupported bookmaker markets and unconfirmed price
   assert.equal(buildTargetSlip(estimated, 2, Date.parse("2029-01-01"), "sportybet", "recommended"), null);
 });
 
-test("public builders reject negative expected-value selections", () => {
+test("Best Bet rejects negative EV while an explicit target request can use market-confirmed selections", () => {
   const negative = Array.from({ length: 5 }, (_, index) => ({ ...pick(`negative${index}`, 1.45, .72), expectedValue: -.001 }));
   assert.equal(rankBestBets(negative, Date.parse("2029-01-01")).length, 0);
-  assert.equal(buildTargetSlip(negative, 2, Date.parse("2029-01-01")), null);
+  assert.equal(buildTargetSlip(negative, 2, Date.parse("2029-01-01"), "sportybet", "recommended"), null);
+  assert.ok(buildTargetSlip(negative, 2, Date.parse("2029-01-01"), "sportybet", "target"));
+});
+
+test("fresh request-time quotes are not rejected for normal network latency", () => {
+  const requestTime = Date.parse("2029-01-01T00:00:00Z");
+  const fresh = { ...pick("fresh", 1.5, .72), quoteObservedAt: "2029-01-01T00:00:30Z" };
+  const impossibleFuture = { ...pick("future-quote", 1.5, .72), quoteObservedAt: "2029-01-01T00:03:00Z" };
+  assert.ok(buildTargetSlip([fresh], 1.5, requestTime));
+  assert.equal(buildTargetSlip([impossibleFuture], 1.5, requestTime), null);
 });
 test("published markets add tested BTTS and team-goal variety while weak markets stay blocked", () => {
   const tested = [

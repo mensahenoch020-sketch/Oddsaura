@@ -45,6 +45,12 @@ test("extracts split instructions", () => {
   assert.equal(intent.provider, "betpawa");
 });
 
+test("does not cap large requested target odds", () => {
+  const intent = interpretAssistantRequest("Give me 1,000,000 odds for SportyBet");
+  assert.equal(intent.kind, "build");
+  assert.equal(intent.targetOdds, 1_000_000);
+});
+
 test("understands bookmaker conversion routes and codes", () => {
   assert.equal(interpretAssistantRequest('Convert SportyBet UZJEEP to Betway').code, 'UZJEEP');
   assert.equal(interpretAssistantRequest('Convert code uzjeep from sporty to betway').code, 'UZJEEP');

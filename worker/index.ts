@@ -28,6 +28,18 @@ interface ExecutionContext {
 
 type AccountIdentity = { email: string; name: string; role: "USER" | "ADMIN" };
 
+function asBookmakerError(error: unknown, fallback: string) {
+  if (error instanceof BookmakerIntegrationError) return error;
+  if (error && typeof error === "object") {
+    const candidate = error as { message?: unknown; status?: unknown; details?: unknown };
+    const status = Number(candidate.status);
+    if (typeof candidate.message === "string") {
+      return new BookmakerIntegrationError(candidate.message, Number.isInteger(status) && status >= 400 && status <= 599 ? status : 502, candidate.details);
+    }
+  }
+  return new BookmakerIntegrationError(fallback, 502);
+}
+
 const SESSION_COOKIE = "oa_session";
 const SESSION_SECONDS = 60 * 60 * 24 * 30;
 // Cloudflare Workers currently caps Web Crypto PBKDF2 at 100,000 rounds.
@@ -376,16 +388,22 @@ const worker = {
     if (providerExpandMatch) {
       if (request.method !== "POST") return Response.json({ error: "Method not allowed" }, { status: 405, headers: { allow: "POST" } });
       try {
-        const body = await authenticatedRequest.json() as { start?: string; end?: string; marketKeys?: string[] };
+        const body = await authenticatedRequest.json() as { start?: string; end?: string; marketKeys?: string[]; fixtureLimit?: number };
         const start = Date.parse(String(body.start ?? "")), end = Date.parse(String(body.end ?? ""));
         if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start || end - start > 8 * 86_400_000) return Response.json({ error: "Choose a valid period of no more than eight days." }, { status: 400 });
         const assetUrl = new URL("/data/expansion.json", request.url);
-        const asset = await env.ASSETS.fetch(new Request(assetUrl));
+        // Cloudflare serves this file through the ASSETS binding. Railway runs
+        // the same worker inside Vinext without Cloudflare bindings, so load
+        // the bundled public file through the local application origin there.
+        const asset = env.ASSETS
+          ? await env.ASSETS.fetch(new Request(assetUrl))
+          : await fetch(assetUrl);
         if (!asset.ok) return Response.json({ error: "The expanded prediction pool has not been published yet." }, { status: 503 });
         const payload = await asset.json() as { candidates?: ExpansionCandidate[] };
         const allowed = Array.isArray(body.marketKeys) && body.marketKeys.length ? new Set(body.marketKeys.slice(0, 40)) : null;
         const candidates = (payload.candidates ?? []).filter(candidate => Date.parse(candidate.kickoff) >= start && Date.parse(candidate.kickoff) < end && (!allowed || allowed.has(candidate.key)));
-        const result = await expandProviderMarkets(providerExpandMatch[1] as BookmakerId, candidates, fetch);
+        const fixtureLimit = Number.isInteger(body.fixtureLimit) ? Math.max(1, Math.min(80, Number(body.fixtureLimit))) : 40;
+        const result = await expandProviderMarkets(providerExpandMatch[1] as BookmakerId, candidates, fetch, fixtureLimit);
         return Response.json(result, { headers: { "cache-control": "no-store" } });
       } catch {
         return Response.json({ error: "The live bookmaker expansion could not finish. The saved verified pool is still available." }, { status: 502 });
@@ -394,7 +412,7 @@ const worker = {
 
     if (url.pathname === "/api/providers/convert") {
       if (request.method !== "POST") return Response.json({ error: "Method not allowed" }, { status: 405, headers: { allow: "POST" } });
-      if (!identity || !env.DB) return Response.json({ error: "Account storage is not ready yet." }, { status: 503 });
+      if (!identity) return Response.json({ error: "Log in to continue." }, { status: 401 });
       try {
         const body = await authenticatedRequest.json() as { sourceProvider?: BookmakerId; destinationProvider?: BookmakerId; code?: string; allowPartial?: boolean };
         const allowPartial = body.allowPartial === true;
@@ -403,7 +421,7 @@ const worker = {
         if (body.sourceProvider === body.destinationProvider) return Response.json({ error: "Choose a different destination bookmaker.", details: { stage: "INPUT" } }, { status: 400 });
         const code = String(body.code || "").trim().toUpperCase();
         if (!/^[A-Z0-9]{4,16}$/.test(code)) return Response.json({ error: "Enter a valid bookmaker code.", details: { stage: "INPUT" } }, { status: 400 });
-        await ensureAccountTables(env.DB);
+        if (env.DB) await ensureAccountTables(env.DB);
         let selections: SportyBetSelectionInput[] = [];
         // A saved request can include legs omitted from a partial booking code.
         // Always load the bookmaker's actual slip, just as Railway does.
@@ -435,15 +453,18 @@ const worker = {
           }
           throw error;
         }
-        const now = Date.now();
-        await env.DB.prepare("INSERT INTO generated_codes (id, user_email, provider, code, deep_link, selections_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
-          .bind(crypto.randomUUID(), identity.email, body.destinationProvider, result.code, result.deepLink ?? null, JSON.stringify({ verified: result.verified === true, verificationStatus: result.verificationStatus, requested: selections, resolved: result.resolved ?? [], unmatched: result.unmatched ?? [], sourceIssues, convertedFrom: { provider: body.sourceProvider, code } }), now).run().catch(() => {
-            result.warning = [result.warning, "Code created, but account history could not be saved. Copy this code now."].filter(Boolean).join(" ");
-            console.error("Converted booking code could not be saved to account history.");
-          });
+        if (env.DB) {
+          const now = Date.now();
+          await ensureAccountTables(env.DB);
+          await env.DB.prepare("INSERT INTO generated_codes (id, user_email, provider, code, deep_link, selections_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
+            .bind(crypto.randomUUID(), identity.email, body.destinationProvider, result.code, result.deepLink ?? null, JSON.stringify({ verified: result.verified === true, verificationStatus: result.verificationStatus, requested: selections, resolved: result.resolved ?? [], unmatched: result.unmatched ?? [], sourceIssues, convertedFrom: { provider: body.sourceProvider, code } }), now).run().catch(() => {
+              result.warning = [result.warning, "Code created, but account history could not be saved. Copy this code now."].filter(Boolean).join(" ");
+              console.error("Converted booking code could not be saved to account history.");
+            });
+        }
         return Response.json({ verified: true, sourceProvider: body.sourceProvider, destinationProvider: body.destinationProvider, sourceCode: code, importedFrom, decoded: selections.length, sourceSelections: selections, sourceIssues, conversionStage: result.verificationStatus === "VERIFIED" ? "VERIFY" : "CREATE", ...result, partial: Boolean(result.partial || sourceIssues.length) }, { headers: { "cache-control": "no-store" } });
       } catch (error) {
-        const typed = error instanceof BookmakerIntegrationError ? error : error instanceof Error && "status" in error ? error as BookmakerIntegrationError : new BookmakerIntegrationError("The code could not be converted.", 502);
+        const typed = asBookmakerError(error, "The code could not be converted.");
         return Response.json({ error: typed.message, details: typed.details }, { status: typed.status, headers: { "cache-control": "no-store" } });
       }
     }
@@ -451,10 +472,17 @@ const worker = {
     if (providerCodeMatch || url.pathname === "/api/sportybet/code") {
       const provider = (providerCodeMatch?.[1] ?? "sportybet") as BookmakerId;
       if (request.method !== "POST") return Response.json({ error: "Method not allowed" }, { status: 405, headers: { allow: "POST" } });
-      if (!identity || !env.DB) return Response.json({ error: "Account storage is not ready yet." }, { status: 503 });
+      if (!identity) return Response.json({ error: "Log in to continue." }, { status: 401 });
       let eventId = "";
       try {
         const body = await authenticatedRequest.json() as { selections?: SportyBetSelectionInput[]; allowPartial?: boolean };
+        // Railway owns authentication, PostgreSQL history and rate limiting in
+        // its outer server. The inner Vinext worker has no D1 binding there and
+        // must still be able to perform the bookmaker operation.
+        if (!env.DB) {
+          const result = await createBookmakerCode(provider, body.selections ?? [], fetch, body.allowPartial ?? false);
+          return Response.json({ provider, ...result }, { headers: { "cache-control": "no-store" } });
+        }
         await ensureAccountTables(env.DB);
         const now = Date.now();
         const requestHash = await digest(`verification-v2|${identity.email}|${provider}|${JSON.stringify({ selections: body.selections ?? [], allowPartial: body.allowPartial ?? false })}`);
@@ -489,7 +517,7 @@ const worker = {
         return Response.json({ provider, ...result, historySaved, ...(!historySaved ? { warning: [result.warning, "Code created, but account history could not be saved. Copy this code now."].filter(Boolean).join(" ") } : {}) }, { headers: { "cache-control": "no-store" } });
       } catch (error) {
         if (eventId) ctx.waitUntil(env.DB.prepare("UPDATE code_request_events SET status = 'FAILED' WHERE id = ?").bind(eventId).run().then(() => undefined));
-        const typed = error instanceof BookmakerIntegrationError ? error : new BookmakerIntegrationError("Bookmaker code creation failed.", 502);
+        const typed = asBookmakerError(error, "Bookmaker code creation failed.");
         return Response.json({ error: typed.message, details: typed.details }, { status: typed.status, headers: { "cache-control": "no-store" } });
       }
     }

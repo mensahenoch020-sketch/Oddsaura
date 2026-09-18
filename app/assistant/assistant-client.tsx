@@ -3,12 +3,15 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import ProductNavigation from "../product-navigation";
+import ConverterForm from "../converter/converter-form";
 import { fallbackSnapshot, loadSnapshot, refreshSnapshot, type PredictedPick, type Snapshot, type Ticket, type TicketSelection, type WatchlistPick } from "../data";
 import { BookmakerCodeError, expandBookmakerMarkets, generateBookmakerCode, providerAdapters, providerSupportsMarket, type BookmakerCodeResponse, type ProviderId } from "../builder/providers";
 import { buildTargetSlip, rankBestBets } from "../builder/target-builder";
 import { extractDateWindow, interpretAssistantRequest, isWithinDateWindow, matchesRequestedMarket, type AssistantIntent } from "./nlu";
 import { includedPicks, resolvedTotal, targetReached } from "./code-summary";
 import "./assistant.css";
+import "../converter/converter.css";
+import "../converter/home-converter.css";
 import "../compact-theme.css";
 
 type PendingIntent = Exclude<AssistantIntent, { kind: "unknown" | "daily" | "best" | "results" }>;
@@ -114,7 +117,7 @@ function partitionPicks(picks: PredictedPick[], requestedParts: number) {
   return groups;
 }
 
-export default function AssistantClient({ initialRequest = "" }: { initialRequest?: string }) {
+export default function AssistantClient({ initialRequest = "", initialTool = "ask" }: { initialRequest?: string; initialTool?: "ask" | "converter" }) {
   const [snapshot, setSnapshot] = useState<Snapshot>(fallbackSnapshot);
   const [resultsSnapshot, setResultsSnapshot] = useState<Snapshot>(fallbackSnapshot);
   const [loading, setLoading] = useState(true);
@@ -195,9 +198,9 @@ export default function AssistantClient({ initialRequest = "" }: { initialReques
     }
   }
 
-  async function expandEligiblePool(current: PredictedPick[], provider: ProviderId, dateWindow: NonNullable<ReturnType<typeof extractDateWindow>>, marketKeys?: string[]) {
+  async function expandEligiblePool(current: PredictedPick[], provider: ProviderId, dateWindow: NonNullable<ReturnType<typeof extractDateWindow>>, marketKeys?: string[], fixtureLimit?: number) {
     try {
-      const expanded = await expandBookmakerMarkets(provider, dateWindow.start, dateWindow.end, marketKeys);
+      const expanded = await expandBookmakerMarkets(provider, dateWindow.start, dateWindow.end, marketKeys, fixtureLimit);
       const merged = new Map(current.map(pick => [pick.id, pick]));
       for (const pick of expanded) merged.set(pick.id, pick);
       return [...merged.values()].filter(pick => pick.quotedOdds != null && matchesRequestedMarket(pick.market.key, marketKeys) && isWithinDateWindow(pick.kickoff, dateWindow) && providerSupportsMarket(provider, pick.market.key));
@@ -216,7 +219,8 @@ export default function AssistantClient({ initialRequest = "" }: { initialReques
     let eligible = predictions.filter((pick) => pick.quotedOdds != null && matchesRequestedMarket(pick.market.key, intent.marketKeys) && isWithinDateWindow(pick.kickoff, searchWindow) && providerSupportsMarket(provider, pick.market.key));
     let built = buildTargetSlip(eligible, target, referenceTime, provider, "target");
     if (!built?.exact) {
-      const expanded = await expandEligiblePool(eligible, provider, searchWindow, intent.marketKeys);
+      const fixtureLimit = target >= 20 ? 80 : target >= 5 ? 60 : 40;
+      const expanded = await expandEligiblePool(eligible, provider, searchWindow, intent.marketKeys, fixtureLimit);
       const candidate = buildTargetSlip(expanded, target, referenceTime, provider, "target");
       if (candidate && (!built || Math.abs(candidate.estimatedOdds - target) < Math.abs(built.estimatedOdds - target))) { eligible = expanded; built = candidate; }
     }
@@ -240,7 +244,8 @@ export default function AssistantClient({ initialRequest = "" }: { initialReques
     let eligible = predictions.filter((pick) => pick.quotedOdds != null && matchesRequestedMarket(pick.market.key, intent.marketKeys) && isWithinDateWindow(pick.kickoff, searchWindow) && providerSupportsMarket(provider, pick.market.key));
     let built = buildTargetSlip(eligible, target, referenceTime, provider, "target");
     if (!built?.exact) {
-      eligible = await expandEligiblePool(eligible, provider, searchWindow, intent.marketKeys);
+      const fixtureLimit = target >= 20 ? 80 : target >= 5 ? 60 : 40;
+      eligible = await expandEligiblePool(eligible, provider, searchWindow, intent.marketKeys, fixtureLimit);
       built = buildTargetSlip(eligible, target, referenceTime, provider, "target");
     }
     if (!built) {
@@ -361,6 +366,10 @@ export default function AssistantClient({ initialRequest = "" }: { initialReques
   }
 
   function startNewChat() {
+    if (initialTool === "converter") {
+      window.location.assign("/dashboard");
+      return;
+    }
     setMessages([]);
     setPending(null);
     setInput("");
@@ -368,16 +377,20 @@ export default function AssistantClient({ initialRequest = "" }: { initialReques
   }
 
   return <main className="assistant-app">
-    <ProductNavigation active="home" />
+    <ProductNavigation active={initialTool === "converter" ? "converter" : "home"} />
     <section className="assistant-shell">
       <header className="assistant-toolbar">
         <span><i aria-hidden="true" /> Verified football data</span>
         <div>
-          <details className="assistant-tools"><summary>Tools</summary><nav><Link href="/converter">Code converter</Link><Link href="/results">Full history</Link></nav></details>
+          <details className="assistant-tools"><summary>Tools</summary><nav><Link href="/results">Full history</Link></nav></details>
           <button type="button" onClick={startNewChat}>New chat</button>
         </div>
       </header>
       <section className={`assistant-workspace ${messages.length ? "has-messages" : ""}`} aria-label="OddsAura betting assistant">
+        {initialTool === "converter" ? <section className="home-code-converter" aria-label="Booking code converter">
+          <header><div><span>Code converter</span><h1>Move a code to another bookmaker.</h1></div><p>Choose the original bookmaker, the destination and paste the booking code. OddsAura reloads the source slip, matches the destination markets and shows every selection it could not include.</p></header>
+          <ConverterForm embedded />
+        </section> : <>
         {!messages.length && !busy ? <div className="assistant-welcome">
           <div className="assistant-orb" aria-hidden="true"><i /><i /><span /></div>
           <span>OddsAura assistant</span>
@@ -399,6 +412,7 @@ export default function AssistantClient({ initialRequest = "" }: { initialReques
           </form>
           <p>Verified selections only · Check every bookmaker slip · 18+</p>
         </div>
+        </>}
       </section>
     </section>
   </main>;

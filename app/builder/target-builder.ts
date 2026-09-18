@@ -47,7 +47,13 @@ function rankedPredictions(predictions: PredictedPick[], now: number, provider: 
   return predictions.filter((pick) => {
     // A different bookmaker's price cannot fulfil this bookmaker's request.
     if (pick.oddsProvider && pick.oddsProvider.toLowerCase() !== provider) return false;
-    if (pick.quoteObservedAt && (!Number.isFinite(Date.parse(pick.quoteObservedAt)) || now - Date.parse(pick.quoteObservedAt) > 30 * 60_000 || Date.parse(pick.quoteObservedAt) > now)) return false;
+    if (pick.quoteObservedAt) {
+      const quoteTime = Date.parse(pick.quoteObservedAt);
+      // A request-time expansion starts before the bookmaker replies, so its
+      // fresh quote can be a few seconds newer than the request timestamp.
+      // Reject genuinely future or stale prices, not normal network latency.
+      if (!Number.isFinite(quoteTime) || now - quoteTime > 30 * 60_000 || quoteTime - now > 2 * 60_000) return false;
+    }
     const price = priceFor(pick, priceOverrides);
     const minimumPrice = mode === "recommended" ? 1.1 : 1.06;
     const hasVerifiedPrice = priceOverrides?.[pick.fixtureId] != null || pick.quotedOdds != null;
@@ -63,14 +69,17 @@ function rankedPredictions(predictions: PredictedPick[], now: number, provider: 
       return strongHistory && marketConfirmed;
     }
 
-    // Target mode can be broader than Best Bet, but it still requires a
-    // bookmaker quote (or a price just verified during a retry).
+    // Target mode answers an explicit accumulator request. It still requires
+    // a fresh bookmaker quote, sufficient history and model/market agreement,
+    // but it must not require positive expected value on every leg. Bookmaker
+    // margin makes that condition reject almost the entire live board. The
+    // stricter positive-EV rule remains above for Best Bet and Daily Odds.
     const legacyQuotedPick = pick.quotedOdds != null && pick.marketProbability == null && pick.expectedValue == null;
     return pick.dataQuality !== "LOW"
       && (pick.historyMatches == null || pick.historyMatches >= 6)
       && pick.confidence >= .5
       && pick.probability >= .5
-      && (legacyQuotedPick || ((pick.modelMarketGap ?? 0) <= .12 && (pick.expectedValue ?? -1) >= 0));
+      && (legacyQuotedPick || (pick.marketProbability != null && (pick.modelMarketGap ?? 1) <= .12));
   }).sort((a, b) => predictionScore(b, provider) - predictionScore(a, provider));
 }
 
@@ -132,7 +141,10 @@ export function buildTargetSlip(predictions: PredictedPick[], requestedTarget: n
 
   type State = { picks: PredictedPick[]; odds: number; confidence: number; winChance: number };
   let beam: State[] = [{ picks: [], odds: 1, confidence: 0, winChance: 1 }];
-  const maxLegs = mode === "target" ? 21 : 8;
+  // Target odds are not capped by OddsAura. Use as many distinct live fixtures
+  // as the destination bookmaker request can carry (the provider API accepts
+  // at most 50 selections); evidence-based recommendations remain compact.
+  const maxLegs = mode === "target" ? Math.min(50, groupMap.size) : 8;
   const score = (state: State) => Math.abs(Math.log(Math.max(state.odds, 1.001) / target)) * 3
     + Math.max(0, state.picks.length - (mode === "target" ? 12 : 8)) * .025
     - (state.picks.length ? state.confidence / state.picks.length : 0) * .35;
