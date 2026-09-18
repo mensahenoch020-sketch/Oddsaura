@@ -50,6 +50,7 @@ export async function providerRoutes(app: FastifyInstance) {
       start: z.string().datetime(),
       end: z.string().datetime(),
       marketKeys: z.array(z.string().min(1)).max(40).optional(),
+      fixtureLimit: z.number().int().min(1).max(80).optional(),
     }).parse(request.body);
     const start = Date.parse(body.start), end = Date.parse(body.end);
     if (end <= start || end - start > 8 * 86_400_000) return reply.code(400).send({ error: "Choose a valid period of no more than eight days." });
@@ -62,7 +63,7 @@ export async function providerRoutes(app: FastifyInstance) {
       if (!payload) return reply.code(503).send({ error: "The expanded prediction pool has not been published yet." });
       const allowed = body.marketKeys?.length ? new Set(body.marketKeys) : null;
       const candidates = (payload.candidates ?? []).filter(candidate => Date.parse(candidate.kickoff) >= start && Date.parse(candidate.kickoff) < end && (!allowed || allowed.has(candidate.key)));
-      return await expandProviderMarkets(provider, candidates, fetch);
+      return await expandProviderMarkets(provider, candidates, fetch, body.fixtureLimit ?? 40);
     } catch (error) {
       if (error instanceof BookmakerIntegrationError) return reply.code(error.status).send({ error: error.message, details: error.details });
       return reply.code(502).send({ error: "The live bookmaker expansion could not finish. The saved verified pool is still available." });

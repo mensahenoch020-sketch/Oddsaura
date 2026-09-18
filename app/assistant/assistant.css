@@ -125,6 +125,15 @@
   overflow: hidden;
 }
 
+.assistant-workspace > .home-code-converter {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #303943 transparent;
+}
+
 .assistant-welcome {
   width: min(700px, 100%);
   margin: auto;

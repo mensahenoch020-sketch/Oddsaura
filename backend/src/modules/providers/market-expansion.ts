@@ -55,7 +55,7 @@ export async function expandProviderMarkets(provider: QuoteProvider, candidates:
     selection: candidate.selection,
     line: candidate.line ?? null,
   })));
-  const collected = await collectBookmakerMarkets(inputs, { fetcher, providers: [provider], timeoutMs: 150_000 });
+  const collected = await collectBookmakerMarkets(inputs, { fetcher, providers: [provider], timeoutMs: 150_000, workers: groups.length > 40 ? 4 : 2 });
   const pricingNow = Date.now();
   const fresh = collected.quotes.filter(quote => quote.provider === provider && typeof quote.odds === "number" && Number.isFinite(quote.odds) && quote.odds > 1 && pricingNow - Date.parse(quote.observedAt) >= 0 && pricingNow - Date.parse(quote.observedAt) <= 30 * 60_000);
   const quoteIndex = new Map(fresh.map(quote => [`${quote.fixtureId}|${quote.marketKey}|${quote.line ?? ""}`, quote]));

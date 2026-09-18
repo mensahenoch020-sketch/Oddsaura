@@ -80,7 +80,7 @@ test("builder receives market evidence, verified-price gates and forward proof",
   assert.match(builder, /mode: BuildMode/);
   assert.match(builder, /hasVerifiedPrice/);
   assert.match(builder, /isPublishedMarket/);
-  assert.match(builder, /maxLegs = mode === "target" \? 21 : 8/);
+  assert.match(builder, /maxLegs = mode === "target" \? Math\.min\(50, groupMap\.size\) : 8/);
   assert.doesNotMatch(builder, /Math\.min\(100/);
   assert.match(admin, /Forward prediction proof/);
   assert.match(admin, /refreshSnapshot\("admin"\)/);
@@ -126,4 +126,20 @@ test("converter exposes verified codes and clearly labelled partial conversion",
   assert.match(form, /Source import/);
   assert.match(controller, /stageDetails\("IMPORT"/);
   assert.match(controller, /creationStage/);
+});
+
+test("Railway-compatible worker paths do not require Cloudflare bindings for bookmaker operations", async () => {
+  const [worker, assistant, navigation, converterPage] = await Promise.all([
+    read("worker/index.ts"),
+    read("app/assistant/assistant-client.tsx"),
+    read("app/product-navigation.tsx"),
+    read("app/converter/page.tsx"),
+  ]);
+  assert.match(worker, /env\.ASSETS\s*\?[^:]+:\s*await fetch\(assetUrl\)/s);
+  assert.doesNotMatch(worker, /if \(!identity \|\| !env\.DB\)/);
+  assert.match(worker, /if \(!env\.DB\)[\s\S]*?createBookmakerCode/);
+  assert.doesNotMatch(assistant, /href="\/converter"/);
+  assert.match(assistant, /<ConverterForm embedded/);
+  assert.match(navigation, /\/dashboard\?tool=converter/);
+  assert.match(converterPage, /redirect\("\/dashboard\?tool=converter"\)/);
 });

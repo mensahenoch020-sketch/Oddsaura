@@ -13,7 +13,7 @@ export type QuoteProvider = keyof typeof marketCollectors;
 export type CollectedQuote = MarketQuote & { provider: QuoteProvider; observedAt: string; kickoff: string };
 
 export async function collectBookmakerMarkets(fixtures: SportyBetSelectionInput[][], options: {
-  fetcher?: typeof fetch; collectors?: typeof marketCollectors; timeoutMs?: number; providers?: QuoteProvider[];
+  fetcher?: typeof fetch; collectors?: typeof marketCollectors; timeoutMs?: number; providers?: QuoteProvider[]; workers?: number;
 } = {}) {
   const startedAt = new Date().toISOString();
   const collectors = options.collectors ?? marketCollectors;
@@ -53,7 +53,8 @@ export async function collectBookmakerMarkets(fixtures: SportyBetSelectionInput[
         }
       }
     }
-    await Promise.all([worker(), worker()]);
+    const workerCount = Math.max(1, Math.min(6, options.workers ?? 2));
+    await Promise.all(Array.from({ length: workerCount }, () => worker()));
     const fixturesQuoted = new Set(quotes.map(row => row.fixtureId)).size;
     return {
       provider, status: quotes.length ? (errors.length || attempted < fixtures.length || fixturesQuoted < fixtures.length ? 'PARTIAL' : 'AVAILABLE') : 'UNAVAILABLE',

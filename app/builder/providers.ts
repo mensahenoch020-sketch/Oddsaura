@@ -105,11 +105,11 @@ export async function generateBookmakerCode(provider: ProviderId, selections: Bo
 export const generateSportyBetCode = (selections: BookmakerSelection[], allowPartial = false) => generateBookmakerCode("sportybet", selections, allowPartial);
 export type SportyBetCodeResponse = BookmakerCodeResponse;
 
-export async function expandBookmakerMarkets(provider: ProviderId, start: string, end: string, marketKeys?: string[]) {
+export async function expandBookmakerMarkets(provider: ProviderId, start: string, end: string, marketKeys?: string[], fixtureLimit?: number) {
   const response = await fetch(`/api/providers/${encodeURIComponent(provider)}/expand`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ start, end, ...(marketKeys?.length ? { marketKeys } : {}) }),
+    body: JSON.stringify({ start, end, ...(marketKeys?.length ? { marketKeys } : {}), ...(fixtureLimit ? { fixtureLimit } : {}) }),
   });
   const payload = await response.json() as { picks?: import("../data").PredictedPick[]; error?: string };
   if (!response.ok) throw new BookmakerCodeError(payload.error || `${provider} could not expand its live match pool.`);
