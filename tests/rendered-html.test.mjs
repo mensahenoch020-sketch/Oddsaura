@@ -32,6 +32,21 @@ test("redirects anonymous visitors away from protected predictions", async () =>
   assert.equal(response.headers.get("location"), "http://localhost/login?next=%2Fdashboard");
 });
 
+test("renders protected pages from Railway forwarded identity without Cloudflare bindings", async () => {
+  const worker = await loadWorker();
+  const response = await worker.fetch(new Request("http://localhost/dashboard", {
+    headers: {
+      "x-oddsaura-user-email": "member@example.com",
+      "x-oddsaura-user-name": "Railway Member",
+      "x-oddsaura-user-role": "USER",
+    },
+  }), undefined, ctx);
+  const html = await response.text();
+  assert.equal(response.status, 200);
+  assert.match(html, /What do you want to bet\?/);
+  assert.doesNotMatch(html, /Internal Server Error/);
+});
+
 test("protects the Daily Odds hub", async () => {
   const worker = await loadWorker();
   const response = await worker.fetch(new Request("http://localhost/daily"), env, ctx);

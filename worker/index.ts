@@ -139,8 +139,9 @@ async function sessionIdentity(request: Request, env: Env): Promise<AccountIdent
   if (!env.DB) {
     const email = request.headers.get("x-oddsaura-user-email")?.trim().toLowerCase();
     const name = request.headers.get("x-oddsaura-user-name")?.trim();
+    const forwardedRole = request.headers.get("x-oddsaura-user-role") === "ADMIN" ? "ADMIN" : "USER";
     const admins = new Set(String(env.ODDSAURA_ADMIN_EMAILS || "").split(",").map((item) => item.trim().toLowerCase()).filter(Boolean));
-    return email ? { email, name: name || email, role: admins.has(email) ? "ADMIN" : "USER" } : null;
+    return email ? { email, name: name || email, role: forwardedRole === "ADMIN" || admins.has(email) ? "ADMIN" : "USER" } : null;
   }
   const token = cookieValue(request, SESSION_COOKIE);
   if (!token) return null;
@@ -319,6 +320,10 @@ async function adminApi(request: Request, env: Env, url: URL, identity: AccountI
 
 const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    // Vinext's Node server does not pass Cloudflare bindings. Railway performs
+    // authentication in its outer server and forwards the verified identity.
+    // Normalize the missing bindings object before protected-route checks.
+    env ||= {} as Env;
     const url = new URL(request.url);
 
     if (url.pathname.startsWith("/api/auth/")) {
