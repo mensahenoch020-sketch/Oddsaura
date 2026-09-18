@@ -3,6 +3,7 @@ import { spawn } from "node:child_process";
 import { resolve } from "node:path";
 import { timingSafeEqual } from "node:crypto";
 import pg from "pg";
+import { resolveDatabaseUrl } from "./database-config.mjs";
 
 const { Pool } = pg;
 const port = Number(process.env.PORT || 3000);
@@ -15,7 +16,8 @@ const protectedPages = ["/dashboard", "/assistant", "/daily", "/matches", "/buil
 const protectedApis = ["/api/providers", "/api/sportybet/code", "/api/account", "/api/codes", "/api/slips", "/api/ticket-controls", "/api/admin"];
 const edgeOrigin = process.env.ODDSAURA_EDGE_ORIGIN?.replace(/\/$/, "") || null;
 
-const pool = process.env.DATABASE_URL ? new Pool({ connectionString: process.env.DATABASE_URL }) : null;
+const databaseUrl = resolveDatabaseUrl();
+const pool = databaseUrl ? new Pool({ connectionString: databaseUrl }) : null;
 
 function base64Url(bytes) { return Buffer.from(bytes).toString("base64url"); }
 function fromBase64Url(value) { return new Uint8Array(Buffer.from(value, "base64url")); }
