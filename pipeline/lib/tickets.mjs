@@ -50,7 +50,7 @@ export function buildTicket(candidates, category, fixtures) {
         && odds >= band.minOdds && odds <= band.maxOdds
         && (item.marketProbability ?? 0) >= band.minMarketProbability
         && (item.modelMarketGap ?? 1) <= .1
-        && (item.expectedValue ?? -1) >= 0;
+        && (item.edge ?? -1) >= 0;
     })
     .sort((a, b) => {
       const leagueDelta = priorityLeague(fixtureMap.get(a.fixtureId)?.league) - priorityLeague(fixtureMap.get(b.fixtureId)?.league);

@@ -65,15 +65,14 @@ function rankedPredictions(predictions: PredictedPick[], now: number, provider: 
         && pick.probability >= .62
         && (pick.marketProbability ?? 0) >= .58
         && (pick.modelMarketGap ?? 1) <= .1
-        && (pick.expectedValue ?? -1) >= 0;
+        && (pick.edge ?? -1) >= 0;
       return strongHistory && marketConfirmed;
     }
 
     // Target mode answers an explicit accumulator request. It still requires
     // a fresh bookmaker quote, sufficient history and model/market agreement,
-    // but it must not require positive expected value on every leg. Bookmaker
-    // margin makes that condition reject almost the entire live board. The
-    // stricter positive-EV rule remains above for Best Bet and Daily Odds.
+    // but it must not require positive model edge on every leg. The stricter
+    // positive-edge rule remains above for Best Bet and Daily Odds.
     const legacyQuotedPick = pick.quotedOdds != null && pick.marketProbability == null && pick.expectedValue == null;
     return pick.dataQuality !== "LOW"
       && (pick.historyMatches == null || pick.historyMatches >= 6)

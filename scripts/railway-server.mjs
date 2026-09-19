@@ -1,9 +1,10 @@
 import { createServer, request as httpRequest } from "node:http";
 import { spawn } from "node:child_process";
 import { resolve } from "node:path";
-import { timingSafeEqual } from "node:crypto";
+import { createHash, timingSafeEqual } from "node:crypto";
 import pg from "pg";
 import { resolveDatabaseUrl } from "./database-config.mjs";
+import { buildXReply, parseXConversionRequest } from "./x-reply-helper.mjs";
 
 const { Pool } = pg;
 const port = Number(process.env.PORT || 3000);
@@ -44,6 +45,9 @@ async function ensureTables() {
   await pool.query(`CREATE TABLE IF NOT EXISTS oa_generated_codes (id TEXT PRIMARY KEY, user_email TEXT NOT NULL REFERENCES oa_users(email) ON DELETE CASCADE, provider TEXT NOT NULL, code TEXT NOT NULL, deep_link TEXT, selections_json TEXT NOT NULL, created_at BIGINT NOT NULL)`);
   await pool.query(`CREATE INDEX IF NOT EXISTS oa_generated_codes_user_created_idx ON oa_generated_codes(user_email, created_at DESC)`);
   await pool.query(`CREATE TABLE IF NOT EXISTS oa_ticket_controls (ticket_id TEXT PRIMARY KEY, visible BOOLEAN NOT NULL DEFAULT TRUE, title_override TEXT, updated_by TEXT NOT NULL REFERENCES oa_users(email), updated_at BIGINT NOT NULL)`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS oa_public_rate_limits (client_key TEXT NOT NULL, window_start BIGINT NOT NULL, request_count INTEGER NOT NULL DEFAULT 1, PRIMARY KEY(client_key, window_start))`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS oa_x_reply_requests (id TEXT PRIMARY KEY, tweet_url TEXT, request_text TEXT NOT NULL, source_provider TEXT NOT NULL, destination_provider TEXT NOT NULL, source_code TEXT NOT NULL, response_text TEXT, status TEXT NOT NULL, conversion_json TEXT, created_by TEXT NOT NULL REFERENCES oa_users(email), created_at BIGINT NOT NULL, updated_at BIGINT NOT NULL)`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS oa_x_reply_requests_created_idx ON oa_x_reply_requests(created_at DESC)`);
 }
 
 async function createSession(email, maxAge = sessionSeconds) { const token = randomToken(); const now = Date.now(); await pool.query("INSERT INTO oa_sessions(token_hash,user_email,expires_at,created_at) VALUES($1,$2,$3,$4)", [await digest(token), email, now + maxAge * 1000, now]); return token; }
@@ -108,9 +112,94 @@ async function ticketControlsApi(req, res) {
   return json(res, 200, { controls: result.rows.map((row) => ({ ticketId: row.ticket_id, titleOverride: row.title_override, visible: row.visible, updatedAt: Number(row.updated_at) })) });
 }
 
+function publicClientKey(req) {
+  const forwarded = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+  const address = forwarded || String(req.headers["x-real-ip"] || req.socket.remoteAddress || "unknown");
+  const agent = String(req.headers["user-agent"] || "unknown").slice(0, 180);
+  return createHash("sha256").update(`${address}|${agent}`).digest("hex");
+}
+
+async function consumePublicConversion(req) {
+  const limit = Math.max(1, Math.min(50, Number(process.env.PUBLIC_CONVERSION_HOURLY_LIMIT || 8)));
+  const windowStart = Math.floor(Date.now() / 3_600_000) * 3_600_000;
+  const result = await pool.query(`INSERT INTO oa_public_rate_limits(client_key,window_start,request_count) VALUES($1,$2,1)
+    ON CONFLICT(client_key,window_start) DO UPDATE SET request_count=oa_public_rate_limits.request_count+1
+    WHERE oa_public_rate_limits.request_count<$3 RETURNING request_count`, [publicClientKey(req), windowStart, limit]);
+  const count = Number(result.rows[0]?.request_count ?? limit);
+  return { allowed: result.rowCount > 0, remaining: Math.max(0, limit - count) };
+}
+
+async function internalConversion(body, account = { email: "public-converter@oddsaura.local", name: "Public converter" }) {
+  const response = await fetch(`http://127.0.0.1:${appPort}/api/providers/convert`, {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-oddsaura-user-email": account.email, "x-oddsaura-user-name": account.name },
+    body: JSON.stringify(body),
+  });
+  const payload = await response.json().catch(() => ({ error: "The bookmaker returned an invalid response." }));
+  return { response, payload };
+}
+
+let activePublicConversions = 0;
+async function publicConverterApi(req, res) {
+  if (req.method !== "POST") return json(res, 405, { error: "Method not allowed." });
+  if (!pool) return json(res, 503, { error: "Public conversion is temporarily unavailable." });
+  if (activePublicConversions >= 3) return json(res, 429, { error: "The converter is busy. Please retry in a minute." }, { "retry-after": "60" });
+  const body = await readJson(req);
+  if (String(body.website || "")) return json(res, 400, { error: "Request could not be accepted." });
+  const providers = new Set(["sportybet", "betpawa", "bet9ja", "betking", "betway"]);
+  const sourceProvider = String(body.sourceProvider || "").toLowerCase();
+  const destinationProvider = String(body.destinationProvider || "").toLowerCase();
+  const code = String(body.code || "").trim().toUpperCase();
+  if (!providers.has(sourceProvider) || !providers.has(destinationProvider) || sourceProvider === destinationProvider || !/^[A-Z0-9]{4,16}$/.test(code)) return json(res, 400, { error: "Choose two different supported bookmakers and enter a valid booking code." });
+  const quota = await consumePublicConversion(req);
+  if (!quota.allowed) return json(res, 429, { error: "Fair-use limit reached. Please try again next hour or log in to OddsAura." }, { "retry-after": "3600" });
+  activePublicConversions += 1;
+  try {
+    const { response, payload } = await internalConversion({ sourceProvider, destinationProvider, code, allowPartial: true });
+    return json(res, response.status, { sourceProvider, destinationProvider, sourceCode: code, importedFrom: "bookmaker", quotaRemaining: quota.remaining, ...payload });
+  } finally { activePublicConversions -= 1; }
+}
+
+async function xReplyApi(req, res, url, user) {
+  if (!pool) return json(res, 503, { error: "Account storage is not configured yet." });
+  if (req.method === "GET" && url.pathname === "/api/admin/x-replies") {
+    const result = await pool.query("SELECT id,tweet_url,request_text,source_provider,destination_provider,source_code,response_text,status,conversion_json,created_at,updated_at FROM oa_x_reply_requests ORDER BY created_at DESC LIMIT 100");
+    return json(res, 200, { requests: result.rows.map((row) => ({ id: row.id, tweetUrl: row.tweet_url, requestText: row.request_text, sourceProvider: row.source_provider, destinationProvider: row.destination_provider, sourceCode: row.source_code, responseText: row.response_text, status: row.status, conversion: row.conversion_json ? JSON.parse(row.conversion_json) : null, createdAt: Number(row.created_at), updatedAt: Number(row.updated_at) })) });
+  }
+  if (req.method === "POST" && url.pathname === "/api/admin/x-replies") {
+    const body = await readJson(req);
+    const parsed = parseXConversionRequest(body.requestText);
+    const sourceProvider = String(body.sourceProvider || parsed.sourceProvider || "").toLowerCase();
+    const destinationProvider = String(body.destinationProvider || parsed.destinationProvider || "").toLowerCase();
+    const sourceCode = String(body.sourceCode || parsed.code || "").trim().toUpperCase();
+    const requestText = String(body.requestText || "").trim().slice(0, 1000);
+    const tweetUrl = String(body.tweetUrl || "").trim().slice(0, 500) || null;
+    const providers = new Set(["sportybet", "betpawa", "bet9ja", "betking", "betway"]);
+    if (!requestText || !providers.has(sourceProvider) || !providers.has(destinationProvider) || sourceProvider === destinationProvider || !/^[A-Z0-9]{4,16}$/.test(sourceCode)) return json(res, 400, { error: "Paste the request, then confirm its source bookmaker, destination bookmaker and booking code." });
+    if (tweetUrl && !/^https:\/\/(?:www\.)?(?:x\.com|twitter\.com)\/[^/]+\/status\/\d+/i.test(tweetUrl)) return json(res, 400, { error: "Enter a valid public X post URL or leave it blank." });
+    const id = crypto.randomUUID(); const now = Date.now();
+    const { response, payload } = await internalConversion({ sourceProvider, destinationProvider, code: sourceCode, allowPartial: true }, { email: user.email, name: user.name });
+    const status = response.ok && payload.code ? "READY" : "FAILED";
+    const responseText = status === "READY" ? buildXReply({ sourceProvider, destinationProvider, sourceCode, result: payload }) : null;
+    await pool.query("INSERT INTO oa_x_reply_requests(id,tweet_url,request_text,source_provider,destination_provider,source_code,response_text,status,conversion_json,created_by,created_at,updated_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$11)", [id, tweetUrl, requestText, sourceProvider, destinationProvider, sourceCode, responseText, status, JSON.stringify(payload), user.email, now]);
+    return json(res, response.ok ? 201 : response.status, { request: { id, tweetUrl, requestText, sourceProvider, destinationProvider, sourceCode, responseText, status, conversion: payload, createdAt: now, updatedAt: now }, ...(response.ok ? {} : { error: payload.error || "Conversion failed." }) });
+  }
+  const match = url.pathname.match(/^\/api\/admin\/x-replies\/([^/]+)$/);
+  if (req.method === "PATCH" && match) {
+    const body = await readJson(req); const status = ["READY", "POSTED", "ARCHIVED"].includes(body.status) ? body.status : null;
+    const responseText = typeof body.responseText === "string" ? body.responseText.trim().slice(0, 1000) : null;
+    if (!status) return json(res, 400, { error: "Choose a valid reply status." });
+    const result = await pool.query("UPDATE oa_x_reply_requests SET status=$1,response_text=COALESCE($2,response_text),updated_at=$3 WHERE id=$4 RETURNING id", [status, responseText, Date.now(), decodeURIComponent(match[1])]);
+    if (!result.rowCount) return json(res, 404, { error: "Reply request not found." });
+    return json(res, 200, { updated: true });
+  }
+  return json(res, 405, { error: "Method not allowed." });
+}
+
 async function adminApi(req, res, url, user) {
   if (!pool) return json(res, 503, { error: "Account storage is not configured yet." });
   if (user.role !== "ADMIN") return json(res, 403, { error: "Administrator access required." });
+  if (url.pathname === "/api/admin/x-replies" || url.pathname.startsWith("/api/admin/x-replies/")) return xReplyApi(req, res, url, user);
   const now = Date.now();
   if (url.pathname === "/api/admin/overview" && req.method === "GET") {
     const [users, slips, codes, recentUsers, controls] = await Promise.all([
@@ -240,6 +329,8 @@ vinext.on("exit", (code) => { if (code) process.exit(code); });
 createServer(async (req, res) => {
   try {
     const url = new URL(req.url || "/", `https://${req.headers.host || "oddsaura.local"}`);
+    if (url.pathname === "/api/health" && req.method === "GET") return json(res, 200, { ok: true, service: "oddsaura", database: Boolean(pool), time: new Date().toISOString() });
+    if (url.pathname === "/api/public/convert") return await publicConverterApi(req, res);
     if (!pool) {
       if (edgeOrigin) return await proxyEdge(req, res);
       const pageProtected = protectedPages.some((path) => url.pathname === path || url.pathname.startsWith(`${path}/`));

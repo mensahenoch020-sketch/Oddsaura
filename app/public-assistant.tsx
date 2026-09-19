@@ -7,7 +7,7 @@ import Brand from "./brand";
 const prompts = [
   { icon: "↗", text: "Give me 20 odds for Sporty" },
   { icon: "↯", text: "Split 100 odds into 3 Sporty codes" },
-  { icon: "⇄", text: "Convert a Betway code to SportyBet" },
+  { icon: "⇄", text: "Convert a Betway code to SportyBet", href: "/convert" },
   { icon: "✓", text: "Show today’s qualified odds" },
 ];
 
@@ -45,7 +45,7 @@ export default function PublicAssistant() {
           <h1>What do you want to bet?</h1>
           <p>Ask naturally. Build any target odds, split slips, convert booking codes, find the strongest matches or check recent results.</p>
           <div className="assistant-prompts">
-            {prompts.map((prompt) => <button key={prompt.text} type="button" onClick={() => continueWith(prompt.text)}><b>{prompt.icon}</b>{prompt.text}</button>)}
+            {prompts.map((prompt) => prompt.href ? <Link key={prompt.text} href={prompt.href}><b>{prompt.icon}</b>{prompt.text}</Link> : <button key={prompt.text} type="button" onClick={() => continueWith(prompt.text)}><b>{prompt.icon}</b>{prompt.text}</button>)}
           </div>
         </div>
         <div className="assistant-composer-dock landing-composer-dock">

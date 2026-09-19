@@ -206,7 +206,8 @@
   text-align: left;
 }
 
-.assistant-prompts button {
+.assistant-prompts button,
+.assistant-prompts a {
   min-height: 58px;
   border: 1px solid var(--chat-line);
   border-radius: 14px;
@@ -219,14 +220,17 @@
   font: inherit;
   font-size: .84rem;
   cursor: pointer;
+  text-decoration: none;
 }
 
-.assistant-prompts button:hover {
+.assistant-prompts button:hover,
+.assistant-prompts a:hover {
   border-color: #3c7652;
   background: #14231a;
 }
 
-.assistant-prompts button b {
+.assistant-prompts button b,
+.assistant-prompts a b {
   width: 30px;
   height: 30px;
   border-radius: 9px;
@@ -534,7 +538,7 @@
   .assistant-welcome h1 { font-size: 2.35rem; }
   .assistant-welcome > p { font-size: .84rem; line-height: 1.52; }
   .assistant-prompts { margin-top: 22px; grid-template-columns: 1fr; gap: 7px; }
-  .assistant-prompts button { min-height: 48px; padding: 8px 11px; font-size: .78rem; }
+  .assistant-prompts button, .assistant-prompts a { min-height: 48px; padding: 8px 11px; font-size: .78rem; }
   .assistant-thread { padding: 16px 0 112px; gap: 15px; scroll-padding-bottom: 112px; }
   .assistant-message { gap: 7px; }
   .assistant-avatar { width: 29px; height: 29px; border-radius: 9px; font-size: .56rem; }
@@ -569,7 +573,7 @@
   .assistant-welcome { padding-top: 18px; }
   .assistant-orb { display: none; }
   .assistant-prompts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .assistant-prompts button { min-height: 44px; }
+  .assistant-prompts button, .assistant-prompts a { min-height: 44px; }
 }
 
 @media (max-width: 370px) {
