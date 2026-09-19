@@ -49,9 +49,9 @@ test("Railway protects and serves account operations used by the live UI", async
 });
 
 test("public converter and private X reply assistant use the verified conversion path", async () => {
-  const [server, publicPage, publicAssistant, admin, helper] = await Promise.all([read("scripts/railway-server.mjs"), read("app/convert/page.tsx"), read("app/public-assistant.tsx"), read("app/admin/x-reply-assistant.tsx"), read("scripts/x-reply-helper.mjs")]);
-  assert.match(server, /oa_public_rate_limits/); assert.match(server, /oa_x_reply_requests/); assert.match(server, /url\.pathname === "\/api\/public\/convert"/); assert.match(server, /activePublicConversions >= 3/); assert.match(server, /internalConversion/); assert.match(server, /url\.pathname === "\/api\/health"/);
-  assert.match(publicPage, /<ConverterForm publicMode/); assert.match(publicAssistant, /href: "\/convert"/); assert.match(admin, /Convert and draft reply/); assert.match(admin, /Open reply on X/); assert.match(helper, /parseXConversionRequest/);
+  const [server, publicPage, publicAssistant, admin, helper, reader, manifest] = await Promise.all([read("scripts/railway-server.mjs"), read("app/convert/page.tsx"), read("app/public-assistant.tsx"), read("app/admin/x-reply-assistant.tsx"), read("scripts/x-reply-helper.mjs"), read("scripts/x-post-reader.mjs"), read("app/manifest.ts")]);
+  assert.match(server, /oa_public_rate_limits/); assert.match(server, /oa_x_reply_requests/); assert.match(server, /url\.pathname === "\/api\/public\/convert"/); assert.match(server, /\/api\/public\/x-results\//); assert.match(server, /activePublicConversions >= 3/); assert.match(server, /internalConversion/); assert.match(server, /url\.pathname === "\/api\/health"/);
+  assert.match(publicPage, /<ConverterForm publicMode/); assert.match(publicAssistant, /href: "\/convert"/); assert.match(admin, /Convert all and draft reply/); assert.match(admin, /Open reply on X/); assert.match(admin, /x_url/); assert.match(helper, /buildBatchXReply/); assert.match(reader, /publish\.x\.com\/oembed/); assert.match(manifest, /share_target/);
 });
 
 test("public football payloads are split, bundled and cached for faster mobile loading", async () => {

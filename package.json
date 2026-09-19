@@ -19,11 +19,13 @@
     "db:generate": "bash scripts/sites-env.sh -- drizzle-kit generate"
   },
   "dependencies": {
+    "@tesseract.js-data/eng": "1.0.0",
     "drizzle-orm": "0.45.2",
     "next": "16.2.6",
     "pg": "^8.16.3",
     "react": "19.2.6",
-    "react-dom": "19.2.6"
+    "react-dom": "19.2.6",
+    "tesseract.js": "7.0.0"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.37.1",
