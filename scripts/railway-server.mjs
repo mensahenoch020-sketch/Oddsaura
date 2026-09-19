@@ -4,7 +4,8 @@ import { resolve } from "node:path";
 import { createHash, timingSafeEqual } from "node:crypto";
 import pg from "pg";
 import { resolveDatabaseUrl } from "./database-config.mjs";
-import { buildXReply, parseXConversionRequest } from "./x-reply-helper.mjs";
+import { batchMissingSelections, buildBatchXReply, isValidXPostUrl, parseXConversionRequest } from "./x-reply-helper.mjs";
+import { readXPost } from "./x-post-reader.mjs";
 
 const { Pool } = pg;
 const port = Number(process.env.PORT || 3000);
@@ -160,29 +161,96 @@ async function publicConverterApi(req, res) {
   } finally { activePublicConversions -= 1; }
 }
 
+function xReplyRow(row) {
+  return { id: row.id, tweetUrl: row.tweet_url, requestText: row.request_text, sourceProvider: row.source_provider, destinationProvider: row.destination_provider, sourceCode: row.source_code, responseText: row.response_text, status: row.status, conversion: row.conversion_json ? JSON.parse(row.conversion_json) : null, createdAt: Number(row.created_at), updatedAt: Number(row.updated_at) };
+}
+
+function batchCodes(input, detected) {
+  const supplied = Array.isArray(input) ? input : [];
+  const candidates = supplied.length ? supplied : detected;
+  const output = []; const seen = new Set();
+  for (const item of candidates ?? []) {
+    const code = String(typeof item === "string" ? item : item?.code || "").trim().toUpperCase();
+    const label = String(typeof item === "object" && item?.label ? item.label : "").trim().slice(0, 40) || null;
+    if (!/^[A-Z0-9]{4,20}$/.test(code) || seen.has(code)) continue;
+    seen.add(code); output.push({ code, label });
+  }
+  return output.slice(0, 20);
+}
+
+function requestOrigin() {
+  const configured = String(process.env.ODDSAURA_PUBLIC_ORIGIN || "https://oddsaura.site").trim().replace(/\/$/, "");
+  try { return new URL(configured).origin; }
+  catch { return "https://oddsaura.site"; }
+}
+
+function normalizedConversionPayload(payload) {
+  return {
+    ...payload,
+    unmatched: Array.isArray(payload?.unmatched) ? payload.unmatched : Array.isArray(payload?.details?.unmatched) ? payload.details.unmatched : [],
+    sourceIssues: Array.isArray(payload?.sourceIssues) ? payload.sourceIssues : Array.isArray(payload?.details?.skippedSelections) ? payload.details.skippedSelections : [],
+  };
+}
+
+async function publicXResultApi(req, res, url) {
+  if (req.method !== "GET") return json(res, 405, { error: "Method not allowed." });
+  if (!pool) return json(res, 503, { error: "Conversion results are temporarily unavailable." });
+  const id = decodeURIComponent(url.pathname.slice("/api/public/x-results/".length));
+  if (!/^[A-Za-z0-9_-]{8,40}$/.test(id)) return json(res, 404, { error: "Conversion result not found." });
+  const result = await pool.query("SELECT id,tweet_url,source_provider,destination_provider,source_code,conversion_json,created_at FROM oa_x_reply_requests WHERE id=$1 LIMIT 1", [id]);
+  if (!result.rowCount) return json(res, 404, { error: "Conversion result not found." });
+  const row = result.rows[0]; const conversion = row.conversion_json ? JSON.parse(row.conversion_json) : {};
+  const items = Array.isArray(conversion.batch) ? conversion.batch : [];
+  return json(res, 200, { id: row.id, tweetUrl: row.tweet_url, sourceProvider: row.source_provider, destinationProvider: row.destination_provider, sourceCodes: String(row.source_code || "").split(",").filter(Boolean), items, missing: batchMissingSelections(items), createdAt: Number(row.created_at) });
+}
+
 async function xReplyApi(req, res, url, user) {
   if (!pool) return json(res, 503, { error: "Account storage is not configured yet." });
   if (req.method === "GET" && url.pathname === "/api/admin/x-replies") {
     const result = await pool.query("SELECT id,tweet_url,request_text,source_provider,destination_provider,source_code,response_text,status,conversion_json,created_at,updated_at FROM oa_x_reply_requests ORDER BY created_at DESC LIMIT 100");
-    return json(res, 200, { requests: result.rows.map((row) => ({ id: row.id, tweetUrl: row.tweet_url, requestText: row.request_text, sourceProvider: row.source_provider, destinationProvider: row.destination_provider, sourceCode: row.source_code, responseText: row.response_text, status: row.status, conversion: row.conversion_json ? JSON.parse(row.conversion_json) : null, createdAt: Number(row.created_at), updatedAt: Number(row.updated_at) })) });
+    return json(res, 200, { requests: result.rows.map(xReplyRow) });
+  }
+  if (req.method === "POST" && url.pathname === "/api/admin/x-replies/resolve") {
+    const body = await readJson(req); const tweetUrl = String(body.tweetUrl || "").trim().slice(0, 500);
+    if (!isValidXPostUrl(tweetUrl)) return json(res, 400, { error: "Enter a valid public X post link." });
+    try {
+      const post = await readXPost(tweetUrl);
+      return json(res, 200, post);
+    } catch (error) { return json(res, 422, { error: error instanceof Error ? error.message : "This X post could not be read." }); }
   }
   if (req.method === "POST" && url.pathname === "/api/admin/x-replies") {
     const body = await readJson(req);
-    const parsed = parseXConversionRequest(body.requestText);
-    const sourceProvider = String(body.sourceProvider || parsed.sourceProvider || "").toLowerCase();
-    const destinationProvider = String(body.destinationProvider || parsed.destinationProvider || "").toLowerCase();
-    const sourceCode = String(body.sourceCode || parsed.code || "").trim().toUpperCase();
-    const requestText = String(body.requestText || "").trim().slice(0, 1000);
     const tweetUrl = String(body.tweetUrl || "").trim().slice(0, 500) || null;
+    if (tweetUrl && !isValidXPostUrl(tweetUrl)) return json(res, 400, { error: "Enter a valid public X post link or leave it blank." });
+    let post = null; let requestText = String(body.requestText || "").trim().slice(0, 4_000);
+    if (!requestText && tweetUrl) {
+      try { post = await readXPost(tweetUrl); requestText = post.requestText; }
+      catch (error) { return json(res, 422, { error: error instanceof Error ? error.message : "This X post could not be read." }); }
+    }
+    const parsed = parseXConversionRequest(requestText);
+    const preferDetected = body.autoDetect !== false;
+    const sourceProvider = String(preferDetected ? parsed.sourceProvider || body.sourceProvider || "" : body.sourceProvider || parsed.sourceProvider || "").toLowerCase();
+    const destinationProvider = String(preferDetected ? parsed.destinationProvider || body.destinationProvider || "" : body.destinationProvider || parsed.destinationProvider || "").toLowerCase();
+    const codes = batchCodes(body.sourceCodes, parsed.codes);
     const providers = new Set(["sportybet", "betpawa", "bet9ja", "betking", "betway"]);
-    if (!requestText || !providers.has(sourceProvider) || !providers.has(destinationProvider) || sourceProvider === destinationProvider || !/^[A-Z0-9]{4,16}$/.test(sourceCode)) return json(res, 400, { error: "Paste the request, then confirm its source bookmaker, destination bookmaker and booking code." });
-    if (tweetUrl && !/^https:\/\/(?:www\.)?(?:x\.com|twitter\.com)\/[^/]+\/status\/\d+/i.test(tweetUrl)) return json(res, 400, { error: "Enter a valid public X post URL or leave it blank." });
-    const id = crypto.randomUUID(); const now = Date.now();
-    const { response, payload } = await internalConversion({ sourceProvider, destinationProvider, code: sourceCode, allowPartial: true }, { email: user.email, name: user.name });
-    const status = response.ok && payload.code ? "READY" : "FAILED";
-    const responseText = status === "READY" ? buildXReply({ sourceProvider, destinationProvider, sourceCode, result: payload }) : null;
-    await pool.query("INSERT INTO oa_x_reply_requests(id,tweet_url,request_text,source_provider,destination_provider,source_code,response_text,status,conversion_json,created_by,created_at,updated_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$11)", [id, tweetUrl, requestText, sourceProvider, destinationProvider, sourceCode, responseText, status, JSON.stringify(payload), user.email, now]);
-    return json(res, response.ok ? 201 : response.status, { request: { id, tweetUrl, requestText, sourceProvider, destinationProvider, sourceCode, responseText, status, conversion: payload, createdAt: now, updatedAt: now }, ...(response.ok ? {} : { error: payload.error || "Conversion failed." }) });
+    if (!requestText && codes.length) requestText = codes.map((item) => `${item.label ? `${item.label} - ` : ""}${item.code}`).join("\n");
+    if (!requestText || !providers.has(sourceProvider) || !providers.has(destinationProvider) || sourceProvider === destinationProvider || !codes.length) return json(res, 400, { error: post?.mediaDetected && !codes.length ? "The attached image was found, but its codes could not be read clearly. Paste the code lines below so OddsAura can continue." : "OddsAura needs the source bookmaker, destination bookmaker and at least one valid booking code.", detected: parsed });
+    const id = randomToken(9); const now = Date.now(); const items = [];
+    for (const item of codes) {
+      try {
+        const { response, payload } = await internalConversion({ sourceProvider, destinationProvider, code: item.code, allowPartial: true }, { email: user.email, name: user.name });
+        const result = normalizedConversionPayload(payload);
+        items.push({ sourceCode: item.code, label: item.label, status: response.ok && result.code ? "READY" : "FAILED", result, error: response.ok ? null : result.error || "Conversion failed." });
+      } catch (error) { items.push({ sourceCode: item.code, label: item.label, status: "FAILED", result: {}, error: error instanceof Error ? error.message : "Conversion failed." }); }
+    }
+    const successCount = items.filter((item) => item.status === "READY").length;
+    const status = successCount ? "READY" : "FAILED";
+    const resultUrl = `${requestOrigin()}/x/${id}`;
+    const responseText = buildBatchXReply({ sourceProvider, destinationProvider, items, resultUrl });
+    const conversion = { batch: items, successCount, failureCount: items.length - successCount, mediaDetected: Boolean(post?.mediaDetected), ocrUsed: Boolean(post?.ocrUsed) };
+    const sourceCode = codes.map((item) => item.code).join(",");
+    await pool.query("INSERT INTO oa_x_reply_requests(id,tweet_url,request_text,source_provider,destination_provider,source_code,response_text,status,conversion_json,created_by,created_at,updated_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$11)", [id, tweetUrl, requestText, sourceProvider, destinationProvider, sourceCode, responseText, status, JSON.stringify(conversion), user.email, now]);
+    return json(res, 201, { request: { id, tweetUrl, requestText, sourceProvider, destinationProvider, sourceCode, sourceCodes: codes, responseText, status, conversion, resultUrl, createdAt: now, updatedAt: now } });
   }
   const match = url.pathname.match(/^\/api\/admin\/x-replies\/([^/]+)$/);
   if (req.method === "PATCH" && match) {
@@ -331,6 +399,7 @@ createServer(async (req, res) => {
     const url = new URL(req.url || "/", `https://${req.headers.host || "oddsaura.local"}`);
     if (url.pathname === "/api/health" && req.method === "GET") return json(res, 200, { ok: true, service: "oddsaura", database: Boolean(pool), time: new Date().toISOString() });
     if (url.pathname === "/api/public/convert") return await publicConverterApi(req, res);
+    if (url.pathname.startsWith("/api/public/x-results/")) return await publicXResultApi(req, res, url);
     if (!pool) {
       if (edgeOrigin) return await proxyEdge(req, res);
       const pageProtected = protectedPages.some((path) => url.pathname === path || url.pathname.startsWith(`${path}/`));
