@@ -259,7 +259,7 @@ const eligiblePicks = [...predictions]
   .filter((item) => {
     const fixture = fixtureMap.get(item.fixtureId);
     if (!fixture || !publicMarketKeys.test(item.key) || !item.quotedOdds || item.marketProbability == null) return false;
-    return historyEvidence(item).ready && item.confidence >= marketConfidenceFloor(item.key) && (item.modelMarketGap ?? 1) <= .1 && (item.expectedValue ?? -1) >= 0;
+    return historyEvidence(item).ready && item.confidence >= marketConfidenceFloor(item.key) && (item.modelMarketGap ?? 1) <= .1 && (item.edge ?? -1) >= 0;
   })
   .sort((a, b) => (b.confidence + Math.max(0, b.edge ?? 0)) - (a.confidence + Math.max(0, a.edge ?? 0)));
 const bestEligibleByFixture = new Map();
@@ -286,7 +286,7 @@ for (const provider of bookmakerIds) for (const key of showcaseKeys) {
   const strongest = predictions.filter((item) => {
     const fixture = fixtureMap.get(item.fixtureId);
     return item.oddsProvider === provider && item.key === key && fixture && item.quotedOdds && item.marketProbability != null && isPriorityLeague(fixture.league)
-      && historyEvidence(item).ready && item.confidence >= Math.max(.48, marketConfidenceFloor(item.key)) && (item.modelMarketGap ?? 1) <= .1 && (item.expectedValue ?? -1) >= 0;
+      && historyEvidence(item).ready && item.confidence >= Math.max(.48, marketConfidenceFloor(item.key)) && (item.modelMarketGap ?? 1) <= .1 && (item.edge ?? -1) >= 0;
   }).sort((a, b) => b.confidence - a.confidence).slice(0, 12);
   for (const pick of strongest) {
     const fixture = fixtureMap.get(pick.fixtureId);
@@ -311,8 +311,8 @@ function watchlistFamily(key) {
   return "OTHER";
 }
 const watchlistCandidates = [...predictions]
-  .filter((item) => dailyFixtureIds.has(item.fixtureId) && publicMarketKeys.test(item.key) && historyEvidence(item).ready && item.confidence >= 0.62 && item.quotedOdds >= 1.1 && item.quotedOdds <= 3 && item.marketProbability != null && (item.modelMarketGap ?? 1) <= .1 && (item.expectedValue ?? -1) >= 0)
-  .sort((a, b) => (b.confidence + Math.max(0, b.expectedValue ?? 0)) - (a.confidence + Math.max(0, a.expectedValue ?? 0)));
+  .filter((item) => dailyFixtureIds.has(item.fixtureId) && publicMarketKeys.test(item.key) && historyEvidence(item).ready && item.confidence >= 0.62 && item.quotedOdds >= 1.1 && item.quotedOdds <= 3 && item.marketProbability != null && (item.modelMarketGap ?? 1) <= .1 && (item.edge ?? -1) >= 0)
+  .sort((a, b) => (b.confidence + Math.max(0, b.edge ?? 0)) - (a.confidence + Math.max(0, a.edge ?? 0)));
 const watchlistFamilies = [...new Set(watchlistCandidates.map((pick) => watchlistFamily(pick.key)))];
 const watchlistBuckets = new Map(watchlistFamilies.map((family) => [family, watchlistCandidates.filter((pick) => watchlistFamily(pick.key) === family)]));
 const orderedWatchlistCandidates = [];
