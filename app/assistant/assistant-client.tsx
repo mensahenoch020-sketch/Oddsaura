@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import ProductNavigation from "../product-navigation";
 import ConverterForm from "../converter/converter-form";
@@ -15,7 +14,7 @@ import "../converter/home-converter.css";
 import "../compact-theme.css";
 
 type PendingIntent = Exclude<AssistantIntent, { kind: "unknown" | "daily" | "best" | "results" }>;
-type SelectionSummary = { id: string; match: string; market: string; selection: string; odds: number | null; priceStatus?: "QUOTED" | "MODEL_ESTIMATE"; evidence?: string };
+type SelectionSummary = { id: string; match: string; market: string; selection: string; odds: number | null; priceStatus?: "QUOTED" | "MODEL_ESTIMATE" };
 type CodeSummary = {
   provider: ProviderId;
   requestedOdds?: number;
@@ -53,7 +52,7 @@ const pickPrice = (pick: PredictedPick) => pick.quotedOdds ?? pick.fairOdds ?? n
 function summarizeSelection(pick: PredictedPick | WatchlistPick | TicketSelection): SelectionSummary {
   const odds = "quotedOdds" in pick ? pick.quotedOdds ?? pick.fairOdds : pick.odds;
   const priceStatus = "priceStatus" in pick ? pick.priceStatus : "quotedOdds" in pick && pick.quotedOdds == null ? "MODEL_ESTIMATE" : "QUOTED";
-  return { id: pick.id, match: `${pick.homeTeam.name} vs ${pick.awayTeam.name}`, market: pick.market.name, selection: pick.selection, odds, priceStatus, evidence: pick.reasoning };
+  return { id: pick.id, match: `${pick.homeTeam.name} vs ${pick.awayTeam.name}`, market: pick.market.name, selection: pick.selection, odds, priceStatus };
 }
 
 function bookmakerSelections(picks: PredictedPick[], provider: ProviderId) {
@@ -70,6 +69,7 @@ function bookmakerSelections(picks: PredictedPick[], provider: ProviderId) {
     providerMarketId: pick.oddsProvider?.toLowerCase() === provider ? pick.providerMarketId : null,
     providerOutcomeId: pick.oddsProvider?.toLowerCase() === provider ? pick.providerSelectionId : null,
     providerSpecifier: pick.oddsProvider?.toLowerCase() === provider ? pick.providerSpecifier : null,
+    quotedOdds: pick.quotedOdds,
   }));
 }
 
@@ -190,7 +190,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
     try {
       const result = await generateBookmakerCode(provider, bookmakerSelections(picks, provider), true);
       const liveOdds = resolvedTotal(result.resolved);
-      const warning = [result.warning, !result.verified ? "Code created but not verified: check all selections before use." : "", liveOdds == null ? "The bookmaker total is unavailable." : ""].filter(Boolean).join(" ");
+      const warning = [result.warning, !result.verified ? "Check this slip in the bookmaker before betting." : ""].filter(Boolean).join(" ");
       return { ...base, selections: includedPicks(picks, result.resolved).map(pick => ({ ...summarizeSelection(pick), odds: pick.quotedOdds })), code: result.code, deepLink: result.deepLink, verified: result.verified, partial: result.partial, warning, liveOdds, unmatched: result.unmatched };
     } catch (error) {
       const message = error instanceof BookmakerCodeError ? error.message : `${adapter.label} could not create a code right now.`;
@@ -225,14 +225,13 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
       if (candidate && (!built || Math.abs(candidate.estimatedOdds - target) < Math.abs(built.estimatedOdds - target))) { eligible = expanded; built = candidate; }
     }
     if (!built) {
-      addMessage("assistant", `I couldn’t find enough bookmaker-priced ${providerName(provider)} selections${intent.dateWindow ? ` for ${intent.dateWindow.label}` : ""} to approach ${formatOdds(target)} odds. I did not use estimated prices or create an unchecked code.`);
+      addMessage("assistant", `I couldn’t build ${formatOdds(target)} odds for ${providerName(provider)}${intent.dateWindow ? ` ${intent.dateWindow.label}` : ""}.`);
       return;
     }
     const card = await createCodeCard(provider, built.picks, target, built.estimatedOdds);
-    const reached = targetReached(target, card.liveOdds, card.verified, card.partial);
     addMessage("assistant", card.code
-      ? `${providerName(provider)} ${card.partial ? "partial code" : "code"} created. ${reached ? `Verified total is within 5% of your ${formatOdds(target)} target.` : `The ${formatOdds(target)} target has not been verified as reached; review the returned total and warnings.`}`
-      : `I built the ${providerName(provider)} selections, but a verified booking code is not available right now.`, { kind: "codes", cards: [card] });
+      ? `${providerName(provider)} ${card.partial ? "partial code" : "code"} ready.`
+      : `${providerName(provider)} code could not be created.`, { kind: "codes", cards: [card] });
   }
 
   async function executeSplit(intent: Extract<AssistantIntent, { kind: "split" }>) {
@@ -258,7 +257,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
       const estimated = group.reduce((total, pick) => total * (pickPrice(pick) ?? 1), 1);
       cards.push(await createCodeCard(provider, group, undefined, estimated));
     }
-    addMessage("assistant", `I split the estimated ${formatOdds(built.estimatedOdds)} total into ${groups.length} groups. ${cards.filter(card => card.code).length} ${providerName(provider)} codes were created; check each card for its actual total, omissions and verification status.`, { kind: "codes", cards });
+    addMessage("assistant", `${cards.filter(card => card.code).length} of ${groups.length} ${providerName(provider)} codes are ready.`, { kind: "codes", cards });
   }
 
   async function executeConversion(intent: Extract<AssistantIntent, { kind: "convert" }>) {
@@ -305,7 +304,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
           ranked = rankBestBets(eligible, referenceTime, provider).slice(0, 3);
         }
         const picks = ranked.map(summarizeSelection);
-        addMessage("assistant", picks.length ? `These are the ${picks.length} strongest bookmaker-priced ${providerName(provider)} selections for ${dateWindow?.label ?? "the requested period"}.` : `No bookmaker-priced ${providerName(provider)} match for ${dateWindow?.label ?? "the requested period"} currently passes every Best Bet check. I won’t weaken the evidence rules just to fill the list.`, picks.length ? { kind: "best", picks } : undefined);
+        addMessage("assistant", picks.length ? `${picks.length} best ${providerName(provider)} selections for ${dateWindow?.label ?? "the requested period"}.` : `No ${providerName(provider)} selections are available for ${dateWindow?.label ?? "the requested period"}.`, picks.length ? { kind: "best", picks } : undefined);
       } else if (intent.kind === "daily") {
         const provider = intent.provider ?? "sportybet";
         const dateWindow = intent.dateWindow ?? todayWindow;
@@ -320,7 +319,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
           tickets.push({
             id: `${dateWindow?.start ?? referenceTime}-${provider}-${target}`,
             title: qualified ? `Daily ${target} Odds` : `Requested ${target} Odds — review required`,
-            totalOdds: card.liveOdds ?? null,
+            totalOdds: card.liveOdds ?? card.estimatedOdds ?? null,
             status: qualified ? "CODE_READY" : "REVIEW_REQUIRED",
             selections: card.selections,
             bookingCodes: card.code ? [{ provider, code: card.code, ...(card.deepLink ? { deepLink: card.deepLink } : {}) }] : [],
@@ -381,10 +380,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
     <section className="assistant-shell">
       <header className="assistant-toolbar">
         <span><i aria-hidden="true" /> Verified football data</span>
-        <div>
-          <details className="assistant-tools"><summary>Tools</summary><nav><Link href="/results">Full history</Link></nav></details>
-          <button type="button" onClick={startNewChat}>New chat</button>
-        </div>
+        <button type="button" onClick={startNewChat}>New chat</button>
       </header>
       <section className={`assistant-workspace ${messages.length ? "has-messages" : ""}`} aria-label="OddsAura betting assistant">
         {initialTool === "converter" ? <section className="home-code-converter" aria-label="Booking code converter">
@@ -422,11 +418,11 @@ function OutputView({ output }: { output: AssistantOutput }) {
   const [copied, setCopied] = useState("");
   async function copy(value: string) { await navigator.clipboard.writeText(value); setCopied(value); window.setTimeout(() => setCopied(""), 1600); }
 
-  if (output.kind === "best") return <details className="assistant-expandable"><summary><span>{output.picks.length} best selections</span><b>Show</b></summary><div className="assistant-picks">{output.picks.map((pick, index) => <div key={pick.id}><span>#{index + 1}</span><div><b>{pick.match}</b><small>{pick.market}: {pick.selection}{pick.priceStatus === "MODEL_ESTIMATE" ? " · model estimate" : ""}</small>{pick.evidence ? <em>{pick.evidence}</em> : null}</div><strong>{pick.odds?.toFixed(2) ?? "—"}</strong></div>)}</div></details>;
+  if (output.kind === "best") return <details className="assistant-expandable"><summary><span>{output.picks.length} best selections</span><b>Show</b></summary><div className="assistant-picks">{output.picks.map((pick, index) => <div key={pick.id}><span>#{index + 1}</span><div><b>{pick.match}</b><small>{pick.market}: {pick.selection}</small></div><strong>{pick.odds?.toFixed(2) ?? "—"}</strong></div>)}</div></details>;
 
   if (output.kind === "daily") return <div className="assistant-daily-output">
     {output.tickets.map((ticket) => <section className="assistant-ticket-card" key={ticket.id}>
-      <header><div><span>Ticket check</span><b>{ticket.title}</b></div><strong>{ticket.totalOdds == null ? "Total unavailable" : formatOdds(ticket.totalOdds)}</strong></header>
+      <header><div><span>Ticket check</span><b>{ticket.title}</b></div><strong>{ticket.totalOdds == null ? "—" : formatOdds(ticket.totalOdds)}</strong></header>
       <small>{ticket.selections.length} picks · {ticket.status === "CODE_READY" ? "Verified code ready" : "Review required"}</small>
       <details className="assistant-output-details"><summary><span>{ticket.selections.length} selections</span><b>Show</b></summary>{ticket.selections.map((pick) => <SelectionRow key={pick.id} pick={pick} />)}</details>
       {ticket.bookingCodes.map((item) => <div className="assistant-inline-code" key={`${ticket.id}-${item.provider}`}><span>{item.provider}</span><b>{item.code}</b><button type="button" onClick={() => void copy(item.code)}>{copied === item.code ? "Copied ✓" : "Copy"}</button></div>)}
@@ -438,11 +434,10 @@ function OutputView({ output }: { output: AssistantOutput }) {
   if (output.kind === "results") return <div className="assistant-results-output">
     <div className="assistant-result-summary"><span><b>{output.won}</b> Won</span><span><b>{output.lost}</b> Lost</span><span><b>{output.pending}</b> Pending</span></div>
     <div>{output.tickets.map((ticket) => <article key={ticket.id}><span className={`result-${ticket.status.toLowerCase()}`}>{ticket.status.replaceAll("_", " ")}</span><div><b>{ticket.title}</b><small>{ticket.publishedAt ? new Date(ticket.publishedAt).toLocaleDateString() : "Tracked ticket"} · {ticket.selections} picks</small></div><strong>{formatOdds(ticket.totalOdds)}</strong></article>)}</div>
-    <Link href="/results">Open full result history →</Link>
   </div>;
 
   return <div className="assistant-code-grid">{output.cards.map((card, index) => <section className="assistant-code-card" key={`${card.provider}-${index}`}>
-    <header><div><span>{providerName(card.provider)} {output.cards.length > 1 ? `code ${index + 1}` : "code"}</span>{card.code ? <strong>{card.code}</strong> : <strong className="unavailable">Not created</strong>}</div>{card.liveOdds ? <b>{formatOdds(card.liveOdds)}</b> : card.code ? <b>Total unavailable</b> : card.estimatedOdds ? <b>Est. {formatOdds(card.estimatedOdds)}</b> : null}</header>
+    <header><div><span>{providerName(card.provider)} {output.cards.length > 1 ? `code ${index + 1}` : "code"}</span>{card.code ? <strong>{card.code}</strong> : <strong className="unavailable">Not created</strong>}</div>{card.liveOdds ? <b>{formatOdds(card.liveOdds)}</b> : card.estimatedOdds ? <b>{formatOdds(card.estimatedOdds)}</b> : null}</header>
     {card.code ? <div className="assistant-code-actions"><button type="button" onClick={() => void copy(card.code!)}>{copied === card.code ? "Copied ✓" : "Copy code"}</button>{card.deepLink ? <a href={card.deepLink} target="_blank" rel="noreferrer">Open {providerName(card.provider)} ↗</a> : null}</div> : card.deepLink ? <a className="assistant-open-manual" href={card.deepLink} target="_blank" rel="noreferrer">Open {providerName(card.provider)} ↗</a> : null}
     <details className="assistant-output-details"><summary><span>{card.selections.length} {card.code ? "included" : "proposed"} {card.selections.length === 1 ? "selection" : "selections"}</span><b>Show</b></summary>{card.selections.map((pick) => <SelectionRow key={pick.id} pick={pick} />)}</details>
     {card.unmatched?.length ? <details className="assistant-unmatched assistant-output-details"><summary><span>{card.unmatched.length} not included</span><b>Show</b></summary>{card.unmatched.map((row, rowIndex) => <p key={`${row.homeTeam}-${rowIndex}`}><b>{row.homeTeam} vs {row.awayTeam}</b><span>{row.reason}</span></p>)}</details> : null}
@@ -451,5 +446,5 @@ function OutputView({ output }: { output: AssistantOutput }) {
 }
 
 function SelectionRow({ pick }: { pick: SelectionSummary }) {
-  return <div className="assistant-selection"><div><b>{pick.match}</b><small>{pick.market}: {pick.selection}{pick.priceStatus === "MODEL_ESTIMATE" ? " · model estimate" : ""}</small>{pick.evidence ? <em>{pick.evidence}</em> : null}</div><strong>{pick.odds?.toFixed(2) ?? "—"}</strong></div>;
+  return <div className="assistant-selection"><div><b>{pick.match}</b><small>{pick.market}: {pick.selection}</small></div><strong>{pick.odds?.toFixed(2) ?? "—"}</strong></div>;
 }

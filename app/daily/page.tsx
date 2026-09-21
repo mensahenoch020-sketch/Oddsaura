@@ -83,6 +83,7 @@ export default function DailyOddsPage() {
         providerMarketId: selection.providerMarketId ?? null,
         providerOutcomeId: selection.providerSelectionId ?? null,
         providerSpecifier: selection.providerSpecifier ?? null,
+        quotedOdds: selection.odds,
       })), true);
       const liveTotalOdds = result.resolved.reduce((value, selection) => value * (selection.odds ?? 1), 1);
       setCodes((current) => ({ ...current, [ticket.id]: { provider, code: result.code, deepLink: result.deepLink, matched: result.resolved.length, total: ticket.selections.length, liveTotalOdds, verified: result.verified } }));

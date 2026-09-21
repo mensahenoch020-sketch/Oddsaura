@@ -18,6 +18,7 @@ const selection = z.object({
   providerMarketId: z.string().nullable().optional(),
   providerOutcomeId: z.string().nullable().optional(),
   providerSpecifier: z.string().nullable().optional(),
+  quotedOdds: z.number().gt(1).nullable().optional(),
 });
 
 export async function providerRoutes(app: FastifyInstance) {

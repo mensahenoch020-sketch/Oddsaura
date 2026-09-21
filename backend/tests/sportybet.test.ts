@@ -14,9 +14,11 @@ test("creates and verifies a SportyBet code from provider identifiers", async ()
     fixtureId: "fixture-1", homeTeam: "Arsenal", awayTeam: "Coventry City", kickoff: "2026-08-21T19:00:00Z",
     marketKey: "MATCH_HOME", marketName: "Match result", selection: "Arsenal",
     providerEventId: "sr:match:72221154", providerMarketId: "1", providerOutcomeId: "1",
+    quotedOdds: 1.82,
   }], fakeFetch as typeof fetch);
   assert.equal(result.code, "PB3CFX");
   assert.equal(result.deepLink, "https://www.sportybet.com/ng/?shareCode=PB3CFX");
+  assert.equal(result.resolved[0]?.odds, 1.82);
   assert.match(requests[0]?.url ?? "", /\/api\/ng\/orders\/share\?/);
   assert.deepEqual(requests[0]?.body, { selections: [{ eventId: "sr:match:72221154", marketId: "1", outcomeId: "1", specifier: "" }] });
   assert.match(requests[1]?.url ?? "", /\/api\/ng\/orders\/share\/PB3CFX$/);
