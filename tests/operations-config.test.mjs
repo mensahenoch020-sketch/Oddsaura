@@ -78,6 +78,24 @@ test("mobile assistant fixes the composer while only the message thread scrolls"
   assert.match(css, /\.assistant-composer textarea \{ font-size: 16px/);
 });
 
+test("minimal account and code results stay consistent on mobile", async () => {
+  const [assistant, account, accountCss, results, sporty, routes] = await Promise.all([
+    read("app/assistant/assistant-client.tsx"),
+    read("app/account/page.tsx"),
+    read("app/account/account.css"),
+    read("app/results/page.tsx"),
+    read("backend/src/modules/providers/sportybet.ts"),
+    read("backend/src/modules/providers/routes.ts"),
+  ]);
+  assert.doesNotMatch(assistant, /Full history|Open full result history|Total unavailable|pick\.evidence/);
+  assert.doesNotMatch(account, /GeneratedCodes/);
+  assert.match(accountCss, /grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+  assert.match(results, /redirect\("\/dashboard"\)/);
+  assert.match(assistant, /quotedOdds: pick\.quotedOdds/);
+  assert.match(sporty, /input\.quotedOdds/);
+  assert.match(routes, /quotedOdds: z\.number\(\)\.gt\(1\)/);
+});
+
 test("builder receives market evidence, verified-price gates and forward proof", async () => {
   const [pipeline, builder, admin] = await Promise.all([read("pipeline/update.mjs"), read("app/builder/target-builder.ts"), read("app/admin/page.tsx")]);
   for (const field of ["expectedValue", "marketProbability", "modelProbability", "modelMarketGap"]) assert.match(pipeline, new RegExp(field));

@@ -6,7 +6,7 @@ import type { PredictedPick } from "../../app/data.js";
 import { interpretAssistantRequest, matchesRequestedMarket } from "../../app/assistant/nlu.js";
 
 function pick(id: string, odds: number, confidence = .7): PredictedPick {
-  return { id, fixtureId: id, kickoff: "2030-01-02T12:00:00Z", league: { name: "Test" }, homeTeam: { name: `${id} Home` }, awayTeam: { name: `${id} Away` }, market: { key: "OVER_1_5", name: "Over 1.5", category: "TOTALS", line: 1.5 }, selection: "Over 1.5", probability: confidence, confidence, quotedOdds: odds, fairOdds: odds, tier: "SAFE", dataQuality: "HIGH", historyMatches: 80, marketProbability: confidence - .01, modelMarketGap: .03, expectedValue: .01, reasoning: "test" };
+  return { id, fixtureId: id, kickoff: "2030-01-02T12:00:00Z", league: { name: "Test" }, homeTeam: { name: `${id} Home` }, awayTeam: { name: `${id} Away` }, market: { key: "OVER_1_5", name: "Over 1.5", category: "TOTALS", line: 1.5 }, selection: "Over 1.5", probability: confidence, confidence, quotedOdds: odds, fairOdds: odds, tier: "SAFE", dataQuality: "HIGH", historyMatches: 80, marketProbability: confidence - .01, modelMarketGap: .03, edge: .01, expectedValue: .01, reasoning: "test" };
 }
 
 test("target builder follows requested totals beyond the old 100 odds ceiling", () => {
@@ -109,7 +109,7 @@ test("target builder rejects unsupported bookmaker markets and unconfirmed price
 });
 
 test("Best Bet rejects negative EV while an explicit target request can use market-confirmed selections", () => {
-  const negative = Array.from({ length: 5 }, (_, index) => ({ ...pick(`negative${index}`, 1.45, .72), expectedValue: -.001 }));
+  const negative = Array.from({ length: 5 }, (_, index) => ({ ...pick(`negative${index}`, 1.45, .72), edge: -.001, expectedValue: -.001 }));
   assert.equal(rankBestBets(negative, Date.parse("2029-01-01")).length, 0);
   assert.equal(buildTargetSlip(negative, 2, Date.parse("2029-01-01"), "sportybet", "recommended"), null);
   assert.ok(buildTargetSlip(negative, 2, Date.parse("2029-01-01"), "sportybet", "target"));

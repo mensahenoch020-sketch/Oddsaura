@@ -15,6 +15,7 @@ export type SportyBetSelectionInput = {
   providerMarketId?: string | null;
   providerOutcomeId?: string | null;
   providerSpecifier?: string | null;
+  quotedOdds?: number | null;
 };
 
 export type SportyBetResolvedSelection = {
@@ -433,7 +434,7 @@ function directSelection(input: SportyBetSelectionInput): SportyBetResolvedSelec
     marketId: input.providerMarketId!,
     outcomeId: input.providerOutcomeId!,
     specifier: input.providerSpecifier ?? null,
-    odds: null,
+    odds: typeof input.quotedOdds === "number" && Number.isFinite(input.quotedOdds) && input.quotedOdds > 1 ? input.quotedOdds : null,
     homeTeam: input.homeTeam,
     awayTeam: input.awayTeam,
     market: input.marketName,

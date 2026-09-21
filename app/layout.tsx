@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "OddsAura | Probability-led football picks",
-  description: "Football predictions, backed by probability. Clear match reasoning and ready-to-copy booking codes.",
+  description: "Simple football picks and ready-to-copy bookmaker codes.",
   openGraph: {
     title: "OddsAura | Probability-led football picks",
     description: "Football predictions, backed by probability.",

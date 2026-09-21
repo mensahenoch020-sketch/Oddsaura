@@ -89,6 +89,7 @@ export type BookmakerSelection = {
   providerMarketId?: string | null;
   providerOutcomeId?: string | null;
   providerSpecifier?: string | null;
+  quotedOdds?: number | null;
 };
 
 export async function generateBookmakerCode(provider: ProviderId, selections: BookmakerSelection[], allowPartial = false) {

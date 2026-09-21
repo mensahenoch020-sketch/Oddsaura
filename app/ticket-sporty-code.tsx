@@ -29,6 +29,7 @@ export default function TicketSportyCode({ ticket }: { ticket: Ticket }) {
         marketName: selection.market.name,
         selection: selection.selection,
         line: selection.market.line,
+        quotedOdds: selection.odds,
       })), true);
       setResult(code);
       window.localStorage.setItem(`oddsaura-code-${ticket.id}`, JSON.stringify(code));
