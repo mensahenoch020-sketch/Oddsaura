@@ -133,14 +133,21 @@ function rule(input: SportyBetSelectionInput): Rule {
   if (fixed[input.marketKey]) return fixed[input.marketKey]!;
   if (/^OVER_/.test(input.marketKey)) return { className: `O/U ${input.line}`, sign: "Over", market: "S_OU", line: input.line };
   if (/^UNDER_/.test(input.marketKey)) return { className: `O/U ${input.line}`, sign: "Under", market: "S_OU", line: input.line };
+  if (/^ASIAN_HOME_/.test(input.marketKey)) return { className: "Asian Handicap", sign: "1", market: "", line: input.line };
+  if (/^ASIAN_AWAY_/.test(input.marketKey)) return { className: "Asian Handicap", sign: "2", market: "", line: input.line };
   return { className: input.sourceMarketName || input.marketName, sign: input.sourceOutcomeName || input.selection, market: "", line: input.line };
 }
 
 function resolve(event: Json, input: SportyBetSelectionInput): SportyBetResolvedSelection & { oddsKey: string; eventCode: string; startDate: string; league: string; sport: string } {
   const wanted = rule(input);
   const classes = Array.isArray(event.ClassiQuotaList) ? event.ClassiQuotaList.filter(isRecord) : [];
-  const market = classes.find((item) => norm(str(item.ClasseQuota)).replace(/\s+/g, " ") === norm(wanted.className).replace(/\s+/g, " ") ||
-    (wanted.line != null && norm(str(item.ClasseQuota)).includes(`o u ${wanted.line}`) && Number(item.ValoreHND) === wanted.line));
+  const market = classes.find((item) => {
+    const label = norm(str(item.ClasseQuota)).replace(/\s+/g, " ");
+    const homeLine = input.marketKey.startsWith("ASIAN_AWAY_") && wanted.line != null ? -wanted.line : wanted.line;
+    return label === norm(wanted.className).replace(/\s+/g, " ")
+      || (wanted.line != null && label.includes(`o u ${wanted.line}`) && Number(item.ValoreHND) === wanted.line)
+      || (/^ASIAN_/.test(input.marketKey) && /handicap/.test(label) && homeLine != null && Math.abs(Number(item.ValoreHND) - homeLine) < .001);
+  });
   if (!market) throw new Bet9jaIntegrationError(`The ${input.marketName} market is not currently available on Bet9ja for ${input.homeTeam} vs ${input.awayTeam}.`, 422);
   const quotes = Array.isArray(market.QuoteList) ? market.QuoteList.filter(isRecord) : [];
   const quote = quotes.find((item) => norm(str(item.TipoQuotaBreve)) === norm(wanted.sign) && (wanted.line == null || Math.abs(Number(item.hnd) - wanted.line) < .001));

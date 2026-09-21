@@ -52,6 +52,8 @@ function rule(input: SportyBetSelectionInput): Rule {
     DC_1X: { marketName: "[Double Chance]", kind: "1X" }, DC_12: { marketName: "[Double Chance]", kind: "12" }, DC_X2: { marketName: "[Double Chance]", kind: "X2" },
   };
   if (fixed[input.marketKey]) return fixed[input.marketKey]!;
+  if (/^ASIAN_HOME_/.test(input.marketKey)) return { marketName: "[Asian Handicap]", kind: "HOME", line: input.line };
+  if (/^ASIAN_AWAY_/.test(input.marketKey)) return { marketName: "[Asian Handicap]", kind: "AWAY", line: input.line };
   if (/^OVER_/.test(input.marketKey)) return { marketName: "[Total Goals]", kind: "OVER", line: input.line };
   if (/^UNDER_/.test(input.marketKey)) return { marketName: "[Total Goals]", kind: "UNDER", line: input.line };
   const label = input.sourceMarketName || input.marketName;

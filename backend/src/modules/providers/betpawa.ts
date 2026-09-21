@@ -136,6 +136,8 @@ function rule(input: SportyBetSelectionInput): Rule {
   if (/^HOME_UNDER_/.test(k)) return { market: "5006", outcome: "Under", line: input.line };
   if (/^AWAY_OVER_/.test(k)) return { market: "5003", outcome: "Over", line: input.line };
   if (/^AWAY_UNDER_/.test(k)) return { market: "5003", outcome: "Under", line: input.line };
+  if (/^ASIAN_HOME_/.test(k)) return { market: "", marketLabel: "Asian Handicap", outcome: "1", line: input.line };
+  if (/^ASIAN_AWAY_/.test(k)) return { market: "", marketLabel: "Asian Handicap", outcome: "2", line: input.line };
   if (k === "HOME_AND_O15") return { market: "1096755", outcome: "1 - Over", line: 1.5 };
   if (k === "AWAY_AND_O15") return { market: "1096755", outcome: "2 - Over", line: 1.5 };
   if (/^HT_OVER_/.test(k)) return { market: "4958", outcome: "Over", line: input.line };
@@ -150,14 +152,15 @@ function resolve(event: RecordValue, input: SportyBetSelectionInput): SportyBetR
     if (!isRecord(item.marketType)) return false;
     if (wanted.market) return str(item.marketType.id) === wanted.market;
     const label = str(item.marketType.displayName || item.marketType.name);
-    return norm(label) === norm(wanted.marketLabel || "");
+    return norm(label) === norm(wanted.marketLabel || "") || (/^ASIAN_/.test(input.marketKey) && /handicap/.test(norm(label)));
   });
   if (!market) throw new BetPawaIntegrationError(`The ${input.marketName} market is not currently available on betPawa for ${input.homeTeam} vs ${input.awayTeam}.`, 422);
   const rows = Array.isArray(market.row) ? market.row.filter(isRecord) : [];
   const row = rows.find((item) => {
     if (wanted.line == null) return true;
     const spec = isRecord(item.specifier) ? Number(item.specifier.total ?? item.specifier.handicap) : NaN;
-    return Number.isFinite(spec) && Math.abs(spec - wanted.line) < .001;
+    const wantedLine = input.marketKey.startsWith("ASIAN_AWAY_") ? -wanted.line : wanted.line;
+    return Number.isFinite(spec) && Math.abs(spec - wantedLine) < .001;
   });
   const prices = row && Array.isArray(row.prices) ? row.prices.filter(isRecord) : [];
   const price = prices.find((item) => norm(str(item.name)) === norm(wanted.outcome));

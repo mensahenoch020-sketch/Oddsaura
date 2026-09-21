@@ -79,6 +79,24 @@ test('SportyBet collection reads several markets from one event without booking'
   assert.ok(urls.every(url => !url.includes('orders')));
 });
 
+test('SportyBet maps both sides of an Asian handicap using the home-relative market line', async () => {
+  const asianInput = { ...input, fixtureId: 'qa-asian', homeTeam: 'Gamma Town', awayTeam: 'Delta City' };
+  const event = { eventId: 'sr:match:asian', homeTeamName: asianInput.homeTeam, awayTeamName: asianInput.awayTeam, estimateStartTime: Date.parse(asianInput.kickoff), markets: [
+    { id: '16', desc: 'Asian Handicap', specifier: 'hcp=-1', status: 0, outcomes: [
+      { id: 'home', desc: 'Home', odds: '1.85', isActive: 1 },
+      { id: 'away', desc: 'Away', odds: '1.95', isActive: 1 },
+    ] },
+  ] };
+  const fetcher = (async (url: unknown) => Response.json({ bizCode: 10000, data: String(url).includes('firstSearch') ? { preMatch: [event] } : event })) as typeof fetch;
+  const quotes = await collectSportyBetMarkets([
+    { ...asianInput, marketKey: 'ASIAN_HOME_M1', marketName: 'Asian handicap', selection: `${asianInput.homeTeam} (-1)`, line: -1 },
+    { ...asianInput, marketKey: 'ASIAN_AWAY_P1', marketName: 'Asian handicap', selection: `${asianInput.awayTeam} (+1)`, line: 1 },
+  ], fetcher);
+  assert.deepEqual(quotes.map(row => [row.marketKey, row.line, row.outcomeId]), [
+    ['ASIAN_HOME_M1', -1, 'home'], ['ASIAN_AWAY_P1', 1, 'away'],
+  ]);
+});
+
 test('request-time expansion joins fresh complete bookmaker prices to model candidates', async () => {
   const kickoff = '2030-01-03T12:00:00Z';
   const base: ExpansionCandidate = {

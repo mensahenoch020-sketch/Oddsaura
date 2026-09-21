@@ -203,6 +203,23 @@ export function scoreEvent(event, allEvents, suppliedContext = null) {
     market("HOME_WIN_NIL", "Win to nil", "Team", event.homeTeam.name, sum(goalRows, (r) => r.home > r.away && r.away === 0)),
     market("AWAY_WIN_NIL", "Win to nil", "Team", event.awayTeam.name, sum(goalRows, (r) => r.away > r.home && r.home === 0)),
   ];
+
+  // Two-way Asian handicaps use the selected team's own line. Whole-goal
+  // lines can push, so their model probability is conditional on the bet not
+  // being void. Each home line is paired with the opposite away line, which
+  // lets bookmaker prices be de-margined as a complete two-outcome market.
+  const asianKey = (side, line) => `ASIAN_${side}_${line > 0 ? "P" : "M"}${String(Math.abs(line)).replace(".", "_")}`;
+  for (const homeLine of [0.5, 1, 1.5, -0.5, -1, -1.5]) {
+    const homeWinProbability = sum(rows, (r) => r.home + homeLine > r.away);
+    const homeLoseProbability = sum(rows, (r) => r.home + homeLine < r.away);
+    const awayLine = -homeLine;
+    const awayWinProbability = sum(rows, (r) => r.away + awayLine > r.home);
+    const awayLoseProbability = sum(rows, (r) => r.away + awayLine < r.home);
+    const settledProbability = (wins, losses) => wins / Math.max(0.001, wins + losses);
+    const label = (line) => `${line > 0 ? "+" : ""}${line}`;
+    predictions.push(market(asianKey("HOME", homeLine), "Asian handicap", "Handicap", `${event.homeTeam.name} (${label(homeLine)})`, settledProbability(homeWinProbability, homeLoseProbability), { line: homeLine }));
+    predictions.push(market(asianKey("AWAY", awayLine), "Asian handicap", "Handicap", `${event.awayTeam.name} (${label(awayLine)})`, settledProbability(awayWinProbability, awayLoseProbability), { line: awayLine }));
+  }
   for (const line of [0.5, 1.5, 2.5, 3.5, 4.5]) {
     const over = sum(goalRows, (r) => r.home + r.away > line);
     predictions.push(market(`OVER_${String(line).replace(".", "_")}`, "Total goals", "Goals", `Over ${line}`, over, { line }));
@@ -294,6 +311,7 @@ function predictionFamily(key = "") {
   if (/^HOME_(OVER|UNDER)_/.test(key)) return "HOME_TOTAL";
   if (/^AWAY_(OVER|UNDER)_/.test(key)) return "AWAY_TOTAL";
   if (/^HCP_3WAY_/.test(key)) return "HANDICAP_3WAY";
+  if (/^ASIAN_(HOME|AWAY)_/.test(key)) return "HANDICAP_ASIAN";
   if (/^(OVER|UNDER)_/.test(key)) return "TOTAL";
   return "OTHER";
 }
@@ -308,6 +326,7 @@ function quoteFamily(value = "") {
   if (/away (team )?(goals|total)|team 2 total/.test(name)) return "AWAY_TOTAL";
   if (!/half|team/.test(name) && /total goals|match goals|over under|goals total|^total$/.test(name)) return "TOTAL";
   if (/european handicap|3 way handicap|three way handicap/.test(name)) return "HANDICAP_3WAY";
+  if (/asian handicap/.test(name)) return "HANDICAP_ASIAN";
   if (/match result|match winner|moneyline|win draw win|1x2/.test(name)) return "RESULT";
   return "OTHER";
 }
@@ -330,6 +349,8 @@ function selectionMatches(prediction, odd) {
   if (/^(UNDER|HOME_UNDER|AWAY_UNDER)_/.test(key)) return actual.startsWith("under");
   if (key === "BTTS_YES") return actual === "yes" || actual === "gg";
   if (key === "BTTS_NO") return actual === "no" || actual === "ng";
+  if (/^ASIAN_HOME_/.test(key)) return actual === "1" || actual === "home" || actual.startsWith(text(prediction.selection).split(" ")[0]);
+  if (/^ASIAN_AWAY_/.test(key)) return actual === "2" || actual === "away" || actual.startsWith(text(prediction.selection).split(" ")[0]);
   if (key === "HCP_3WAY_HOME") return actual === "1" || actual === "home" || actual.startsWith(text(prediction.selection).split(" ")[0]);
   if (key === "HCP_3WAY_DRAW") return actual === "x" || actual.startsWith("draw");
   if (key === "HCP_3WAY_AWAY") return actual === "2" || actual === "away" || actual.startsWith(text(prediction.selection).split(" ")[0]);
@@ -342,7 +363,13 @@ export function attachOdds(predictions, odds) {
       const wantedFamily = predictionFamily(prediction.key);
       const actualFamily = quoteFamily(odd.market);
       const line = quotedLine(odd);
-      const lineMatches = prediction.line == null || line != null && Math.abs(line - Number(prediction.line)) < .001;
+      // Historical Asian-handicap feeds store the market line from the home
+      // team's perspective. An away selection therefore matches the inverse
+      // of the selection-relative line carried by the prediction.
+      const expectedLine = /^ASIAN_AWAY_/.test(prediction.key)
+        ? -Number(prediction.line)
+        : Number(prediction.line);
+      const lineMatches = prediction.line == null || line != null && Math.abs(line - expectedLine) < .001;
       return wantedFamily !== "OTHER" && actualFamily !== "OTHER" && wantedFamily === actualFamily && lineMatches && selectionMatches(prediction, odd);
     });
     if (!quote) return prediction;

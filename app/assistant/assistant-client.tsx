@@ -298,21 +298,22 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
         const provider = intent.provider ?? "sportybet";
         const dateWindow = intent.dateWindow ?? todayWindow;
         let eligible = predictions.filter((pick) => pick.quotedOdds != null && matchesRequestedMarket(pick.market.key, intent.marketKeys) && isWithinDateWindow(pick.kickoff, dateWindow) && providerSupportsMarket(provider, pick.market.key));
-        let ranked = rankBestBets(eligible, referenceTime, provider).slice(0, 3);
+        let ranked = rankBestBets(eligible, referenceTime, provider, intent.strategy).slice(0, 3);
         if (!ranked.length) {
           eligible = await expandEligiblePool(eligible, provider, dateWindow, intent.marketKeys);
-          ranked = rankBestBets(eligible, referenceTime, provider).slice(0, 3);
+          ranked = rankBestBets(eligible, referenceTime, provider, intent.strategy).slice(0, 3);
         }
         const picks = ranked.map(summarizeSelection);
-        addMessage("assistant", picks.length ? `${picks.length} best ${providerName(provider)} selections for ${dateWindow?.label ?? "the requested period"}.` : `No ${providerName(provider)} selections are available for ${dateWindow?.label ?? "the requested period"}.`, picks.length ? { kind: "best", picks } : undefined);
+        const strategyLabel = intent.strategy === "value" ? "best-value" : "best-protection";
+        addMessage("assistant", picks.length ? `${picks.length} ${strategyLabel} ${providerName(provider)} selections for ${dateWindow?.label ?? "the requested period"}.` : `No ${providerName(provider)} ${strategyLabel} selections are available for ${dateWindow?.label ?? "the requested period"}.`, picks.length ? { kind: "best", picks } : undefined);
       } else if (intent.kind === "daily") {
         const provider = intent.provider ?? "sportybet";
         const dateWindow = intent.dateWindow ?? todayWindow;
         let eligible = predictions.filter((pick) => pick.quotedOdds != null && matchesRequestedMarket(pick.market.key, intent.marketKeys) && isWithinDateWindow(pick.kickoff, dateWindow) && providerSupportsMarket(provider, pick.market.key));
-        if (![2, 5].some(target => buildTargetSlip(eligible, target, referenceTime, provider, "recommended")?.exact)) eligible = await expandEligiblePool(eligible, provider, dateWindow, intent.marketKeys);
+        if (![2, 5].some(target => buildTargetSlip(eligible, target, referenceTime, provider, intent.strategy)?.exact)) eligible = await expandEligiblePool(eligible, provider, dateWindow, intent.marketKeys);
         const tickets: DailyTicketSummary[] = [];
         for (const target of [2, 5]) {
-          const built = buildTargetSlip(eligible, target, referenceTime, provider, "recommended");
+          const built = buildTargetSlip(eligible, target, referenceTime, provider, intent.strategy);
           if (!built || !built.exact) continue;
           const card = await createCodeCard(provider, built.picks, target, built.estimatedOdds);
           const qualified = targetReached(target, card.liveOdds, card.verified, card.partial);
@@ -326,7 +327,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
             warning: [card.warning, !qualified ? "Not a verified complete Daily Odds ticket. Check the final bookmaker total and included selections." : "", ...(card.unmatched ?? []).map(row => `${row.homeTeam} vs ${row.awayTeam}: ${row.reason}`)].filter(Boolean).join(" "),
           });
         }
-        const watchlist = rankBestBets(eligible, referenceTime, provider).slice(0, 3).map(summarizeSelection);
+        const watchlist = rankBestBets(eligible, referenceTime, provider, intent.strategy).slice(0, 3).map(summarizeSelection);
         addMessage("assistant", tickets.length ? `I built ${tickets.length} bookmaker-priced ${providerName(provider)} Daily Odds ${tickets.length === 1 ? "ticket" : "tickets"} for ${dateWindow?.label ?? "the requested period"}.` : `No complete bookmaker-priced ${providerName(provider)} Daily Odds ticket passes every check for ${dateWindow?.label ?? "the requested period"}.${watchlist.length ? " The strongest individual qualifiers are shown separately." : ""}`, { kind: "daily", tickets, watchlist });
       } else if (intent.kind === "results") {
         const history = [...(resultsSnapshot.ticketHistory ?? resultsSnapshot.tickets ?? [])]
@@ -393,7 +394,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
           <h1>What do you want to bet?</h1>
           <p>Write naturally. I can build target odds, split slips, convert codes, find the strongest matches and check results.</p>
           <div className="assistant-prompts" aria-label="Example requests">
-            {["Give me 20 odds for Sporty", "Split 100 odds into 3 Sporty codes", "Show today’s qualified odds", "Check recent results"].map((prompt, index) => <button type="button" key={prompt} onClick={() => runPrompt(prompt)}><b>{["↗", "⑂", "◎", "✓"][index]}</b><span>{prompt}</span></button>)}
+            {["Best protection for today", "Best value for today", "Build 20 odds for Sporty", "Show today’s qualified odds"].map((prompt, index) => <button type="button" key={prompt} onClick={() => runPrompt(prompt)}><b>{["✓", "↗", "⑂", "◎"][index]}</b><span>{prompt}</span></button>)}
           </div>
         </div> : null}
         {messages.length || busy ? <div ref={threadRef} className="assistant-thread" aria-live="polite">

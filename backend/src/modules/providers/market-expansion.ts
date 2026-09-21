@@ -36,6 +36,13 @@ const family = (key: string) => {
   if (key.startsWith("DC_")) return ["DC_1X", "DC_X2", "DC_12"];
   if (key.startsWith("BTTS_")) return ["BTTS_YES", "BTTS_NO"];
   if (/^(HOME_|AWAY_)?(OVER|UNDER)_/.test(key)) return [key.replace("UNDER_", "OVER_"), key.replace("OVER_", "UNDER_")];
+  if (/^ASIAN_(HOME|AWAY)_[PM]/.test(key)) {
+    const side = key.includes("_HOME_") ? "HOME" : "AWAY";
+    const oppositeSide = side === "HOME" ? "AWAY" : "HOME";
+    const suffix = key.split(`ASIAN_${side}_`)[1]!;
+    const oppositeSuffix = suffix.startsWith("P") ? `M${suffix.slice(1)}` : `P${suffix.slice(1)}`;
+    return [key, `ASIAN_${oppositeSide}_${oppositeSuffix}`];
+  }
   return [];
 };
 
@@ -65,7 +72,10 @@ export async function expandProviderMarkets(provider: QuoteProvider, candidates:
     const price = Number(quote.odds);
     if (!candidate || !Number.isFinite(price) || price <= 1) return [];
     const keys = family(quote.marketKey);
-    const siblings = keys.map(key => quoteIndex.get(`${quote.fixtureId}|${key}|${quote.line ?? ""}`));
+    const siblings = keys.map(key => {
+      const line = key.startsWith("ASIAN_") && key !== quote.marketKey && quote.line != null ? -Number(quote.line) : quote.line;
+      return quoteIndex.get(`${quote.fixtureId}|${key}|${line ?? ""}`);
+    });
     if (!keys.length || siblings.some(item => !item)) return [];
     const totalImplied = siblings.reduce((sum, item) => sum + 1 / Number(item!.odds), 0);
     const marketProbability = (1 / price) / totalImplied * (quote.marketKey.startsWith("DC_") ? 2 : 1);

@@ -78,6 +78,8 @@ function rule(input: SportyBetSelectionInput): Rule {
   if (/^UNDER_/.test(input.marketKey)) return { typeId: 160, outcome: "Under", line: input.line };
   if (/^HOME_(?:OVER|UNDER)_/.test(input.marketKey)) return { typeId: 10283, outcome: input.marketKey.includes("OVER") ? "Over" : "Under", line: input.line };
   if (/^AWAY_(?:OVER|UNDER)_/.test(input.marketKey)) return { typeId: 10284, outcome: input.marketKey.includes("OVER") ? "Over" : "Under", line: input.line };
+  if (/^ASIAN_HOME_/.test(input.marketKey)) return { marketLabel: "Asian Handicap", outcome: "1", line: input.line };
+  if (/^ASIAN_AWAY_/.test(input.marketKey)) return { marketLabel: "Asian Handicap", outcome: "2", line: input.line };
   return { marketLabel: input.sourceMarketName || input.marketName, outcome: input.sourceOutcomeName || input.selection, line: input.line };
 }
 
@@ -85,8 +87,10 @@ function resolve(event: Json, input: SportyBetSelectionInput): SportyBetResolved
   const wanted = rule(input);
   const markets = Array.isArray(event.markets) ? event.markets.filter(isRecord).flatMap((item) => [item, ...(Array.isArray(item.spreadMarkets) ? item.spreadMarkets.filter(isRecord) : [])]) : [];
   const market = markets.find((item) => {
-    const identityMatches = wanted.typeId != null ? Number(item.typeId) === wanted.typeId : norm(str(item.name)) === norm(wanted.marketLabel || "");
-    return identityMatches && (wanted.line == null || Math.abs(Number(item.specialValue) - wanted.line) < .001);
+    const label = norm(str(item.name));
+    const identityMatches = wanted.typeId != null ? Number(item.typeId) === wanted.typeId : label === norm(wanted.marketLabel || "") || (/^ASIAN_/.test(input.marketKey) && /handicap/.test(label));
+    const wantedLine = input.marketKey.startsWith("ASIAN_AWAY_") && wanted.line != null ? -wanted.line : wanted.line;
+    return identityMatches && (wantedLine == null || Math.abs(Number(item.specialValue) - wantedLine) < .001);
   });
   if (!market) throw new BetKingIntegrationError(`The ${input.marketName} market is not currently available on BetKing for ${input.homeTeam} vs ${input.awayTeam}.`, 422);
   const prices = Array.isArray(market.selections) ? market.selections.filter(isRecord) : [];

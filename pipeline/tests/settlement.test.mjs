@@ -25,3 +25,13 @@ test("settles extended converter markets and pushes whole-number totals", () => 
   assert.equal(settleSelection({ ...selection, market: { key: "CS_2_0", name: "Correct score" } }, cleanWin), "WON");
   assert.equal(settleSelection({ ...selection, market: { key: "OVER_2_0", name: "Over 2", line: 2 } }, cleanWin), "VOID");
 });
+
+test("settles Asian handicaps from the selected team's own line", () => {
+  const oneGoalHomeWin = { id: "asian", status: "FINISHED", homeScore: 2, awayScore: 1 };
+  const homeMinusOne = { market: { key: "ASIAN_HOME_M1", line: -1 } };
+  const awayPlusOne = { market: { key: "ASIAN_AWAY_P1", line: 1 } };
+  const homeMinusHalf = { market: { key: "ASIAN_HOME_M0_5", line: -.5 } };
+  assert.equal(settleSelection(homeMinusOne, oneGoalHomeWin), "VOID");
+  assert.equal(settleSelection(awayPlusOne, oneGoalHomeWin), "VOID");
+  assert.equal(settleSelection(homeMinusHalf, oneGoalHomeWin), "WON");
+});
