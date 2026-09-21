@@ -274,6 +274,16 @@ function marketRule(input: SportyBetSelectionInput): MarketRule {
 }
 
 function findMarket(event: JsonRecord, input: SportyBetSelectionInput) {
+  if (/^ASIAN_(HOME|AWAY)_/.test(input.marketKey)) {
+    const homeLine = input.marketKey.startsWith("ASIAN_HOME_") ? input.line : input.line == null ? null : -input.line;
+    return getMarkets(event).find(market => {
+      const name = marketText(market);
+      return (market.status == null || Number(market.status) === 0)
+        && /asian.*handicap|handicap.*asian/.test(name)
+        && getOutcomes(market).length === 2
+        && homeLine != null && specifierLine(market) === homeLine;
+    });
+  }
   if (input.marketKey.startsWith("HCP_3WAY_")) {
     return getMarkets(event).find(market => {
       const name = marketText(market);
@@ -300,6 +310,14 @@ function findMarket(event: JsonRecord, input: SportyBetSelectionInput) {
 function findOutcome(market: JsonRecord, input: SportyBetSelectionInput) {
   const rule = marketRule(input);
   const outcomes = getOutcomes(market).filter((outcome) => outcome.isActive == null || Number(outcome.isActive) === 1);
+  if (/^ASIAN_(HOME|AWAY)_/.test(input.marketKey)) {
+    const home = input.marketKey.startsWith("ASIAN_HOME_");
+    const labels = home ? ["1", "home", normalize(input.homeTeam)] : ["2", "away", normalize(input.awayTeam)];
+    return outcomes.find(outcome => {
+      const actual = outcomeText(outcome);
+      return labels.some(label => actual === label || actual.startsWith(`${label} `) || actual.includes(label));
+    });
+  }
   if (input.marketKey.startsWith("HCP_3WAY_")) {
     const side = input.marketKey.slice("HCP_3WAY_".length);
     const labels = side === "HOME" ? ["1", "home", normalize(input.homeTeam)] : side === "AWAY" ? ["2", "away", normalize(input.awayTeam)] : ["x", "draw"];

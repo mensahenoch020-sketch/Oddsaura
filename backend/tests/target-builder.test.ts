@@ -38,20 +38,16 @@ test("Best Bet keeps individually qualified matches when the full target is unav
   assert.equal(result?.exact, false);
 });
 
-test("Best Bet rotates through equally qualified evidence-approved market families", () => {
-  const markets = [
-    ["MATCH_HOME", "Match result", "Home"],
-    ["OVER_1_5", "Total goals", "Over 1.5"],
-    ["DC_1X", "Double chance", "Home or draw"],
-    ["DNB_HOME", "Draw no bet", "Home"],
-  ] as const;
-  const rows = markets.flatMap(([key, name, selection], familyIndex) => Array.from({ length: 4 }, (_, index) => ({
-    ...pick(`${familyIndex}-${index}`, 1.42, .72 - index * .002),
-    market: { key, name, category: "TEST", line: null },
-    selection,
-  })));
-  const ranked = rankBestBets(rows, Date.parse("2029-01-01"));
-  assert.equal(new Set(ranked.slice(0, 4).map((item) => item.market.key.replace(/^(MATCH_|DC_|DNB_|OVER_).*/, "$1"))).size, 4);
+test("Best Market for Each Match keeps exactly one strategy-ranked market per fixture", () => {
+  const rows = ["a", "b"].flatMap((fixtureId) => [
+    { ...pick(`${fixtureId}-result`, 1.55, .7), fixtureId, market: { key: "MATCH_HOME", name: "Match result", category: "RESULT" }, selection: "Home" },
+    { ...pick(`${fixtureId}-dnb`, 1.42, .72), fixtureId, market: { key: "DNB_HOME", name: "Draw no bet", category: "RESULT" }, selection: "Home" },
+    { ...pick(`${fixtureId}-dc`, 1.3, .74), fixtureId, market: { key: "DC_1X", name: "Double chance", category: "RESULT" }, selection: "Home or draw" },
+  ]);
+  const ranked = rankBestBets(rows, Date.parse("2029-01-01"), "sportybet", "protection");
+  assert.equal(ranked.length, 2);
+  assert.equal(new Set(ranked.map((item) => item.fixtureId)).size, 2);
+  assert.ok(ranked.every((item) => ["DNB_HOME", "DC_1X"].includes(item.market.key)));
 });
 
 test("removed 2.5 totals never appear in target or recommended slips", () => {
@@ -101,17 +97,18 @@ test("eligibility changes with current time and rejects malformed kickoff or pri
 });
 
 test("target builder rejects unsupported bookmaker markets and unconfirmed prices", () => {
-  const unsupported = Array.from({ length: 4 }, (_, index) => ({ ...pick(`btts${index}`, 1.45, .72), market: { key: "BTTS_YES", name: "Both teams to score", category: "GOALS" }, selection: "Yes" }));
+  const unsupported = Array.from({ length: 4 }, (_, index) => ({ ...pick(`early${index}`, 1.45, .72), market: { key: "ONE_UP_HOME", name: "1UP", category: "RESULT" }, selection: "Home" }));
   assert.equal(buildTargetSlip(unsupported, 2, Date.parse("2029-01-01"), "betway"), null);
   const estimated = Array.from({ length: 4 }, (_, index) => ({ ...pick(`raw${index}`, 1.45, .72), quotedOdds: null, marketProbability: null, expectedValue: null }));
   assert.equal(buildTargetSlip(estimated, 2, Date.parse("2029-01-01"), "sportybet", "target"), null);
   assert.equal(buildTargetSlip(estimated, 2, Date.parse("2029-01-01"), "sportybet", "recommended"), null);
 });
 
-test("Best Bet rejects negative EV while an explicit target request can use market-confirmed selections", () => {
+test("Best value rejects negative EV while protection and explicit target modes can use a strong market-confirmed pick", () => {
   const negative = Array.from({ length: 5 }, (_, index) => ({ ...pick(`negative${index}`, 1.45, .72), edge: -.001, expectedValue: -.001 }));
-  assert.equal(rankBestBets(negative, Date.parse("2029-01-01")).length, 0);
-  assert.equal(buildTargetSlip(negative, 2, Date.parse("2029-01-01"), "sportybet", "recommended"), null);
+  assert.equal(rankBestBets(negative, Date.parse("2029-01-01"), "sportybet", "value").length, 0);
+  assert.equal(buildTargetSlip(negative, 2, Date.parse("2029-01-01"), "sportybet", "value"), null);
+  assert.ok(rankBestBets(negative, Date.parse("2029-01-01"), "sportybet", "protection").length);
   assert.ok(buildTargetSlip(negative, 2, Date.parse("2029-01-01"), "sportybet", "target"));
 });
 

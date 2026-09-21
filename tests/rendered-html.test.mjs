@@ -19,7 +19,7 @@ test("renders the public chat-first OddsAura homepage", async () => {
   assert.match(html, /What do you want to bet\?/);
   assert.match(html, /Ask OddsAura anything/);
   assert.match(html, /Create account/);
-  assert.match(html, /Give me 20 odds for Sporty/i);
+  assert.match(html, /Build 20 odds for Sporty/i);
   assert.match(html, /Convert a Betway code to SportyBet/i);
   for (const bookmaker of ["SportyBet", "Bet9ja", "betPawa", "Betway", "BetKing"]) assert.match(html, new RegExp(bookmaker, "i"));
   assert.doesNotMatch(html, /codex-preview/);

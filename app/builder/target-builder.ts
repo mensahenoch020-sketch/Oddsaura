@@ -1,7 +1,8 @@
 import type { PredictedPick } from "../data";
 import { providerSupportsMarket, type ProviderId } from "./providers";
 
-export type BuildMode = "recommended" | "target";
+export type RecommendationMode = "protection" | "value";
+export type BuildMode = RecommendationMode | "recommended" | "target";
 
 export type TargetBuild = {
   picks: PredictedPick[];
@@ -20,27 +21,27 @@ const priceFor = (pick: PredictedPick, priceOverrides?: Record<string, number>) 
 // Only markets with usable historical price evidence are eligible for public
 // recommendations. The wider model catalog remains available for research,
 // but it must not be promoted merely to make the screen look varied.
-const publishedMarket = /^(MATCH_(HOME|DRAW|AWAY)|DC_(1X|X2|12)|DNB_(HOME|AWAY)|BTTS_YES|(HOME|AWAY)_OVER_(0_5|1_5)|OVER_1_5|UNDER_3_5)$/;
+const publishedMarket = /^(MATCH_(HOME|DRAW|AWAY)|DC_(1X|X2|12)|DNB_(HOME|AWAY)|BTTS_(YES|NO)|ASIAN_(HOME|AWAY)_[PM](0_5|1|1_5)|(HOME|AWAY)_OVER_(0_5|1_5)|OVER_1_5|UNDER_3_5)$/;
 export const isPublishedMarket = (key: string) => publishedMarket.test(key);
 
 const normalizeTarget = (requestedTarget: number, fallback = 5) => Number.isFinite(requestedTarget) && requestedTarget >= 1.2 ? requestedTarget : fallback;
 
-function marketFamily(key: string) {
-  if (/^MATCH_/.test(key)) return "RESULT";
-  if (/^DC_/.test(key)) return "DOUBLE_CHANCE";
-  if (/^DNB_/.test(key)) return "DRAW_NO_BET";
-  if (/^BTTS_/.test(key)) return "BTTS";
-  if (/^(HOME|AWAY)_(OVER|UNDER)_/.test(key)) return "TEAM_GOALS";
-  if (/^(OVER|UNDER)_/.test(key)) return "TOTAL_GOALS";
-  if (/_(CLEAN|WIN_NIL)$/.test(key)) return "CLEAN_SHEET";
-  if (/^HCP_/.test(key)) return "HANDICAP";
-  return "OTHER";
+function protectionBonus(key: string) {
+  if (/^ASIAN_(HOME|AWAY)_P/.test(key)) return .07;
+  if (/^DNB_/.test(key)) return .055;
+  if (/^DC_/.test(key)) return .045;
+  if (/^(HOME|AWAY)_OVER_0_5$/.test(key)) return .035;
+  if (key === "BTTS_NO") return .02;
+  return 0;
 }
 
-function predictionScore(pick: PredictedPick, provider: ProviderId) {
+function predictionScore(pick: PredictedPick, provider: ProviderId, mode: BuildMode) {
   const quality = { HIGH: .08, MEDIUM: .04, LOW: 0 } as const;
   const readiness = provider === "sportybet" && pick.providerMarketId && pick.providerSelectionId ? .05 : 0;
-  return pick.confidence + quality[pick.dataQuality ?? "LOW"] + readiness + (pick.marketProbability ?? 0) * .18 + (pick.expectedValue ?? 0) * .25 + (pick.quotedOdds ? .03 : 0);
+  const base = pick.confidence * .55 + quality[pick.dataQuality ?? "LOW"] + readiness + (pick.marketProbability ?? 0) * .22 + (pick.quotedOdds ? .03 : 0);
+  if (mode === "value") return base + Math.max(-.05, pick.edge ?? 0) * 1.6 + Math.max(-.08, pick.expectedValue ?? 0) * .8;
+  if (mode === "protection" || mode === "recommended") return base + pick.probability * .28 + protectionBonus(pick.market.key) - Math.max(0, (pick.quotedOdds ?? 1) - 2.1) * .04;
+  return base + Math.max(-.04, pick.expectedValue ?? 0) * .25;
 }
 
 function rankedPredictions(predictions: PredictedPick[], now: number, provider: ProviderId, mode: BuildMode, priceOverrides?: Record<string, number>) {
@@ -55,18 +56,24 @@ function rankedPredictions(predictions: PredictedPick[], now: number, provider: 
       if (!Number.isFinite(quoteTime) || now - quoteTime > 30 * 60_000 || quoteTime - now > 2 * 60_000) return false;
     }
     const price = priceFor(pick, priceOverrides);
-    const minimumPrice = mode === "recommended" ? 1.1 : 1.06;
+    const recommendationMode = mode === "recommended" ? "protection" : mode;
+    const minimumPrice = recommendationMode === "protection" || recommendationMode === "value" ? 1.1 : 1.06;
     const hasVerifiedPrice = priceOverrides?.[pick.fixtureId] != null || pick.quotedOdds != null;
     if (!hasVerifiedPrice || !Number.isFinite(price) || !Number.isFinite(Date.parse(pick.kickoff)) || !isPublishedMarket(pick.market.key) || Date.parse(pick.kickoff) <= now + 30 * 60_000 || price < minimumPrice || price > 3 || !providerSupportsMarket(provider, pick.market.key)) return false;
-    if (mode === "recommended") {
+    if (recommendationMode === "protection" || recommendationMode === "value") {
       const strongHistory = pick.dataQuality === "HIGH" && (pick.historyMatches == null || pick.historyMatches >= 40);
       const marketConfirmed = pick.quotedOdds != null
-        && pick.confidence >= .6
-        && pick.probability >= .62
-        && (pick.marketProbability ?? 0) >= .58
-        && (pick.modelMarketGap ?? 1) <= .1
-        && (pick.edge ?? -1) >= 0;
-      return strongHistory && marketConfirmed;
+        && (pick.modelMarketGap ?? 1) <= .1;
+      if (!strongHistory || !marketConfirmed) return false;
+      if (recommendationMode === "value") return pick.confidence >= .58
+        && pick.probability >= .56
+        && (pick.marketProbability ?? 0) >= .5
+        && (pick.edge ?? -1) >= .01
+        && (pick.expectedValue ?? -1) >= .015;
+      return pick.confidence >= .62
+        && pick.probability >= .65
+        && (pick.marketProbability ?? 0) >= .59
+        && (pick.edge ?? -1) >= -.015;
     }
 
     // Target mode answers an explicit accumulator request. It still requires
@@ -79,43 +86,19 @@ function rankedPredictions(predictions: PredictedPick[], now: number, provider: 
       && pick.confidence >= .5
       && pick.probability >= .5
       && (legacyQuotedPick || (pick.marketProbability != null && (pick.modelMarketGap ?? 1) <= .12));
-  }).sort((a, b) => predictionScore(b, provider) - predictionScore(a, provider));
+  }).sort((a, b) => predictionScore(b, provider, mode) - predictionScore(a, provider, mode));
 }
 
-export function rankBestBets(predictions: PredictedPick[], now = Date.now(), provider: ProviderId = "sportybet") {
-  const ranked = rankedPredictions(predictions, now, provider, "recommended");
+export function rankBestBets(predictions: PredictedPick[], now = Date.now(), provider: ProviderId = "sportybet", mode: RecommendationMode = "protection") {
+  const ranked = rankedPredictions(predictions, now, provider, mode);
   if (!ranked.length) return [];
 
-  // Keep every published recommendation inside the same evidence gates, then
-  // rotate through competitive market families so one market cannot occupy
-  // the whole visible Best Bet or Daily Odds list.
-  const strongestScore = predictionScore(ranked[0], provider);
-  const competitive = ranked.filter((pick) => predictionScore(pick, provider) >= strongestScore - .12);
-  const familyOrder = [...new Set(competitive.map((pick) => marketFamily(pick.market.key)))];
-  const buckets = new Map(familyOrder.map((family) => [family, competitive.filter((pick) => marketFamily(pick.market.key) === family)]));
-  const usedFixtures = new Set<string>();
-  const usedPicks = new Set<string>();
-  const diversified: PredictedPick[] = [];
-  let added = true;
-  while (added) {
-    added = false;
-    for (const family of familyOrder) {
-      const bucket = buckets.get(family) ?? [];
-      let pick = bucket.shift();
-      while (pick && usedFixtures.has(pick.fixtureId)) pick = bucket.shift();
-      if (!pick) continue;
-      diversified.push(pick);
-      usedFixtures.add(pick.fixtureId);
-      usedPicks.add(pick.id);
-      added = true;
-    }
-  }
-  for (const pick of ranked) {
-    if (usedFixtures.has(pick.fixtureId) || usedPicks.has(pick.id)) continue;
-    diversified.push(pick);
-    usedFixtures.add(pick.fixtureId);
-  }
-  return diversified;
+  // This is the core Best Market for Each Match decision: compare every
+  // eligible, actually quoted market for the same bookmaker and fixture, then
+  // retain only the strongest one for the requested strategy.
+  const bestByFixture = new Map<string, PredictedPick>();
+  for (const pick of ranked) if (!bestByFixture.has(pick.fixtureId)) bestByFixture.set(pick.fixtureId, pick);
+  return [...bestByFixture.values()].sort((a, b) => predictionScore(b, provider, mode) - predictionScore(a, provider, mode));
 }
 
 export function correctedSearchTarget(requestedTarget: number, verifiedTotal: number) {

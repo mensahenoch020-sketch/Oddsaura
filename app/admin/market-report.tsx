@@ -12,8 +12,8 @@ export default function MarketReport({ performance }: { performance: ExpandedPer
     <p>1X2 baseline: {performance.baseline?.label ?? "Not yet loaded"} · {percent(performance.baseline?.accuracy)}</p>
     {performance.markets?.length ? <div className="adm-table-scroll" tabIndex={0} aria-label="Historical market tests"><table><thead><tr><th>Selection</th><th>Matches</th><th>Voids</th><th>Accuracy</th><th>Baseline</th><th>Picked</th><th>Pick hit rate</th></tr></thead><tbody>{performance.markets.map(row => <tr key={row.key}><th>{labels[row.key] ?? row.key.replaceAll("_", " ")}</th><td>{row.matches}</td><td>{row.voids}</td><td>{percent(row.accuracy)}</td><td>{percent(row.baselineAccuracy)}</td><td>{row.selected}</td><td>{percent(row.selectedHitRate)}</td></tr>)}</tbody></table></div> : <p>The expanded test report has not loaded yet.</p>}
     <h3>Predicted, but not covered by every row in this report</h3>
-    <p>Additional total and team-total lines are produced from the same score distribution. Correct score has been removed from OddsAura recommendations. Early-payout, goal parity, first-half and combination markets are not recommended until they receive their own validation.</p>
-    <h3>Not modelled</h3><p>Corners, cards and player shots. The prediction engine now tests one adaptive European three-way handicap line (+1 or -1) when a fixture has a clear favourite.</p>
+    <p>Draw no bet, BTTS No, team goals and two-way Asian handicap lines are tested separately before recommendation. Correct score and match-total 2.5 picks are excluded. Early-payout, goal parity, first-half and combination markets are not recommended until they receive their own validation.</p>
+    <h3>Not modelled</h3><p>Corners, cards and player shots. European three-way handicaps remain research-only; public handicap picks use a two-way market with explicit win, loss and push settlement.</p>
     <h3>Destination conversion rules implemented</h3>
     <p>These describe code mappings—not live-tested availability. Every requested fixture, line and outcome must still match exactly.</p>
     <dl>

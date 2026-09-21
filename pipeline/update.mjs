@@ -146,7 +146,7 @@ const modelPredictions = upcoming.flatMap((event) => scoreEvent(event, events, m
 const bookmakerIds = ['sportybet', 'betpawa', 'betking', 'betway', 'bet9ja'];
 // Collect only complete market families that the prediction engine can
 // evaluate and publish. The user-disabled 2.5 total is deliberately absent.
-const collectibleMarketKeys = /^(MATCH_(HOME|DRAW|AWAY)|DC_(1X|X2|12)|DNB_(HOME|AWAY)|BTTS_(YES|NO)|(HOME|AWAY)_(OVER|UNDER)_(0_5|1_5)|(OVER|UNDER)_(1_5|3_5))$/;
+const collectibleMarketKeys = /^(MATCH_(HOME|DRAW|AWAY)|DC_(1X|X2|12)|DNB_(HOME|AWAY)|BTTS_(YES|NO)|ASIAN_(HOME|AWAY)_[PM](0_5|1|1_5)|(HOME|AWAY)_(OVER|UNDER)_(0_5|1_5)|(OVER|UNDER)_(1_5|3_5))$/;
 const marketFixtureLimit = Math.max(1, Math.min(250, Number(process.env.BOOKMAKER_FIXTURE_LIMIT ?? 200)));
 const modelByFixture = new Map();
 for (const prediction of modelPredictions) modelByFixture.set(prediction.fixtureId, [...(modelByFixture.get(prediction.fixtureId) ?? []), prediction]);
@@ -186,14 +186,18 @@ const predictedPicks = [];
 const predictionKeys = new Set();
 const fixturePickCounts = new Map();
 const maxSelectablePicks = Math.min(5000, Math.max(2500, upcoming.length * 3));
-const publicMarketKeys = /^(MATCH_(HOME|DRAW|AWAY)|DC_(1X|X2|12)|DNB_(HOME|AWAY)|BTTS_YES|(HOME|AWAY)_OVER_(0_5|1_5)|OVER_1_5|UNDER_3_5)$/;
+const publicMarketKeys = /^(MATCH_(HOME|DRAW|AWAY)|DC_(1X|X2|12)|DNB_(HOME|AWAY)|BTTS_(YES|NO)|ASIAN_(HOME|AWAY)_[PM](0_5|1|1_5)|(HOME|AWAY)_OVER_(0_5|1_5)|OVER_1_5|UNDER_3_5)$/;
+const evidenceGatedMarketKeys = /^(DNB_(HOME|AWAY)|BTTS_NO|ASIAN_|(HOME|AWAY)_OVER_)/;
+function marketEvidenceReady(pick) {
+  return !evidenceGatedMarketKeys.test(pick.key) || Number(pick.calibrationSamples ?? 0) >= 1000;
+}
 function isPriorityLeague(league) {
   return /eng\.1|english premier|premier league|esp\.1|la ?liga|ita\.1|italian serie a|\bserie a\b|ger\.1|bundesliga|fra\.1|ligue 1|ned\.1|eredivisie|ksa\.1|saudi pro|por\.1|primeira liga|liga portugal|tur\.1|super lig|süper lig/i.test(`${league?.id ?? ""} ${league?.name ?? ""} ${league?.country ?? ""}`);
 }
 function marketConfidenceFloor(key) {
   if (/^(HOME|AWAY)_CLEAN$/.test(key)) return .64;
-  if (/^HCP_3WAY_/.test(key)) return .58;
-  if (key === "BTTS_YES") return .58;
+  if (/^HCP_3WAY_|^ASIAN_/.test(key)) return .58;
+  if (/^BTTS_/.test(key)) return .58;
   if (/^(HOME|AWAY)_OVER_0_5$/.test(key)) return .64;
   if (/^(HOME|AWAY)_OVER_1_5$/.test(key)) return .58;
   return .5;
@@ -202,7 +206,7 @@ function publishPick(pick, fixture) {
   const identity = `${pick.oddsProvider}-${pick.fixtureId}-${pick.providerMarketId ?? pick.key}-${pick.providerSelectionId ?? pick.selection}-${pick.line ?? "none"}`;
   const providerFixture = `${pick.oddsProvider}:${pick.fixtureId}`;
   const fixtureLimit = isPriorityLeague(fixture.league) ? 6 : 3;
-  if (!publicMarketKeys.test(pick.key) || predictionKeys.has(identity) || (fixturePickCounts.get(providerFixture) ?? 0) >= fixtureLimit || predictedPicks.length >= maxSelectablePicks) return false;
+  if (!publicMarketKeys.test(pick.key) || !marketEvidenceReady(pick) || predictionKeys.has(identity) || (fixturePickCounts.get(providerFixture) ?? 0) >= fixtureLimit || predictedPicks.length >= maxSelectablePicks) return false;
   const evidence = historyEvidence(pick);
   const historyMatches = evidence.total;
   const dataQuality = evidence.minimum >= 40 && Math.min(evidence.homeRecent, evidence.awayRecent) >= 12 ? "HIGH" : evidence.ready ? "MEDIUM" : "LOW";
@@ -258,8 +262,8 @@ function publishPick(pick, fixture) {
 const eligiblePicks = [...predictions]
   .filter((item) => {
     const fixture = fixtureMap.get(item.fixtureId);
-    if (!fixture || !publicMarketKeys.test(item.key) || !item.quotedOdds || item.marketProbability == null) return false;
-    return historyEvidence(item).ready && item.confidence >= marketConfidenceFloor(item.key) && (item.modelMarketGap ?? 1) <= .1 && (item.edge ?? -1) >= 0;
+    if (!fixture || !publicMarketKeys.test(item.key) || !marketEvidenceReady(item) || !item.quotedOdds || item.marketProbability == null) return false;
+    return historyEvidence(item).ready && item.confidence >= marketConfidenceFloor(item.key) && (item.modelMarketGap ?? 1) <= .1 && (item.edge ?? -1) >= -.015;
   })
   .sort((a, b) => (b.confidence + Math.max(0, b.edge ?? 0)) - (a.confidence + Math.max(0, a.edge ?? 0)));
 const bestEligibleByFixture = new Map();
@@ -279,13 +283,14 @@ for (const primary of bestEligibleByFixture.values()) {
 // allowing high-probability totals to crowd every other option off the board.
 const showcaseKeys = [
   "MATCH_HOME", "MATCH_DRAW", "MATCH_AWAY",
-  "DC_1X", "DC_X2", "DC_12", "OVER_1_5", "UNDER_3_5", "DNB_HOME", "DNB_AWAY",
-  "BTTS_YES", "HOME_OVER_0_5", "AWAY_OVER_0_5", "HOME_OVER_1_5", "AWAY_OVER_1_5",
+    "DC_1X", "DC_X2", "DC_12", "OVER_1_5", "UNDER_3_5", "DNB_HOME", "DNB_AWAY",
+    "BTTS_YES", "BTTS_NO", "HOME_OVER_0_5", "AWAY_OVER_0_5", "HOME_OVER_1_5", "AWAY_OVER_1_5",
+    "ASIAN_HOME_P0_5", "ASIAN_AWAY_P0_5", "ASIAN_HOME_P1", "ASIAN_AWAY_P1", "ASIAN_HOME_P1_5", "ASIAN_AWAY_P1_5",
 ];
 for (const provider of bookmakerIds) for (const key of showcaseKeys) {
   const strongest = predictions.filter((item) => {
     const fixture = fixtureMap.get(item.fixtureId);
-    return item.oddsProvider === provider && item.key === key && fixture && item.quotedOdds && item.marketProbability != null && isPriorityLeague(fixture.league)
+    return item.oddsProvider === provider && item.key === key && fixture && marketEvidenceReady(item) && item.quotedOdds && item.marketProbability != null && isPriorityLeague(fixture.league)
       && historyEvidence(item).ready && item.confidence >= Math.max(.48, marketConfidenceFloor(item.key)) && (item.modelMarketGap ?? 1) <= .1 && (item.edge ?? -1) >= 0;
   }).sort((a, b) => b.confidence - a.confidence).slice(0, 12);
   for (const pick of strongest) {
@@ -311,7 +316,7 @@ function watchlistFamily(key) {
   return "OTHER";
 }
 const watchlistCandidates = [...predictions]
-  .filter((item) => dailyFixtureIds.has(item.fixtureId) && publicMarketKeys.test(item.key) && historyEvidence(item).ready && item.confidence >= 0.62 && item.quotedOdds >= 1.1 && item.quotedOdds <= 3 && item.marketProbability != null && (item.modelMarketGap ?? 1) <= .1 && (item.edge ?? -1) >= 0)
+  .filter((item) => dailyFixtureIds.has(item.fixtureId) && publicMarketKeys.test(item.key) && marketEvidenceReady(item) && historyEvidence(item).ready && item.confidence >= 0.62 && item.quotedOdds >= 1.1 && item.quotedOdds <= 3 && item.marketProbability != null && (item.modelMarketGap ?? 1) <= .1 && (item.edge ?? -1) >= 0)
   .sort((a, b) => (b.confidence + Math.max(0, b.edge ?? 0)) - (a.confidence + Math.max(0, a.edge ?? 0)));
 const watchlistFamilies = [...new Set(watchlistCandidates.map((pick) => watchlistFamily(pick.key)))];
 const watchlistBuckets = new Map(watchlistFamilies.map((family) => [family, watchlistCandidates.filter((pick) => watchlistFamily(pick.key) === family)]));
@@ -365,7 +370,7 @@ const marketCatalog = [...new Set([
 // bookmaker for fresh prices when the periodically priced pool is too small.
 const expansionCandidates = modelPredictions.filter((pick) => {
   const fixture = fixtureMap.get(pick.fixtureId);
-  return fixture && publicMarketKeys.test(pick.key) && historyEvidence(pick).ready
+  return fixture && publicMarketKeys.test(pick.key) && marketEvidenceReady(pick) && historyEvidence(pick).ready
     && Date.parse(fixture.kickoff) > Date.now() + 30 * 60_000;
 }).map((pick) => {
   const fixture = fixtureMap.get(pick.fixtureId);

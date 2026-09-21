@@ -23,3 +23,15 @@ test('overlapping double chance outcomes normalize to two, not one', () => {
   const quotes = models.map(p => ({ fixtureId: 'f', marketKey: p.key, provider: 'betking', odds: 1.5, observedAt: new Date(now).toISOString() }));
   assert.equal(priceModelPredictions(models, quotes, now)[0].marketProbability, 2 / 3);
 });
+
+test('opposite Asian handicap lines form one complete two-way price group', () => {
+  const now = Date.now();
+  const models = [
+    { fixtureId: 'f', key: 'ASIAN_HOME_P1', line: 1, probability: .7, dataQuality: 1 },
+    { fixtureId: 'f', key: 'ASIAN_AWAY_M1', line: -1, probability: .3, dataQuality: 1 },
+  ];
+  const quotes = models.map((model, index) => ({ fixtureId: 'f', marketKey: model.key, line: model.line, provider: 'sportybet', odds: index ? 3 : 1.5, observedAt: new Date(now).toISOString() }));
+  const priced = priceModelPredictions(models, quotes, now);
+  assert.equal(priced.length, 2);
+  assert.equal(priced.find(row => row.key === 'ASIAN_HOME_P1').marketProbability, 2 / 3);
+});

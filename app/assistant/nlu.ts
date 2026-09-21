@@ -14,12 +14,14 @@ type RequestContext = {
   marketKeys?: string[];
 };
 
+export type RecommendationStrategy = "protection" | "value";
+
 export type AssistantIntent =
   | { kind: "build"; confidence: number; targetOdds: number | null; provider: ProviderId | null } & RequestContext
   | { kind: "split"; confidence: number; targetOdds: number | null; parts: number | null; provider: ProviderId | null } & RequestContext
   | { kind: "convert"; confidence: number; code: string | null; sourceProvider: ProviderId | null; destinationProvider: ProviderId | null }
-  | { kind: "best"; confidence: number; provider: ProviderId | null } & RequestContext
-  | { kind: "daily"; confidence: number; provider: ProviderId | null } & RequestContext
+  | { kind: "best"; confidence: number; provider: ProviderId | null; strategy: RecommendationStrategy } & RequestContext
+  | { kind: "daily"; confidence: number; provider: ProviderId | null; strategy: RecommendationStrategy } & RequestContext
   | { kind: "results"; confidence: number } & RequestContext
   | { kind: "unknown"; confidence: number };
 
@@ -281,6 +283,10 @@ export function requestedMarketKeys(input: string): string[] | undefined {
   if (/\bbtts\b|both teams to score/.test(text)) return [/\bno\b/.test(text) ? 'BTTS_NO' : 'BTTS_YES'];
   if (/double chance/.test(text)) return ['DC_1X', 'DC_X2', 'DC_12'];
   if (/draw no bet/.test(text)) return ['DNB_HOME', 'DNB_AWAY'];
+  if (/asian handicap|positive handicap|handicap cover/.test(text)) return [
+    'ASIAN_HOME_P0_5', 'ASIAN_AWAY_P0_5', 'ASIAN_HOME_P1', 'ASIAN_AWAY_P1', 'ASIAN_HOME_P1_5', 'ASIAN_AWAY_P1_5',
+    'ASIAN_HOME_M0_5', 'ASIAN_AWAY_M0_5', 'ASIAN_HOME_M1', 'ASIAN_AWAY_M1',
+  ];
   return undefined;
 }
 
@@ -318,6 +324,7 @@ export function interpretAssistantRequest(input: string, referenceTime = Date.no
   const dateWindow = extractDateWindow(text, referenceTime);
   if (!dateWindow && /\b(?:20\d{2}[\/-]\d{1,2}[\/-]\d{1,2}|\d{1,2}[\/-]\d{1,2}[\/-]20\d{2})\b/.test(text)) return { kind: "unknown", confidence: 0 };
   const context = { dateWindow, marketKeys: requestedMarketKeys(text) };
+  const strategy: RecommendationStrategy = /\b(value|valuable|edge|price)\b/.test(text) ? "value" : "protection";
   const hasSplitLanguage = /\b(split|divide|break|separate|smaller|across)\b/.test(text);
   const hasConversionLanguage = /\b(convert|change|move|transfer|translate|turn)\b/.test(text);
   const hasBuildLanguage = /\b(odds?|bet|slip|ticket|games?|matches?|booking)\b/.test(text);
@@ -333,10 +340,10 @@ export function interpretAssistantRequest(input: string, referenceTime = Date.no
   const explicitTarget = extractTarget(text, null);
   if (explicitTarget && /\bodds?\b/.test(text)) return { kind: "build", confidence: 1, targetOdds: explicitTarget, provider: providers[0]?.id ?? null, ...context };
   if (scores.best >= .58 || /\b(best|safest|strongest|strong|reliable|top)\b/.test(text)) {
-    return { kind: "best", confidence: Math.min(1, scores.best + .18), provider: providers[0]?.id ?? null, ...context };
+    return { kind: "best", confidence: Math.min(1, scores.best + .18), provider: providers[0]?.id ?? null, strategy, ...context };
   }
   if (scores.daily >= .6 || /\bdaily\b|\btoday.?s?(?:\s+[a-z]+){0,2}\s+(?:odds|tickets|slips)\b|\bready made (?:tickets|slips)\b/.test(text) || Boolean(dateWindow && /\b(?:matches|games|odds|picks|predictions)\b/.test(text) && !extractTarget(text, parts))) {
-    return { kind: "daily", confidence: Math.min(1, scores.daily + .18), provider: providers[0]?.id ?? null, ...context };
+    return { kind: "daily", confidence: Math.min(1, scores.daily + .18), provider: providers[0]?.id ?? null, strategy, ...context };
   }
   if (scores.results >= .58 || /\b(results?|settled|won|lost|performance|hit rate)\b/.test(text)) {
     return { kind: "results", confidence: Math.min(1, scores.results + .18), dateWindow };

@@ -4,7 +4,8 @@ const bands = {
   BALANCED_10: { title: "Balanced 10 Odds", min: 8, max: 11.5, confidence: 0.6, minOdds: 1.18, maxOdds: 2, selections: 6, minHistory: 12, minMarketProbability: .54 },
 };
 
-const supportedKeys = /^(MATCH_(HOME|DRAW|AWAY)|DC_(1X|X2|12)|DNB_(HOME|AWAY)|BTTS_YES|(HOME|AWAY)_OVER_(0_5|1_5)|OVER_1_5|UNDER_3_5)$/;
+const supportedKeys = /^(MATCH_(HOME|DRAW|AWAY)|DC_(1X|X2|12)|DNB_(HOME|AWAY)|BTTS_(YES|NO)|ASIAN_(HOME|AWAY)_[PM](0_5|1|1_5)|(HOME|AWAY)_OVER_(0_5|1_5)|OVER_1_5|UNDER_3_5)$/;
+const evidenceGatedMarketKeys = /^(DNB_(HOME|AWAY)|BTTS_NO|ASIAN_|(HOME|AWAY)_OVER_)/;
 
 function priorityLeague(league) {
   const value = `${league?.id ?? ""} ${league?.name ?? ""} ${league?.country ?? ""}`;
@@ -35,6 +36,7 @@ function marketFamily(key = "") {
   if (/^DC_/.test(key)) return "DOUBLE_CHANCE";
   if (/^BTTS_/.test(key)) return "BTTS";
   if (/^DNB_/.test(key)) return "DNB";
+  if (/^ASIAN_/.test(key)) return "HANDICAP";
   return "OTHER";
 }
 
@@ -46,7 +48,8 @@ export function buildTicket(candidates, category, fixtures) {
     .filter((item) => {
       const odds = estimatedOdds(item);
       const history = (item.factors?.homePlayed ?? 0) + (item.factors?.awayPlayed ?? 0);
-      return supportedKeys.test(item.key) && odds && history >= band.minHistory && item.confidence >= band.confidence
+      const evidenceReady = !evidenceGatedMarketKeys.test(item.key) || Number(item.calibrationSamples ?? 0) >= 1000;
+      return supportedKeys.test(item.key) && evidenceReady && odds && history >= band.minHistory && item.confidence >= band.confidence
         && odds >= band.minOdds && odds <= band.maxOdds
         && (item.marketProbability ?? 0) >= band.minMarketProbability
         && (item.modelMarketGap ?? 1) <= .1

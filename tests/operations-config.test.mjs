@@ -103,7 +103,9 @@ test("builder receives market evidence, verified-price gates and forward proof",
   assert.match(pipeline, /paperTrials/);
   assert.match(builder, /mode: BuildMode/);
   assert.match(builder, /hasVerifiedPrice/);
-  assert.match(builder, /\(pick\.edge \?\? -1\) >= 0/);
+  assert.match(builder, /recommendationMode === "value"/);
+  assert.match(builder, /\(pick\.edge \?\? -1\) >= \.01/);
+  assert.match(builder, /\(pick\.edge \?\? -1\) >= -\.015/);
   assert.match(builder, /isPublishedMarket/);
   assert.match(builder, /maxLegs = mode === "target" \? Math\.min\(50, groupMap\.size\) : 8/);
   assert.doesNotMatch(builder, /Math\.min\(100/);

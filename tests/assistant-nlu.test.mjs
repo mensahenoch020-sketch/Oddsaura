@@ -66,6 +66,8 @@ test("recognizes Best Bet, Daily Odds and result requests", () => {
   assert.equal(interpretAssistantRequest("Which prediction strong pass?").kind, "best");
   assert.equal(interpretAssistantRequest("Show today's ready made tickets").kind, "daily");
   assert.equal(interpretAssistantRequest("Did the last odds win?").kind, "results");
+  assert.equal(interpretAssistantRequest("Best protection for today").strategy, "protection");
+  assert.equal(interpretAssistantRequest("Best value for today").strategy, "value");
 });
 
 test("extracts Lagos calendar days and filters date numbers out of target odds", () => {

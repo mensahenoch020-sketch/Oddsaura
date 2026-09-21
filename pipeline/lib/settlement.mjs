@@ -24,6 +24,10 @@ export function settleSelection(selection, fixture) {
     const adjusted = home + line - away;
     return (key === "HCP_3WAY_HOME" ? adjusted > 0 : key === "HCP_3WAY_AWAY" ? adjusted < 0 : key === "HCP_3WAY_DRAW" ? adjusted === 0 : false) ? "WON" : "LOST";
   }
+  if (/^ASIAN_(HOME|AWAY)_/.test(key) && Number.isFinite(line)) {
+    const adjusted = key.startsWith("ASIAN_HOME_") ? home + line - away : away + line - home;
+    return adjusted === 0 ? "VOID" : adjusted > 0 ? "WON" : "LOST";
+  }
   if (key === "MATCH_HOME") return home > away ? "WON" : "LOST";
   if (key === "MATCH_DRAW") return home === away ? "WON" : "LOST";
   if (key === "MATCH_AWAY") return away > home ? "WON" : "LOST";

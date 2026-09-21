@@ -5,10 +5,10 @@ import { FormEvent, useState } from "react";
 import Brand from "./brand";
 
 const prompts = [
-  { icon: "↗", text: "Give me 20 odds for Sporty" },
-  { icon: "↯", text: "Split 100 odds into 3 Sporty codes" },
+  { icon: "✓", text: "Best protection for today" },
+  { icon: "↗", text: "Best value for today" },
+  { icon: "↯", text: "Build 20 odds for Sporty" },
   { icon: "⇄", text: "Convert a Betway code to SportyBet", href: "/convert" },
-  { icon: "✓", text: "Show today’s qualified odds" },
 ];
 
 export default function PublicAssistant() {

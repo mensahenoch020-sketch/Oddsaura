@@ -19,6 +19,7 @@ export function marketFamily(key = "") {
   if (/^(OVER|UNDER)_/.test(key)) return "TOTAL";
   if (/_(CLEAN|WIN_NIL)$/.test(key)) return "CLEAN_SHEET";
   if (/^HCP_/.test(key)) return "HANDICAP";
+  if (/^ASIAN_/.test(key)) return "HANDICAP";
   if (/^HT_/.test(key)) return "FIRST_HALF";
   return "OTHER";
 }

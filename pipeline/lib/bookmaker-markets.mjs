@@ -26,6 +26,13 @@ function groupKeys(key) {
   if (key.startsWith('DC_')) return ['DC_1X', 'DC_X2', 'DC_12'];
   if (key.startsWith('BTTS_')) return ['BTTS_YES', 'BTTS_NO'];
   if (/^(HOME_|AWAY_)?(OVER|UNDER)_/.test(key)) return [key.replace('UNDER_', 'OVER_'), key.replace('OVER_', 'UNDER_')];
+  if (/^ASIAN_(HOME|AWAY)_[PM]/.test(key)) {
+    const side = key.includes('_HOME_') ? 'HOME' : 'AWAY';
+    const oppositeSide = side === 'HOME' ? 'AWAY' : 'HOME';
+    const suffix = key.split(`ASIAN_${side}_`)[1];
+    const oppositeSuffix = suffix.startsWith('P') ? `M${suffix.slice(1)}` : `P${suffix.slice(1)}`;
+    return [key, `ASIAN_${oppositeSide}_${oppositeSuffix}`];
+  }
   return [];
 }
 
@@ -37,7 +44,10 @@ export function priceModelPredictions(predictions, quotes, now = Date.now()) {
     const model = models.get(`${quote.fixtureId}|${quote.marketKey}|${quote.line ?? ''}`);
     if (!model) return [];
     const keys = groupKeys(quote.marketKey);
-    const siblings = keys.map(key => index.get(`${quote.provider}|${quote.fixtureId}|${key}|${quote.line ?? ''}`));
+    const siblings = keys.map(key => {
+      const line = key.startsWith('ASIAN_') && key !== quote.marketKey && quote.line != null ? -Number(quote.line) : quote.line;
+      return index.get(`${quote.provider}|${quote.fixtureId}|${key}|${line ?? ''}`);
+    });
     if (!keys.length || siblings.some(q => !q)) return [];
     const sum = siblings.reduce((total, q) => total + 1 / q.odds, 0);
     // Double chance outcomes overlap: each score belongs to two of three.

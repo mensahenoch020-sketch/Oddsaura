@@ -19,6 +19,9 @@ test("the keyless model exposes many flexible markets", () => {
   assert.ok(predictions.length > 30);
   assert.ok(predictions.some((item) => item.key === "DC_1X"));
   assert.ok(predictions.some((item) => item.key.startsWith("HCP_3WAY_")));
+  assert.ok(predictions.some((item) => item.key === "BTTS_NO"));
+  assert.ok(predictions.some((item) => item.key === "ASIAN_HOME_P1" && item.line === 1));
+  assert.ok(predictions.some((item) => item.key === "ASIAN_AWAY_P1_5" && item.line === 1.5));
   assert.ok(!predictions.some((item) => item.name === "Correct score"));
   assert.ok(!predictions.some((item) => item.key.startsWith("ONE_UP_") || item.key.startsWith("TWO_UP_")));
   assert.ok(predictions.find((item) => item.key === "MATCH_HOME").probability > predictions.find((item) => item.key === "MATCH_AWAY").probability);
@@ -101,6 +104,16 @@ test("odds matching never confuses match totals with team totals or missing line
   assert.equal(unrelated.find((item) => item.key === "HOME_CLEAN").quotedOdds, null);
 });
 
+test("away Asian handicaps invert home-relative feed lines", () => {
+  const predictions = scoreEvent(fixture, history);
+  const priced = attachOdds(predictions, [
+    { market: "Asian handicap", selection: "Alpha", line: -1, odds: 1.95, source: "test", marketId: "asian-minus-one", selectionId: "home" },
+    { market: "Asian handicap", selection: "Beta", line: -1, odds: 1.85, source: "test", marketId: "asian-minus-one", selectionId: "away" },
+  ]);
+  assert.equal(priced.find((item) => item.key === "ASIAN_AWAY_P1").quotedOdds, 1.85);
+  assert.equal(priced.find((item) => item.key === "ASIAN_HOME_M1").quotedOdds, 1.95);
+});
+
 test("priced predictions use the de-margined market as the primary baseline", () => {
   const predictions = scoreEvent(fixture, history);
   const prices = [
@@ -171,6 +184,13 @@ test("ticket construction does not fill a ticket with under markets", () => {
   assert.ok(ticket);
   assert.ok(ticket.selections.some((item) => !item.market.key.startsWith("UNDER_")));
   assert.ok(ticket.selections.filter((item) => item.market.key.startsWith("UNDER_")).length <= 2);
+});
+
+test("new market families require historical evidence before ticket publication", () => {
+  const candidates = Array.from({ length: 4 }, (_, index) => ({ fixtureId: `evidence${index}`, key: "DNB_HOME", name: "Draw no bet", category: "Result", selection: "Home", probability: .8, confidence: .8, quotedOdds: 1.35, fairOdds: 1.25, edge: .05, expectedValue: .08, marketProbability: .76, modelMarketGap: .04, oddsSource: "test", factors: { homePlayed: 8, awayPlayed: 8 } }));
+  const fixtures = candidates.map((item) => ({ id: item.fixtureId, status: "SCHEDULED", kickoff: new Date(Date.now() + 86_400_000).toISOString(), league: { name: "League" }, homeTeam: { name: "Home" }, awayTeam: { name: "Away" } }));
+  assert.equal(buildTicket(candidates, "SAFE_2", fixtures), null);
+  assert.ok(buildTicket(candidates.map((item) => ({ ...item, calibrationSamples: 1474 })), "SAFE_2", fixtures));
 });
 
 test("the ESPN fallback normalizes fixtures and available moneyline prices", () => {
