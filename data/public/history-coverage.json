@@ -1,430 +1,442 @@
 {
   "version": 1,
-  "generatedAt": "2026-09-15T23:16:06.536Z",
+  "generatedAt": "2026-09-21T09:20:52.982Z",
   "requirements": {
     "long": 20,
     "recent": 8,
     "venue": 4
   },
-  "matches": 102536,
+  "matches": 103563,
   "competitionCount": 189,
-  "teamCount": 5065,
-  "teamsMeetingLongRequirement": 2080,
+  "teamCount": 5208,
+  "teamsMeetingLongRequirement": 2083,
   "competitions": [
     {
       "id": "scoped-ncaa-women-s-soccer-usa-ncaa-w-1",
       "name": "NCAA Women's Soccer",
       "country": "USA",
-      "matches": 5176,
-      "teams": 447,
+      "matches": 5378,
+      "teams": 510,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-15T16:00:00.000Z",
-      "lastKickoff": "2026-09-14T21:00:00.000Z"
+      "lastKickoff": "2026-09-21T00:30:00.000Z"
     },
     {
       "id": "eng-2",
       "name": "Championship",
       "country": "England",
-      "matches": 4960,
+      "matches": 4974,
       "teams": 68,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-08-02T19:45:00.000Z",
-      "lastKickoff": "2026-09-13T11:00:00.000Z"
+      "lastKickoff": "2026-09-20T12:30:00.000Z"
     },
     {
       "id": "eng-3",
       "name": "League One",
       "country": "England",
-      "matches": 4818,
+      "matches": 4830,
       "teams": 80,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-08-03T15:00:00.000Z",
-      "lastKickoff": "2026-09-12T15:00:00.000Z"
+      "lastKickoff": "2026-09-19T14:00:00.000Z"
     },
     {
       "id": "eng-4",
       "name": "League Two",
       "country": "England",
-      "matches": 4702,
+      "matches": 4714,
       "teams": 68,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-08-03T12:30:00.000Z",
-      "lastKickoff": "2026-09-12T15:00:00.000Z"
+      "lastKickoff": "2026-09-19T14:00:00.000Z"
     },
     {
       "id": "esp-2",
       "name": "Segunda División",
       "country": "Spain",
-      "matches": 3751,
+      "matches": 3762,
       "teams": 56,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-08-17T17:00:00.000Z",
-      "lastKickoff": "2026-09-14T19:30:00.000Z"
+      "lastKickoff": "2026-09-20T19:00:00.000Z"
     },
     {
       "id": "esp.1",
       "name": "La Liga",
       "country": "Spain",
-      "matches": 3219,
+      "matches": 3241,
       "teams": 42,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-08-16T20:00:00.000Z",
-      "lastKickoff": "2026-09-14T20:00:00.000Z"
+      "lastKickoff": "2026-09-20T19:00:00.000Z"
     },
     {
       "id": "usa-ncaa-m-1",
       "name": "NCAA Men's Soccer",
       "country": "USA",
-      "matches": 2967,
-      "teams": 294,
+      "matches": 3081,
+      "teams": 323,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-15T18:00:00.000Z",
-      "lastKickoff": "2026-09-14T20:00:00.000Z"
+      "lastKickoff": "2026-09-21T02:30:00.000Z"
     },
     {
       "id": "eng.1",
       "name": "Premier League",
       "country": "England",
-      "matches": 2888,
+      "matches": 2898,
       "teams": 36,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-08-09T20:00:00.000Z",
-      "lastKickoff": "2026-09-14T20:00:00.000Z"
+      "lastKickoff": "2026-09-20T15:30:00.000Z"
     },
     {
       "id": "tur.1",
       "name": "Süper Lig",
       "country": "Türkiye",
-      "matches": 2868,
+      "matches": 2877,
       "teams": 43,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-08-16T18:30:00.000Z",
-      "lastKickoff": "2026-09-14T18:00:00.000Z"
+      "lastKickoff": "2026-09-20T17:00:00.000Z"
     },
     {
       "id": "ita.1",
       "name": "Serie A",
       "country": "Italy",
-      "matches": 2846,
+      "matches": 2856,
       "teams": 33,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-08-24T17:00:00.000Z",
-      "lastKickoff": "2026-09-14T18:45:00.000Z"
+      "lastKickoff": "2026-09-20T18:45:00.000Z"
     },
     {
       "id": "fra-2",
       "name": "Ligue 2",
       "country": "France",
-      "matches": 2833,
+      "matches": 2842,
       "teams": 50,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-07-26T19:00:00.000Z",
-      "lastKickoff": "2026-09-14T19:45:00.000Z"
+      "lastKickoff": "2026-09-19T18:00:00.000Z"
     },
     {
       "id": "ger-2",
       "name": "2. Bundesliga",
       "country": "Germany",
-      "matches": 2769,
+      "matches": 2778,
       "teams": 56,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-07-26T19:30:00.000Z",
-      "lastKickoff": "2026-09-13T12:30:00.000Z"
+      "lastKickoff": "2026-09-20T11:30:00.000Z"
     },
     {
       "id": "ita-2",
       "name": "Serie B",
       "country": "Italy",
-      "matches": 2766,
+      "matches": 2776,
       "teams": 51,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-08-23T20:00:00.000Z",
-      "lastKickoff": "2026-09-13T16:15:00.000Z"
+      "lastKickoff": "2026-09-20T17:30:00.000Z"
     },
     {
       "id": "bel-1",
       "name": "Belgian Pro League",
       "country": "Belgium",
-      "matches": 2728,
+      "matches": 2737,
       "teams": 39,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-07-26T19:30:00.000Z",
-      "lastKickoff": "2026-09-13T18:15:00.000Z"
+      "lastKickoff": "2026-09-20T17:15:00.000Z"
     },
     {
       "id": "ger.1",
       "name": "Bundesliga",
       "country": "Germany",
-      "matches": 2684,
+      "matches": 2693,
       "teams": 42,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-08-16T19:30:00.000Z",
-      "lastKickoff": "2026-09-13T16:30:00.000Z"
+      "lastKickoff": "2026-09-20T17:30:00.000Z"
     },
     {
       "id": "fra.1",
       "name": "Ligue 1",
       "country": "France",
-      "matches": 2678,
+      "matches": 2687,
       "teams": 39,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-08-09T19:45:00.000Z",
-      "lastKickoff": "2026-09-13T18:45:00.000Z"
+      "lastKickoff": "2026-09-20T18:45:00.000Z"
     },
     {
       "id": "ned.1",
       "name": "Eredivisie",
       "country": "Netherlands",
-      "matches": 2502,
+      "matches": 2512,
       "teams": 34,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-08-02T19:00:00.000Z",
-      "lastKickoff": "2026-09-13T18:00:00.000Z"
+      "lastKickoff": "2026-09-20T14:45:00.000Z"
     },
     {
       "id": "por.1",
       "name": "Primeira Liga",
       "country": "Portugal",
-      "matches": 2455,
+      "matches": 2464,
       "teams": 35,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-08-09T20:30:00.000Z",
-      "lastKickoff": "2026-09-14T20:45:00.000Z"
+      "lastKickoff": "2026-09-20T19:30:00.000Z"
     },
     {
       "id": "gre-1",
       "name": "Greek Super League",
       "country": "Greece",
-      "matches": 1963,
+      "matches": 1970,
       "teams": 28,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-08-24T17:00:00.000Z",
-      "lastKickoff": "2026-09-13T19:00:00.000Z"
+      "lastKickoff": "2026-09-20T18:00:00.000Z"
     },
     {
       "id": "sco-1",
       "name": "Scottish Premiership",
       "country": "Scotland",
-      "matches": 1656,
+      "matches": 1665,
       "teams": 16,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-08-03T15:00:00.000Z",
-      "lastKickoff": "2026-09-09T19:00:00.000Z"
+      "lastKickoff": "2026-09-20T11:00:00.000Z"
     },
     {
       "id": "sco-2",
       "name": "Scottish Championship",
       "country": "Scotland",
-      "matches": 1546,
+      "matches": 1552,
       "teams": 31,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-08-02T19:05:00.000Z",
-      "lastKickoff": "2026-09-12T15:00:00.000Z"
+      "lastKickoff": "2026-09-19T14:00:00.000Z"
     },
     {
       "id": "arg-2",
       "name": "Nacional B de Argentina",
       "country": "Argentina",
-      "matches": 1302,
+      "matches": 1319,
       "teams": 45,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-15T17:00:00.000Z",
-      "lastKickoff": "2026-09-14T18:30:00.000Z"
+      "lastKickoff": "2026-09-20T20:00:00.000Z"
     },
     {
       "id": "eng-5",
       "name": "English Conference",
       "country": "England",
-      "matches": 1092,
+      "matches": 1107,
       "teams": 35,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-17T18:45:00.000Z",
-      "lastKickoff": "2026-09-12T16:30:00.000Z"
+      "lastKickoff": "2026-09-19T16:30:00.000Z"
     },
     {
       "id": "arg-1",
       "name": "Argentine Primera División",
       "country": "Argentina",
-      "matches": 1089,
+      "matches": 1101,
       "teams": 32,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-15T18:00:00.000Z",
-      "lastKickoff": "2026-09-15T00:15:00.000Z"
+      "lastKickoff": "2026-09-21T00:30:00.000Z"
     },
     {
       "id": "usa-1",
       "name": "MLS",
       "country": "",
-      "matches": 1029,
+      "matches": 1044,
       "teams": 32,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-15T23:15:00.000Z",
-      "lastKickoff": "2026-09-14T01:00:00.000Z"
+      "lastKickoff": "2026-09-20T23:00:00.000Z"
     },
     {
       "id": "arg-3",
       "name": "Primera División B de Argentina",
       "country": "Argentina",
-      "matches": 918,
+      "matches": 929,
       "teams": 30,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-15T16:30:00.000Z",
-      "lastKickoff": "2026-09-13T18:00:00.000Z"
+      "lastKickoff": "2026-09-20T20:00:00.000Z"
     },
     {
       "id": "col-1",
       "name": "Colombian Fútbol Profesional",
       "country": "Colombia",
-      "matches": 866,
+      "matches": 878,
       "teams": 23,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-15T23:30:00.000Z",
-      "lastKickoff": "2026-09-14T01:15:00.000Z"
+      "lastKickoff": "2026-09-21T01:15:00.000Z"
     },
     {
       "id": "bra-2",
       "name": "Brasileirao B",
       "country": "Brazil",
-      "matches": 783,
+      "matches": 791,
       "teams": 33,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-15T19:00:00.000Z",
-      "lastKickoff": "2026-09-14T22:30:00.000Z"
+      "lastKickoff": "2026-09-20T21:30:00.000Z"
     },
     {
       "id": "bra-1",
       "name": "Brazilian Futebol",
       "country": "Brazil",
-      "matches": 780,
+      "matches": 791,
       "teams": 27,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-15T19:00:00.000Z",
-      "lastKickoff": "2026-09-14T23:00:00.000Z"
+      "lastKickoff": "2026-09-20T22:30:00.000Z"
     },
     {
       "id": "ned-2",
       "name": "Dutch Eerste Divisie",
       "country": "",
-      "matches": 772,
+      "matches": 782,
       "teams": 25,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-16T18:00:00.000Z",
-      "lastKickoff": "2026-09-14T18:00:00.000Z"
+      "lastKickoff": "2026-09-20T14:45:00.000Z"
     },
     {
       "id": "usa-usl-1",
       "name": "USL Championship",
       "country": "USA",
-      "matches": 760,
+      "matches": 774,
       "teams": 27,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-19T01:00:00.000Z",
-      "lastKickoff": "2026-09-13T02:00:00.000Z"
+      "lastKickoff": "2026-09-20T23:00:00.000Z"
     },
     {
       "id": "jpn-1",
       "name": "Japanese J League",
       "country": "Japan",
-      "matches": 736,
+      "matches": 746,
       "teams": 26,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-18T10:00:00.000Z",
-      "lastKickoff": "2026-09-13T09:30:00.000Z"
+      "lastKickoff": "2026-09-20T08:00:00.000Z"
     },
     {
       "id": "mex-1",
       "name": "Mexican Liga MX",
       "country": "",
-      "matches": 679,
+      "matches": 688,
       "teams": 19,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-18T01:00:00.000Z",
-      "lastKickoff": "2026-09-14T01:07:00.000Z"
+      "lastKickoff": "2026-09-21T02:10:00.000Z"
+    },
+    {
+      "id": "club-friendly",
+      "name": "Club Friendly",
+      "country": "",
+      "matches": 651,
+      "teams": 651,
+      "sources": [
+        "espn-global-json"
+      ],
+      "firstKickoff": "2024-11-15T17:00:00.000Z",
+      "lastKickoff": "2026-09-19T15:30:00.000Z"
     },
     {
       "id": "ksa.1",
@@ -439,124 +451,112 @@
       "lastKickoff": "2026-09-13T18:00:00.000Z"
     },
     {
-      "id": "club-friendly",
-      "name": "Club Friendly",
-      "country": "",
-      "matches": 648,
-      "teams": 651,
+      "id": "eng-fa-qual",
+      "name": "English FA Cup Qualifying",
+      "country": "England",
+      "matches": 641,
+      "teams": 625,
       "sources": [
         "espn-global-json"
       ],
-      "firstKickoff": "2024-11-15T17:00:00.000Z",
-      "lastKickoff": "2026-09-13T16:00:00.000Z"
+      "firstKickoff": "2026-08-07T18:30:00.000Z",
+      "lastKickoff": "2026-09-20T14:00:00.000Z"
     },
     {
       "id": "per-1",
       "name": "Peruvian Primera Profesional",
       "country": "Peru",
-      "matches": 631,
+      "matches": 639,
       "teams": 24,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-15T18:00:00.000Z",
-      "lastKickoff": "2026-09-13T20:15:00.000Z"
+      "lastKickoff": "2026-09-20T20:30:00.000Z"
     },
     {
       "id": "ecu-1",
       "name": "Ecuadoran Primera A",
       "country": "Ecuador",
-      "matches": 630,
+      "matches": 636,
       "teams": 20,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-15T17:30:00.000Z",
-      "lastKickoff": "2026-09-15T00:00:00.000Z"
+      "lastKickoff": "2026-09-20T23:30:00.000Z"
     },
     {
       "id": "uru-1",
       "name": "Liga AUF Uruguaya",
       "country": "Uruguay",
-      "matches": 624,
+      "matches": 631,
       "teams": 21,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-15T16:30:00.000Z",
-      "lastKickoff": "2026-09-14T22:00:00.000Z"
+      "lastKickoff": "2026-09-20T23:00:00.000Z"
     },
     {
       "id": "fifa-friendly",
       "name": "International Friendly",
       "country": "",
-      "matches": 572,
+      "matches": 575,
       "teams": 202,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-10-10T09:30:00.000Z",
-      "lastKickoff": "2026-06-11T00:00:00.000Z"
-    },
-    {
-      "id": "eng-fa-qual",
-      "name": "English FA Cup Qualifying",
-      "country": "England",
-      "matches": 561,
-      "teams": 577,
-      "sources": [
-        "espn-global-json"
-      ],
-      "firstKickoff": "2026-08-07T18:30:00.000Z",
-      "lastKickoff": "2026-09-09T18:45:00.000Z"
+      "lastKickoff": "2026-09-21T04:00:00.000Z"
     },
     {
       "id": "slv-1",
       "name": "Primera División de El Salvador",
       "country": "El Salvador",
+      "matches": 553,
+      "teams": 16,
+      "sources": [
+        "espn-global-json"
+      ],
+      "firstKickoff": "2024-09-15T21:00:00.000Z",
+      "lastKickoff": "2026-09-20T23:30:00.000Z"
+    },
+    {
+      "id": "gua-1",
+      "name": "Liga Nacional de Guatemala",
+      "country": "Guatemala",
       "matches": 546,
       "teams": 16,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-15T21:00:00.000Z",
-      "lastKickoff": "2026-09-13T23:30:00.000Z"
-    },
-    {
-      "id": "gua-1",
-      "name": "Liga Nacional de Guatemala",
-      "country": "Guatemala",
-      "matches": 541,
-      "teams": 16,
-      "sources": [
-        "espn-global-json"
-      ],
-      "firstKickoff": "2024-09-15T21:00:00.000Z",
-      "lastKickoff": "2026-09-14T01:00:00.000Z"
+      "lastKickoff": "2026-09-21T01:00:00.000Z"
     },
     {
       "id": "par-1",
       "name": "Primera División de Paraguay",
       "country": "Paraguay",
-      "matches": 527,
+      "matches": 533,
       "teams": 16,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-15T22:30:00.000Z",
-      "lastKickoff": "2026-09-13T21:30:00.000Z"
+      "lastKickoff": "2026-09-20T21:30:00.000Z"
     },
     {
       "id": "bol-1",
       "name": "Bolivian Liga Profesional",
       "country": "Bolivia",
-      "matches": 526,
+      "matches": 532,
       "teams": 19,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-15T19:00:00.000Z",
-      "lastKickoff": "2026-09-14T00:00:00.000Z"
+      "lastKickoff": "2026-09-18T23:00:00.000Z"
     },
     {
       "id": "uefa-europa-conf-qual",
@@ -574,157 +574,181 @@
       "id": "rsa-1",
       "name": "South African Premier",
       "country": "South Africa",
-      "matches": 501,
+      "matches": 509,
       "teams": 21,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-15T13:00:00.000Z",
-      "lastKickoff": "2026-09-13T15:30:00.000Z"
+      "lastKickoff": "2026-09-20T15:30:00.000Z"
     },
     {
       "id": "esp-w-1",
       "name": "Liga F",
       "country": "Spain",
-      "matches": 492,
+      "matches": 500,
       "teams": 20,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-15T10:00:00.000Z",
-      "lastKickoff": "2026-09-13T17:30:00.000Z"
+      "lastKickoff": "2026-09-20T16:00:00.000Z"
     },
     {
       "id": "mex-2",
       "name": "Mexican Ascenso MX",
       "country": "Mexico",
-      "matches": 491,
+      "matches": 499,
       "teams": 19,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-15T18:00:00.000Z",
-      "lastKickoff": "2026-09-13T18:00:00.000Z"
-    },
-    {
-      "id": "chn-1",
-      "name": "Chinese Super League",
-      "country": "",
-      "matches": 488,
-      "teams": 20,
-      "sources": [
-        "espn-global-json"
-      ],
-      "firstKickoff": "2024-09-15T11:00:00.000Z",
-      "lastKickoff": "2026-09-12T11:35:00.000Z"
+      "lastKickoff": "2026-09-20T23:00:00.000Z"
     },
     {
       "id": "rus-1",
       "name": "Russian Premier League",
       "country": "Russia",
-      "matches": 483,
+      "matches": 491,
       "teams": 19,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-15T11:15:00.000Z",
-      "lastKickoff": "2026-09-13T16:30:00.000Z"
+      "lastKickoff": "2026-09-17T17:45:00.000Z"
+    },
+    {
+      "id": "chn-1",
+      "name": "Chinese Super League",
+      "country": "",
+      "matches": 489,
+      "teams": 20,
+      "sources": [
+        "espn-global-json"
+      ],
+      "firstKickoff": "2024-09-15T11:00:00.000Z",
+      "lastKickoff": "2026-09-18T11:35:00.000Z"
     },
     {
       "id": "swe-1",
       "name": "Swedish Allsvenskanliga",
       "country": "Sweden",
-      "matches": 479,
+      "matches": 488,
       "teams": 19,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-15T12:00:00.000Z",
-      "lastKickoff": "2026-09-14T17:20:00.000Z"
-    },
-    {
-      "id": "chi-1",
-      "name": "Chilean Primera División",
-      "country": "Chile",
-      "matches": 476,
-      "teams": 20,
-      "sources": [
-        "espn-global-json"
-      ],
-      "firstKickoff": "2024-09-15T15:30:00.000Z",
-      "lastKickoff": "2026-09-14T23:30:00.000Z"
+      "lastKickoff": "2026-09-20T14:30:00.000Z"
     },
     {
       "id": "ven-1",
       "name": "Primera División de Venezuela",
       "country": "Venezuela",
-      "matches": 473,
+      "matches": 484,
       "teams": 17,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-15T21:00:00.000Z",
-      "lastKickoff": "2026-09-13T21:30:00.000Z"
-    },
-    {
-      "id": "nor-1",
-      "name": "Norwegian Tippeligaen",
-      "country": "Norway",
-      "matches": 472,
-      "teams": 20,
-      "sources": [
-        "espn-global-json"
-      ],
-      "firstKickoff": "2024-09-15T12:30:00.000Z",
-      "lastKickoff": "2026-09-14T17:00:00.000Z"
+      "lastKickoff": "2026-09-20T21:00:00.000Z"
     },
     {
       "id": "usa-usl-l1",
       "name": "USL League One",
       "country": "USA",
-      "matches": 469,
+      "matches": 483,
       "teams": 22,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-18T23:00:00.000Z",
-      "lastKickoff": "2026-09-13T22:00:00.000Z"
+      "lastKickoff": "2026-09-20T23:00:00.000Z"
+    },
+    {
+      "id": "nor-1",
+      "name": "Norwegian Tippeligaen",
+      "country": "Norway",
+      "matches": 480,
+      "teams": 20,
+      "sources": [
+        "espn-global-json"
+      ],
+      "firstKickoff": "2024-09-15T12:30:00.000Z",
+      "lastKickoff": "2026-09-20T17:15:00.000Z"
+    },
+    {
+      "id": "chi-1",
+      "name": "Chilean Primera División",
+      "country": "Chile",
+      "matches": 477,
+      "teams": 20,
+      "sources": [
+        "espn-global-json"
+      ],
+      "firstKickoff": "2024-09-15T15:30:00.000Z",
+      "lastKickoff": "2026-09-16T21:00:00.000Z"
     },
     {
       "id": "crc-1",
       "name": "Primera División de Costa Rica",
       "country": "Costa Rica",
-      "matches": 457,
+      "matches": 462,
       "teams": 15,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-15T17:00:00.000Z",
-      "lastKickoff": "2026-09-14T00:00:00.000Z"
+      "lastKickoff": "2026-09-21T01:00:00.000Z"
     },
     {
       "id": "hon-1",
       "name": "Primera División de Honduras",
       "country": "",
-      "matches": 456,
+      "matches": 462,
       "teams": 15,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-15T21:00:00.000Z",
-      "lastKickoff": "2026-09-14T01:30:00.000Z"
+      "lastKickoff": "2026-09-21T01:30:00.000Z"
     },
     {
       "id": "usa-nwsl",
       "name": "NWSL",
       "country": "USA",
-      "matches": 430,
+      "matches": 440,
       "teams": 16,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-15T17:00:00.000Z",
-      "lastKickoff": "2026-09-13T23:00:00.000Z"
+      "lastKickoff": "2026-09-20T23:00:00.000Z"
+    },
+    {
+      "id": "aut-1",
+      "name": "Austrian Bundesliga",
+      "country": "Austria",
+      "matches": 401,
+      "teams": 14,
+      "sources": [
+        "espn-global-json"
+      ],
+      "firstKickoff": "2024-09-15T12:30:00.000Z",
+      "lastKickoff": "2026-09-20T15:00:00.000Z"
+    },
+    {
+      "id": "den-1",
+      "name": "Danish SAS-Ligaen",
+      "country": "Denmark",
+      "matches": 396,
+      "teams": 15,
+      "sources": [
+        "espn-global-json"
+      ],
+      "firstKickoff": "2024-09-15T12:00:00.000Z",
+      "lastKickoff": "2026-09-20T16:00:00.000Z"
     },
     {
       "id": "uefa-champions",
@@ -739,40 +763,16 @@
       "lastKickoff": "2026-09-10T19:00:00.000Z"
     },
     {
-      "id": "aut-1",
-      "name": "Austrian Bundesliga",
-      "country": "Austria",
-      "matches": 395,
-      "teams": 14,
-      "sources": [
-        "espn-global-json"
-      ],
-      "firstKickoff": "2024-09-15T12:30:00.000Z",
-      "lastKickoff": "2026-09-13T15:00:00.000Z"
-    },
-    {
-      "id": "den-1",
-      "name": "Danish SAS-Ligaen",
-      "country": "Denmark",
-      "matches": 390,
-      "teams": 15,
-      "sources": [
-        "espn-global-json"
-      ],
-      "firstKickoff": "2024-09-15T12:00:00.000Z",
-      "lastKickoff": "2026-09-14T17:00:00.000Z"
-    },
-    {
       "id": "uefa-europa",
       "name": "UEFA Europa League",
       "country": "",
-      "matches": 378,
-      "teams": 57,
+      "matches": 396,
+      "teams": 78,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-25T16:45:00.000Z",
-      "lastKickoff": "2026-05-20T19:00:00.000Z"
+      "lastKickoff": "2026-09-17T19:00:00.000Z"
     },
     {
       "id": "aus-1",
@@ -790,25 +790,25 @@
       "id": "conmebol-sudamericana",
       "name": "CONMEBOL Sudamericana",
       "country": "",
-      "matches": 317,
+      "matches": 319,
       "teams": 96,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-18T00:30:00.000Z",
-      "lastKickoff": "2026-09-11T00:30:00.000Z"
+      "lastKickoff": "2026-09-18T00:30:00.000Z"
     },
     {
       "id": "conmebol-libertadores",
       "name": "CONMEBOL Libertadores",
       "country": "",
-      "matches": 314,
+      "matches": 317,
       "teams": 71,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-18T00:30:00.000Z",
-      "lastKickoff": "2026-09-11T00:30:00.000Z"
+      "lastKickoff": "2026-09-18T00:30:00.000Z"
     },
     {
       "id": "uefa-europa-conf",
@@ -823,28 +823,40 @@
       "lastKickoff": "2026-05-27T19:00:00.000Z"
     },
     {
-      "id": "ned-w-1",
-      "name": "Dutch Vrouwen Eredivisie",
-      "country": "Netherlands",
-      "matches": 281,
-      "teams": 15,
-      "sources": [
-        "espn-global-json"
-      ],
-      "firstKickoff": "2024-09-28T12:00:00.000Z",
-      "lastKickoff": "2026-09-13T14:45:00.000Z"
-    },
-    {
       "id": "fra-w-1",
       "name": "Division 1 Féminine",
       "country": "",
-      "matches": 280,
+      "matches": 286,
       "teams": 16,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-20T19:00:00.000Z",
-      "lastKickoff": "2026-09-12T16:00:00.000Z"
+      "lastKickoff": "2026-09-19T19:00:00.000Z"
+    },
+    {
+      "id": "ned-w-1",
+      "name": "Dutch Vrouwen Eredivisie",
+      "country": "Netherlands",
+      "matches": 286,
+      "teams": 15,
+      "sources": [
+        "espn-global-json"
+      ],
+      "firstKickoff": "2024-09-28T12:00:00.000Z",
+      "lastKickoff": "2026-09-20T14:45:00.000Z"
+    },
+    {
+      "id": "scoped-fa-women-s-super-league-eng-w-1",
+      "name": "FA Women's Super League",
+      "country": "England",
+      "matches": 285,
+      "teams": 15,
+      "sources": [
+        "espn-global-json"
+      ],
+      "firstKickoff": "2024-09-20T18:00:00.000Z",
+      "lastKickoff": "2026-09-20T13:00:00.000Z"
     },
     {
       "id": "bra-copa-do-brazil",
@@ -857,18 +869,6 @@
       ],
       "firstKickoff": "2024-10-02T22:15:00.000Z",
       "lastKickoff": "2026-09-03T23:00:00.000Z"
-    },
-    {
-      "id": "scoped-fa-women-s-super-league-eng-w-1",
-      "name": "FA Women's Super League",
-      "country": "England",
-      "matches": 278,
-      "teams": 15,
-      "sources": [
-        "espn-global-json"
-      ],
-      "firstKickoff": "2024-09-20T18:00:00.000Z",
-      "lastKickoff": "2026-09-13T17:30:00.000Z"
     },
     {
       "id": "scoped-women-s-fa-cup-eng-w-fa",
@@ -919,6 +919,18 @@
       "lastKickoff": "2026-05-21T14:00:00.000Z"
     },
     {
+      "id": "cup",
+      "name": "AFC Champions League Two",
+      "country": "",
+      "matches": 250,
+      "teams": 68,
+      "sources": [
+        "espn-global-json"
+      ],
+      "firstKickoff": "2024-09-17T16:00:00.000Z",
+      "lastKickoff": "2026-09-17T12:15:00.000Z"
+    },
+    {
       "id": "eng-fa",
       "name": "English FA Cup",
       "country": "England",
@@ -931,16 +943,16 @@
       "lastKickoff": "2026-05-16T14:00:00.000Z"
     },
     {
-      "id": "cup",
-      "name": "AFC Champions League Two",
+      "id": "champions",
+      "name": "AFC Champions League",
       "country": "",
-      "matches": 236,
-      "teams": 50,
+      "matches": 235,
+      "teams": 44,
       "sources": [
         "espn-global-json"
       ],
-      "firstKickoff": "2024-09-17T16:00:00.000Z",
-      "lastKickoff": "2026-05-16T17:45:00.000Z"
+      "firstKickoff": "2024-09-16T16:00:00.000Z",
+      "lastKickoff": "2026-09-16T12:15:00.000Z"
     },
     {
       "id": "eng-trophy",
@@ -953,18 +965,6 @@
       ],
       "firstKickoff": "2024-09-17T18:00:00.000Z",
       "lastKickoff": "2026-09-08T18:00:00.000Z"
-    },
-    {
-      "id": "champions",
-      "name": "AFC Champions League",
-      "country": "",
-      "matches": 233,
-      "teams": 41,
-      "sources": [
-        "espn-global-json"
-      ],
-      "firstKickoff": "2024-09-16T16:00:00.000Z",
-      "lastKickoff": "2026-09-14T18:15:00.000Z"
     },
     {
       "id": "chi-copa-chi",
@@ -991,6 +991,18 @@
       "lastKickoff": "2026-03-31T18:30:00.000Z"
     },
     {
+      "id": "por-taca-portugal",
+      "name": "Taca de Portugal",
+      "country": "Portugal",
+      "matches": 216,
+      "teams": 162,
+      "sources": [
+        "espn-global-json"
+      ],
+      "firstKickoff": "2024-10-18T19:15:00.000Z",
+      "lastKickoff": "2026-09-20T16:00:00.000Z"
+    },
+    {
       "id": "fifa-worldq-uefa",
       "name": "World Cup Qualifying - UEFA",
       "country": "",
@@ -1013,6 +1025,18 @@
       ],
       "firstKickoff": "2024-09-27T18:30:00.000Z",
       "lastKickoff": "2026-05-23T14:00:00.000Z"
+    },
+    {
+      "id": "eng-league-cup",
+      "name": "English Carabao Cup",
+      "country": "England",
+      "matches": 197,
+      "teams": 94,
+      "sources": [
+        "espn-global-json"
+      ],
+      "firstKickoff": "2024-09-17T18:30:00.000Z",
+      "lastKickoff": "2026-09-17T18:30:00.000Z"
     },
     {
       "id": "sco-challenge",
@@ -1039,28 +1063,16 @@
       "lastKickoff": "2026-09-13T11:00:00.000Z"
     },
     {
-      "id": "eng-league-cup",
-      "name": "English Carabao Cup",
-      "country": "England",
-      "matches": 192,
-      "teams": 94,
-      "sources": [
-        "espn-global-json"
-      ],
-      "firstKickoff": "2024-09-17T18:30:00.000Z",
-      "lastKickoff": "2026-09-09T19:15:00.000Z"
-    },
-    {
       "id": "scoped-women-s-international-friendly-fifa-friendly-w",
       "name": "Women's International Friendly",
       "country": "",
-      "matches": 186,
-      "teams": 65,
+      "matches": 190,
+      "teams": 70,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-10-24T23:30:00.000Z",
-      "lastKickoff": "2026-09-09T06:00:00.000Z"
+      "lastKickoff": "2026-09-20T07:00:00.000Z"
     },
     {
       "id": "uefa-champions-qual",
@@ -1087,18 +1099,6 @@
       "lastKickoff": "2026-09-13T17:00:00.000Z"
     },
     {
-      "id": "por-taca-portugal",
-      "name": "Taca de Portugal",
-      "country": "Portugal",
-      "matches": 177,
-      "teams": 147,
-      "sources": [
-        "espn-global-json"
-      ],
-      "firstKickoff": "2024-10-18T19:15:00.000Z",
-      "lastKickoff": "2026-09-06T16:00:00.000Z"
-    },
-    {
       "id": "bra-camp-paulista",
       "name": "Campeonato Paulista",
       "country": "Brazil",
@@ -1123,6 +1123,18 @@
       "lastKickoff": "2026-09-10T01:10:00.000Z"
     },
     {
+      "id": "usa-open",
+      "name": "U.S. Open Cup",
+      "country": "",
+      "matches": 174,
+      "teams": 121,
+      "sources": [
+        "espn-global-json"
+      ],
+      "firstKickoff": "2024-09-26T02:30:00.000Z",
+      "lastKickoff": "2026-09-17T01:30:00.000Z"
+    },
+    {
       "id": "usa-usl-l1-cup",
       "name": "USL Cup",
       "country": "USA",
@@ -1135,16 +1147,16 @@
       "lastKickoff": "2026-09-09T00:30:00.000Z"
     },
     {
-      "id": "usa-open",
-      "name": "U.S. Open Cup",
+      "id": "caf-confed",
+      "name": "CAF Confederation Cup",
       "country": "",
-      "matches": 172,
-      "teams": 121,
+      "matches": 170,
+      "teams": 73,
       "sources": [
         "espn-global-json"
       ],
-      "firstKickoff": "2024-09-26T02:30:00.000Z",
-      "lastKickoff": "2026-05-21T02:00:00.000Z"
+      "firstKickoff": "2024-11-27T13:00:00.000Z",
+      "lastKickoff": "2026-09-19T16:00:00.000Z"
     },
     {
       "id": "scoped-women-s-nations-league-uefa-w-nations",
@@ -1159,16 +1171,16 @@
       "lastKickoff": "2025-12-02T18:00:00.000Z"
     },
     {
-      "id": "caf-confed",
-      "name": "CAF Confederation Cup",
-      "country": "",
-      "matches": 168,
-      "teams": 73,
+      "id": "bol-copa",
+      "name": "Copa Bolivia",
+      "country": "Bolivia",
+      "matches": 163,
+      "teams": 17,
       "sources": [
         "espn-global-json"
       ],
-      "firstKickoff": "2024-11-27T13:00:00.000Z",
-      "lastKickoff": "2026-09-13T17:00:00.000Z"
+      "firstKickoff": "2025-04-29T19:00:00.000Z",
+      "lastKickoff": "2026-09-20T23:30:00.000Z"
     },
     {
       "id": "uefa-europa-qual",
@@ -1195,16 +1207,16 @@
       "lastKickoff": "2025-11-16T19:00:00.000Z"
     },
     {
-      "id": "bol-copa",
-      "name": "Copa Bolivia",
-      "country": "Bolivia",
-      "matches": 157,
-      "teams": 17,
+      "id": "usa-w-usl-1",
+      "name": "USL Super League",
+      "country": "USA",
+      "matches": 151,
+      "teams": 9,
       "sources": [
         "espn-global-json"
       ],
-      "firstKickoff": "2025-04-29T19:00:00.000Z",
-      "lastKickoff": "2026-09-11T00:30:00.000Z"
+      "firstKickoff": "2025-08-23T23:00:00.000Z",
+      "lastKickoff": "2026-09-20T21:00:00.000Z"
     },
     {
       "id": "scoped-fifa-women-s-world-cup-qualifying-uefa-fifa-wworldq-uefa",
@@ -1219,18 +1231,6 @@
       "lastKickoff": "2026-06-09T19:00:00.000Z"
     },
     {
-      "id": "usa-w-usl-1",
-      "name": "USL Super League",
-      "country": "USA",
-      "matches": 147,
-      "teams": 9,
-      "sources": [
-        "espn-global-json"
-      ],
-      "firstKickoff": "2025-08-23T23:00:00.000Z",
-      "lastKickoff": "2026-09-13T23:30:00.000Z"
-    },
-    {
       "id": "ned-cup",
       "name": "Dutch Cup",
       "country": "Netherlands",
@@ -1243,6 +1243,18 @@
       "lastKickoff": "2026-09-02T18:00:00.000Z"
     },
     {
+      "id": "can-w-nsl",
+      "name": "Northern Super League",
+      "country": "",
+      "matches": 143,
+      "teams": 6,
+      "sources": [
+        "espn-global-json"
+      ],
+      "firstKickoff": "2025-04-17T02:00:00.000Z",
+      "lastKickoff": "2026-09-20T23:00:00.000Z"
+    },
+    {
       "id": "bra-camp-carioca",
       "name": "Campeonato Carioca",
       "country": "Brazil",
@@ -1253,18 +1265,6 @@
       ],
       "firstKickoff": "2025-01-11T19:00:00.000Z",
       "lastKickoff": "2026-03-08T21:00:00.000Z"
-    },
-    {
-      "id": "can-w-nsl",
-      "name": "Northern Super League",
-      "country": "",
-      "matches": 140,
-      "teams": 6,
-      "sources": [
-        "espn-global-json"
-      ],
-      "firstKickoff": "2025-04-17T02:00:00.000Z",
-      "lastKickoff": "2026-09-13T20:00:00.000Z"
     },
     {
       "id": "bra-camp-gaucho",
@@ -1306,13 +1306,13 @@
       "id": "arg-copa",
       "name": "Copa Argentina",
       "country": "Argentina",
-      "matches": 127,
+      "matches": 128,
       "teams": 85,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2024-09-19T00:10:00.000Z",
-      "lastKickoff": "2026-09-09T22:00:00.000Z"
+      "lastKickoff": "2026-09-16T22:00:00.000Z"
     },
     {
       "id": "fra-coupe-de-france",
@@ -1339,6 +1339,18 @@
       "lastKickoff": "2026-09-02T18:45:00.000Z"
     },
     {
+      "id": "concacaf-central-american-cup",
+      "name": "Central American Cup",
+      "country": "",
+      "matches": 124,
+      "teams": 26,
+      "sources": [
+        "espn-global-json"
+      ],
+      "firstKickoff": "2024-09-25T02:00:00.000Z",
+      "lastKickoff": "2026-09-18T03:15:00.000Z"
+    },
+    {
       "id": "concacaf-leagues-cup",
       "name": "Leagues Cup",
       "country": "",
@@ -1349,18 +1361,6 @@
       ],
       "firstKickoff": "2025-07-29T23:00:00.000Z",
       "lastKickoff": "2026-09-07T01:15:00.000Z"
-    },
-    {
-      "id": "concacaf-central-american-cup",
-      "name": "Central American Cup",
-      "country": "",
-      "matches": 120,
-      "teams": 26,
-      "sources": [
-        "espn-global-json"
-      ],
-      "firstKickoff": "2024-09-25T02:00:00.000Z",
-      "lastKickoff": "2026-09-11T03:06:00.000Z"
     },
     {
       "id": "bra-camp-mineiro",
@@ -1534,13 +1534,13 @@
       "id": "ned-w-knvb-cup",
       "name": "Dutch KNVB Beker Vrouwen",
       "country": "Netherlands",
-      "matches": 70,
+      "matches": 71,
       "teams": 62,
       "sources": [
         "espn-global-json"
       ],
       "firstKickoff": "2025-02-13T17:00:00.000Z",
-      "lastKickoff": "2026-09-12T16:00:00.000Z"
+      "lastKickoff": "2026-09-16T18:00:00.000Z"
     },
     {
       "id": "fifa-worldq-concacaf",
@@ -1831,6 +1831,18 @@
       "lastKickoff": "2025-03-26T02:00:00.000Z"
     },
     {
+      "id": "fifa-intercontinental-cup",
+      "name": "Intercontinental Cup",
+      "country": "",
+      "matches": 12,
+      "teams": 13,
+      "sources": [
+        "espn-global-json"
+      ],
+      "firstKickoff": "2024-09-22T16:00:00.000Z",
+      "lastKickoff": "2026-09-19T13:00:00.000Z"
+    },
+    {
       "id": "sco-2-promotion-relegation",
       "name": "Scottish Championship Promotion/Relegation Playoffs",
       "country": "Scotland",
@@ -1865,18 +1877,6 @@
       ],
       "firstKickoff": "2025-05-06T18:45:00.000Z",
       "lastKickoff": "2026-05-25T19:00:00.000Z"
-    },
-    {
-      "id": "fifa-intercontinental-cup",
-      "name": "Intercontinental Cup",
-      "country": "",
-      "matches": 11,
-      "teams": 12,
-      "sources": [
-        "espn-global-json"
-      ],
-      "firstKickoff": "2024-09-22T16:00:00.000Z",
-      "lastKickoff": "2026-08-26T18:00:00.000Z"
     },
     {
       "id": "rus-1-promotion-relegation",
@@ -2083,6 +2083,18 @@
       "lastKickoff": "2026-08-31T12:00:00.000Z"
     },
     {
+      "id": "campeones-cup",
+      "name": "Campeones Cup",
+      "country": "",
+      "matches": 3,
+      "teams": 6,
+      "sources": [
+        "espn-global-json"
+      ],
+      "firstKickoff": "2024-09-25T23:30:00.000Z",
+      "lastKickoff": "2026-09-17T00:00:00.000Z"
+    },
+    {
       "id": "fra-super-cup",
       "name": "Trophee des Champions",
       "country": "France",
@@ -2105,18 +2117,6 @@
       ],
       "firstKickoff": "2024-12-22T00:00:00.000Z",
       "lastKickoff": "2025-12-20T21:00:00.000Z"
-    },
-    {
-      "id": "campeones-cup",
-      "name": "Campeones Cup",
-      "country": "",
-      "matches": 2,
-      "teams": 4,
-      "sources": [
-        "espn-global-json"
-      ],
-      "firstKickoff": "2024-09-25T23:30:00.000Z",
-      "lastKickoff": "2025-10-02T02:30:00.000Z"
     },
     {
       "id": "ned-supercup",
@@ -2239,6 +2239,18 @@
       "lastKickoff": "2026-08-19T18:00:00.000Z"
     },
     {
+      "id": "scoped-u20-intercontinental-cup-global-u20-intercontinental-cup",
+      "name": "U20 Intercontinental Cup",
+      "country": "",
+      "matches": 2,
+      "teams": 4,
+      "sources": [
+        "espn-global-json"
+      ],
+      "firstKickoff": "2025-08-23T19:30:00.000Z",
+      "lastKickoff": "2026-09-19T10:30:00.000Z"
+    },
+    {
       "id": "uefa-super-cup",
       "name": "UEFA Super Cup",
       "country": "",
@@ -2273,18 +2285,6 @@
       ],
       "firstKickoff": "2025-09-06T19:00:00.000Z",
       "lastKickoff": "2025-09-06T19:00:00.000Z"
-    },
-    {
-      "id": "scoped-u20-intercontinental-cup-global-u20-intercontinental-cup",
-      "name": "U20 Intercontinental Cup",
-      "country": "",
-      "matches": 1,
-      "teams": 2,
-      "sources": [
-        "espn-global-json"
-      ],
-      "firstKickoff": "2025-08-23T19:30:00.000Z",
-      "lastKickoff": "2025-08-23T19:30:00.000Z"
     },
     {
       "id": "scoped-women-s-super-league-pro-rel-eng-w-promotion-relegation",
