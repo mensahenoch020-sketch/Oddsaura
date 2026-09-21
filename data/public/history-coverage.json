@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "generatedAt": "2026-09-21T09:20:52.982Z",
+  "generatedAt": "2026-09-21T18:13:52.920Z",
   "requirements": {
     "long": 20,
     "recent": 8,
     "venue": 4
   },
-  "matches": 103563,
+  "matches": 103672,
   "competitionCount": 189,
   "teamCount": 5208,
   "teamsMeetingLongRequirement": 2083,
@@ -27,46 +27,46 @@
       "id": "eng-2",
       "name": "Championship",
       "country": "England",
-      "matches": 4974,
+      "matches": 4983,
       "teams": 68,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-08-02T19:45:00.000Z",
-      "lastKickoff": "2026-09-20T12:30:00.000Z"
+      "lastKickoff": "2026-09-20T13:30:00.000Z"
     },
     {
       "id": "eng-3",
       "name": "League One",
       "country": "England",
-      "matches": 4830,
+      "matches": 4839,
       "teams": 80,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-08-03T15:00:00.000Z",
-      "lastKickoff": "2026-09-19T14:00:00.000Z"
+      "lastKickoff": "2026-09-19T15:00:00.000Z"
     },
     {
       "id": "eng-4",
       "name": "League Two",
       "country": "England",
-      "matches": 4714,
+      "matches": 4724,
       "teams": 68,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-08-03T12:30:00.000Z",
-      "lastKickoff": "2026-09-19T14:00:00.000Z"
+      "lastKickoff": "2026-09-19T15:00:00.000Z"
     },
     {
       "id": "esp-2",
       "name": "Segunda División",
       "country": "Spain",
-      "matches": 3762,
+      "matches": 3767,
       "teams": 56,
       "sources": [
         "espn-global-json",
@@ -79,14 +79,14 @@
       "id": "esp.1",
       "name": "La Liga",
       "country": "Spain",
-      "matches": 3241,
+      "matches": 3248,
       "teams": 42,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-08-16T20:00:00.000Z",
-      "lastKickoff": "2026-09-20T19:00:00.000Z"
+      "lastKickoff": "2026-09-20T20:00:00.000Z"
     },
     {
       "id": "usa-ncaa-m-1",
@@ -104,7 +104,7 @@
       "id": "eng.1",
       "name": "Premier League",
       "country": "England",
-      "matches": 2898,
+      "matches": 2902,
       "teams": 36,
       "sources": [
         "espn-global-json",
@@ -117,20 +117,20 @@
       "id": "tur.1",
       "name": "Süper Lig",
       "country": "Türkiye",
-      "matches": 2877,
+      "matches": 2883,
       "teams": 43,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-08-16T18:30:00.000Z",
-      "lastKickoff": "2026-09-20T17:00:00.000Z"
+      "lastKickoff": "2026-09-20T18:00:00.000Z"
     },
     {
       "id": "ita.1",
       "name": "Serie A",
       "country": "Italy",
-      "matches": 2856,
+      "matches": 2857,
       "teams": 33,
       "sources": [
         "espn-global-json",
@@ -143,33 +143,33 @@
       "id": "fra-2",
       "name": "Ligue 2",
       "country": "France",
-      "matches": 2842,
+      "matches": 2849,
       "teams": 50,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-07-26T19:00:00.000Z",
-      "lastKickoff": "2026-09-19T18:00:00.000Z"
+      "lastKickoff": "2026-09-19T19:00:00.000Z"
     },
     {
       "id": "ger-2",
       "name": "2. Bundesliga",
       "country": "Germany",
-      "matches": 2778,
+      "matches": 2787,
       "teams": 56,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-07-26T19:30:00.000Z",
-      "lastKickoff": "2026-09-20T11:30:00.000Z"
+      "lastKickoff": "2026-09-20T12:30:00.000Z"
     },
     {
       "id": "ita-2",
       "name": "Serie B",
       "country": "Italy",
-      "matches": 2776,
+      "matches": 2778,
       "teams": 51,
       "sources": [
         "espn-global-json",
@@ -182,33 +182,33 @@
       "id": "bel-1",
       "name": "Belgian Pro League",
       "country": "Belgium",
-      "matches": 2737,
+      "matches": 2746,
       "teams": 39,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-07-26T19:30:00.000Z",
-      "lastKickoff": "2026-09-20T17:15:00.000Z"
+      "lastKickoff": "2026-09-20T18:15:00.000Z"
     },
     {
       "id": "ger.1",
       "name": "Bundesliga",
       "country": "Germany",
-      "matches": 2693,
+      "matches": 2701,
       "teams": 42,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-08-16T19:30:00.000Z",
-      "lastKickoff": "2026-09-20T17:30:00.000Z"
+      "lastKickoff": "2026-09-20T18:30:00.000Z"
     },
     {
       "id": "fra.1",
       "name": "Ligue 1",
       "country": "France",
-      "matches": 2687,
+      "matches": 2691,
       "teams": 39,
       "sources": [
         "espn-global-json",
@@ -221,20 +221,20 @@
       "id": "ned.1",
       "name": "Eredivisie",
       "country": "Netherlands",
-      "matches": 2512,
+      "matches": 2518,
       "teams": 34,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-08-02T19:00:00.000Z",
-      "lastKickoff": "2026-09-20T14:45:00.000Z"
+      "lastKickoff": "2026-09-20T15:45:00.000Z"
     },
     {
       "id": "por.1",
       "name": "Primeira Liga",
       "country": "Portugal",
-      "matches": 2464,
+      "matches": 2469,
       "teams": 35,
       "sources": [
         "espn-global-json",
@@ -247,7 +247,7 @@
       "id": "gre-1",
       "name": "Greek Super League",
       "country": "Greece",
-      "matches": 1970,
+      "matches": 1973,
       "teams": 28,
       "sources": [
         "espn-global-json",
@@ -260,7 +260,7 @@
       "id": "sco-1",
       "name": "Scottish Premiership",
       "country": "Scotland",
-      "matches": 1665,
+      "matches": 1666,
       "teams": 16,
       "sources": [
         "espn-global-json",
@@ -273,14 +273,14 @@
       "id": "sco-2",
       "name": "Scottish Championship",
       "country": "Scotland",
-      "matches": 1552,
+      "matches": 1556,
       "teams": 31,
       "sources": [
         "espn-global-json",
         "football-data-historical"
       ],
       "firstKickoff": "2019-08-02T19:05:00.000Z",
-      "lastKickoff": "2026-09-19T14:00:00.000Z"
+      "lastKickoff": "2026-09-19T15:00:00.000Z"
     },
     {
       "id": "arg-2",
