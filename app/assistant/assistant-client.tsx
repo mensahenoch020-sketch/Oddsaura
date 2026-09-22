@@ -4,10 +4,11 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import ProductNavigation from "../product-navigation";
 import ConverterForm from "../converter/converter-form";
 import { fallbackSnapshot, loadSnapshot, refreshSnapshot, type PredictedPick, type Snapshot, type Ticket, type TicketSelection, type WatchlistPick } from "../data";
-import { BookmakerCodeError, decodeBookmakerCode, expandBookmakerMarkets, generateBookmakerCode, providerAdapters, providerSupportsMarket, type BookmakerCodeResponse, type BookmakerSelection, type ProviderId } from "../builder/providers";
+import { BookmakerCodeError, decodeBookmakerCode, expandBookmakerMarkets, generateBookmakerCode, providerAdapters, providerSupportsMarket, unavailableFixtureIds, type BookmakerCodeResponse, type BookmakerSelection, type ProviderId } from "../builder/providers";
 import { buildTargetSlip, rankBestBets } from "../builder/target-builder";
 import { extractDateWindow, interpretAssistantRequest, isWithinDateWindow, matchesRequestedMarket, type AssistantIntent } from "./nlu";
 import { includedPicks, resolvedTotal, targetReached } from "./code-summary";
+import { plainPickExplanation, unmetTargetMessage } from "./plain-language";
 import "./assistant.css";
 import "../converter/converter.css";
 import "../converter/home-converter.css";
@@ -27,7 +28,9 @@ type CodeSummary = {
   warning?: string;
   selections: SelectionSummary[];
   unmatched?: Array<{ homeTeam: string; awayTeam: string; reason: string }>;
+  failedFixtureIds?: string[];
 };
+type ConversationOutcome = { kind: "build" | "conversion"; explanation: string };
 type DailyTicketSummary = {
   id: string;
   title: string;
@@ -47,14 +50,13 @@ type AssistantOutput =
   | { kind: "explanation"; selected: SelectionSummary; alternatives: SelectionSummary[] };
 type Message = { id: number; role: "user" | "assistant"; text: string; output?: AssistantOutput };
 const providerName = (provider: ProviderId) => providerAdapters.find((item) => item.id === provider)?.label ?? provider;
-const conversionStageName = (stage?: string) => ({ INPUT: "Request check", IMPORT: "Source import", TRANSLATE: "Market translation", MATCH: "Destination matching", CREATE: "Code creation", VERIFY: "Code verification" }[stage ?? ""] ?? "Conversion");
 const formatOdds = (value: number) => value >= 1_000_000 ? value.toExponential(2) : value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const pickPrice = (pick: PredictedPick) => pick.quotedOdds ?? pick.fairOdds ?? null;
 
 function summarizeSelection(pick: PredictedPick | WatchlistPick | TicketSelection): SelectionSummary {
   const odds = "quotedOdds" in pick ? pick.quotedOdds ?? pick.fairOdds : pick.odds;
   const priceStatus = "priceStatus" in pick ? pick.priceStatus : "quotedOdds" in pick && pick.quotedOdds == null ? "MODEL_ESTIMATE" : "QUOTED";
-  return { id: pick.id, fixtureId: pick.fixtureId, match: `${pick.homeTeam.name} vs ${pick.awayTeam.name}`, market: pick.market.name, selection: pick.selection, odds, priceStatus, probability: pick.probability, fairOdds: "fairOdds" in pick ? pick.fairOdds : pick.probability > 0 ? 1 / pick.probability : null, edge: pick.edge, confidence: pick.confidence, reasoning: pick.reasoning };
+  return { id: pick.id, fixtureId: pick.fixtureId, match: `${pick.homeTeam.name} vs ${pick.awayTeam.name}`, market: pick.market.name, selection: pick.selection, odds, priceStatus, probability: pick.probability, fairOdds: "fairOdds" in pick ? pick.fairOdds : pick.probability > 0 ? 1 / pick.probability : null, edge: pick.edge, confidence: pick.confidence, reasoning: plainPickExplanation(pick) };
 }
 
 const normalizedWords = (value: string) => value.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\b(fc|cf|sc|afc|club|united|utd)\b/g, " ").replace(/[^a-z0-9]+/g, " ").trim();
@@ -151,7 +153,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
   const [input, setInput] = useState(initialRequest.slice(0, 500));
   const [pending, setPending] = useState<PendingIntent | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const conversation = useRef<{ provider: ProviderId | null; code: string | null; selections: SelectionSummary[]; picks: PredictedPick[]; decoded: BookmakerSelection[] }>({ provider: null, code: null, selections: [], picks: [], decoded: [] });
+  const conversation = useRef<{ provider: ProviderId | null; code: string | null; selections: SelectionSummary[]; picks: PredictedPick[]; decoded: BookmakerSelection[]; lastOutcome: ConversationOutcome | null }>({ provider: null, code: null, selections: [], picks: [], decoded: [], lastOutcome: null });
   const nextId = useRef(1);
   const threadRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -226,8 +228,45 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
       return { ...base, selections: includedPicks(picks, result.resolved).map(pick => ({ ...summarizeSelection(pick), odds: pick.quotedOdds })), code: result.code, deepLink: result.deepLink, verified: result.verified, partial: result.partial, warning, liveOdds, unmatched: result.unmatched };
     } catch (error) {
       const message = error instanceof BookmakerCodeError ? error.message : `${adapter.label} could not create a code right now.`;
-      return { ...base, warning: message };
+      return { ...base, warning: message, failedFixtureIds: unavailableFixtureIds(error) };
     }
+  }
+
+  async function createTargetCodeCard(provider: ProviderId, initialPicks: PredictedPick[], eligible: PredictedPick[], target: number, estimatedOdds: number) {
+    let selected = initialPicks;
+    let estimate = estimatedOdds;
+    let best: CodeSummary | null = null;
+    const excluded = new Set<string>();
+    const attempts = new Set<string>();
+
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      const signature = selected.map((pick) => pick.id).sort().join("|");
+      if (!signature || attempts.has(signature)) break;
+      attempts.add(signature);
+
+      const card = await createCodeCard(provider, selected, target, estimate);
+      const distance = card.liveOdds == null ? Number.POSITIVE_INFINITY : Math.abs(card.liveOdds - target) / target;
+      const bestDistance = best?.liveOdds == null ? Number.POSITIVE_INFINITY : Math.abs(best.liveOdds - target) / target;
+      if (!best || (card.code && !best.code) || (Boolean(card.code) === Boolean(best.code) && distance < bestDistance)) best = card;
+      if (targetReached(target, card.liveOdds, card.verified, card.partial)) return card;
+
+      const includedIds = new Set(card.selections.map((pick) => pick.fixtureId).filter((id): id is string => Boolean(id)));
+      const accepted = card.code ? selected.filter((pick) => includedIds.has(pick.fixtureId)) : [];
+      const failed = new Set(card.failedFixtureIds ?? []);
+      if (card.partial) for (const pick of selected) if (!includedIds.has(pick.fixtureId)) failed.add(pick.fixtureId);
+      for (const id of failed) excluded.add(id);
+
+      const acceptedTotal = card.liveOdds;
+      const remainingTarget = accepted.length && acceptedTotal && acceptedTotal > 1 ? Math.max(1.2, target / acceptedTotal) : target;
+      const unavailable = new Set([...excluded, ...accepted.map((pick) => pick.fixtureId)]);
+      const replacementPool = eligible.filter((pick) => !unavailable.has(pick.fixtureId));
+      const replacements = buildTargetSlip(replacementPool, remainingTarget, Date.now(), provider, "target");
+      if (!replacements) break;
+      selected = [...accepted, ...replacements.picks];
+      estimate = selected.reduce((total, pick) => total * (pickPrice(pick) ?? 1), 1);
+    }
+
+    return best ?? createCodeCard(provider, initialPicks, target, estimatedOdds);
   }
 
   async function expandEligiblePool(current: PredictedPick[], provider: ProviderId, dateWindow: NonNullable<ReturnType<typeof extractDateWindow>>, marketKeys?: string[], fixtureLimit?: number) {
@@ -257,14 +296,25 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
       if (candidate && (!built || Math.abs(candidate.estimatedOdds - target) < Math.abs(built.estimatedOdds - target))) { eligible = expanded; built = candidate; }
     }
     if (!built) {
-      addMessage("assistant", `I couldn’t build ${formatOdds(target)} odds for ${providerName(provider)}${intent.dateWindow ? ` ${intent.dateWindow.label}` : ""}.`);
+      const explanation = unmetTargetMessage(providerName(provider), target);
+      conversation.current = { provider, code: null, selections: [], picks: [], decoded: [], lastOutcome: { kind: "build", explanation } };
+      addMessage("assistant", explanation);
       return;
     }
-    const card = await createCodeCard(provider, built.picks, target, built.estimatedOdds);
-    conversation.current = { provider, code: card.code ?? null, selections: card.selections, picks: built.picks, decoded: [] };
-    addMessage("assistant", card.code
-      ? `${providerName(provider)} ${card.partial ? "partial code" : "code"} ready.`
-      : `${providerName(provider)} code could not be created.`, { kind: "codes", cards: [card] });
+    const card = await createTargetCodeCard(provider, built.picks, eligible, target, built.estimatedOdds);
+    const reached = targetReached(target, card.liveOdds, card.verified, card.partial);
+    const closeToTarget = card.liveOdds != null && !card.partial && Math.abs(card.liveOdds - target) / target <= .05;
+    const explanation = reached
+      ? `${providerName(provider)} code ready at ${formatOdds(card.liveOdds!)} odds.`
+      : card.code && closeToTarget
+        ? `${providerName(provider)} code created at ${formatOdds(card.liveOdds!)} odds. Check the final slip with ${providerName(provider)} before using it.`
+      : card.code
+        ? unmetTargetMessage(providerName(provider), target, card.liveOdds, true)
+        : `${unmetTargetMessage(providerName(provider), target)}${card.warning ? ` ${card.warning}` : ""}`;
+    const selectedIds = new Set(card.selections.map((pick) => pick.id));
+    const finalPicks = eligible.filter((pick) => selectedIds.has(pick.id));
+    conversation.current = { provider, code: card.code ?? null, selections: card.selections, picks: finalPicks, decoded: [], lastOutcome: { kind: "build", explanation } };
+    addMessage("assistant", explanation, { kind: "codes", cards: [card] });
   }
 
   async function executeSplit(intent: Extract<AssistantIntent, { kind: "split" }>) {
@@ -299,7 +349,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
         }
         const summaries = cards.flatMap(card => card.selections);
         const matchedPicks = decoded.selections.flatMap(selection => { const match = matchPrediction(selection, provider); return match ? [match] : []; });
-        conversation.current = { provider, code: intent.code, selections: summaries, picks: matchedPicks, decoded: decoded.selections };
+        conversation.current = { provider, code: intent.code, selections: summaries, picks: matchedPicks, decoded: decoded.selections, lastOutcome: null };
         addMessage("assistant", `${cards.filter(card => card.code).length} of ${cards.length} ${providerName(provider)} split codes are ready.${decoded.partial ? ` ${decoded.skipped} source selection${decoded.skipped === 1 ? " was" : "s were"} not readable and were not hidden.` : ""}`, { kind: "codes", cards });
       } catch (error) {
         addMessage("assistant", error instanceof Error ? error.message : `That ${providerName(provider)} code could not be split.`);
@@ -325,7 +375,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
       const estimated = group.reduce((total, pick) => total * (pickPrice(pick) ?? 1), 1);
       cards.push(await createCodeCard(provider, group, undefined, estimated));
     }
-    conversation.current = { provider, code: null, selections: cards.flatMap(card => card.selections), picks: built.picks, decoded: [] };
+    conversation.current = { provider, code: null, selections: cards.flatMap(card => card.selections), picks: built.picks, decoded: [], lastOutcome: null };
     addMessage("assistant", `${cards.filter(card => card.code).length} of ${groups.length} ${providerName(provider)} codes are ready.`, { kind: "codes", cards });
   }
 
@@ -337,7 +387,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
         body: JSON.stringify({ sourceProvider: intent.sourceProvider, destinationProvider: intent.destinationProvider, code: intent.code, allowPartial: true }),
       });
       const payload = await response.json() as BookmakerCodeResponse & { error?: string; details?: { stage?: string } };
-      if (!response.ok || !payload.code) throw new Error(`${conversionStageName(payload.details?.stage)} failed — ${payload.error || "that booking code could not be converted."}`);
+      if (!response.ok || !payload.code) throw new Error(payload.error || "That booking code could not be converted.");
       const sourceSelections = payload.sourceSelections ?? [];
       const card: CodeSummary = {
         provider: intent.destinationProvider!, code: payload.code, deepLink: payload.deepLink, verified: payload.verified, partial: payload.partial, warning: [payload.warning, !payload.verified ? "Verification incomplete or mismatched. Check all selections before use." : ""].filter(Boolean).join(" "),
@@ -349,7 +399,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
         unmatched: [...(payload.unmatched ?? []), ...(payload.sourceIssues ?? []).map(issue => ({ homeTeam: issue.eventName ?? "Untranslated selection", awayTeam: "", reason: `${issue.marketName ?? ""}: ${issue.outcomeName ?? ""}. ${issue.reason ?? "No safe equivalent"}` }))],
       };
       const matchedPicks = sourceSelections.flatMap(selection => { const match = matchPrediction(selection, intent.destinationProvider!); return match ? [match] : []; });
-      conversation.current = { provider: intent.destinationProvider!, code: payload.code, selections: card.selections, picks: matchedPicks, decoded: sourceSelections };
+      conversation.current = { provider: intent.destinationProvider!, code: payload.code, selections: card.selections, picks: matchedPicks, decoded: sourceSelections, lastOutcome: null };
       addMessage("assistant", payload.partial ? `I created a partial ${providerName(intent.destinationProvider!)} code. The available selections are included, and every omission is listed below.` : `Your ${providerName(intent.destinationProvider!)} code is ready.`, { kind: "codes", cards: [card] });
     } catch (error) {
       addMessage("assistant", error instanceof Error ? error.message : "That booking code could not be converted.");
@@ -374,7 +424,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
         const result = await decodeBookmakerCode(provider, intent.code);
         decoded = result.selections;
         selections = decoded.map((selection, index) => decodedSummary(selection, index, matchPrediction(selection, provider!)));
-        conversation.current = { provider, code: intent.code, selections, picks: decoded.flatMap(selection => { const match = matchPrediction(selection, provider!); return match ? [match] : []; }), decoded };
+        conversation.current = { provider, code: intent.code, selections, picks: decoded.flatMap(selection => { const match = matchPrediction(selection, provider!); return match ? [match] : []; }), decoded, lastOutcome: null };
       } catch (error) {
         addMessage("assistant", error instanceof Error ? error.message : "That booking code could not be analysed.");
         return;
@@ -387,22 +437,22 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
     const quoted = selections.map(item => item.odds).filter((value): value is number => value != null && value > 1);
     const totalOdds = quoted.length === selections.length ? quoted.reduce((total, price) => total * price, 1) : null;
     const risk: "LOW" | "MEDIUM" | "HIGH" = selections.length >= 8 || (totalOdds ?? 0) >= 20 ? "HIGH" : selections.length >= 4 || (totalOdds ?? 0) >= 5 ? "MEDIUM" : "LOW";
-    const modelled = selections.filter(item => item.probability != null).length;
-    const warning = modelled < selections.length ? `${selections.length - modelled} selection${selections.length - modelled === 1 ? " has" : "s have"} no matching OddsAura model record, so I will not invent a probability for ${selections.length - modelled === 1 ? "it" : "them"}.` : undefined;
-    addMessage("assistant", `This is a ${risk.toLowerCase()}-risk slip with ${selections.length} selection${selections.length === 1 ? "" : "s"}${totalOdds ? ` at ${formatOdds(totalOdds)} combined odds` : ""}. The assessment uses the quoted markets and only the model evidence OddsAura actually has.`, { kind: "analysis", selections, totalOdds, risk, warning });
+    const unsupported = selections.filter(item => item.probability == null).length;
+    const warning = unsupported ? `${unsupported} selection${unsupported === 1 ? " does" : "s do"} not have enough verified information for a detailed assessment.` : undefined;
+    addMessage("assistant", `This is a ${risk.toLowerCase()}-risk slip with ${selections.length} selection${selections.length === 1 ? "" : "s"}${totalOdds ? ` at ${formatOdds(totalOdds)} combined odds` : ""}. I only used information OddsAura could verify.`, { kind: "analysis", selections, totalOdds, risk, warning });
   }
 
   function executeExplanation(intent: Extract<AssistantIntent, { kind: "explain" }>) {
     const picks = conversation.current.picks;
     if (!picks.length) {
-      addMessage("assistant", "I don’t have a model-selected match in this chat yet. Ask for a prediction or build a slip, then ask why I chose one of its options.");
+      addMessage("assistant", conversation.current.lastOutcome?.explanation ?? "I don’t have a match or booking code to explain yet. Send one, or ask me to build a slip first.");
       return;
     }
     const subject = normalizedWords(intent.subject);
     const selected = picks.find(pick => subject.includes(normalizedWords(pick.homeTeam.name)) || subject.includes(normalizedWords(pick.awayTeam.name)) || subject.includes(normalizedWords(pick.selection))) ?? picks[0]!;
     const provider = (selected.oddsProvider?.toLowerCase() as ProviderId | undefined) ?? conversation.current.provider;
     const alternatives = predictions.filter(pick => pick.fixtureId === selected.fixtureId && pick.id !== selected.id && (!provider || pick.oddsProvider?.toLowerCase() === provider)).sort((a, b) => b.confidence - a.confidence).slice(0, 4);
-    addMessage("assistant", selected.reasoning || `I chose ${selected.selection} because it ranked highest among the eligible, freshly quoted markets for this match under the requested strategy.`, { kind: "explanation", selected: summarizeSelection(selected), alternatives: alternatives.map(summarizeSelection) });
+    addMessage("assistant", plainPickExplanation(selected, provider ? providerName(provider) : null), { kind: "explanation", selected: summarizeSelection(selected), alternatives: alternatives.map(summarizeSelection) });
   }
 
   async function execute(intent: AssistantIntent, referenceTime: number) {
@@ -426,7 +476,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
           ranked = rankBestBets(eligible, referenceTime, provider, intent.strategy).slice(0, 3);
         }
         const picks = ranked.map(summarizeSelection);
-        conversation.current = { provider, code: null, selections: picks, picks: ranked, decoded: [] };
+        conversation.current = { provider, code: null, selections: picks, picks: ranked, decoded: [], lastOutcome: null };
         const strategyLabel = intent.strategy === "value" ? "best-value" : "best-protection";
         addMessage("assistant", picks.length ? `${picks.length} ${strategyLabel} ${providerName(provider)} selections for ${dateWindow?.label ?? "the requested period"}.` : `No ${providerName(provider)} ${strategyLabel} selections are available for ${dateWindow?.label ?? "the requested period"}.`, picks.length ? { kind: "best", picks } : undefined);
       } else if (intent.kind === "daily") {
@@ -453,7 +503,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
           });
         }
         const watchlist = rankBestBets(eligible, referenceTime, provider, intent.strategy).slice(0, 3).map(summarizeSelection);
-        conversation.current = { provider, code: tickets[0]?.bookingCodes[0]?.code ?? null, selections: tickets.flatMap(ticket => ticket.selections), picks: chosenPicks, decoded: [] };
+        conversation.current = { provider, code: tickets[0]?.bookingCodes[0]?.code ?? null, selections: tickets.flatMap(ticket => ticket.selections), picks: chosenPicks, decoded: [], lastOutcome: null };
         addMessage("assistant", tickets.length ? `I built ${tickets.length} bookmaker-priced ${providerName(provider)} Daily Odds ${tickets.length === 1 ? "ticket" : "tickets"} for ${dateWindow?.label ?? "the requested period"}.` : `No complete bookmaker-priced ${providerName(provider)} Daily Odds ticket passes every check for ${dateWindow?.label ?? "the requested period"}.${watchlist.length ? " The strongest individual qualifiers are shown separately." : ""}`, { kind: "daily", tickets, watchlist });
       } else if (intent.kind === "results") {
         const history = [...(resultsSnapshot.ticketHistory ?? resultsSnapshot.tickets ?? [])]
@@ -498,7 +548,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
     }
     setMessages([]);
     setPending(null);
-    conversation.current = { provider: null, code: null, selections: [], picks: [], decoded: [] };
+    conversation.current = { provider: null, code: null, selections: [], picks: [], decoded: [], lastOutcome: null };
     setInput("");
     window.setTimeout(() => inputRef.current?.focus(), 0);
   }
@@ -586,5 +636,5 @@ function OutputView({ output }: { output: AssistantOutput }) {
 }
 
 function SelectionRow({ pick, detailed = false }: { pick: SelectionSummary; detailed?: boolean }) {
-  return <div className="assistant-selection"><div><b>{pick.match}</b><small>{pick.market}: {pick.selection}</small>{detailed && pick.probability != null ? <em>Model {Math.round(pick.probability * 100)}% · Fair {pick.fairOdds?.toFixed(2) ?? "—"}{pick.edge != null ? ` · Edge ${(pick.edge * 100).toFixed(1)}%` : ""}</em> : null}</div><strong>{pick.odds?.toFixed(2) ?? "—"}</strong></div>;
+  return <div className="assistant-selection"><div><b>{pick.match}</b><small>{pick.market}: {pick.selection}</small>{detailed && pick.confidence != null ? <em>{Math.round(pick.confidence * 100)}% confidence</em> : null}</div><strong>{pick.odds?.toFixed(2) ?? "—"}</strong></div>;
 }

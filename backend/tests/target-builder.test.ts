@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { buildTargetSlip, correctedSearchTarget, rankBestBets } from "../../app/builder/target-builder.js";
-import { BookmakerCodeError, unavailableFixtureId } from "../../app/builder/providers.js";
+import { BookmakerCodeError, unavailableFixtureId, unavailableFixtureIds } from "../../app/builder/providers.js";
 import type { PredictedPick } from "../../app/data.js";
 import { interpretAssistantRequest, matchesRequestedMarket } from "../../app/assistant/nlu.js";
 
@@ -150,5 +150,6 @@ test("target retry corrects its search total in the direction of live price drif
 test("target retry can identify and exclude an unavailable bookmaker fixture", () => {
   assert.equal(unavailableFixtureId(new BookmakerCodeError("missing", { fixtureId: "fixture-7" })), "fixture-7");
   assert.equal(unavailableFixtureId(new BookmakerCodeError("missing", { unmatched: [{ fixtureId: "fixture-8" }] })), "fixture-8");
+  assert.deepEqual(unavailableFixtureIds(new BookmakerCodeError("missing", { unmatched: [{ fixtureId: "fixture-8" }, { fixtureId: "fixture-9" }] })), ["fixture-8", "fixture-9"]);
   assert.equal(unavailableFixtureId(new Error("missing")), null);
 });

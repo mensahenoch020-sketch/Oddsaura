@@ -68,12 +68,18 @@ export class BookmakerCodeError extends Error {
   }
 }
 
-export function unavailableFixtureId(error: unknown) {
-  if (!(error instanceof BookmakerCodeError) || !error.details || typeof error.details !== "object") return null;
+export function unavailableFixtureIds(error: unknown) {
+  if (!(error instanceof BookmakerCodeError) || !error.details || typeof error.details !== "object") return [] as string[];
   const details = error.details as { fixtureId?: unknown; unmatched?: Array<{ fixtureId?: unknown }> };
-  if (typeof details.fixtureId === "string") return details.fixtureId;
-  const unmatched = Array.isArray(details.unmatched) ? details.unmatched.find((item) => typeof item?.fixtureId === "string") : null;
-  return typeof unmatched?.fixtureId === "string" ? unmatched.fixtureId : null;
+  const ids = [
+    typeof details.fixtureId === "string" ? details.fixtureId : null,
+    ...(Array.isArray(details.unmatched) ? details.unmatched.map((item) => typeof item?.fixtureId === "string" ? item.fixtureId : null) : []),
+  ].filter((value): value is string => Boolean(value));
+  return [...new Set(ids)];
+}
+
+export function unavailableFixtureId(error: unknown) {
+  return unavailableFixtureIds(error)[0] ?? null;
 }
 
 export type BookmakerSelection = {
