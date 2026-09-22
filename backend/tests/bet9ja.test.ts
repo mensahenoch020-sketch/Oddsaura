@@ -51,6 +51,18 @@ test("accepts Bet9ja's nested success response and nested verification coupon", 
   assert.equal(result.verified, true);
 });
 
+test("does not mistake Bet9ja's numeric error code for the generated RIS code", async () => {
+  const fakeFetch = async (input: string | URL | Request) => {
+    const url = String(input);
+    if (url.endsWith("GetSearchBoxData")) return Response.json({ d: { SearchResults: [{ ID: 825252096, Type: "SE", Area: "Liverpool - Nottingham Forest", DataInizio: "/Date(1788003000000)/" }] } });
+    if (url.endsWith("GetSubEventDetails")) return Response.json({ d: detail });
+    if (url.includes("BookABetV2")) return Response.json({ status: 1, error: { code: 0, message: "" }, data: [{ RIS: "5SKGQKV", STATUS: 1 }] });
+    return Response.json({ R: "OK", D: { O: { "825252096$S_1X2_1": {} } } });
+  };
+  const result = await createBet9jaCode([{ fixtureId: "live-shape", homeTeam: "Liverpool", awayTeam: "Nottingham Forest", kickoff: "2026-08-29T11:30:00Z", marketKey: "MATCH_HOME", marketName: "Match result", selection: "Liverpool" }], fakeFetch as typeof fetch);
+  assert.equal(result.code, "5SKGQKV");
+});
+
 test("matches United and Utd team aliases", async () => {
   const leedsDetail = { ...detail, IDSottoEvento: 9002, SottoEvento: "Brighton - Leeds Utd" };
   const fakeFetch = async (input: string | URL | Request) => {
