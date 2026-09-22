@@ -1,4 +1,5 @@
 import type { ProviderId } from "../builder/providers";
+import type { LeagueFilter } from "../leagues";
 
 export const ASSISTANT_TIME_ZONE = "Africa/Lagos";
 
@@ -12,6 +13,7 @@ export type DateWindow = {
 type RequestContext = {
   dateWindow: DateWindow | null;
   marketKeys?: string[];
+  leagueFilters?: LeagueFilter[];
 };
 
 export type RecommendationStrategy = "protection" | "value";
@@ -22,6 +24,10 @@ export type AssistantIntent =
   | { kind: "convert"; confidence: number; code: string | null; sourceProvider: ProviderId | null; destinationProvider: ProviderId | null }
   | { kind: "analyze"; confidence: number; code: string | null; provider: ProviderId | null }
   | { kind: "explain"; confidence: number; subject: string }
+  | { kind: "revise"; confidence: number; action: "safer" | "remove" | "replace" | "riskiest" | "safest"; subject: string }
+  | { kind: "match"; confidence: number; homeTeam: string; awayTeam: string; provider: ProviderId | null }
+  | { kind: "help"; confidence: number }
+  | { kind: "limits"; confidence: number; subject: string }
   | { kind: "best"; confidence: number; provider: ProviderId | null; strategy: RecommendationStrategy } & RequestContext
   | { kind: "daily"; confidence: number; provider: ProviderId | null; strategy: RecommendationStrategy } & RequestContext
   | { kind: "results"; confidence: number } & RequestContext
@@ -126,7 +132,7 @@ function mentionedProviders(input: string) {
 
 function extractCode(input: string) {
   const candidates = input.toUpperCase().match(/\b[A-Z0-9]{4,16}\b/g) ?? [];
-  const excluded = new Set('convert conversion transfer move from into code codes booking sporty sportybet betway betpawa betking bet9ja please this that give odds today tomorrow'.split(' '));
+  const excluded = new Set('convert conversion transfer move from into code codes booking sporty sportybet betway betpawa betking bet9ja please this that give odds today tomorrow btts dnb gg ng epl'.split(' '));
   const valid = (candidate: string) => !excluded.has(candidate.toLowerCase()) && !providerAliases.some(provider => provider.aliases.some(alias => normalize(alias).replaceAll(' ', '') === candidate.toLowerCase()));
   const mixed = candidates.find(candidate => /[A-Z]/.test(candidate) && /\d/.test(candidate) && valid(candidate));
   if (mixed) return mixed;
@@ -278,23 +284,60 @@ export function isWithinDateWindow(kickoff: string, window: DateWindow | null) {
 
 export function requestedMarketKeys(input: string): string[] | undefined {
   const text = normalize(input);
+  const keys = new Set<string>();
+  const nonTotals = [
+    'MATCH_HOME', 'MATCH_DRAW', 'MATCH_AWAY', 'DC_1X', 'DC_X2', 'DC_12', 'DNB_HOME', 'DNB_AWAY',
+    'BTTS_YES', 'BTTS_NO', 'ASIAN_HOME_P0_5', 'ASIAN_AWAY_P0_5', 'ASIAN_HOME_P1', 'ASIAN_AWAY_P1',
+    'ASIAN_HOME_P1_5', 'ASIAN_AWAY_P1_5', 'ASIAN_HOME_M0_5', 'ASIAN_AWAY_M0_5', 'ASIAN_HOME_M1', 'ASIAN_AWAY_M1',
+  ];
+  if (/\b(?:no|without|dont use|do not use)\s+(?:over.?under|totals?|goal markets?)\b/.test(text)) nonTotals.forEach((key) => keys.add(key));
   const total = text.match(/\b(over|under)\s+(\d+(?:\.\d+)?)\b/);
   if (total) {
     const team = /\bhome\b/.test(text) ? 'HOME_' : /\baway\b/.test(text) ? 'AWAY_' : '';
-    return [`${team}${total[1].toUpperCase()}_${total[2].replace('.', '_')}`];
+    keys.add(`${team}${total[1].toUpperCase()}_${total[2].replace('.', '_')}`);
   }
-  if (/\bbtts\b|both teams to score/.test(text)) return [/\bno\b/.test(text) ? 'BTTS_NO' : 'BTTS_YES'];
-  if (/double chance/.test(text)) return ['DC_1X', 'DC_X2', 'DC_12'];
-  if (/draw no bet/.test(text)) return ['DNB_HOME', 'DNB_AWAY'];
-  if (/asian handicap|positive handicap|handicap cover/.test(text)) return [
+  if (/\bbtts\b|both teams to score|\bgg\b|\bng\b/.test(text)) keys.add(/\b(?:no|ng)\b/.test(text) ? 'BTTS_NO' : 'BTTS_YES');
+  if (/double chance|\b1x\b|\bx2\b|\b12\b/.test(text)) {
+    if (/\b1x\b/.test(text)) keys.add('DC_1X');
+    else if (/\bx2\b/.test(text)) keys.add('DC_X2');
+    else if (/\b12\b/.test(text)) keys.add('DC_12');
+    else ['DC_1X', 'DC_X2', 'DC_12'].forEach((key) => keys.add(key));
+  }
+  const hasDnb = /draw.?no.?bet|\bdnb\b/.test(text);
+  if (hasDnb) ['DNB_HOME', 'DNB_AWAY'].forEach((key) => keys.add(key));
+  if (!hasDnb && /\b(?:straight|match)\s+(?:win|result)|\bhome wins?\b|\baway wins?\b|\bdraws?\b/.test(text)) {
+    if (/\bhome wins?\b/.test(text)) keys.add('MATCH_HOME');
+    else if (/\baway wins?\b/.test(text)) keys.add('MATCH_AWAY');
+    else if (/\bdraws?\b/.test(text)) keys.add('MATCH_DRAW');
+    else ['MATCH_HOME', 'MATCH_DRAW', 'MATCH_AWAY'].forEach((key) => keys.add(key));
+  }
+  if (/\bteam goals?\b|team to score/.test(text)) ['HOME_OVER_0_5', 'AWAY_OVER_0_5', 'HOME_OVER_1_5', 'AWAY_OVER_1_5'].forEach((key) => keys.add(key));
+  if (/asian handicap|positive handicap|handicap cover/.test(text)) [
     'ASIAN_HOME_P0_5', 'ASIAN_AWAY_P0_5', 'ASIAN_HOME_P1', 'ASIAN_AWAY_P1', 'ASIAN_HOME_P1_5', 'ASIAN_AWAY_P1_5',
     'ASIAN_HOME_M0_5', 'ASIAN_AWAY_M0_5', 'ASIAN_HOME_M1', 'ASIAN_AWAY_M1',
-  ];
-  return undefined;
+  ].forEach((key) => keys.add(key));
+  return keys.size ? [...keys] : undefined;
 }
 
 export function matchesRequestedMarket(key: string, keys?: string[]) {
   return !keys || keys.includes(key);
+}
+
+export function requestedLeagueFilters(input: string): LeagueFilter[] | undefined {
+  const text = normalize(input);
+  const aliases: Array<[LeagueFilter, RegExp]> = [
+    ["PREMIER_LEAGUE", /\b(?:premier league|epl|english premier)\b/],
+    ["LA_LIGA", /\b(?:la liga|laliga|spanish primera)\b/],
+    ["SERIE_A", /\b(?:serie a|italian league)\b/],
+    ["BUNDESLIGA", /\b(?:bundesliga|german league)\b/],
+    ["LIGUE_1", /\b(?:ligue 1|french league)\b/],
+    ["EREDIVISIE", /\b(?:eredivisie|dutch league)\b/],
+    ["SAUDI_PRO", /\b(?:saudi pro|saudi league|roshan league)\b/],
+    ["PORTUGAL", /\b(?:primeira liga|portugal league|portuguese league)\b/],
+    ["TURKIYE", /\b(?:super lig|turkiye league|turkish league)\b/],
+  ];
+  const filters = aliases.filter(([, matcher]) => matcher.test(text)).map(([id]) => id);
+  return filters.length ? filters : undefined;
 }
 
 function conversionProviders(input: string, providers: ReturnType<typeof mentionedProviders>) {
@@ -317,6 +360,16 @@ function conversionProviders(input: string, providers: ReturnType<typeof mention
   return { sourceProvider, destinationProvider };
 }
 
+function extractMatchup(input: string) {
+  const text = normalize(input);
+  const match = text.match(/(.{2,55}?)\s+(?:vs\.?|versus|v|against)\s+(.{2,55})/);
+  if (!match) return null;
+  const cleanLeft = match[1]!.replace(/^.*\b(?:about|for|between|on|think of|predict)\s+/, "").replace(/^\b(?:who will win|best pick)\s+/, "").trim();
+  const cleanRight = match[2]!.replace(/\b(?:today|tonight|tomorrow|this weekend|on sportybet|on sporty|on betking|on bet9ja|on betway|on betpawa)\b.*$/, "").trim();
+  if (!cleanLeft || !cleanRight || cleanLeft.length > 40 || cleanRight.length > 40) return null;
+  return { homeTeam: cleanLeft, awayTeam: cleanRight };
+}
+
 export function interpretAssistantRequest(input: string, referenceTime = Date.now()): AssistantIntent {
   const text = normalize(input.replace(/(\d),(?=\d{3}\b)/g, "$1"));
   if (!text) return { kind: "unknown", confidence: 0 };
@@ -326,22 +379,35 @@ export function interpretAssistantRequest(input: string, referenceTime = Date.no
   const parts = extractParts(text);
   const dateWindow = extractDateWindow(text, referenceTime);
   if (!dateWindow && /\b(?:20\d{2}[\/-]\d{1,2}[\/-]\d{1,2}|\d{1,2}[\/-]\d{1,2}[\/-]20\d{2})\b/.test(text)) return { kind: "unknown", confidence: 0 };
-  const context = { dateWindow, marketKeys: requestedMarketKeys(text) };
+  const leagueFilters = requestedLeagueFilters(text);
+  const matchup = extractMatchup(input);
+  const context = { dateWindow, marketKeys: requestedMarketKeys(text), leagueFilters };
   const strategy: RecommendationStrategy = /\b(value|valuable|edge|price)\b/.test(text) ? "value" : "protection";
   const hasSplitLanguage = /\b(split|divide|break|separate|smaller|across)\b/.test(text);
-  const hasConversionLanguage = /\b(convert|change|move|transfer|translate|turn)\b/.test(text);
-  const hasAnalysisLanguage = /\b(analy[sz]e|assess|review|rate|risky|risk|opinion)\b|\bwhat do you think\b|\bhow (?:good|safe|strong)\b/.test(text);
-  const hasExplanationLanguage = /\bwhy\b|\bexplain\b|\breason\b|\bhow come\b|\bwhat made you\b/.test(text);
-  const hasBuildLanguage = /\b(odds?|bet|slip|ticket|games?|matches?|booking)\b/.test(text);
+  const hasConversionLanguage = /\b(convert|change|move|transfer|translate|turn|carry)\b|\bsend (?:this |the )?(?:code|slip|bet)\b/.test(text);
+  const hasAnalysisLanguage = /\b(analy[sz]e|assess|review|rate|risky|opinion)\b|\bwhat do you think\b|\bhow (?:good|safe|strong)\b/.test(text);
+  const hasExplanationLanguage = /\bwhy\b|\bexplain\b|\breason\b|\bhow come\b|\bwhat made you\b|what (?:could|can|might) make .{0,40}(?:lose|fail)|how (?:could|can|might) .{0,40}(?:lose|fail)|can (?:this|that|the) .{0,24}(?:lose|fail)/.test(text);
+  const hasBuildLanguage = /\b(odds?|bet|slip|ticket|games?|matches?|booking|picks?|predictions?)\b/.test(text);
+
+  if (/\b(?:guaranteed|guarantee|sure win|cannot lose|100 percent)\b|\b(?:correct score|corners?|cards?|player bets?|goalscorer|1up|2up)\b/.test(text)) return { kind: "limits", confidence: 1, subject: input.trim() };
+  if (/^(?:hi|hello|hey|good morning|good afternoon|good evening)\b/.test(text) || /\b(?:what can you do|how can you help|help me|show me how|what should i ask)\b/.test(text)) return { kind: "help", confidence: 1 };
 
   // Explicit verbs win over weak inferences. Previously any code plus a
   // bookmaker was treated as conversion, so "split this Sporty code" could
   // never reach the split action.
   if (hasExplanationLanguage) return { kind: "explain", confidence: 1, subject: input.trim() };
+  const reviseAction = /\b(?:remove|drop|delete|take out)\b/.test(text) ? "remove"
+    : /\b(?:replace|swap|change)\b/.test(text) && /\b(?:pick|selection|match|game|weakest|riskiest|that|it)\b/.test(text) ? "replace"
+    : /\b(?:make|build|give)\b.*\bsafer\b|\bsafer\s+(?:one|slip|option)\b/.test(text) || (/\btoo risky\b/.test(text) && !extractTarget(text, null)) ? "safer"
+    : /\b(?:which|show|tell).*(?:riskiest|weakest)\b|\b(?:riskiest|weakest)\s+(?:pick|selection|match|game)\b/.test(text) ? "riskiest"
+    : /\b(?:which|show|tell).*(?:safest|strongest)\b.*\b(?:pick|selection|match|game|one)\b/.test(text) ? "safest"
+    : null;
+  if (reviseAction) return { kind: "revise", confidence: 1, action: reviseAction, subject: input.trim() };
+  if (matchup) return { kind: "match", confidence: 1, ...matchup, provider: providers[0]?.id ?? null };
   if (hasSplitLanguage || parts || scores.split >= .62) {
     return { kind: "split", confidence: Math.min(1, scores.split + (hasSplitLanguage ? .2 : 0) + (code ? .15 : 0)), code, targetOdds: code ? null : extractTarget(text, parts), parts, provider: providers[0]?.id ?? null, ...context };
   }
-  if (hasAnalysisLanguage) return { kind: "analyze", confidence: 1, code, provider: providers[0]?.id ?? null };
+  if ((hasAnalysisLanguage || (code && !hasConversionLanguage)) && !extractTarget(text, null)) return { kind: "analyze", confidence: 1, code, provider: providers[0]?.id ?? null };
   if (hasConversionLanguage || (code && providers.length > 0) || scores.convert >= .56) {
     const routes = conversionProviders(text, providers);
     return { kind: "convert", confidence: Math.min(1, scores.convert + (code ? .22 : 0) + (hasConversionLanguage ? .18 : 0)), code, ...routes };
@@ -349,7 +415,7 @@ export function interpretAssistantRequest(input: string, referenceTime = Date.no
   if (/\b(results?|settled|won|lost|performance|hit rate)\b/.test(text)) return { kind: "results", confidence: 1, ...context };
   const explicitTarget = extractTarget(text, null);
   if (explicitTarget && /\bodds?\b/.test(text)) return { kind: "build", confidence: 1, targetOdds: explicitTarget, provider: providers[0]?.id ?? null, ...context };
-  if (scores.best >= .58 || /\b(best|safest|strongest|strong|reliable|top)\b/.test(text)) {
+  if (scores.best >= .58 || /\b(best|safe|safest|protected|strongest|strong|reliable|top|low risk|lower risk)\b/.test(text) || Boolean(context.marketKeys?.length && !extractTarget(text, null) && /\b(picks?|predictions?|options?|selections?)\b/.test(text)) || Boolean(leagueFilters?.length && /\b(picks?|predictions?|matches?|games?)\b/.test(text))) {
     return { kind: "best", confidence: Math.min(1, scores.best + .18), provider: providers[0]?.id ?? null, strategy, ...context };
   }
   if (scores.daily >= .6 || /\bdaily\b|\btoday.?s?(?:\s+[a-z]+){0,2}\s+(?:odds|tickets|slips)\b|\bready made (?:tickets|slips)\b/.test(text) || Boolean(dateWindow && /\b(?:matches|games|odds|picks|predictions)\b/.test(text) && !extractTarget(text, parts))) {

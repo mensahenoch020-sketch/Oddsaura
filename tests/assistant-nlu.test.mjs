@@ -85,6 +85,26 @@ test("recognizes Best Bet, Daily Odds and result requests", () => {
   assert.equal(interpretAssistantRequest("Best value for today").strategy, "value");
 });
 
+test("understands league-only prediction requests from normal user language", () => {
+  const intent = interpretAssistantRequest("Give me predictions from the Premier League and La Liga only.");
+  assert.equal(intent.kind, "best");
+  assert.deepEqual(intent.leagueFilters, ["PREMIER_LEAGUE", "LA_LIGA"]);
+});
+
+test("combines multiple requested market families", () => {
+  const intent = interpretAssistantRequest("Build 8 odds using only double chance and draw-no-bet for SportyBet");
+  assert.equal(intent.kind, "build");
+  assert.deepEqual(intent.marketKeys, ["DC_1X", "DC_X2", "DC_12", "DNB_HOME", "DNB_AWAY"]);
+});
+
+test("recognizes conversational slip revision requests", () => {
+  assert.deepEqual(interpretAssistantRequest("Nah, make it safer").action, "safer");
+  assert.deepEqual(interpretAssistantRequest("Remove the riskiest match").action, "remove");
+  assert.deepEqual(interpretAssistantRequest("Replace the weakest selection").action, "replace");
+  assert.deepEqual(interpretAssistantRequest("Which selection is the riskiest?").action, "riskiest");
+  assert.deepEqual(interpretAssistantRequest("Which is the safest pick?").action, "safest");
+});
+
 test("extracts Lagos calendar days and filters date numbers out of target odds", () => {
   const today = interpretAssistantRequest("Give me matches for today", lagosReference);
   assert.equal(today.kind, "daily");

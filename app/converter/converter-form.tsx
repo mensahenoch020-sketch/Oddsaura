@@ -9,6 +9,7 @@ type SourceSelection = { fixtureId: string; homeTeam: string; awayTeam: string; 
 type ConversionStage = "INPUT" | "IMPORT" | "TRANSLATE" | "MATCH" | "CREATE" | "VERIFY";
 type ResolvedSelection = { odds?: number | null };
 type Result = { verified?: boolean; verificationStatus?: "VERIFIED" | "UNVERIFIED" | "MISMATCH"; warning?: string; code: string; deepLink: string; decoded: number; partial?: boolean; resolved?: ResolvedSelection[]; unmatched?: Unmatched[]; sourceIssues?: ConversionIssue[]; importedFrom?: string; conversionStage?: ConversionStage };
+type FailedConversion = { stage?: ConversionStage; unmatched: Unmatched[]; sourceCount: number };
 const providers: Array<{ id: Provider; label: string; link: string }> = [
   { id: "sportybet", label: "SportyBet", link: "https://www.sportybet.com/ng/" },
   { id: "betpawa", label: "betPawa", link: "https://www.betpawa.ng/" },
@@ -26,6 +27,7 @@ export default function ConverterForm({ embedded = false, publicMode = false, xH
   const [result, setResult] = useState<Result | null>(null);
   const [issues, setIssues] = useState<ConversionIssue[]>([]);
   const [transferSelections, setTransferSelections] = useState<SourceSelection[]>([]);
+  const [failedConversion, setFailedConversion] = useState<FailedConversion | null>(null);
   const [copied, setCopied] = useState(false);
   const sourceMeta = useMemo(() => providers.find((item) => item.id === source)!, [source]);
   const destinationMeta = useMemo(() => providers.find((item) => item.id === destination)!, [destination]);
@@ -33,7 +35,7 @@ export default function ConverterForm({ embedded = false, publicMode = false, xH
   const originalCount = (result?.decoded ?? 0) + (result?.sourceIssues?.length ?? 0);
   const convertedOdds = result?.resolved?.reduce((total, item) => Number.isFinite(item.odds) ? total * Number(item.odds) : total, 1) ?? 1;
 
-  function resetFeedback() { setResult(null); setMessage(""); setIssues([]); setTransferSelections([]); setCopied(false); }
+  function resetFeedback() { setResult(null); setMessage(""); setIssues([]); setTransferSelections([]); setFailedConversion(null); setCopied(false); }
   function swap() { setSource(destination); setDestination(source); resetFeedback(); }
 
   async function runConversion() {
@@ -47,6 +49,7 @@ export default function ConverterForm({ embedded = false, publicMode = false, xH
       if (!response.ok || !payload.code) {
         setIssues(payload.details?.skippedSelections ?? []);
         setTransferSelections(payload.details?.sourceSelections ?? []);
+        setFailedConversion({ stage: payload.details?.stage, unmatched: payload.details?.unmatched ?? [], sourceCount: payload.details?.sourceSelections?.length ?? 0 });
         throw new Error(payload.error || "This code could not be converted.");
       }
       setResult(payload); setIssues(payload.sourceIssues ?? []);
@@ -88,9 +91,13 @@ export default function ConverterForm({ embedded = false, publicMode = false, xH
         <label className="converter-code"><span>{sourceMeta.label} code</span><input disabled={busy} value={code} onChange={(event) => { setCode(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 16)); resetFeedback(); }} placeholder="Enter booking code" minLength={4} maxLength={16} required autoCapitalize="characters" /></label>
         <button className="converter-submit" disabled={busy || source === destination}>{source === destination ? "Choose a different bookmaker" : busy ? "Loading and matching…" : `Convert to ${destinationMeta.label}`}</button>
         {message ? <p className={`converter-message${result?.partial ? " partial" : result?.verified ? " success" : ""}`} role="status">{message}</p> : null}
+        {failedConversion?.sourceCount ? <section className="converter-failure-summary" aria-live="polite">
+          <div><span>No destination code</span><strong>0 of {failedConversion.sourceCount} matched</strong><small>{destinationMeta.label} could not safely recreate any selection from this slip.</small></div>
+          {failedConversion.unmatched.length ? <details><summary>Why the selections were left out</summary>{failedConversion.unmatched.map((item, index) => <p key={`${item.fixtureId}-${index}`}><b>{item.homeTeam} vs {item.awayTeam}</b><span>{item.reason}</span></p>)}</details> : null}
+        </section> : null}
         {result ? <section className={`converter-result converter-result-inline${result.partial ? " partial" : ""}`} aria-live="polite"><div><span>{result.partial ? `Partial ${destinationMeta.label} code` : `Your ${destinationMeta.label} code`}</span><strong>{result.code}</strong><small>{result.partial ? `${convertedCount} of ${originalCount} selections converted` : result.verified ? `${result.resolved?.length ?? result.decoded} selections verified` : result.verificationStatus === "MISMATCH" ? "Selection mismatch—do not use unchecked" : "Created—verification incomplete"}</small></div><div><button type="button" onClick={() => void copyCode()}>{copied ? "Copied ✓" : "Copy code"}</button><a href={result.deepLink} target="_blank" rel="noreferrer">Open {destinationMeta.label} ↗</a>{publicMode ? <button type="button" className="converter-share-x" onClick={shareOnX}>Share on X</button> : null}</div>{result.unmatched?.length ? <details open><summary>{result.unmatched.length} destination selections not included</summary>{result.unmatched.map((item, index) => <p key={`${item.fixtureId}-${index}`}><b>{item.homeTeam} vs {item.awayTeam}</b><span>{item.reason}</span></p>)}</details> : null}</section> : null}
         {issues.length ? <div className="converter-issues"><strong>{issues.length} source selection{issues.length === 1 ? "" : "s"} could not be read from the original code</strong>{issues.slice(0, 12).map((issue, index) => <p key={`${issue.eventName}-${index}`}><b>{issue.eventName}</b><span>{issue.marketName}: {issue.outcomeName} · {issue.reason}</span></p>)}</div> : null}
-        {destination === "bet9ja" && transferSelections.length ? <section className="converter-transfer"><header><div><span>Available selections</span><strong>{transferSelections.length} selections are ready to copy</strong><small>Bet9ja did not create the code, so OddsAura kept the readable selections for you.</small></div><div><button type="button" onClick={() => void copyTransfer()}>{copied ? "Copied ✓" : "Copy selections"}</button><a href={destinationMeta.link} target="_blank" rel="noreferrer">Open Bet9ja ↗</a></div></header>{transferSelections.map((item, index) => <div key={`${item.fixtureId}-${index}`}><b>{index + 1}. {item.homeTeam} vs {item.awayTeam}</b><span>{item.marketName}: {item.selection}</span><small>{new Date(item.kickoff).toLocaleString()}</small></div>)}</section> : null}
+        {transferSelections.length ? <section className="converter-transfer"><header><div><span>Original selections</span><strong>{transferSelections.length} selections were imported</strong><small>No destination code was created. Copy the list only if you want to rebuild it manually.</small></div><div><button type="button" onClick={() => void copyTransfer()}>{copied ? "Copied ✓" : "Copy list"}</button><a href={destinationMeta.link} target="_blank" rel="noreferrer">Open {destinationMeta.label} ↗</a></div></header>{transferSelections.map((item, index) => <div key={`${item.fixtureId}-${index}`}><b>{index + 1}. {item.homeTeam} vs {item.awayTeam}</b><span>{item.marketName}: {item.selection}</span><small>{new Date(item.kickoff).toLocaleString()}</small></div>)}</section> : null}
       </form>
     </section>
   </>;
