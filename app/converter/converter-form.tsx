@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 
 type Provider = "sportybet" | "betpawa" | "bet9ja" | "betking" | "betway";
 type ConversionIssue = { eventName?: string; marketName?: string; outcomeName?: string; reason?: string };
@@ -9,22 +9,12 @@ type SourceSelection = { fixtureId: string; homeTeam: string; awayTeam: string; 
 type ConversionStage = "INPUT" | "IMPORT" | "TRANSLATE" | "MATCH" | "CREATE" | "VERIFY";
 type ResolvedSelection = { odds?: number | null };
 type Result = { verified?: boolean; verificationStatus?: "VERIFIED" | "UNVERIFIED" | "MISMATCH"; warning?: string; code: string; deepLink: string; decoded: number; partial?: boolean; resolved?: ResolvedSelection[]; unmatched?: Unmatched[]; sourceIssues?: ConversionIssue[]; importedFrom?: string; conversionStage?: ConversionStage };
-type ProviderHealth = { provider: Provider; status: "AVAILABLE" | "DEGRADED" | "UNTESTED" | "ASSISTED"; stage: "IMPORT" | "CREATE" | null; checkedAt: string | null; message: string };
-const stageLabels: Record<ConversionStage, string> = { INPUT: "Request check", IMPORT: "Source import", TRANSLATE: "Market translation", MATCH: "Destination matching", CREATE: "Code creation", VERIFY: "Code verification" };
-
-async function loadProviderHealth() {
-  const response = await fetch("/api/providers/health", { cache: "no-store" }).catch(() => null);
-  if (!response?.ok) return [] as ProviderHealth[];
-  const payload = await response.json() as { providers?: ProviderHealth[] };
-  return payload.providers ?? [];
-}
-
-const providers: Array<{ id: Provider; label: string; input: string; output: string; note: string; link: string }> = [
-  { id: "sportybet", label: "SportyBet", input: "Public code import", output: "Automatic", note: "Loads and recreates verified selections.", link: "https://www.sportybet.com/ng/" },
-  { id: "betpawa", label: "betPawa", input: "Public code import", output: "Automatic", note: "Loads booking numbers and creates a new code.", link: "https://www.betpawa.ng/" },
-  { id: "bet9ja", label: "Bet9ja", input: "Public code import", output: "Automatic", note: "Imports, creates and reload-checks Bet9ja BookABet codes; a readable fallback list is shown if Bet9ja blocks a request.", link: "https://sports.bet9ja.com/mobile/bookabet" },
-  { id: "betking", label: "BetKing", input: "Public code import", output: "Automatic", note: "Loads and verifies the rebuilt coupon.", link: "https://m.betking.com/en-ng/sports" },
-  { id: "betway", label: "Betway", input: "Public code import", output: "Automatic", note: "Loads, creates and reload-verifies Betway BookABet codes.", link: "https://www.betway.com.ng/book-a-bet" },
+const providers: Array<{ id: Provider; label: string; link: string }> = [
+  { id: "sportybet", label: "SportyBet", link: "https://www.sportybet.com/ng/" },
+  { id: "betpawa", label: "betPawa", link: "https://www.betpawa.ng/" },
+  { id: "bet9ja", label: "Bet9ja", link: "https://sports.bet9ja.com/mobile/bookabet" },
+  { id: "betking", label: "BetKing", link: "https://m.betking.com/en-ng/sports" },
+  { id: "betway", label: "Betway", link: "https://www.betway.com.ng/book-a-bet" },
 ];
 
 export default function ConverterForm({ embedded = false, publicMode = false, xHandle = "" }: { embedded?: boolean; publicMode?: boolean; xHandle?: string }) {
@@ -37,24 +27,13 @@ export default function ConverterForm({ embedded = false, publicMode = false, xH
   const [issues, setIssues] = useState<ConversionIssue[]>([]);
   const [transferSelections, setTransferSelections] = useState<SourceSelection[]>([]);
   const [copied, setCopied] = useState(false);
-  const [failureStage, setFailureStage] = useState<ConversionStage | null>(null);
-  const [health, setHealth] = useState<ProviderHealth[]>([]);
   const sourceMeta = useMemo(() => providers.find((item) => item.id === source)!, [source]);
   const destinationMeta = useMemo(() => providers.find((item) => item.id === destination)!, [destination]);
   const convertedCount = result?.resolved?.length ?? Math.max(0, (result?.decoded ?? 0) - (result?.unmatched?.length ?? 0));
   const originalCount = (result?.decoded ?? 0) + (result?.sourceIssues?.length ?? 0);
   const convertedOdds = result?.resolved?.reduce((total, item) => Number.isFinite(item.odds) ? total * Number(item.odds) : total, 1) ?? 1;
 
-  useEffect(() => {
-    if (publicMode) return;
-    let active = true;
-    loadProviderHealth().then((rows) => { if (active) setHealth(rows); });
-    return () => { active = false; };
-  }, [publicMode]);
-
-  async function refreshHealth() { setHealth(await loadProviderHealth()); }
-
-  function resetFeedback() { setResult(null); setMessage(""); setIssues([]); setTransferSelections([]); setCopied(false); setFailureStage(null); }
+  function resetFeedback() { setResult(null); setMessage(""); setIssues([]); setTransferSelections([]); setCopied(false); }
   function swap() { setSource(destination); setDestination(source); resetFeedback(); }
 
   async function runConversion() {
@@ -66,7 +45,6 @@ export default function ConverterForm({ embedded = false, publicMode = false, xH
       try { payload = JSON.parse(text) as typeof payload; }
       catch { throw new Error("The bookmaker connection returned an unreadable response. Please retry shortly."); }
       if (!response.ok || !payload.code) {
-        setFailureStage(payload.details?.stage ?? null);
         setIssues(payload.details?.skippedSelections ?? []);
         setTransferSelections(payload.details?.sourceSelections ?? []);
         throw new Error(payload.error || "This code could not be converted.");
@@ -78,7 +56,7 @@ export default function ConverterForm({ embedded = false, publicMode = false, xH
         ? `Partial code created: ${included} of ${total} selections converted. Review the selections not included below.${payload.warning ? ` ${payload.warning}` : ""}`
         : payload.warning || (payload.verified ? "Every selection was converted and the new code was reload-verified." : "Code created—verification incomplete. Check every selection on the bookmaker."));
     } catch (error) { setMessage(error instanceof Error ? error.message : "This code could not be converted."); }
-    finally { setBusy(false); if (!publicMode) void refreshHealth(); }
+    finally { setBusy(false); }
   }
 
   function convert(event: FormEvent<HTMLFormElement>) { event.preventDefault(); void runConversion(); }
@@ -103,19 +81,17 @@ export default function ConverterForm({ embedded = false, publicMode = false, xH
     <section className={`converter-workspace${embedded ? " converter-workspace-embedded" : ""}`}>
       <form onSubmit={convert}>
         <div className="converter-route">
-          <label><span>From</span><select disabled={busy} value={source} onChange={(event) => { setSource(event.target.value as Provider); resetFeedback(); }}>{providers.map((item) => <option value={item.id} key={item.id}>{item.label}</option>)}</select><small>{sourceMeta.input}</small></label>
+          <label><span>From</span><select disabled={busy} value={source} onChange={(event) => { setSource(event.target.value as Provider); resetFeedback(); }}>{providers.map((item) => <option value={item.id} key={item.id}>{item.label}</option>)}</select></label>
           <button type="button" disabled={busy} className="converter-swap" onClick={swap} aria-label="Swap source and destination">⇄</button>
-          <label><span>To</span><select disabled={busy} value={destination} onChange={(event) => { setDestination(event.target.value as Provider); resetFeedback(); }}>{providers.map((item) => <option value={item.id} key={item.id}>{item.label}</option>)}</select><small>{destinationMeta.output}</small></label>
+          <label><span>To</span><select disabled={busy} value={destination} onChange={(event) => { setDestination(event.target.value as Provider); resetFeedback(); }}>{providers.map((item) => <option value={item.id} key={item.id}>{item.label}</option>)}</select></label>
         </div>
         <label className="converter-code"><span>{sourceMeta.label} code</span><input disabled={busy} value={code} onChange={(event) => { setCode(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 16)); resetFeedback(); }} placeholder="Enter booking code" minLength={4} maxLength={16} required autoCapitalize="characters" /></label>
         <button className="converter-submit" disabled={busy || source === destination}>{source === destination ? "Choose a different bookmaker" : busy ? "Loading and matching…" : `Convert to ${destinationMeta.label}`}</button>
-        {message ? <p className={`converter-message${result?.partial ? " partial" : result?.verified ? " success" : ""}`} role="status">{failureStage ? <strong>{stageLabels[failureStage]} · </strong> : null}{message}</p> : null}
+        {message ? <p className={`converter-message${result?.partial ? " partial" : result?.verified ? " success" : ""}`} role="status">{message}</p> : null}
         {result ? <section className={`converter-result converter-result-inline${result.partial ? " partial" : ""}`} aria-live="polite"><div><span>{result.partial ? `Partial ${destinationMeta.label} code` : `Your ${destinationMeta.label} code`}</span><strong>{result.code}</strong><small>{result.partial ? `${convertedCount} of ${originalCount} selections converted` : result.verified ? `${result.resolved?.length ?? result.decoded} selections verified` : result.verificationStatus === "MISMATCH" ? "Selection mismatch—do not use unchecked" : "Created—verification incomplete"}</small></div><div><button type="button" onClick={() => void copyCode()}>{copied ? "Copied ✓" : "Copy code"}</button><a href={result.deepLink} target="_blank" rel="noreferrer">Open {destinationMeta.label} ↗</a>{publicMode ? <button type="button" className="converter-share-x" onClick={shareOnX}>Share on X</button> : null}</div>{result.unmatched?.length ? <details open><summary>{result.unmatched.length} destination selections not included</summary>{result.unmatched.map((item, index) => <p key={`${item.fixtureId}-${index}`}><b>{item.homeTeam} vs {item.awayTeam}</b><span>{item.reason}</span></p>)}</details> : null}</section> : null}
         {issues.length ? <div className="converter-issues"><strong>{issues.length} source selection{issues.length === 1 ? "" : "s"} could not be read from the original code</strong>{issues.slice(0, 12).map((issue, index) => <p key={`${issue.eventName}-${index}`}><b>{issue.eventName}</b><span>{issue.marketName}: {issue.outcomeName} · {issue.reason}</span></p>)}</div> : null}
-        {destination === "bet9ja" && transferSelections.length ? <section className="converter-transfer"><header><div><span>Bet9ja fallback list</span><strong>{transferSelections.length} readable selections listed</strong><small>Automatic creation failed at the stage shown above. Nothing was hidden; you can copy the readable selections while the connection is retried.</small></div><div><button type="button" onClick={() => void copyTransfer()}>{copied ? "Copied ✓" : "Copy listed selections"}</button><a href={destinationMeta.link} target="_blank" rel="noreferrer">Open Bet9ja ↗</a></div></header>{transferSelections.map((item, index) => <div key={`${item.fixtureId}-${index}`}><b>{index + 1}. {item.homeTeam} vs {item.awayTeam}</b><span>{item.marketName}: {item.selection}</span><small>{new Date(item.kickoff).toLocaleString()}</small></div>)}</section> : null}
+        {destination === "bet9ja" && transferSelections.length ? <section className="converter-transfer"><header><div><span>Available selections</span><strong>{transferSelections.length} selections are ready to copy</strong><small>Bet9ja did not create the code, so OddsAura kept the readable selections for you.</small></div><div><button type="button" onClick={() => void copyTransfer()}>{copied ? "Copied ✓" : "Copy selections"}</button><a href={destinationMeta.link} target="_blank" rel="noreferrer">Open Bet9ja ↗</a></div></header>{transferSelections.map((item, index) => <div key={`${item.fixtureId}-${index}`}><b>{index + 1}. {item.homeTeam} vs {item.awayTeam}</b><span>{item.marketName}: {item.selection}</span><small>{new Date(item.kickoff).toLocaleString()}</small></div>)}</section> : null}
       </form>
-      {!embedded ? <aside><span>How it works</span><ol><li>Loads the source bookmaker code.</li><li>Translates markets and finds the same matches.</li><li>Uses the destination&apos;s current odds.</li><li>Creates and reload-verifies the new code.</li></ol><p>When some selections are unavailable, OddsAura creates a clearly labelled partial code from the selections it matched and lists everything it left out.</p></aside> : null}
     </section>
-    {!embedded ? <section className="converter-support"><header><span>Connection capability</span><h2>Bookmaker adapters</h2><p>Status reflects the most recent real import or code-creation attempt on this server. Untested does not mean unavailable.</p></header><div>{providers.map((item) => { const observed = health.find((row) => row.provider === item.id); const status = observed?.status ?? "UNTESTED"; return <article key={item.id}><div><strong>{item.label}</strong><span className={status === "AVAILABLE" ? "live" : "limited"}>{status === "AVAILABLE" ? "Available" : status === "DEGRADED" ? "Latest attempt failed" : status === "ASSISTED" ? "Assisted" : "Not tested yet"}</span></div><p>{observed?.message ?? item.note}</p>{observed?.checkedAt ? <small>Checked {new Date(observed.checkedAt).toLocaleString()}</small> : null}<a href={item.link} target="_blank" rel="noreferrer">Open bookmaker ↗</a></article>; })}</div></section> : null}
   </>;
 }

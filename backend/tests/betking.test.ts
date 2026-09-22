@@ -58,3 +58,23 @@ test("matches a non-whitelisted market from BetKing's live event catalogue", asy
   assert.equal(result.resolved[0]?.marketId, "99001");
   assert.equal(result.resolved[0]?.outcomeId, "990011");
 });
+
+test("creates a partial BetKing code when one requested fixture is unavailable", async () => {
+  const fakeFetch = async (input: string | URL | Request) => {
+    const url = String(input);
+    if (url.includes("main-bets/")) return Response.json({ events: [event] });
+    if (url.endsWith("action/createcoupon")) return Response.json({ odds: [{ selectionId: 2153200560, matchName: event.name }] });
+    if (url.endsWith("action/bookbet")) return Response.json({ responseStatus: 1, bookedCouponCode: "PART42" });
+    const context = { state: { actionData: { "routes/($locale).widgets.bookBet": { bookedCoupon: { odds: [{ selectionId: 2153200560 }] } } } } };
+    return new Response(`<script>window.__remixContext = ${JSON.stringify(context)};</script>`, { status: 500 });
+  };
+  const result = await createBetKingCode([
+    { fixtureId: "available", homeTeam: "Borussia Dortmund", awayTeam: "Hamburg", kickoff: "2026-08-29T16:30:00Z", marketKey: "MATCH_HOME", marketName: "Match result", selection: "Borussia Dortmund" },
+    { fixtureId: "missing", homeTeam: "York City", awayTeam: "Rotherham United", kickoff: "2026-08-29T18:30:00Z", marketKey: "MATCH_HOME", marketName: "Match result", selection: "York City" },
+  ], fakeFetch as typeof fetch, true);
+  assert.equal(result.code, "PART42");
+  assert.equal(result.partial, true);
+  assert.equal(result.resolved.length, 1);
+  assert.equal(result.unmatched.length, 1);
+  assert.equal(result.unmatched[0]?.fixtureId, "missing");
+});

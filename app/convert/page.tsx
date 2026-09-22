@@ -12,10 +12,9 @@ export default function PublicConverterPage() {
       <nav aria-label="OddsAura account"><Link href="/">Home</Link><Link href="/login">Log in</Link></nav>
     </header>
     <section className="converter-hero public-converter-hero">
-      <span>Free self-service converter</span>
+      <span>Booking code converter</span>
       <h1>Move your booking code.</h1>
-      <p>Choose the original bookmaker and where you want the code. OddsAura reloads the source slip, matches the same fixtures and markets, then clearly labels anything the destination does not offer.</p>
-      <div><b>No account required</b><b>Rate limited for fair use</b><b>Always check the final bookmaker slip</b></div>
+      <p>Choose both bookmakers, paste your code and convert it.</p>
     </section>
     <ConverterForm publicMode xHandle={xHandle} />
     <footer className="public-converter-footer"><p>OddsAura does not accept stakes or guarantee winnings. Booking codes and prices can change when bookmakers update their markets. 18+</p><Link href="/signup">Create an OddsAura account →</Link></footer>

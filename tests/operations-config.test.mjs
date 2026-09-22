@@ -148,14 +148,14 @@ test("converter exposes verified codes and clearly labelled partial conversion",
   assert.match(form, /Partial code created/);
   assert.match(form, /allowPartial: true/);
   assert.match(await read("backend/src/modules/providers/routes.ts"), /body\.allowPartial \?\? false/);
-  assert.match(form, /\{transferSelections\.length\} readable selections listed/);
+  assert.match(form, /\{transferSelections\.length\} selections are ready to copy/);
   assert.match(form, /payload\.warning \|\|/);
   assert.match(worker, /Code created, but account history could not be saved/);
   assert.match(railway, /Code created, but account history could not be saved/);
   assert.match(worker, /decoded\.partial && !allowPartial/);
   assert.match(worker, /sourceSelections: selections/);
   assert.match(railway, /const allowPartial = body\.allowPartial === true/);
-  assert.match(form, /Source import/);
+  assert.doesNotMatch(form, /Bookmaker adapters|Connection capability|How it works|Source import/);
   assert.match(controller, /stageDetails\("IMPORT"/);
   assert.match(controller, /creationStage/);
 });

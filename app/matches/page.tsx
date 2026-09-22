@@ -114,7 +114,7 @@ export default function MatchesPage() {
             <div><TeamMark team={fixture.homeTeam} /><strong>{fixture.homeTeam.name}</strong>{fixture.status === "LIVE" && <b>{fixture.homeScore ?? "–"}</b>}</div>
             <div><TeamMark team={fixture.awayTeam} /><strong>{fixture.awayTeam.name}</strong>{fixture.status === "LIVE" && <b>{fixture.awayScore ?? "–"}</b>}</div>
           </div>
-          {modelPicks.length ? <div className="matches-prices">{modelPicks.slice(0, 3).map((pick) => <span key={pick.id}><small>{pick.selection}</small><b>{pick.quotedOdds?.toFixed(2) ?? `Fair ${pick.fairOdds.toFixed(2)}`}</b></span>)}</div> : <p className="matches-waiting">A prediction will appear after the next model refresh.</p>}
+          {modelPicks.length ? <div className="matches-prices">{modelPicks.slice(0, 3).map((pick) => <span key={pick.id}><small>{pick.selection}</small><b>{pick.quotedOdds?.toFixed(2) ?? "—"}</b></span>)}</div> : <p className="matches-waiting">A prediction will appear after the next data refresh.</p>}
           <div className="matches-card-foot"><span>{modelPicks.length} {modelPicks.length === 1 ? "pick" : "picks"}</span>{modelPicks.length ? <Link href={`/dashboard?fixture=${encodeURIComponent(fixture.id)}`}>Select <b>→</b></Link> : <span>Unavailable</span>}</div>
         </article>; })}</div>
       </section>)}
