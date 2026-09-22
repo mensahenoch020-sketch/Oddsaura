@@ -148,7 +148,9 @@ test("converter exposes verified codes and clearly labelled partial conversion",
   assert.match(form, /Partial code created/);
   assert.match(form, /allowPartial: true/);
   assert.match(await read("backend/src/modules/providers/routes.ts"), /body\.allowPartial \?\? false/);
-  assert.match(form, /\{transferSelections\.length\} selections are ready to copy/);
+  assert.match(form, /0 of \{failedConversion\.sourceCount\} matched/);
+  assert.match(form, /\{transferSelections\.length\} selections were imported/);
+  assert.doesNotMatch(form, /selections are ready to copy/);
   assert.match(form, /payload\.warning \|\|/);
   assert.match(worker, /Code created, but account history could not be saved/);
   assert.match(railway, /Code created, but account history could not be saved/);

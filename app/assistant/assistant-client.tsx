@@ -9,12 +9,14 @@ import { buildTargetSlip, rankBestBets } from "../builder/target-builder";
 import { extractDateWindow, interpretAssistantRequest, isWithinDateWindow, matchesRequestedMarket, type AssistantIntent } from "./nlu";
 import { includedPicks, resolvedTotal, targetReached } from "./code-summary";
 import { plainPickExplanation, unmetTargetMessage } from "./plain-language";
+import { leagueMatches, type LeagueFilter } from "../leagues";
+import { applyConversationReference, resolveAssistantTurn, type PendingIntent } from "./conversation";
 import "./assistant.css";
 import "../converter/converter.css";
 import "../converter/home-converter.css";
 import "../compact-theme.css";
+import "./experience.css";
 
-type PendingIntent = Extract<AssistantIntent, { kind: "build" | "split" | "convert" | "analyze" }>;
 type SelectionSummary = { id: string; match: string; market: string; selection: string; odds: number | null; priceStatus?: "QUOTED" | "MODEL_ESTIMATE"; probability?: number | null; fairOdds?: number | null; edge?: number | null; confidence?: number | null; reasoning?: string; fixtureId?: string };
 type CodeSummary = {
   provider: ProviderId;
@@ -84,41 +86,8 @@ function bookmakerSelections(picks: PredictedPick[], provider: ProviderId) {
   }));
 }
 
-function mergePending(pending: PendingIntent, input: string): AssistantIntent {
-  const next = interpretAssistantRequest(pending.kind === "convert" ? `convert ${input}` : input);
-  if (pending.kind === "build") {
-    const candidate = next.kind === "build" ? next : null;
-    return { ...pending, targetOdds: candidate?.targetOdds ?? pending.targetOdds, provider: candidate?.provider ?? pending.provider, dateWindow: candidate?.dateWindow ?? pending.dateWindow, marketKeys: candidate?.marketKeys ?? pending.marketKeys, confidence: Math.max(pending.confidence, next.confidence) };
-  }
-  if (pending.kind === "split") {
-    const candidate = next.kind === "split" || next.kind === "build" ? next : null;
-    const candidateNumber = candidate && "targetOdds" in candidate ? candidate.targetOdds : null;
-    const completingParts = pending.targetOdds != null && pending.parts == null && candidate?.kind === "build" && candidateNumber != null && candidateNumber >= 2 && candidateNumber <= 10;
-    return {
-      ...pending,
-      code: candidate?.kind === "split" ? candidate.code ?? pending.code : pending.code,
-      targetOdds: completingParts ? pending.targetOdds : candidateNumber ?? pending.targetOdds,
-      parts: completingParts ? Math.round(candidateNumber!) : candidate && "parts" in candidate ? candidate.parts ?? pending.parts : pending.parts,
-      provider: candidate && "provider" in candidate ? candidate.provider ?? pending.provider : pending.provider,
-      dateWindow: candidate && "dateWindow" in candidate ? candidate.dateWindow ?? pending.dateWindow : pending.dateWindow,
-      marketKeys: candidate?.marketKeys ?? pending.marketKeys,
-      confidence: Math.max(pending.confidence, next.confidence),
-    };
-  }
-  if (pending.kind === "convert") {
-    const candidate = next.kind === "convert" ? next : null;
-    const candidates = [...new Set([candidate?.sourceProvider, candidate?.destinationProvider].filter((item): item is ProviderId => item != null))];
-    const firstMentioned = candidates[0] ?? null;
-    const secondMentioned = candidates[1] ?? null;
-    const sourceProvider = pending.sourceProvider ?? (!pending.destinationProvider && candidates.length === 1 ? firstMentioned : candidate?.sourceProvider ?? null);
-    const destinationProvider = pending.destinationProvider ?? (pending.sourceProvider && candidates.length === 1 ? firstMentioned : secondMentioned ?? (candidates.length > 1 ? candidate?.destinationProvider ?? null : null));
-    return { ...pending, code: candidate?.code ?? pending.code, sourceProvider, destinationProvider, confidence: Math.max(pending.confidence, next.confidence) };
-  }
-  if (pending.kind === "analyze") {
-    const candidate = next.kind === "analyze" ? next : next.kind === "convert" ? next : null;
-    return { ...pending, code: candidate && "code" in candidate ? candidate.code ?? pending.code : pending.code, provider: candidate?.kind === "analyze" ? candidate.provider ?? pending.provider : candidate?.sourceProvider ?? pending.provider, confidence: Math.max(pending.confidence, next.confidence) };
-  }
-  return next;
+function matchesRequestedLeagues(pick: PredictedPick, filters?: LeagueFilter[]) {
+  return !filters?.length || filters.some((filter) => leagueMatches(pick.league, filter));
 }
 
 function partitionPicks(picks: PredictedPick[], requestedParts: number) {
@@ -154,6 +123,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
   const [pending, setPending] = useState<PendingIntent | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const conversation = useRef<{ provider: ProviderId | null; code: string | null; selections: SelectionSummary[]; picks: PredictedPick[]; decoded: BookmakerSelection[]; lastOutcome: ConversationOutcome | null }>({ provider: null, code: null, selections: [], picks: [], decoded: [], lastOutcome: null });
+  const lastIntent = useRef<AssistantIntent | null>(null);
   const nextId = useRef(1);
   const threadRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -269,12 +239,12 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
     return best ?? createCodeCard(provider, initialPicks, target, estimatedOdds);
   }
 
-  async function expandEligiblePool(current: PredictedPick[], provider: ProviderId, dateWindow: NonNullable<ReturnType<typeof extractDateWindow>>, marketKeys?: string[], fixtureLimit?: number) {
+  async function expandEligiblePool(current: PredictedPick[], provider: ProviderId, dateWindow: NonNullable<ReturnType<typeof extractDateWindow>>, marketKeys?: string[], fixtureLimit?: number, leagueFilters?: LeagueFilter[]) {
     try {
       const expanded = await expandBookmakerMarkets(provider, dateWindow.start, dateWindow.end, marketKeys, fixtureLimit);
       const merged = new Map(current.map(pick => [pick.id, pick]));
       for (const pick of expanded) merged.set(pick.id, pick);
-      return [...merged.values()].filter(pick => pick.quotedOdds != null && matchesRequestedMarket(pick.market.key, marketKeys) && isWithinDateWindow(pick.kickoff, dateWindow) && providerSupportsMarket(provider, pick.market.key));
+      return [...merged.values()].filter(pick => pick.quotedOdds != null && matchesRequestedMarket(pick.market.key, marketKeys) && matchesRequestedLeagues(pick, leagueFilters) && isWithinDateWindow(pick.kickoff, dateWindow) && providerSupportsMarket(provider, pick.market.key));
     } catch {
       // The saved verified pool remains usable when a bookmaker throttles or
       // temporarily blocks the request-time expansion.
@@ -287,11 +257,11 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
     const provider = intent.provider!;
     const target = intent.targetOdds!;
     const searchWindow = intent.dateWindow ?? extractDateWindow("upcoming", referenceTime)!;
-    let eligible = predictions.filter((pick) => pick.quotedOdds != null && matchesRequestedMarket(pick.market.key, intent.marketKeys) && isWithinDateWindow(pick.kickoff, searchWindow) && providerSupportsMarket(provider, pick.market.key));
+    let eligible = predictions.filter((pick) => pick.quotedOdds != null && matchesRequestedMarket(pick.market.key, intent.marketKeys) && matchesRequestedLeagues(pick, intent.leagueFilters) && isWithinDateWindow(pick.kickoff, searchWindow) && providerSupportsMarket(provider, pick.market.key));
     let built = buildTargetSlip(eligible, target, referenceTime, provider, "target");
     if (!built?.exact) {
       const fixtureLimit = target >= 20 ? 80 : target >= 5 ? 60 : 40;
-      const expanded = await expandEligiblePool(eligible, provider, searchWindow, intent.marketKeys, fixtureLimit);
+      const expanded = await expandEligiblePool(eligible, provider, searchWindow, intent.marketKeys, fixtureLimit, intent.leagueFilters);
       const candidate = buildTargetSlip(expanded, target, referenceTime, provider, "target");
       if (candidate && (!built || Math.abs(candidate.estimatedOdds - target) < Math.abs(built.estimatedOdds - target))) { eligible = expanded; built = candidate; }
     }
@@ -358,11 +328,11 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
     }
     const target = intent.targetOdds!;
     const searchWindow = intent.dateWindow ?? extractDateWindow("upcoming", referenceTime)!;
-    let eligible = predictions.filter((pick) => pick.quotedOdds != null && matchesRequestedMarket(pick.market.key, intent.marketKeys) && isWithinDateWindow(pick.kickoff, searchWindow) && providerSupportsMarket(provider, pick.market.key));
+    let eligible = predictions.filter((pick) => pick.quotedOdds != null && matchesRequestedMarket(pick.market.key, intent.marketKeys) && matchesRequestedLeagues(pick, intent.leagueFilters) && isWithinDateWindow(pick.kickoff, searchWindow) && providerSupportsMarket(provider, pick.market.key));
     let built = buildTargetSlip(eligible, target, referenceTime, provider, "target");
     if (!built?.exact) {
       const fixtureLimit = target >= 20 ? 80 : target >= 5 ? 60 : 40;
-      eligible = await expandEligiblePool(eligible, provider, searchWindow, intent.marketKeys, fixtureLimit);
+      eligible = await expandEligiblePool(eligible, provider, searchWindow, intent.marketKeys, fixtureLimit, intent.leagueFilters);
       built = buildTargetSlip(eligible, target, referenceTime, provider, "target");
     }
     if (!built) {
@@ -408,10 +378,11 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
 
   function matchPrediction(selection: BookmakerSelection, provider: ProviderId) {
     const home = normalizedWords(selection.homeTeam), away = normalizedWords(selection.awayTeam);
-    return predictions.find((pick) => pick.market.key === selection.marketKey
-      && (!pick.oddsProvider || pick.oddsProvider.toLowerCase() === provider)
+    const matches = predictions.filter((pick) => pick.market.key === selection.marketKey
       && normalizedWords(pick.homeTeam.name) === home
       && normalizedWords(pick.awayTeam.name) === away);
+    return matches.find((pick) => !pick.oddsProvider || pick.oddsProvider.toLowerCase() === provider)
+      ?? matches.sort((left, right) => right.confidence - left.confidence)[0];
   }
 
   async function executeAnalysis(intent: Extract<AssistantIntent, { kind: "analyze" }>) {
@@ -455,9 +426,86 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
     addMessage("assistant", plainPickExplanation(selected, provider ? providerName(provider) : null), { kind: "explanation", selected: summarizeSelection(selected), alternatives: alternatives.map(summarizeSelection) });
   }
 
+  function referencedSelection(subject: string, order: "risk" | "safe") {
+    const normalized = normalizedWords(subject);
+    const named = conversation.current.selections.find((item) => normalized.includes(normalizedWords(item.match)) || item.match.split(" vs ").some((team) => normalized.includes(normalizedWords(team))));
+    if (named) return named;
+    const scored = [...conversation.current.selections].sort((left, right) => {
+      const leftStrength = left.probability ?? left.confidence ?? (left.odds && left.odds > 1 ? 1 / left.odds : .5);
+      const rightStrength = right.probability ?? right.confidence ?? (right.odds && right.odds > 1 ? 1 / right.odds : .5);
+      return order === "risk" ? leftStrength - rightStrength : rightStrength - leftStrength;
+    });
+    return scored[0] ?? null;
+  }
+
+  async function executeRevision(intent: Extract<AssistantIntent, { kind: "revise" }>) {
+    if (!conversation.current.selections.length) {
+      addMessage("assistant", "Send a booking code or ask me to build a slip first. Then I can identify, remove or replace a selection.");
+      return;
+    }
+    const order = intent.action === "safest" ? "safe" : "risk";
+    const selected = referencedSelection(intent.subject, order);
+    if (!selected) return;
+    if (intent.action === "riskiest" || intent.action === "safest") {
+      const label = intent.action === "riskiest" ? "riskiest" : "safest";
+      const reason = selected.reasoning ? ` ${selected.reasoning}` : selected.odds ? ` Its quoted price is ${selected.odds.toFixed(2)}.` : "";
+      addMessage("assistant", `${selected.match} — ${selected.selection} is the ${label} selection I can identify in this slip.${reason}`, { kind: "analysis", selections: [selected], totalOdds: selected.odds, risk: intent.action === "riskiest" ? "HIGH" : "LOW" });
+      return;
+    }
+
+    const provider = conversation.current.provider;
+    if (!provider) {
+      addMessage("assistant", "Tell me which bookmaker should receive the revised code.");
+      return;
+    }
+    const currentPicks = conversation.current.picks;
+    if (currentPicks.length) {
+      const removed = currentPicks.find((pick) => pick.id === selected.id || pick.fixtureId === selected.fixtureId) ?? currentPicks[currentPicks.length - 1]!;
+      let revised = currentPicks.filter((pick) => pick.id !== removed.id);
+      let replacement: PredictedPick | null = null;
+      if (intent.action !== "remove") {
+        const usedFixtures = new Set(revised.map((pick) => pick.fixtureId));
+        const window = extractDateWindow("upcoming")!;
+        const candidates = rankBestBets(predictions.filter((pick) => pick.quotedOdds != null && !usedFixtures.has(pick.fixtureId) && isWithinDateWindow(pick.kickoff, window) && providerSupportsMarket(provider, pick.market.key)), Date.now(), provider, "protection");
+        replacement = candidates.find((pick) => pick.probability > removed.probability) ?? candidates[0] ?? null;
+        if (replacement) revised = [...revised, replacement];
+      }
+      if (!revised.length) {
+        addMessage("assistant", "That is the only supported selection in the slip, so removing it would leave no code to create.");
+        return;
+      }
+      const estimated = revised.reduce((total, pick) => total * (pickPrice(pick) ?? 1), 1);
+      const card = await createCodeCard(provider, revised, undefined, estimated);
+      conversation.current = { provider, code: card.code ?? null, selections: card.selections, picks: revised, decoded: [], lastOutcome: { kind: "build", explanation: card.code ? `${providerName(provider)} revised code ready.` : `${providerName(provider)} could not create the revised code.` } };
+      const action = replacement ? `I replaced ${removed.homeTeam.name} vs ${removed.awayTeam.name} with ${replacement.homeTeam.name} vs ${replacement.awayTeam.name}.` : `I removed ${removed.homeTeam.name} vs ${removed.awayTeam.name}.`;
+      addMessage("assistant", `${action} ${card.code ? "The revised code is below." : card.warning || "No revised code was created."}`, { kind: "codes", cards: [card] });
+      return;
+    }
+
+    const remaining = conversation.current.decoded.filter((item) => item.fixtureId !== selected.fixtureId);
+    if (!remaining.length) {
+      addMessage("assistant", "That is the only readable selection in the code, so removing it would leave an empty slip.");
+      return;
+    }
+    if (intent.action !== "remove") {
+      addMessage("assistant", `I identified ${selected.match} as the weakest readable selection, but I do not have a verified replacement for that match. Ask me to remove it if you want a smaller code.`);
+      return;
+    }
+    try {
+      const result = await generateBookmakerCode(provider, remaining, true);
+      const included = new Set(result.resolved.map((item) => item.fixtureId));
+      const card: CodeSummary = { provider, code: result.code, deepLink: result.deepLink, verified: result.verified, partial: result.partial, liveOdds: resolvedTotal(result.resolved), selections: remaining.filter((item) => included.has(item.fixtureId)).map((item, index) => decodedSummary(item, index, matchPrediction(item, provider))), unmatched: result.unmatched, warning: result.warning };
+      conversation.current = { provider, code: result.code, selections: card.selections, picks: remaining.flatMap((item) => { const pick = matchPrediction(item, provider); return pick ? [pick] : []; }), decoded: remaining, lastOutcome: { kind: "build", explanation: `${providerName(provider)} revised code ready.` } };
+      addMessage("assistant", `I removed ${selected.match}. The revised ${providerName(provider)} code is below.`, { kind: "codes", cards: [card] });
+    } catch (error) {
+      addMessage("assistant", error instanceof Error ? error.message : `${providerName(provider)} could not create the revised code.`);
+    }
+  }
+
   async function execute(intent: AssistantIntent, referenceTime: number) {
     const todayWindow = extractDateWindow("today", referenceTime);
     if (askForMissing(intent)) return;
+    lastIntent.current = intent;
     setPending(null);
     setBusy(true);
     try {
@@ -466,13 +514,35 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
       else if (intent.kind === "convert") await executeConversion(intent);
       else if (intent.kind === "analyze") await executeAnalysis(intent);
       else if (intent.kind === "explain") executeExplanation(intent);
+      else if (intent.kind === "revise") await executeRevision(intent);
+      else if (intent.kind === "help") {
+        addMessage("assistant", "I can build target odds, find safer or better-value picks, explain a match, analyse or split a booking code, convert codes between supported bookmakers, revise a slip and show tracked results. Try: “10 safe odds for SportyBet tomorrow” or “analyse SportyBet code 4V0XMZ”.");
+      } else if (intent.kind === "limits") {
+        addMessage("assistant", "I can’t promise guaranteed wins. Correct scores, corners, cards, player bets and 1UP/2UP are not recommended until OddsAura has enough reliable evidence for them. I can use match result, double chance, draw-no-bet, BTTS, team goals and supported handicaps instead.");
+      } else if (intent.kind === "match") {
+        const provider = intent.provider ?? conversation.current.provider ?? "sportybet";
+        const home = normalizedWords(intent.homeTeam), away = normalizedWords(intent.awayTeam);
+        const candidates = predictions.filter((pick) => {
+          const pickHome = normalizedWords(pick.homeTeam.name), pickAway = normalizedWords(pick.awayTeam.name);
+          const namesMatch = (pickHome.includes(home) || home.includes(pickHome)) && (pickAway.includes(away) || away.includes(pickAway));
+          return namesMatch && pick.quotedOdds != null && (!pick.oddsProvider || pick.oddsProvider.toLowerCase() === provider) && providerSupportsMarket(provider, pick.market.key);
+        });
+        const selected = rankBestBets(candidates, referenceTime, provider, "protection")[0] ?? [...candidates].sort((left, right) => right.confidence - left.confidence)[0];
+        if (!selected) {
+          addMessage("assistant", `I can’t find a current verified ${providerName(provider)} market for ${intent.homeTeam} vs ${intent.awayTeam}. Check the team names or try another bookmaker.`);
+        } else {
+          const alternatives = candidates.filter((pick) => pick.id !== selected.id).sort((left, right) => right.confidence - left.confidence).slice(0, 3);
+          conversation.current = { provider, code: null, selections: [summarizeSelection(selected)], picks: [selected], decoded: [], lastOutcome: null };
+          addMessage("assistant", plainPickExplanation(selected, providerName(provider)), { kind: "explanation", selected: summarizeSelection(selected), alternatives: alternatives.map(summarizeSelection) });
+        }
+      }
       else if (intent.kind === "best") {
         const provider = intent.provider ?? "sportybet";
-        const dateWindow = intent.dateWindow ?? todayWindow;
-        let eligible = predictions.filter((pick) => pick.quotedOdds != null && matchesRequestedMarket(pick.market.key, intent.marketKeys) && isWithinDateWindow(pick.kickoff, dateWindow) && providerSupportsMarket(provider, pick.market.key));
+        const dateWindow = intent.dateWindow ?? extractDateWindow("upcoming", referenceTime)!;
+        let eligible = predictions.filter((pick) => pick.quotedOdds != null && matchesRequestedMarket(pick.market.key, intent.marketKeys) && matchesRequestedLeagues(pick, intent.leagueFilters) && isWithinDateWindow(pick.kickoff, dateWindow) && providerSupportsMarket(provider, pick.market.key));
         let ranked = rankBestBets(eligible, referenceTime, provider, intent.strategy).slice(0, 3);
         if (!ranked.length) {
-          eligible = await expandEligiblePool(eligible, provider, dateWindow, intent.marketKeys);
+          eligible = await expandEligiblePool(eligible, provider, dateWindow, intent.marketKeys, undefined, intent.leagueFilters);
           ranked = rankBestBets(eligible, referenceTime, provider, intent.strategy).slice(0, 3);
         }
         const picks = ranked.map(summarizeSelection);
@@ -482,8 +552,8 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
       } else if (intent.kind === "daily") {
         const provider = intent.provider ?? "sportybet";
         const dateWindow = intent.dateWindow ?? todayWindow;
-        let eligible = predictions.filter((pick) => pick.quotedOdds != null && matchesRequestedMarket(pick.market.key, intent.marketKeys) && isWithinDateWindow(pick.kickoff, dateWindow) && providerSupportsMarket(provider, pick.market.key));
-        if (![2, 5].some(target => buildTargetSlip(eligible, target, referenceTime, provider, intent.strategy)?.exact)) eligible = await expandEligiblePool(eligible, provider, dateWindow, intent.marketKeys);
+        let eligible = predictions.filter((pick) => pick.quotedOdds != null && matchesRequestedMarket(pick.market.key, intent.marketKeys) && matchesRequestedLeagues(pick, intent.leagueFilters) && isWithinDateWindow(pick.kickoff, dateWindow) && providerSupportsMarket(provider, pick.market.key));
+        if (![2, 5].some(target => buildTargetSlip(eligible, target, referenceTime, provider, intent.strategy)?.exact)) eligible = await expandEligiblePool(eligible, provider, dateWindow, intent.marketKeys, undefined, intent.leagueFilters);
         const tickets: DailyTicketSummary[] = [];
         const chosenPicks: PredictedPick[] = [];
         for (const target of [2, 5]) {
@@ -529,7 +599,12 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
     // Event handler only: obtain the submission time, never a render-time clock.
     // eslint-disable-next-line react-hooks/purity
     const referenceTime = Date.now();
-    void execute(pending ? mergePending(pending, value) : interpretAssistantRequest(value, referenceTime), referenceTime);
+    let resolved = applyConversationReference(resolveAssistantTurn(pending, value, referenceTime), conversation.current);
+    if (!pending && /\b(?:what about|try|use|how about|same (?:thing|slip|odds?) (?:for|on)|instead (?:use|on))\b/i.test(value) && resolved.kind === "build" && !resolved.targetOdds && resolved.provider) {
+      const previous = lastIntent.current;
+      if (previous?.kind === "build" || previous?.kind === "best" || previous?.kind === "daily" || previous?.kind === "match") resolved = { ...previous, provider: resolved.provider };
+    }
+    void execute(resolved, referenceTime);
   }
 
   function runPrompt(value: string) {
@@ -549,6 +624,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
     setMessages([]);
     setPending(null);
     conversation.current = { provider: null, code: null, selections: [], picks: [], decoded: [], lastOutcome: null };
+    lastIntent.current = null;
     setInput("");
     window.setTimeout(() => inputRef.current?.focus(), 0);
   }
@@ -562,7 +638,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
       </header>
       <section className={`assistant-workspace ${messages.length ? "has-messages" : ""}`} aria-label="OddsAura betting assistant">
         {initialTool === "converter" ? <section className="home-code-converter" aria-label="Booking code converter">
-          <header><div><span>Code converter</span><h1>Move a code to another bookmaker.</h1></div><p>Choose the original bookmaker, the destination and paste the booking code. OddsAura reloads the source slip, matches the destination markets and shows every selection it could not include.</p></header>
+          <header><div><span>Code converter</span><h1>Move your bet.</h1></div><p>Paste once. OddsAura matches every available selection and clearly shows what was left out.</p></header>
           <ConverterForm embedded />
         </section> : <>
         {!messages.length && !busy ? <div className="assistant-welcome">
