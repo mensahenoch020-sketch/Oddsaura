@@ -5,7 +5,7 @@ import { teamSearchTerms, teamSimilarity } from "./team-matching.js";
 type Json = Record<string, unknown>;
 type FetchLike = typeof fetch;
 const SEARCH_URL = "https://web.bet9ja.com/Controls/ControlsWS.asmx";
-const CREATE_URL = "https://apigw.bet9ja.com/sportsbook/placebet/BookABetV2";
+const CREATE_URL = "https://apigw.bet9ja.com/sportsbook/placebet/BookABetV2?source=desktop";
 const VERIFY_URL = "https://sports.bet9ja.com/desktop/feapi/CouponAjax/GetBookABetCouponV2";
 const SITE_URL = "https://sports.bet9ja.com/";
 const LOAD_URL = "https://sports.bet9ja.com/mobile";
@@ -47,8 +47,9 @@ async function bootstrapSession(fetcher: FetchLike) {
 async function request(fetcher: FetchLike, url: string, init: RequestInit, failure: string, retried = false): Promise<unknown> {
   let response: Response;
   const searchRequest = url.startsWith(SEARCH_URL);
+  const createRequest = url.startsWith("https://apigw.bet9ja.com/");
   try {
-    response = await fetcher(url, { ...init, headers: { accept: "application/json, text/plain, */*", origin: searchRequest ? "https://web.bet9ja.com" : SITE_URL.slice(0, -1), referer: searchRequest ? "https://web.bet9ja.com/Sport/Odds" : SITE_URL, "x-requested-with": "XMLHttpRequest", "user-agent": "Mozilla/5.0 OddsAura/1.0", ...(searchRequest && sessionCookie ? { cookie: sessionCookie } : {}), ...init.headers }, signal: init.signal ?? AbortSignal.timeout(15_000) });
+    response = await fetcher(url, { ...init, headers: { accept: "application/json, text/plain, */*", origin: searchRequest ? "https://web.bet9ja.com" : createRequest ? "https://coupon.bet9ja.com" : SITE_URL.slice(0, -1), referer: searchRequest ? "https://web.bet9ja.com/Sport/Odds" : createRequest ? "https://coupon.bet9ja.com/" : SITE_URL, "x-requested-with": "XMLHttpRequest", "user-agent": "Mozilla/5.0 OddsAura/1.0", ...(searchRequest && sessionCookie ? { cookie: sessionCookie } : {}), ...init.headers }, signal: init.signal ?? AbortSignal.timeout(15_000) });
   } catch (error) {
     throw new Bet9jaIntegrationError(failure, 502, { cause: error instanceof Error ? error.message : String(error) });
   }
@@ -223,13 +224,17 @@ export async function createBet9jaCode(selections: SportyBetSelectionInput[], fe
   for (const selection of resolved) if (events.has(selection.eventId)) throw new Bet9jaIntegrationError("Choose only one prediction from each Bet9ja match.", 422); else events.add(selection.eventId);
   const odds = Object.fromEntries(resolved.map((item) => [item.oddsKey, item.odds]));
   const product = resolved.reduce((value, item) => value * (item.odds ?? 1), 1);
-  const bet = { BSTYPE: resolved.length === 1 ? 3 : 2, TAB: resolved.length === 1 ? 3 : 2, NUMLINES: resolved.length, COMB: 1, TYPE: resolved.length,
+  const bet = { BSTYPE: 0, TAB: 0, NUMLINES: resolved.length, COMB: 1, TYPE: resolved.length,
     STAKE: 0, POTWINMIN: 0, POTWINMAX: 0, BONUSMIN: 0, BONUSMAX: 0, ODDMIN: product, ODDMAX: product, ODDS: odds, FIXED: {} };
-  const evs = Object.fromEntries(resolved.map((item) => [item.oddsKey, { id: item.oddsKey, eventId: Number(item.eventId), eventCode: item.eventCode,
-    eventName: `${item.homeTeam} v ${item.awayTeam}`, market: item.market, sid: item.marketId, sign: item.outcome, GN: item.league, leagueName: item.league,
-    SG: "", startdate: item.startDate, oddValue: item.odds, hnd: item.specifier ? item.specifier.split("=")[1] : "", sportName: item.sport }]));
-  const form = new URLSearchParams({ BETSLIP: JSON.stringify({ BETS: [bet], EVS: evs, IMPERSONIZE: 0 }), IS_PASSBET: "0", LIVE: "0" });
-  const created = await request(fetcher, CREATE_URL, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded", "x-source": "desktop" }, body: form.toString() }, "Bet9ja's booking-code service is temporarily unavailable.");
+  const evs = Object.fromEntries(resolved.map((item) => {
+    const [, marketAndSign = ""] = item.oddsKey.split("$");
+    const marketCode = marketAndSign.slice(0, Math.max(0, marketAndSign.lastIndexOf("_"))) || item.market;
+    return [item.oddsKey, { id: item.oddsKey, eventId: item.eventId, eventName: `${item.homeTeam} - ${item.awayTeam}`,
+      market: marketCode, marketName: `${item.market} ${item.outcome}`.trim(), marketNameNoSign: item.market,
+      sign: item.outcome, sid: marketAndSign, sportId: 1 }];
+  }));
+  const form = new URLSearchParams({ BETSLIP: JSON.stringify({ BETS: [bet], EVS: evs, IMPERSONIZE: 0 }) });
+  const created = await request(fetcher, CREATE_URL, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: form.toString() }, "Bet9ja's booking-code service is temporarily unavailable.");
   const code = findValue(created, ["RIS", "couponCode", "bookingCode", "code"]);
   const accepted = isRecord(created) && (Number(created.status) === 1 || Number(created.Status) === 1 || /^(?:ok|success|true)$/i.test(str(created.R ?? created.result ?? created.success)));
   if (!accepted || !/^[A-Z0-9]{5,16}$/i.test(code)) {
