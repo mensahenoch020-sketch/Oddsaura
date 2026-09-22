@@ -26,10 +26,15 @@ test("creates and reload-verifies a public Bet9ja booking code", async () => {
   assert.equal(result.code, "5PGCLX3");
   assert.equal(result.deepLink, "https://sports.bet9ja.com/mobile?bookABetCode=5PGCLX3");
   const create = calls.find((call) => call.url.includes("BookABetV2"));
+  assert.match(create?.url ?? "", /[?&]source=desktop/);
   const form = new URLSearchParams(String(create?.init?.body));
-  assert.equal(form.get("LIVE"), "0");
+  assert.equal(form.get("LIVE"), null);
+  assert.deepEqual([...form.keys()], ["BETSLIP"]);
   const slip = JSON.parse(String(form.get("BETSLIP")));
+  assert.equal(slip.BETS[0].BSTYPE, 0);
+  assert.equal(slip.BETS[0].TAB, 0);
   assert.equal(slip.BETS[0].ODDS["825252096$S_1X2_1"], 1.54);
+  assert.deepEqual(slip.EVS["825252096$S_1X2_1"], { id: "825252096$S_1X2_1", eventId: "825252096", eventName: "Liverpool - Nottingham Forest", market: "S_1X2", marketName: "1X2 1", marketNameNoSign: "1X2", sign: "1", sid: "S_1X2_1", sportId: 1 });
   assert.ok(calls.some((call) => call.url.includes("couponCode=5PGCLX3")));
 });
 
