@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { BOOKMAKER_IDS, BookmakerIntegrationError, createBookmakerCode, convertBookmakerCode, providerHealthReport, type BookmakerId } from "./controller.js";
+import { BOOKMAKER_IDS, BookmakerIntegrationError, createBookmakerCode, convertBookmakerCode, inspectBookmakerCode, providerHealthReport, type BookmakerId } from "./controller.js";
 import { expandProviderMarkets, type ExpansionCandidate } from "./market-expansion.js";
 
 const selection = z.object({
@@ -23,6 +23,17 @@ const selection = z.object({
 
 export async function providerRoutes(app: FastifyInstance) {
   app.get("/api/providers/health", async () => ({ providers: providerHealthReport(), scope: "latest operation on this server instance" }));
+
+  app.post("/api/providers/:provider/decode", async (request, reply) => {
+    const provider = z.enum(BOOKMAKER_IDS).parse((request.params as { provider?: string }).provider) as BookmakerId;
+    const body = z.object({ code: z.string().min(4).max(16) }).parse(request.body);
+    try {
+      return await inspectBookmakerCode(provider, body.code, fetch);
+    } catch (error) {
+      if (error instanceof BookmakerIntegrationError) return reply.code(error.status).send({ error: error.message, details: error.details });
+      throw error;
+    }
+  });
 
   app.post("/api/providers/convert", async (request, reply) => {
     const body = z.object({ sourceProvider: z.enum(BOOKMAKER_IDS), destinationProvider: z.enum(BOOKMAKER_IDS), code: z.string().min(4).max(16), allowPartial: z.boolean().optional() }).parse(request.body);

@@ -11,7 +11,7 @@ export type BookmakerId = typeof BOOKMAKER_IDS[number];
 export const bookmakerCatalog: Record<BookmakerId, { label: string; deepLink: string; status: "live" | "integration" }> = {
   sportybet: { label: "SportyBet", deepLink: "https://www.sportybet.com/ng/", status: "live" },
   betpawa: { label: "betPawa", deepLink: "https://www.betpawa.ng/", status: "live" },
-  bet9ja: { label: "Bet9ja", deepLink: "https://sports.bet9ja.com/mobile/", status: "integration" },
+  bet9ja: { label: "Bet9ja", deepLink: "https://sports.bet9ja.com/mobile/", status: "live" },
   betking: { label: "BetKing", deepLink: "https://m.betking.com/en-ng/sports", status: "live" },
   betway: { label: "Betway", deepLink: "https://www.betway.com.ng/book-a-bet", status: "live" },
 };
@@ -38,9 +38,22 @@ export function providerHealthReport() {
       provider,
       label: catalog.label,
       integration: catalog.status,
+      capabilities: { importCode: true, createCode: catalog.status === "live", reloadVerification: true },
       ...(observed ?? { status: catalog.status === "integration" ? "ASSISTED" : "UNTESTED", stage: null, checkedAt: null, message: catalog.status === "integration" ? "Automatic code creation is not dependable yet." : "No bookmaker operation has run on this server instance yet." }),
     };
   });
+}
+
+export async function inspectBookmakerCode(provider: BookmakerId, code: string, fetcher: typeof fetch = fetch) {
+  try {
+    const decoded = await decodeBookmakerCode(provider, code, fetcher);
+    recordProviderOperation(provider, "AVAILABLE", "IMPORT", "The latest booking code was imported successfully.");
+    return decoded;
+  } catch (error) {
+    recordProviderOperation(provider, "DEGRADED", "IMPORT", error instanceof Error ? error.message : "The latest booking-code import failed.");
+    if (error instanceof BookmakerDecodeError) throw new BookmakerIntegrationError(error.message, error.status, stageDetails("IMPORT", error.details));
+    throw new BookmakerIntegrationError(`${bookmakerCatalog[provider].label} could not load that code right now.`, 502, stageDetails("IMPORT", { cause: error instanceof Error ? error.message : String(error) }));
+  }
 }
 
 export type ConversionStage = "INPUT" | "IMPORT" | "TRANSLATE" | "MATCH" | "CREATE" | "VERIFY";

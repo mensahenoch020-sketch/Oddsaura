@@ -1,7 +1,7 @@
 /** Cloudflare Worker entry point for the vinext-starter template. */
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
-import { BookmakerIntegrationError, createBookmakerCode, providerHealthReport, type BookmakerId } from "../backend/src/modules/providers/controller";
+import { BookmakerIntegrationError, createBookmakerCode, inspectBookmakerCode, providerHealthReport, type BookmakerId } from "../backend/src/modules/providers/controller";
 import { BookmakerDecodeError, decodeBookmakerCode } from "../backend/src/modules/providers/decoder";
 import type { SportyBetSelectionInput } from "../backend/src/modules/providers/sportybet";
 import { expandProviderMarkets, type ExpansionCandidate } from "../backend/src/modules/providers/market-expansion";
@@ -353,8 +353,9 @@ const worker = {
     const protectedPages = ["/dashboard", "/assistant", "/daily", "/matches", "/builder", "/converter", "/results", "/account", "/admin"];
     const isProtectedPage = protectedPages.some((path) => url.pathname === path || url.pathname.startsWith(`${path}/`));
     const providerCodeMatch = url.pathname.match(/^\/api\/providers\/(sportybet|betpawa|bet9ja|betking|betway)\/code$/);
+    const providerDecodeMatch = url.pathname.match(/^\/api\/providers\/(sportybet|betpawa|bet9ja|betking|betway)\/decode$/);
     const providerExpandMatch = url.pathname.match(/^\/api\/providers\/(sportybet|betpawa|bet9ja|betking|betway)\/expand$/);
-    const isProtectedApi = Boolean(providerCodeMatch) || Boolean(providerExpandMatch) || url.pathname === "/api/providers/convert" || url.pathname === "/api/providers/health" || url.pathname === "/api/sportybet/code" || url.pathname === "/api/account" || url.pathname === "/api/codes" || url.pathname === "/api/slips" || url.pathname.startsWith("/api/slips/") || url.pathname === "/api/ticket-controls" || url.pathname.startsWith("/api/admin/");
+    const isProtectedApi = Boolean(providerCodeMatch) || Boolean(providerDecodeMatch) || Boolean(providerExpandMatch) || url.pathname === "/api/providers/convert" || url.pathname === "/api/providers/health" || url.pathname === "/api/sportybet/code" || url.pathname === "/api/account" || url.pathname === "/api/codes" || url.pathname === "/api/slips" || url.pathname.startsWith("/api/slips/") || url.pathname === "/api/ticket-controls" || url.pathname.startsWith("/api/admin/");
     const identity = isProtectedPage || isProtectedApi ? await sessionIdentity(request, env) : null;
     if ((isProtectedPage || isProtectedApi) && !identity) {
       if (isProtectedApi) return Response.json({ error: "Log in to continue." }, { status: 401, headers: { "cache-control": "no-store" } });
@@ -383,6 +384,19 @@ const worker = {
     if (url.pathname === "/api/providers/health") {
       if (request.method !== "GET") return Response.json({ error: "Method not allowed" }, { status: 405, headers: { allow: "GET" } });
       return Response.json({ providers: providerHealthReport(), scope: "latest operation on this server instance" }, { headers: { "cache-control": "no-store" } });
+    }
+
+    if (providerDecodeMatch) {
+      if (request.method !== "POST") return Response.json({ error: "Method not allowed" }, { status: 405, headers: { allow: "POST" } });
+      try {
+        const body = await authenticatedRequest.json() as { code?: string };
+        const code = String(body.code || "").trim().toUpperCase();
+        if (!/^[A-Z0-9]{4,16}$/.test(code)) return Response.json({ error: "Enter a valid bookmaker code.", details: { stage: "INPUT" } }, { status: 400 });
+        return Response.json(await inspectBookmakerCode(providerDecodeMatch[1] as BookmakerId, code, fetch), { headers: { "cache-control": "no-store" } });
+      } catch (error) {
+        const bookmakerError = asBookmakerError(error, "That booking code could not be loaded.");
+        return Response.json({ error: bookmakerError.message, details: bookmakerError.details }, { status: bookmakerError.status });
+      }
     }
 
     if (providerExpandMatch) {

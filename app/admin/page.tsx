@@ -15,6 +15,7 @@ type AdminOverview = {
   controls: Array<{ ticketId: string; visible: boolean; titleOverride: string | null; updatedAt: number }>;
   services: { passwordResetEmail: boolean };
 };
+type ProviderHealth = { provider: string; label: string; integration: "live" | "integration"; status: "AVAILABLE" | "DEGRADED" | "UNTESTED" | "ASSISTED"; stage: "IMPORT" | "CREATE" | null; checkedAt: string | null; message: string; capabilities?: { importCode: boolean; createCode: boolean; reloadVerification: boolean } };
 const emptyPerformance: ModelPerformance = { generatedAt: null, matches: 0, oneXTwoAccuracy: null, over25Accuracy: null, brierScore: null, logLoss: null, methodology: "Walk-forward backtest pending historical refresh.", leagues: [] };
 const modelPerformanceUrl = process.env.NEXT_PUBLIC_MODEL_PERFORMANCE_URL ?? "https://raw.githubusercontent.com/mensahenoch020-sketch/Oddsaura/main/data/public/model-performance.json";
 const snapshotTime = (snapshot: Snapshot) => Date.parse(snapshot.generatedAt ?? "") || 0;
@@ -35,14 +36,16 @@ export default function AdminPage() {
   const [message, setMessage] = useState("");
   const [performance, setPerformance] = useState<ModelPerformance>(emptyPerformance);
   const [overview, setOverview] = useState<AdminOverview | null>(null);
+  const [providerHealth, setProviderHealth] = useState<ProviderHealth[]>([]);
   const [draftTitles, setDraftTitles] = useState<Record<string, string>>({});
 
   async function refresh() {
     setBusy(true); setMessage("");
     try {
-      const [nextSnapshot, adminResponse] = await Promise.all([freshestAdminSnapshot(), fetch("/api/admin/overview", { cache: "no-store" })]);
+      const [nextSnapshot, adminResponse, providerResponse] = await Promise.all([freshestAdminSnapshot(), fetch("/api/admin/overview", { cache: "no-store" }), fetch("/api/providers/health", { cache: "no-store" })]);
       setSnapshot(nextSnapshot);
       if (adminResponse.ok) setOverview(await adminResponse.json());
+      if (providerResponse.ok) setProviderHealth(((await providerResponse.json()) as { providers?: ProviderHealth[] }).providers ?? []);
     }
     catch { setMessage("The live GitHub snapshot could not be reached. The last bundled snapshot is still shown."); }
     finally { setBusy(false); }
@@ -66,6 +69,7 @@ export default function AdminPage() {
     return () => { active = false; };
   }, []);
   useEffect(() => { fetch("/api/admin/overview", { cache: "no-store" }).then((response) => response.ok ? response.json() : Promise.reject()).then(setOverview).catch(() => setMessage("Admin account data could not be loaded.")); }, []);
+  useEffect(() => { fetch("/api/providers/health", { cache: "no-store" }).then((response) => response.ok ? response.json() : Promise.reject()).then((payload: { providers?: ProviderHealth[] }) => setProviderHealth(payload.providers ?? [])).catch(() => undefined); }, []);
 
   async function saveTicket(ticketId: string, visible: boolean) {
     const response = await fetch(`/api/admin/tickets/${encodeURIComponent(ticketId)}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ visible, titleOverride: draftTitles[ticketId] ?? overview?.controls.find((item) => item.ticketId === ticketId)?.titleOverride ?? "" }) });
@@ -86,14 +90,15 @@ export default function AdminPage() {
     key !== "paperTrials" && key !== "noBetCategories" && (typeof value === "number" || typeof value === "string"));
 
   return <main className="adm-app">
-    <aside className="adm-sidebar"><Link href="/dashboard" className="adm-brand">Odds<span>Aura</span></Link><nav><a href="#overview">Pipeline</a><a href="#operations">Operations</a><a href="#x-replies">X replies</a><a href="#tickets">Daily tickets</a><a href="#users">Users</a><a href="#markets">Markets</a></nav><a className="adm-repo" href="https://github.com/mensahenoch020-sketch/Oddsaura/actions" target="_blank" rel="noreferrer">Automation runs ↗</a></aside>
+    <aside className="adm-sidebar"><Link href="/dashboard" className="adm-brand">Odds<span>Aura</span></Link><nav><a href="#overview">Pipeline</a><a href="#operations">Operations</a><a href="#bookmakers">Bookmakers</a><a href="#x-replies">X replies</a><a href="#tickets">Daily tickets</a><a href="#users">Users</a><a href="#markets">Markets</a></nav><a className="adm-repo" href="https://github.com/mensahenoch020-sketch/Oddsaura/actions" target="_blank" rel="noreferrer">Automation runs ↗</a></aside>
     <section className="adm-content">
-      <nav className="adm-mobile-menu" aria-label="Admin sections"><Link href="/dashboard">Home</Link><a href="#overview">Overview</a><a href="#x-replies">X replies</a><a href="#tickets">Tickets</a><a href="#users">Users</a><a href="#markets">Markets and tests</a><a href="https://github.com/mensahenoch020-sketch/Oddsaura/actions" target="_blank" rel="noreferrer">Automation runs ↗</a></nav>
+      <nav className="adm-mobile-menu" aria-label="Admin sections"><Link href="/dashboard">Home</Link><a href="#overview">Overview</a><a href="#bookmakers">Bookmakers</a><a href="#x-replies">X replies</a><a href="#tickets">Tickets</a><a href="#users">Users</a><a href="#markets">Markets and tests</a><a href="https://github.com/mensahenoch020-sketch/Oddsaura/actions" target="_blank" rel="noreferrer">Automation runs ↗</a></nav>
       <header><div><span className="adm-kicker">Zero-key operations</span><h1>Automation monitor</h1></div><div className="adm-actions"><button className="adm-primary" disabled={busy} onClick={refresh}>{busy ? "Checking…" : "Refresh snapshot"}</button></div></header>
       {message && <div className="adm-message">{message}</div>}
       <section id="overview" className="adm-pipeline-status"><div><span className={`adm-dot adm-dot-${snapshot.status}`} /> <strong>{snapshot.status.toUpperCase()}</strong><p>{snapshot.message}</p></div><small>{snapshot.generatedAt ? `Last run ${new Date(snapshot.generatedAt).toLocaleString()}` : "First scheduled run pending"}</small></section>
       <section className="adm-metrics">{metricEntries.map(([label, value]) => <article key={label}><span>{label.replace(/([A-Z])/g, " $1")}</span><strong>{String(value)}</strong></article>)}</section>
       <section id="operations" className="adm-operations"><div className="adm-section-head"><h2>Site operations</h2><span>Private admin data</span></div><div><article><span>Users</span><strong>{overview?.stats.users ?? "—"}</strong></article><article><span>Saved slips</span><strong>{overview?.stats.savedSlips ?? "—"}</strong></article><article><span>Generated codes</span><strong>{overview?.stats.generatedCodes ?? "—"}</strong></article><article><span>Password email</span><strong className={overview?.services.passwordResetEmail ? "ready" : "needs-setup"}>{overview?.services.passwordResetEmail ? "Ready" : "Needs setup"}</strong></article></div></section>
+      <section id="bookmakers" className="adm-bookmakers"><div className="adm-section-head"><h2>Bookmaker connections</h2><span>Latest real server operation</span></div><div>{providerHealth.map((item) => <article key={item.provider}><header><strong>{item.label}</strong><span className={`provider-${item.status.toLowerCase()}`}>{item.status.replaceAll("_", " ")}</span></header><p>{item.message}</p><small>{item.stage ? `Last stage: ${item.stage.toLowerCase()}` : "No operation recorded"}{item.checkedAt ? ` · ${new Date(item.checkedAt).toLocaleString()}` : ""}</small><footer><span>Import {item.capabilities?.importCode ? "✓" : "—"}</span><span>Create {item.capabilities?.createCode ? "✓" : "—"}</span><span>Verify {item.capabilities?.reloadVerification ? "✓" : "—"}</span></footer></article>)}</div></section>
       <XReplyAssistant />
       <section className="adm-performance"><div className="adm-section-head"><h2>Historical prediction tests</h2><span>{performance.matches ? `${performance.matches} walk-forward matches` : "Backtest pending"}</span></div><p>{performance.methodology}</p><div><article><span>1X2 accuracy</span><strong>{performance.oneXTwoAccuracy == null ? "—" : `${Math.round(performance.oneXTwoAccuracy * 100)}%`}</strong></article><article><span>Over 2.5 accuracy</span><strong>{performance.over25Accuracy == null ? "—" : `${Math.round(performance.over25Accuracy * 100)}%`}</strong></article><article><span>Brier score</span><strong>{performance.brierScore == null ? "—" : performance.brierScore.toFixed(3)}</strong></article><article><span>Log loss</span><strong>{performance.logLoss == null ? "—" : performance.logLoss.toFixed(3)}</strong></article></div></section>
       <section className="adm-performance"><div className="adm-section-head"><h2>Forward prediction proof</h2><span>Recorded before kickoff</span></div><p>This paper ledger records priced selections before matches start, then settles them from final scores. It is proof of future performance—not a guarantee of profit.</p><div><article><span>Recorded</span><strong>{snapshot.metrics.paperTrials?.recorded ?? 0}</strong></article><article><span>Settled</span><strong>{snapshot.metrics.paperTrials?.settled ?? 0}</strong></article><article><span>Won</span><strong>{snapshot.metrics.paperTrials?.won ?? 0}</strong></article><article><span>Hit rate</span><strong>{snapshot.metrics.paperTrials?.hitRate == null ? "—" : `${Math.round(snapshot.metrics.paperTrials.hitRate * 100)}%`}</strong></article><article><span>Flat-stake ROI</span><strong>{snapshot.metrics.paperTrials?.flatStakeRoi == null ? "—" : `${(snapshot.metrics.paperTrials.flatStakeRoi * 100).toFixed(1)}%`}</strong></article></div></section>
