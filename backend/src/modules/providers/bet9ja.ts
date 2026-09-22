@@ -76,20 +76,22 @@ function unwrap(payload: unknown) {
   return payload;
 }
 
-function findValue(payload: unknown, keys: string[], depth = 0): string {
+function findBookingCode(payload: unknown, depth = 0): string {
   if (depth > 5 || !isRecord(payload)) return "";
-  for (const key of keys) {
-    const value = str(payload[key]);
-    if (value) return value;
+  for (const key of ["RIS", "couponCode", "bookingCode"]) {
+    const value = str(payload[key]).trim();
+    if (/^[A-Z0-9]{5,16}$/i.test(value)) return value;
   }
+  const generic = str(payload.code).trim();
+  if (/^[A-Z0-9]{5,16}$/i.test(generic)) return generic;
   for (const value of Object.values(payload)) {
     if (Array.isArray(value)) {
       for (const item of value) {
-        const found = findValue(item, keys, depth + 1);
+        const found = findBookingCode(item, depth + 1);
         if (found) return found;
       }
     } else if (isRecord(value)) {
-      const found = findValue(value, keys, depth + 1);
+      const found = findBookingCode(value, depth + 1);
       if (found) return found;
     }
   }
@@ -235,7 +237,7 @@ export async function createBet9jaCode(selections: SportyBetSelectionInput[], fe
   }));
   const form = new URLSearchParams({ BETSLIP: JSON.stringify({ BETS: [bet], EVS: evs, IMPERSONIZE: 0 }) });
   const created = await request(fetcher, CREATE_URL, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: form.toString() }, "Bet9ja's booking-code service is temporarily unavailable.");
-  const code = findValue(created, ["RIS", "couponCode", "bookingCode", "code"]);
+  const code = findBookingCode(created);
   const accepted = isRecord(created) && (Number(created.status) === 1 || Number(created.Status) === 1 || /^(?:ok|success|true)$/i.test(str(created.R ?? created.result ?? created.success)));
   if (!accepted || !/^[A-Z0-9]{5,16}$/i.test(code)) {
     const message = isRecord(created) && isRecord(created.error) ? str(created.error.message) : "";
