@@ -45,6 +45,21 @@ test("extracts split instructions", () => {
   assert.equal(intent.provider, "betpawa");
 });
 
+test("explicitly splits an existing bookmaker code instead of misrouting it to conversion", () => {
+  const intent = interpretAssistantRequest("BA12345 split this sporty code into 3");
+  assert.equal(intent.kind, "split");
+  assert.equal(intent.code, "BA12345");
+  assert.equal(intent.parts, 3);
+  assert.equal(intent.provider, "sportybet");
+  assert.equal(intent.targetOdds, null);
+});
+
+test("recognizes slip analysis and selection explanation requests", () => {
+  assert.equal(interpretAssistantRequest("What do you think about this odds?").kind, "analyze");
+  assert.equal(interpretAssistantRequest("Analyse Sporty code BA12345").kind, "analyze");
+  assert.equal(interpretAssistantRequest("Why did you choose this specific option for this match?").kind, "explain");
+});
+
 test("does not cap large requested target odds", () => {
   const intent = interpretAssistantRequest("Give me 1,000,000 odds for SportyBet");
   assert.equal(intent.kind, "build");

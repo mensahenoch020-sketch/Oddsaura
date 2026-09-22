@@ -165,6 +165,8 @@ function toInput(row: Json, provider: DecodableBookmaker, index: number): Sporty
     sourceOutcomeName: outcomeName,
     sourceSpecifier: specifier || null,
   };
+  const quotedOdds = Number(first(nested, ["odds", "odd", "price", "oddValue", "QuotaValore", "V"]));
+  if (Number.isFinite(quotedOdds) && quotedOdds > 1) input.quotedOdds = quotedOdds;
   if (provider === "sportybet") {
     input.providerEventId = eventId || null;
     input.providerMarketId = first(nested, ["marketId", "marketID", "MID", "sid"]) || null;

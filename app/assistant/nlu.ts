@@ -18,8 +18,10 @@ export type RecommendationStrategy = "protection" | "value";
 
 export type AssistantIntent =
   | { kind: "build"; confidence: number; targetOdds: number | null; provider: ProviderId | null } & RequestContext
-  | { kind: "split"; confidence: number; targetOdds: number | null; parts: number | null; provider: ProviderId | null } & RequestContext
+  | { kind: "split"; confidence: number; code: string | null; targetOdds: number | null; parts: number | null; provider: ProviderId | null } & RequestContext
   | { kind: "convert"; confidence: number; code: string | null; sourceProvider: ProviderId | null; destinationProvider: ProviderId | null }
+  | { kind: "analyze"; confidence: number; code: string | null; provider: ProviderId | null }
+  | { kind: "explain"; confidence: number; subject: string }
   | { kind: "best"; confidence: number; provider: ProviderId | null; strategy: RecommendationStrategy } & RequestContext
   | { kind: "daily"; confidence: number; provider: ProviderId | null; strategy: RecommendationStrategy } & RequestContext
   | { kind: "results"; confidence: number } & RequestContext
@@ -155,7 +157,8 @@ function extractNumbers(input: string) {
 function extractParts(input: string) {
   const text = normalize(input);
   const numeric = text.match(/(?:into|across|to)\s+(\d+)(?:\s+[a-z0-9]+){0,3}\s+(?:slips?|tickets?|codes?|parts?)/)?.[1]
-    ?? text.match(/(\d+)\s+(?:separate|smaller)\s+(?:slips?|tickets?|codes?)/)?.[1];
+    ?? text.match(/(\d+)\s+(?:separate|smaller)\s+(?:slips?|tickets?|codes?)/)?.[1]
+    ?? text.match(/\b(?:split|divide|break|separate)\b.*?\b(?:into|across)\s+(\d+)\b/)?.[1];
   if (numeric) return Math.max(2, Math.min(10, Number(numeric)));
   const words: Record<string, number> = { two: 2, three: 3, four: 4, five: 5, six: 6 };
   for (const [word, value] of Object.entries(words)) {
@@ -327,14 +330,21 @@ export function interpretAssistantRequest(input: string, referenceTime = Date.no
   const strategy: RecommendationStrategy = /\b(value|valuable|edge|price)\b/.test(text) ? "value" : "protection";
   const hasSplitLanguage = /\b(split|divide|break|separate|smaller|across)\b/.test(text);
   const hasConversionLanguage = /\b(convert|change|move|transfer|translate|turn)\b/.test(text);
+  const hasAnalysisLanguage = /\b(analy[sz]e|assess|review|rate|risky|risk|opinion)\b|\bwhat do you think\b|\bhow (?:good|safe|strong)\b/.test(text);
+  const hasExplanationLanguage = /\bwhy\b|\bexplain\b|\breason\b|\bhow come\b|\bwhat made you\b/.test(text);
   const hasBuildLanguage = /\b(odds?|bet|slip|ticket|games?|matches?|booking)\b/.test(text);
 
+  // Explicit verbs win over weak inferences. Previously any code plus a
+  // bookmaker was treated as conversion, so "split this Sporty code" could
+  // never reach the split action.
+  if (hasExplanationLanguage) return { kind: "explain", confidence: 1, subject: input.trim() };
+  if (hasSplitLanguage || parts || scores.split >= .62) {
+    return { kind: "split", confidence: Math.min(1, scores.split + (hasSplitLanguage ? .2 : 0) + (code ? .15 : 0)), code, targetOdds: code ? null : extractTarget(text, parts), parts, provider: providers[0]?.id ?? null, ...context };
+  }
+  if (hasAnalysisLanguage) return { kind: "analyze", confidence: 1, code, provider: providers[0]?.id ?? null };
   if (hasConversionLanguage || (code && providers.length > 0) || scores.convert >= .56) {
     const routes = conversionProviders(text, providers);
     return { kind: "convert", confidence: Math.min(1, scores.convert + (code ? .22 : 0) + (hasConversionLanguage ? .18 : 0)), code, ...routes };
-  }
-  if (hasSplitLanguage || parts || scores.split >= .62) {
-    return { kind: "split", confidence: Math.min(1, scores.split + (hasSplitLanguage ? .2 : 0)), targetOdds: extractTarget(text, parts), parts, provider: providers[0]?.id ?? null, ...context };
   }
   if (/\b(results?|settled|won|lost|performance|hit rate)\b/.test(text)) return { kind: "results", confidence: 1, ...context };
   const explicitTarget = extractTarget(text, null);

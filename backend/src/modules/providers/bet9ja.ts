@@ -75,6 +75,39 @@ function unwrap(payload: unknown) {
   return payload;
 }
 
+function findValue(payload: unknown, keys: string[], depth = 0): string {
+  if (depth > 5 || !isRecord(payload)) return "";
+  for (const key of keys) {
+    const value = str(payload[key]);
+    if (value) return value;
+  }
+  for (const value of Object.values(payload)) {
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        const found = findValue(item, keys, depth + 1);
+        if (found) return found;
+      }
+    } else if (isRecord(value)) {
+      const found = findValue(value, keys, depth + 1);
+      if (found) return found;
+    }
+  }
+  return "";
+}
+
+function couponOdds(payload: unknown): Json | null {
+  if (!isRecord(payload)) return null;
+  if (isRecord(payload.O)) return payload.O;
+  if (isRecord(payload.EVS)) return payload.EVS;
+  for (const value of Object.values(payload)) {
+    if (isRecord(value)) {
+      const found = couponOdds(value);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
 function splitTeams(name: string) {
   const parts = name.split(/\s+-\s+|\s+(?:vs\.?|v)\s+/i);
   return { home: parts[0]?.trim() ?? "", away: parts[1]?.trim() ?? "" };
@@ -197,16 +230,17 @@ export async function createBet9jaCode(selections: SportyBetSelectionInput[], fe
     SG: "", startdate: item.startDate, oddValue: item.odds, hnd: item.specifier ? item.specifier.split("=")[1] : "", sportName: item.sport }]));
   const form = new URLSearchParams({ BETSLIP: JSON.stringify({ BETS: [bet], EVS: evs, IMPERSONIZE: 0 }), IS_PASSBET: "0", LIVE: "0" });
   const created = await request(fetcher, CREATE_URL, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded", "x-source": "desktop" }, body: form.toString() }, "Bet9ja's booking-code service is temporarily unavailable.");
-  const first = isRecord(created) && Array.isArray(created.data) && isRecord(created.data[0]) ? created.data[0] : null;
-  const code = first ? str(first.RIS) : "";
-  if (!isRecord(created) || Number(created.status) !== 1 || !/^[A-Z0-9]{5,12}$/i.test(code)) {
+  const code = findValue(created, ["RIS", "couponCode", "bookingCode", "code"]);
+  const accepted = isRecord(created) && (Number(created.status) === 1 || Number(created.Status) === 1 || /^(?:ok|success|true)$/i.test(str(created.R ?? created.result ?? created.success)));
+  if (!accepted || !/^[A-Z0-9]{5,16}$/i.test(code)) {
     const message = isRecord(created) && isRecord(created.error) ? str(created.error.message) : "";
     throw new Bet9jaIntegrationError(message || "Bet9ja rejected one or more selections.", 422, created);
   }
   const verificationState = await verifyCreatedCode(async () => {
   const checked = unwrap(await request(fetcher, `${VERIFY_URL}?couponCode=${encodeURIComponent(code)}`, { method: "GET" }, "Bet9ja created a code but did not confirm it. Please try again."));
-  if (!isRecord(checked) || !isRecord(checked.O)) return null;
-  return compareSelectionIds(resolved.map(item => item.oddsKey), Object.keys(checked.O));
+  const odds = couponOdds(checked);
+  if (!odds) return null;
+  return compareSelectionIds(resolved.map(item => item.oddsKey), Object.keys(odds));
   });
   return { ...verificationState, code, deepLink: `${LOAD_URL}?bookABetCode=${encodeURIComponent(code)}`, resolved, partial: unmatched.length > 0, unmatched };
 }

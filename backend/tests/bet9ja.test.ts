@@ -33,6 +33,19 @@ test("creates and reload-verifies a public Bet9ja booking code", async () => {
   assert.ok(calls.some((call) => call.url.includes("couponCode=5PGCLX3")));
 });
 
+test("accepts Bet9ja's nested success response and nested verification coupon", async () => {
+  const fakeFetch = async (input: string | URL | Request) => {
+    const url = String(input);
+    if (url.endsWith("GetSearchBoxData")) return Response.json({ d: { SearchResults: [{ ID: 825252096, Type: "SE", Area: "Liverpool - Nottingham Forest", DataInizio: "/Date(1788003000000)/" }] } });
+    if (url.endsWith("GetSubEventDetails")) return Response.json({ d: detail });
+    if (url.includes("BookABetV2")) return Response.json({ Status: 1, D: { result: [{ bookingCode: "NESTED91" }] } });
+    return Response.json({ R: "OK", D: { coupon: { O: { "825252096$S_1X2_1": {} } } } });
+  };
+  const result = await createBet9jaCode([{ fixtureId: "nested", homeTeam: "Liverpool", awayTeam: "Nottingham Forest", kickoff: "2026-08-29T11:30:00Z", marketKey: "MATCH_HOME", marketName: "Match result", selection: "Liverpool" }], fakeFetch as typeof fetch);
+  assert.equal(result.code, "NESTED91");
+  assert.equal(result.verified, true);
+});
+
 test("matches United and Utd team aliases", async () => {
   const leedsDetail = { ...detail, IDSottoEvento: 9002, SottoEvento: "Brighton - Leeds Utd" };
   const fakeFetch = async (input: string | URL | Request) => {

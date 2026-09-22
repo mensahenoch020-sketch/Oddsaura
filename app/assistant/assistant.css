@@ -229,6 +229,8 @@
   background: #14231a;
 }
 
+.assistant-analysis{border:1px solid var(--chat-line);border-radius:14px;background:#11181a;overflow:hidden}.assistant-analysis>header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:16px;border-bottom:1px solid var(--chat-line)}.assistant-analysis>header div{display:grid;gap:5px}.assistant-analysis>header span{font-size:.66rem;color:#8e9aa5;text-transform:uppercase;letter-spacing:.08em}.assistant-analysis>header b{font-size:.86rem;color:#dfe7e1}.assistant-analysis>header strong{color:var(--chat-green)}.assistant-analysis .assistant-selection{padding:13px 16px;border-bottom:1px solid var(--chat-line)}.assistant-selection em{display:block;margin-top:5px;color:#8fa399;font-size:.68rem;font-style:normal}.assistant-explanation>header b{max-width:440px}.assistant-explanation>.assistant-selection{background:rgba(35,217,108,.04)}
+
 .assistant-prompts button b,
 .assistant-prompts a b {
   width: 30px;

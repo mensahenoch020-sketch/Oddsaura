@@ -72,6 +72,11 @@ test("decodes Bet9ja's current uppercase booking-code response", () => {
   assert.equal(decoded.selections[0]?.selection, "Liverpool");
 });
 
+test("preserves the bookmaker price when decoding a slip for analysis", () => {
+  const decoded = decodeLoadedPayload("bet9ja", "PRICE91", { D: { O: { one: { eventId: 91, eventName: "Arsenal - Chelsea", market: "1X2", sign: "1", oddValue: 1.72 } } } });
+  assert.equal(decoded.selections[0]?.quotedOdds, 1.72);
+});
+
 test("hydrates ID-only SportyBet code selections before translating", async () => {
   const fakeFetch = async (input: string | URL | Request) => {
     const url = String(input);
