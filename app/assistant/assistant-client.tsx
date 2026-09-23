@@ -1,10 +1,10 @@
 "use client";
 
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import ProductNavigation from "../product-navigation";
 import ConverterForm from "../converter/converter-form";
 import { fallbackSnapshot, loadSnapshot, refreshSnapshot, type PredictedPick, type Snapshot, type Ticket, type TicketSelection, type WatchlistPick } from "../data";
-import { BookmakerCodeError, decodeBookmakerCode, expandBookmakerMarkets, generateBookmakerCode, providerAdapters, providerSupportsMarket, unavailableFixtureIds, type BookmakerCodeResponse, type BookmakerSelection, type ProviderId } from "../builder/providers";
+import { BookmakerCodeError, decodeBookmakerCode, expandBookmakerMarkets, generateBookmakerCode, providerAdapters, providerSupportsMarket, unavailableFixtureIds, type BookmakerSelection, type ProviderId } from "../builder/providers";
 import { buildTargetSlip, rankBestBets } from "../builder/target-builder";
 import { extractDateWindow, interpretAssistantRequest, isWithinDateWindow, matchesRequestedMarket, type AssistantIntent } from "./nlu";
 import { includedPicks, resolvedTotal, targetReached } from "./code-summary";
@@ -12,6 +12,7 @@ import { plainPickExplanation, unmetTargetMessage } from "./plain-language";
 import { leagueMatches, type LeagueFilter } from "../leagues";
 import { applyConversationReference, resolveAssistantTurn, type PendingIntent } from "./conversation";
 import { saveBetslipImage } from "./betslip-image";
+import { matchImageRowsToFixtures, parsePredictionImageText, type MatchedImagePrediction } from "./image-import";
 import "./assistant.css";
 import "../converter/converter.css";
 import "../converter/home-converter.css";
@@ -44,17 +45,29 @@ type DailyTicketSummary = {
   warning?: string;
 };
 type ResultSummary = { id: string; title: string; totalOdds: number; status: string; publishedAt?: string; selections: number };
+type FixtureSummary = { id: string; competition: string; country?: string; kickoff: string; homeTeam: string; awayTeam: string; status: string };
 type AssistantOutput =
   | { kind: "codes"; cards: CodeSummary[] }
   | { kind: "best"; picks: SelectionSummary[] }
   | { kind: "daily"; tickets: DailyTicketSummary[]; watchlist: SelectionSummary[] }
   | { kind: "results"; tickets: ResultSummary[]; won: number; lost: number; pending: number }
+  | { kind: "fixtures"; fixtures: FixtureSummary[]; windowLabel: string }
   | { kind: "analysis"; selections: SelectionSummary[]; totalOdds: number | null; risk: "LOW" | "MEDIUM" | "HIGH" | "UNKNOWN"; warning?: string }
   | { kind: "explanation"; selected: SelectionSummary; alternatives: SelectionSummary[] };
 type Message = { id: number; role: "user" | "assistant"; text: string; output?: AssistantOutput };
+type ImageImportReview = { fileName: string; provider: ProviderId; matched: MatchedImagePrediction[]; selected: boolean[]; unmatched: Array<{ homeTeam: string; awayTeam: string; marketText: string; reason: string }> };
 const providerName = (provider: ProviderId) => providerAdapters.find((item) => item.id === provider)?.label ?? provider;
 const formatOdds = (value: number) => value >= 1_000_000 ? value.toExponential(2) : value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const pickPrice = (pick: PredictedPick) => pick.quotedOdds ?? pick.fairOdds ?? null;
+
+function friendlyBookmakerError(error: unknown, provider: ProviderId, action: "load" | "create" | "convert") {
+  const raw = error instanceof Error ? error.message : "";
+  if (/market label not found|market.*not found/i.test(raw)) return `${providerName(provider)} returned a market OddsAura could not translate safely. The readable selections are kept so you can review or retry without that market.`;
+  if (/does not currently list|fixture|event.*not found|match.*not found/i.test(raw)) return `${providerName(provider)} does not currently list one or more matches in this slip. OddsAura will keep every match that is available.`;
+  if (/timeout|temporar|right now|502|503|blocked|thrott/i.test(raw)) return `${providerName(provider)} is temporarily unavailable. Your selections are still here, so you can try again shortly.`;
+  if (/recognise|recognize|valid.*code|could not load/i.test(raw) && action === "load") return `${providerName(provider)} could not load that code. Check the code and bookmaker, then try again.`;
+  return `${providerName(provider)} could not ${action === "load" ? "load that code" : action === "create" ? "create the code" : "finish the conversion"}. Your readable selections have not been discarded.`;
+}
 
 function summarizeSelection(pick: PredictedPick | WatchlistPick | TicketSelection): SelectionSummary {
   const odds = "quotedOdds" in pick ? pick.quotedOdds ?? pick.fairOdds : pick.odds;
@@ -118,8 +131,11 @@ function partitionSelections(selections: BookmakerSelection[], requestedParts: n
 export default function AssistantClient({ initialRequest = "", initialTool = "ask" }: { initialRequest?: string; initialTool?: "ask" | "converter" }) {
   const [snapshot, setSnapshot] = useState<Snapshot>(fallbackSnapshot);
   const [resultsSnapshot, setResultsSnapshot] = useState<Snapshot>(fallbackSnapshot);
+  const [matchesSnapshot, setMatchesSnapshot] = useState<Snapshot>(fallbackSnapshot);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [readingImage, setReadingImage] = useState(false);
+  const [imageImport, setImageImport] = useState<ImageImportReview | null>(null);
   const [input, setInput] = useState(initialRequest.slice(0, 500));
   const [pending, setPending] = useState<PendingIntent | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -128,6 +144,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
   const nextId = useRef(1);
   const threadRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let active = true;
@@ -138,6 +155,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
     loadSnapshot("builder").then((data) => { if (active) setSnapshot(data); }).catch(() => undefined).finally(() => { if (active) setLoading(false); });
     refreshSnapshot("builder").then((data) => { if (active) setSnapshot(data); }).catch(() => undefined);
     load("results", setResultsSnapshot);
+    load("matches", setMatchesSnapshot);
     return () => { active = false; };
   }, []);
 
@@ -147,6 +165,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
   }, [messages, busy]);
 
   const predictions = snapshot.predictedPicks ?? [];
+  const fixtures = matchesSnapshot.fixtures ?? [];
 
   function addMessage(role: Message["role"], text: string, output?: AssistantOutput) {
     setMessages((current) => [...current, { id: nextId.current++, role, text, output }]);
@@ -351,29 +370,48 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
   }
 
   async function executeConversion(intent: Extract<AssistantIntent, { kind: "convert" }>) {
+    const source = intent.sourceProvider!;
+    const destination = intent.destinationProvider!;
+    let decoded: Awaited<ReturnType<typeof decodeBookmakerCode>>;
     try {
-      const response = await fetch("/api/providers/convert", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ sourceProvider: intent.sourceProvider, destinationProvider: intent.destinationProvider, code: intent.code, allowPartial: true }),
-      });
-      const payload = await response.json() as BookmakerCodeResponse & { error?: string; details?: { stage?: string } };
-      if (!response.ok || !payload.code) throw new Error(payload.error || "That booking code could not be converted.");
-      const sourceSelections = payload.sourceSelections ?? [];
+      decoded = await decodeBookmakerCode(source, intent.code!);
+    } catch (error) {
+      addMessage("assistant", friendlyBookmakerError(error, source, "load"));
+      return;
+    }
+
+    let candidates = decoded.selections;
+    let removed: BookmakerSelection[] = [];
+    try {
+      let payload;
+      try {
+        payload = await generateBookmakerCode(destination, candidates, true);
+      } catch (error) {
+        const failed = new Set(unavailableFixtureIds(error));
+        if (!failed.size) throw error;
+        removed = candidates.filter((selection) => failed.has(selection.fixtureId));
+        candidates = candidates.filter((selection) => !failed.has(selection.fixtureId));
+        if (!candidates.length) throw error;
+        payload = await generateBookmakerCode(destination, candidates, true);
+      }
+      const includedIds = new Set(payload.resolved.map((item) => item.fixtureId));
+      const sourceIssues = decoded.skippedSelections.map((issue) => ({ homeTeam: issue.eventName ?? "Unreadable source selection", awayTeam: "", reason: `${issue.marketName ?? "Unknown market"}: ${issue.outcomeName ?? "Unknown option"}. ${issue.reason ?? "No safe equivalent"}` }));
+      const removedIssues = removed.map((selection) => ({ homeTeam: selection.homeTeam, awayTeam: selection.awayTeam, reason: `${providerName(destination)} does not currently offer the same match or market.` }));
       const card: CodeSummary = {
-        provider: intent.destinationProvider!, code: payload.code, deepLink: payload.deepLink, verified: payload.verified, partial: payload.partial, warning: [payload.warning, !payload.verified ? "Verification incomplete or mismatched. Check all selections before use." : ""].filter(Boolean).join(" "),
+        provider: destination, code: payload.code, deepLink: payload.deepLink, verified: payload.verified, partial: payload.partial || removed.length > 0 || decoded.partial, warning: [payload.warning, !payload.verified ? "Check every selection in the bookmaker before using this code." : ""].filter(Boolean).join(" "),
         liveOdds: resolvedTotal(payload.resolved),
         selections: payload.resolved.map((item, index) => {
-          const source = sourceSelections.find((selection) => selection.fixtureId === item.fixtureId);
-          return { id: `${item.fixtureId}-${index}`, match: source ? `${source.homeTeam} vs ${source.awayTeam}` : item.fixtureId, market: source?.marketName ?? "Converted selection", selection: source?.selection ?? "Included", odds: item.odds };
+          const selection = candidates.find((candidate) => candidate.fixtureId === item.fixtureId);
+          return { id: `${item.fixtureId}-${index}`, fixtureId: item.fixtureId, match: selection ? `${selection.homeTeam} vs ${selection.awayTeam}` : item.fixtureId, market: selection?.marketName ?? "Converted selection", selection: selection?.selection ?? "Included", odds: item.odds };
         }),
-        unmatched: [...(payload.unmatched ?? []), ...(payload.sourceIssues ?? []).map(issue => ({ homeTeam: issue.eventName ?? "Untranslated selection", awayTeam: "", reason: `${issue.marketName ?? ""}: ${issue.outcomeName ?? ""}. ${issue.reason ?? "No safe equivalent"}` }))],
+        unmatched: [...payload.unmatched, ...removedIssues, ...sourceIssues],
       };
-      const matchedPicks = sourceSelections.flatMap(selection => { const match = matchPrediction(selection, intent.destinationProvider!); return match ? [match] : []; });
-      conversation.current = { provider: intent.destinationProvider!, code: payload.code, selections: card.selections, picks: matchedPicks, decoded: sourceSelections, lastOutcome: null };
-      addMessage("assistant", payload.partial ? `I created a partial ${providerName(intent.destinationProvider!)} code. The available selections are included, and every omission is listed below.` : `Your ${providerName(intent.destinationProvider!)} code is ready.`, { kind: "codes", cards: [card] });
+      const matchedPicks = candidates.filter((selection) => includedIds.has(selection.fixtureId)).flatMap(selection => { const match = matchPrediction(selection, destination); return match ? [match] : []; });
+      conversation.current = { provider: destination, code: payload.code, selections: card.selections, picks: matchedPicks, decoded: candidates, lastOutcome: null };
+      addMessage("assistant", card.partial ? `I created the ${providerName(destination)} code with every available selection. Anything omitted is listed clearly below.` : `Your ${providerName(destination)} code is ready.`, { kind: "codes", cards: [card] });
     } catch (error) {
-      addMessage("assistant", error instanceof Error ? error.message : "That booking code could not be converted.");
+      conversation.current = { provider: destination, code: null, selections: candidates.map((selection, index) => decodedSummary(selection, index)), picks: [], decoded: candidates, lastOutcome: { kind: "conversion", explanation: friendlyBookmakerError(error, destination, "convert") } };
+      addMessage("assistant", friendlyBookmakerError(error, destination, "convert"));
     }
   }
 
@@ -507,6 +545,34 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
     }
   }
 
+  async function executeConfirmation() {
+    const provider = conversation.current.provider;
+    const selections = conversation.current.decoded;
+    if (!provider || !selections.length) {
+      addMessage("assistant", "There isn’t an unfinished slip in this chat yet. Send a booking code or ask me to build one first.");
+      return;
+    }
+    try {
+      const result = await generateBookmakerCode(provider, selections, true);
+      const includedIds = new Set(result.resolved.map((item) => item.fixtureId));
+      const card: CodeSummary = {
+        provider,
+        code: result.code,
+        deepLink: result.deepLink,
+        verified: result.verified,
+        partial: result.partial,
+        liveOdds: resolvedTotal(result.resolved),
+        selections: selections.filter((item) => includedIds.has(item.fixtureId)).map((item, index) => decodedSummary(item, index, matchPrediction(item, provider))),
+        unmatched: result.unmatched,
+        warning: result.warning,
+      };
+      conversation.current = { ...conversation.current, code: result.code, selections: card.selections };
+      addMessage("assistant", result.partial ? `I created the ${providerName(provider)} code with every available selection.` : `Your ${providerName(provider)} code is ready.`, { kind: "codes", cards: [card] });
+    } catch (error) {
+      addMessage("assistant", friendlyBookmakerError(error, provider, "create"));
+    }
+  }
+
   async function execute(intent: AssistantIntent, referenceTime: number) {
     const todayWindow = extractDateWindow("today", referenceTime);
     if (askForMissing(intent)) return;
@@ -520,6 +586,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
       else if (intent.kind === "analyze") await executeAnalysis(intent);
       else if (intent.kind === "explain") executeExplanation(intent);
       else if (intent.kind === "revise") await executeRevision(intent);
+      else if (intent.kind === "confirm") await executeConfirmation();
       else if (intent.kind === "help") {
         addMessage("assistant", "I can build target odds, find safer or better-value picks, explain a match, analyse or split a booking code, convert codes between supported bookmakers, revise a slip and show tracked results. Try: “10 safe odds for SportyBet tomorrow” or “analyse SportyBet code 4V0XMZ”.");
       } else if (intent.kind === "limits") {
@@ -540,6 +607,39 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
           conversation.current = { provider, code: null, selections: [summarizeSelection(selected)], picks: [selected], decoded: [], lastOutcome: null };
           addMessage("assistant", plainPickExplanation(selected, providerName(provider)), { kind: "explanation", selected: summarizeSelection(selected), alternatives: alternatives.map(summarizeSelection) });
         }
+      }
+      else if (intent.kind === "fixtures") {
+        const dateWindow = intent.dateWindow ?? extractDateWindow("upcoming", referenceTime)!;
+        const seen = new Set<string>();
+        const available = fixtures
+          .filter((fixture) => isWithinDateWindow(fixture.kickoff, dateWindow))
+          .filter((fixture) => !intent.leagueFilters?.length || intent.leagueFilters.some((filter) => leagueMatches(fixture.league, filter)))
+          .sort((left, right) => Date.parse(left.kickoff) - Date.parse(right.kickoff))
+          .filter((fixture) => {
+            const key = `${normalizedWords(fixture.homeTeam.name)}|${normalizedWords(fixture.awayTeam.name)}|${fixture.kickoff}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          })
+          .slice(0, 40)
+          .map((fixture): FixtureSummary => ({
+            id: fixture.id,
+            competition: fixture.league.name,
+            country: fixture.league.country,
+            kickoff: fixture.kickoff,
+            homeTeam: fixture.homeTeam.name,
+            awayTeam: fixture.awayTeam.name,
+            status: fixture.status,
+          }));
+        const competitions = [...new Set(available.map((fixture) => fixture.competition))];
+        const requested = intent.leagueFilters?.length ? " in the requested competitions" : "";
+        addMessage(
+          "assistant",
+          available.length
+            ? `${available.length} upcoming fixture${available.length === 1 ? "" : "s"}${requested} for ${dateWindow.label}${competitions.length ? ` across ${competitions.slice(0, 4).join(", ")}${competitions.length > 4 ? " and more" : ""}` : ""}.`
+            : `I don’t have any listed fixtures${requested} for ${dateWindow.label}. Try another date or competition.`,
+          available.length ? { kind: "fixtures", fixtures: available, windowLabel: dateWindow.label } : undefined,
+        );
       }
       else if (intent.kind === "best") {
         const provider = intent.provider ?? "sportybet";
@@ -595,6 +695,72 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
     } finally { setBusy(false); }
   }
 
+  async function importPredictionImage(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || readingImage || busy) return;
+    setReadingImage(true);
+    setImageImport(null);
+    addMessage("user", `Uploaded prediction image: ${file.name}`);
+    try {
+      const { createWorker } = await import("tesseract.js");
+      const worker = await createWorker("eng");
+      const result = await worker.recognize(file);
+      await worker.terminate();
+      const rows = parsePredictionImageText(result.data.text);
+      if (!rows.length) {
+        addMessage("assistant", "I couldn’t read clear match and market rows from that image. Use a sharp screenshot showing both team names and each selection.");
+        return;
+      }
+      const availableFixtures = fixtures.filter((fixture) => Date.parse(fixture.kickoff) > Date.now() - 60 * 60_000);
+      const review = matchImageRowsToFixtures(rows, availableFixtures);
+      setImageImport({ fileName: file.name, provider: conversation.current.provider ?? "sportybet", matched: review.matched, selected: review.matched.map(() => true), unmatched: review.unmatched });
+      addMessage("assistant", review.matched.length ? `I read ${rows.length} prediction${rows.length === 1 ? "" : "s"} and matched ${review.matched.length}. Review them below, choose the bookmaker, then create the code.` : `I read ${rows.length} prediction${rows.length === 1 ? "" : "s"}, but none matched a current fixture and supported market safely.`);
+    } catch {
+      addMessage("assistant", "I couldn’t read that image on this device. Try a clearer JPG or PNG screenshot.");
+    } finally {
+      setReadingImage(false);
+    }
+  }
+
+  async function createImageCode() {
+    if (!imageImport || busy) return;
+    const supported = imageImport.matched.filter((match, index) => imageImport.selected[index] && providerSupportsMarket(imageImport.provider, match.selection.marketKey));
+    if (!supported.length) {
+      addMessage("assistant", `None of the selected image predictions use markets ${providerName(imageImport.provider)} can currently recreate safely.`);
+      return;
+    }
+    setBusy(true);
+    try {
+      const result = await generateBookmakerCode(imageImport.provider, supported.map((match) => match.selection), true);
+      const includedIds = new Set(result.resolved.map((item) => item.fixtureId));
+      const selections = supported.filter((match) => includedIds.has(match.selection.fixtureId)).map((match, index) => ({ ...decodedSummary(match.selection, index), odds: result.resolved.find((item) => item.fixtureId === match.selection.fixtureId)?.odds ?? match.row.odds }));
+      const unsupported = imageImport.matched.filter((match, index) => imageImport.selected[index] && !providerSupportsMarket(imageImport.provider, match.selection.marketKey));
+      const card: CodeSummary = {
+        provider: imageImport.provider,
+        code: result.code,
+        deepLink: result.deepLink,
+        verified: result.verified,
+        partial: result.partial || unsupported.length > 0 || imageImport.unmatched.length > 0,
+        liveOdds: resolvedTotal(result.resolved),
+        selections,
+        unmatched: [
+          ...result.unmatched,
+          ...unsupported.map((match) => ({ homeTeam: match.fixture.homeTeam.name, awayTeam: match.fixture.awayTeam.name, reason: `${providerName(imageImport.provider)} does not support this market for automatic conversion.` })),
+          ...imageImport.unmatched.map((row) => ({ homeTeam: row.homeTeam, awayTeam: row.awayTeam, reason: row.reason })),
+        ],
+        warning: result.warning,
+      };
+      conversation.current = { provider: imageImport.provider, code: result.code, selections, picks: [], decoded: supported.map((match) => match.selection), lastOutcome: null };
+      addMessage("assistant", card.partial ? `I created a ${providerName(imageImport.provider)} code from every image selection I could verify. Review the omitted rows below.` : `Your ${providerName(imageImport.provider)} code from the image is ready.`, { kind: "codes", cards: [card] });
+      setImageImport(null);
+    } catch (error) {
+      addMessage("assistant", friendlyBookmakerError(error, imageImport.provider, "create"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   function submit(event: FormEvent) {
     event.preventDefault();
     const value = input.trim();
@@ -628,6 +794,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
     }
     setMessages([]);
     setPending(null);
+    setImageImport(null);
     conversation.current = { provider: null, code: null, selections: [], picks: [], decoded: [], lastOutcome: null };
     lastIntent.current = null;
     setInput("");
@@ -647,23 +814,35 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
           <ConverterForm embedded />
         </section> : <>
         {!messages.length && !busy ? <div className="assistant-welcome">
-          <div className="assistant-orb" aria-hidden="true"><i /><i /><span /></div>
-          <span>OddsAura assistant</span>
-          <h1>What do you want to bet?</h1>
-          <p>Write naturally. I can build target odds, split slips, convert codes, find the strongest matches and check results.</p>
+          <section className="assistant-welcome-card">
+            <header><div><span>OddsAura assistant</span><h1>Today’s football,<br />made simpler.</h1></div><b>Live data</b></header>
+            <p>Find fixtures by competition, compare supported markets, build bookmaker codes, or upload a prediction screenshot.</p>
+            <div className="assistant-league-chips" aria-label="Browse competitions">
+              {["Premier League matches", "Serie A matches", "International Friendlies", "Champions League matches"].map((prompt) => <button type="button" key={prompt} onClick={() => runPrompt(prompt)}>{prompt}</button>)}
+            </div>
+          </section>
           <div className="assistant-prompts" aria-label="Example requests">
-            {["Best protection for today", "Best value for today", "Build 20 odds for Sporty", "Show today’s qualified odds"].map((prompt, index) => <button type="button" key={prompt} onClick={() => runPrompt(prompt)}><b>{["✓", "↗", "⑂", "◎"][index]}</b><span>{prompt}</span></button>)}
+            {["Best protection for today", "Build 20 odds for Sporty", "Upload a prediction screenshot", "Convert a bookmaker code"].map((prompt, index) => <button type="button" key={prompt} onClick={() => index === 2 ? imageInputRef.current?.click() : runPrompt(prompt)}><b>{["✓", "⑂", "↑", "⇄"][index]}</b><span>{prompt}</span></button>)}
           </div>
         </div> : null}
         {messages.length || busy ? <div ref={threadRef} className="assistant-thread" aria-live="polite">
           {messages.map((message) => <article key={message.id} className={`assistant-message ${message.role}`}><div className="assistant-avatar" aria-hidden="true">{message.role === "assistant" ? "OA" : "You"}</div><div className="assistant-bubble"><p>{message.text}</p>{message.output ? <OutputView output={message.output} /> : null}</div></article>)}
           {busy ? <article className="assistant-message assistant"><div className="assistant-avatar" aria-hidden="true">OA</div><div className="assistant-bubble assistant-thinking"><i /><i /><i /><span>Checking matches and bookmaker markets…</span></div></article> : null}
         </div> : null}
+        {imageImport ? <section className="assistant-image-review" aria-label="Review predictions read from image">
+          <header><div><span>Image review</span><b>{imageImport.fileName}</b></div><button type="button" onClick={() => setImageImport(null)} aria-label="Close image review">×</button></header>
+          <div className="assistant-image-review-route"><label>Bookmaker<select value={imageImport.provider} onChange={(event) => setImageImport((current) => current ? { ...current, provider: event.target.value as ProviderId } : current)}>{providerAdapters.filter((provider) => provider.status === "live").map((provider) => <option value={provider.id} key={provider.id}>{provider.label}</option>)}</select></label><strong>{imageImport.selected.filter(Boolean).length} selected</strong></div>
+          <div className="assistant-image-review-rows">{imageImport.matched.map((match, index) => <label key={`${match.fixture.id}-${index}`}><input type="checkbox" checked={imageImport.selected[index]} onChange={() => setImageImport((current) => current ? { ...current, selected: current.selected.map((selected, itemIndex) => itemIndex === index ? !selected : selected) } : current)} /><span><b>{match.fixture.homeTeam.name} vs {match.fixture.awayTeam.name}</b><small>{match.selection.marketName}: {match.selection.selection}</small></span><em>{match.row.odds?.toFixed(2) ?? "—"}</em></label>)}</div>
+          {imageImport.unmatched.length ? <details><summary>{imageImport.unmatched.length} row{imageImport.unmatched.length === 1 ? "" : "s"} need review</summary>{imageImport.unmatched.map((row, index) => <p key={`${row.homeTeam}-${index}`}><b>{row.homeTeam} vs {row.awayTeam}</b><span>{row.reason}</span></p>)}</details> : null}
+          <button className="assistant-image-create" type="button" onClick={() => void createImageCode()} disabled={busy || !imageImport.selected.some(Boolean)}>Create {providerName(imageImport.provider)} code</button>
+        </section> : null}
         <div className="assistant-composer-dock">
           <form className="assistant-composer" onSubmit={submit}>
             <label htmlFor="assistant-request">Tell OddsAura what you want</label>
-            <textarea ref={inputRef} id="assistant-request" rows={1} value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }} placeholder={loading ? "Loading football data…" : "Ask OddsAura anything…"} disabled={busy || loading} />
-            <button type="submit" disabled={busy || loading || !input.trim()} aria-label="Send request"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 14-7-4 14-3-6z" /><path d="m12 13 7-8" /></svg></button>
+            <input ref={imageInputRef} className="assistant-image-input" type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => void importPredictionImage(event)} />
+            <button className="assistant-attach" type="button" onClick={() => imageInputRef.current?.click()} disabled={busy || loading || readingImage} aria-label="Upload prediction screenshot"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17V3m0 0L7 8m5-5 5 5"/><path d="M5 13v6h14v-6"/></svg></button>
+            <textarea ref={inputRef} id="assistant-request" rows={1} value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }} placeholder={readingImage ? "Reading prediction image…" : loading ? "Loading football data…" : "Ask OddsAura anything…"} disabled={busy || loading || readingImage} />
+            <button className="assistant-send" type="submit" disabled={busy || loading || readingImage || !input.trim()} aria-label="Send request"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 14-7-4 14-3-6z" /><path d="m12 13 7-8" /></svg></button>
           </form>
           <p>Verified selections only · Check every bookmaker slip · 18+</p>
         </div>
@@ -684,6 +863,24 @@ function OutputView({ output }: { output: AssistantOutput }) {
   }
 
   if (output.kind === "best") return <details className="assistant-expandable"><summary><span>{output.picks.length} best selections</span><b>Show</b></summary><div className="assistant-picks">{output.picks.map((pick, index) => <div key={pick.id}><span>#{index + 1}</span><div><b>{pick.match}</b><small>{pick.market}: {pick.selection}</small></div><strong>{pick.odds?.toFixed(2) ?? "—"}</strong></div>)}</div></details>;
+
+  if (output.kind === "fixtures") {
+    const groups = output.fixtures.reduce((map, fixture) => {
+      const key = fixture.competition;
+      map.set(key, [...(map.get(key) ?? []), fixture]);
+      return map;
+    }, new Map<string, FixtureSummary[]>());
+    return <section className="assistant-fixtures">
+      <header><span>Fixtures · {output.windowLabel}</span><b>{output.fixtures.length} matches</b></header>
+      {[...groups].map(([competition, rows]) => <section key={competition} className="assistant-competition">
+        <h3>{competition}<small>{rows[0]?.country ?? ""}</small></h3>
+        {rows.map((fixture) => <div className="assistant-fixture-row" key={fixture.id}>
+          <time dateTime={fixture.kickoff}>{new Intl.DateTimeFormat("en-NG", { timeZone: "Africa/Lagos", weekday: "short", hour: "numeric", minute: "2-digit" }).format(new Date(fixture.kickoff))}</time>
+          <div><b>{fixture.homeTeam}</b><span>vs</span><b>{fixture.awayTeam}</b></div>
+        </div>)}
+      </section>)}
+    </section>;
+  }
 
   if (output.kind === "daily") return <div className="assistant-daily-output">
     {output.tickets.map((ticket) => <section className="assistant-ticket-card" key={ticket.id}>

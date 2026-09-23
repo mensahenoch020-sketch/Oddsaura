@@ -11,6 +11,14 @@ export const LEAGUE_FILTERS = [
   { id: "SAUDI_PRO", label: "Saudi Pro League" },
   { id: "PORTUGAL", label: "Portugal League" },
   { id: "TURKIYE", label: "Türkiye League" },
+  { id: "CHAMPIONS_LEAGUE", label: "Champions League" },
+  { id: "EUROPA_LEAGUE", label: "Europa League" },
+  { id: "CONFERENCE_LEAGUE", label: "Conference League" },
+  { id: "MLS", label: "MLS" },
+  { id: "INTERNATIONAL_FRIENDLY", label: "International Friendlies" },
+  { id: "CLUB_FRIENDLY", label: "Club Friendlies" },
+  { id: "WORLD_CUP", label: "World Cup" },
+  { id: "AFCON", label: "Africa Cup of Nations" },
   { id: "OTHER", label: "Other leagues" },
 ] as const;
 
@@ -27,6 +35,14 @@ const priorityMatchers: Array<[PriorityLeague, RegExp]> = [
   ["SAUDI_PRO", /\b(ksa\.1|saudi pro|saudi professional|roshan saudi)\b/i],
   ["PORTUGAL", /\b(por\.1|primeira liga|liga portugal|portuguese primeira)\b/i],
   ["TURKIYE", /\b(tur\.1|super lig|süper lig|turkiye super|turkish super)\b/i],
+  ["CHAMPIONS_LEAGUE", /\b(uefa champions|champions league|uefa\.champions)\b/i],
+  ["EUROPA_LEAGUE", /\b(uefa europa|europa league|uefa\.europa)\b/i],
+  ["CONFERENCE_LEAGUE", /\b(uefa conference|conference league)\b/i],
+  ["MLS", /\b(usa\.1|major league soccer|mls)\b/i],
+  ["INTERNATIONAL_FRIENDLY", /\b(international friendl(?:y|ies)|friendly internationals?|fifa friendl(?:y|ies))\b/i],
+  ["CLUB_FRIENDLY", /\b(club friendl(?:y|ies)|friendly clubs?)\b/i],
+  ["WORLD_CUP", /\b(fifa world cup|world cup qualif|world cup)\b/i],
+  ["AFCON", /\b(africa cup of nations|afcon)\b/i],
 ];
 
 export function leagueFilterFor(league: League): LeagueFilter {

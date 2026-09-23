@@ -43,7 +43,7 @@ test("renders protected pages from Railway forwarded identity without Cloudflare
   }), undefined, ctx);
   const html = await response.text();
   assert.equal(response.status, 200);
-  assert.match(html, /What do you want to bet\?/);
+  assert.match(html, /Today’s football/);
   assert.doesNotMatch(html, /Internal Server Error/);
 });
 
