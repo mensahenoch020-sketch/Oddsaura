@@ -97,6 +97,28 @@ test("Railway applies security headers and rate limits account entry points", as
   assert.match(server, /HttpOnly; SameSite=Lax/);
 });
 
+test("public trust pages, consent links and responsible gambling guidance are present", async () => {
+  const [privacy, terms, responsible, contact, auth, footer, sitemap] = await Promise.all([
+    read("app/privacy/page.tsx"),
+    read("app/terms/page.tsx"),
+    read("app/responsible-gambling/page.tsx"),
+    read("app/contact/page.tsx"),
+    read("app/auth-form.tsx"),
+    read("app/legal-footer.tsx"),
+    read("app/sitemap.ts"),
+  ]);
+  assert.match(privacy, /We do not sell personal information/);
+  assert.match(privacy, /essential cookies/);
+  assert.match(terms, /OddsAura is not a bookmaker/);
+  assert.match(terms, /Always review the final bookmaker slip/);
+  assert.match(responsible, /Every bet can lose/);
+  assert.match(contact, /privacy@oddsaura\.site/);
+  assert.match(auth, /href="\/terms"/);
+  assert.match(auth, /href="\/privacy"/);
+  assert.match(footer, /responsible-gambling/);
+  for (const route of ["privacy", "terms", "responsible-gambling", "contact"]) assert.match(sitemap, new RegExp(route));
+});
+
 test("minimal account and code results stay consistent on mobile", async () => {
   const [assistant, account, accountCss, results, sporty, routes] = await Promise.all([
     read("app/assistant/assistant-client.tsx"),
