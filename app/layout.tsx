@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://oddsaura.site"),
   title: "OddsAura | Probability-led football picks",
   description: "Simple football picks and ready-to-copy bookmaker codes.",
   openGraph: {
@@ -20,6 +21,7 @@ export const metadata: Metadata = {
     shortcut: "/favicon.svg",
   },
   manifest: "/manifest.webmanifest",
+  robots: { index: true, follow: true },
 };
 
 export const viewport: Viewport = {
@@ -37,6 +39,15 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          name: "OddsAura",
+          url: "https://oddsaura.site",
+          applicationCategory: "SportsApplication",
+          operatingSystem: "Any",
+          description: "Football predictions, booking-code creation and bookmaker-code conversion.",
+        }) }} />
       </head>
       <body className="antialiased">{children}</body>
     </html>

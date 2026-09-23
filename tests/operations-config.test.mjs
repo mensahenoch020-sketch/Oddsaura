@@ -66,16 +66,35 @@ test("public football payloads are split, bundled and cached for faster mobile l
 });
 
 test("mobile assistant fixes the composer while only the message thread scrolls", async () => {
-  const [css, client] = await Promise.all([read("app/assistant/assistant.css"), read("app/assistant/assistant-client.tsx")]);
+  const [css, experience, client] = await Promise.all([read("app/assistant/assistant.css"), read("app/assistant/experience.css"), read("app/assistant/assistant-client.tsx")]);
   assert.match(css, /\.assistant-thread[\s\S]*?overflow-y:\s*auto/);
-  assert.match(css, /\.assistant-composer-dock\s*\{[\s\S]*?position:\s*fixed/);
-  assert.match(css, /bottom:\s*calc\(62px \+ env\(safe-area-inset-bottom\)\)/);
+  assert.match(experience, /\.assistant-composer-dock\{position:relative/);
+  assert.match(experience, /scroll-padding-bottom:12px/);
   assert.match(css, /\.assistant-expandable\[open\][\s\S]*?content:\s*"Hide"/);
   assert.match(css, /\.assistant-output-details\[open\][\s\S]*?content:\s*"Hide"/);
   assert.match(client, /assistant-output-details/);
   assert.doesNotMatch(client, /scrollIntoView/);
   assert.match(client, /thread\.scrollTo/);
   assert.match(css, /\.assistant-composer textarea \{ font-size: 16px/);
+});
+
+test("chat exports real betslip images and avoids false risk ratings without prices", async () => {
+  const [client, image] = await Promise.all([read("app/assistant/assistant-client.tsx"), read("app/assistant/betslip-image.ts")]);
+  assert.match(client, /risk: "LOW" \| "MEDIUM" \| "HIGH" \| "UNKNOWN"/);
+  assert.match(client, /NOT ENOUGH DATA/);
+  assert.match(client, /Save betslip/);
+  assert.match(client, /slice\(0, 3\)/);
+  assert.match(image, /canvas\.toBlob/);
+  assert.match(image, /navigator\.share/);
+  assert.match(image, /Check the final bookmaker slip/);
+});
+
+test("Railway applies security headers and rate limits account entry points", async () => {
+  const server = await read("scripts/railway-server.mjs");
+  for (const header of ["strict-transport-security", "x-content-type-options", "x-frame-options", "referrer-policy", "permissions-policy", "content-security-policy"]) assert.match(server, new RegExp(header));
+  assert.match(server, /consumeRateLimit/);
+  assert.match(server, /Too many attempts/);
+  assert.match(server, /HttpOnly; SameSite=Lax/);
 });
 
 test("minimal account and code results stay consistent on mobile", async () => {

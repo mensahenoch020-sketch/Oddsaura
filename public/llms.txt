@@ -1,0 +1,7 @@
+# OddsAura
+
+OddsAura is a football prediction and bookmaker-code utility at https://oddsaura.site.
+
+Primary public page: https://oddsaura.site/
+
+OddsAura provides probability-led football picks, booking-code creation and supported bookmaker-code conversion. Predictions are not guarantees. Users should verify every final bookmaker slip and must be 18 or older.
