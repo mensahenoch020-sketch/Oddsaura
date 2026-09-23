@@ -11,6 +11,7 @@ import { includedPicks, resolvedTotal, targetReached } from "./code-summary";
 import { plainPickExplanation, unmetTargetMessage } from "./plain-language";
 import { leagueMatches, type LeagueFilter } from "../leagues";
 import { applyConversationReference, resolveAssistantTurn, type PendingIntent } from "./conversation";
+import { saveBetslipImage } from "./betslip-image";
 import "./assistant.css";
 import "../converter/converter.css";
 import "../converter/home-converter.css";
@@ -48,7 +49,7 @@ type AssistantOutput =
   | { kind: "best"; picks: SelectionSummary[] }
   | { kind: "daily"; tickets: DailyTicketSummary[]; watchlist: SelectionSummary[] }
   | { kind: "results"; tickets: ResultSummary[]; won: number; lost: number; pending: number }
-  | { kind: "analysis"; selections: SelectionSummary[]; totalOdds: number | null; risk: "LOW" | "MEDIUM" | "HIGH"; warning?: string }
+  | { kind: "analysis"; selections: SelectionSummary[]; totalOdds: number | null; risk: "LOW" | "MEDIUM" | "HIGH" | "UNKNOWN"; warning?: string }
   | { kind: "explanation"; selected: SelectionSummary; alternatives: SelectionSummary[] };
 type Message = { id: number; role: "user" | "assistant"; text: string; output?: AssistantOutput };
 const providerName = (provider: ProviderId) => providerAdapters.find((item) => item.id === provider)?.label ?? provider;
@@ -407,10 +408,14 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
     }
     const quoted = selections.map(item => item.odds).filter((value): value is number => value != null && value > 1);
     const totalOdds = quoted.length === selections.length ? quoted.reduce((total, price) => total * price, 1) : null;
-    const risk: "LOW" | "MEDIUM" | "HIGH" = selections.length >= 8 || (totalOdds ?? 0) >= 20 ? "HIGH" : selections.length >= 4 || (totalOdds ?? 0) >= 5 ? "MEDIUM" : "LOW";
+    const supported = selections.filter(item => item.probability != null || item.confidence != null);
+    const risk: "LOW" | "MEDIUM" | "HIGH" | "UNKNOWN" = !totalOdds && !supported.length ? "UNKNOWN" : selections.length >= 8 || (totalOdds ?? 0) >= 20 ? "HIGH" : selections.length >= 4 || (totalOdds ?? 0) >= 5 ? "MEDIUM" : "LOW";
     const unsupported = selections.filter(item => item.probability == null).length;
-    const warning = unsupported ? `${unsupported} selection${unsupported === 1 ? " does" : "s do"} not have enough verified information for a detailed assessment.` : undefined;
-    addMessage("assistant", `This is a ${risk.toLowerCase()}-risk slip with ${selections.length} selection${selections.length === 1 ? "" : "s"}${totalOdds ? ` at ${formatOdds(totalOdds)} combined odds` : ""}. I only used information OddsAura could verify.`, { kind: "analysis", selections, totalOdds, risk, warning });
+    const warning = unsupported ? `${unsupported} selection${unsupported === 1 ? " is" : "s are"} readable, but ${unsupported === 1 ? "it has" : "they have"} no verified price or model rating yet.` : undefined;
+    const summary = risk === "UNKNOWN"
+      ? `I loaded ${selections.length} selection${selections.length === 1 ? "" : "s"}, but the bookmaker did not return enough pricing data for an honest risk rating.`
+      : `This slip rates ${risk.toLowerCase()} risk with ${selections.length} selection${selections.length === 1 ? "" : "s"}${totalOdds ? ` at ${formatOdds(totalOdds)} combined odds` : ""}.`;
+    addMessage("assistant", summary, { kind: "analysis", selections, totalOdds, risk, warning });
   }
 
   function executeExplanation(intent: Extract<AssistantIntent, { kind: "explain" }>) {
@@ -518,7 +523,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
       else if (intent.kind === "help") {
         addMessage("assistant", "I can build target odds, find safer or better-value picks, explain a match, analyse or split a booking code, convert codes between supported bookmakers, revise a slip and show tracked results. Try: “10 safe odds for SportyBet tomorrow” or “analyse SportyBet code 4V0XMZ”.");
       } else if (intent.kind === "limits") {
-        addMessage("assistant", "I can’t promise guaranteed wins. Correct scores, corners, cards, player bets and 1UP/2UP are not recommended until OddsAura has enough reliable evidence for them. I can use match result, double chance, draw-no-bet, BTTS, team goals and supported handicaps instead.");
+        addMessage("assistant", "I can’t guarantee a win, but I can build the safest supported option. Tell me the bookmaker and target odds.");
       } else if (intent.kind === "match") {
         const provider = intent.provider ?? conversation.current.provider ?? "sportybet";
         const home = normalizedWords(intent.homeTeam), away = normalizedWords(intent.awayTeam);
@@ -633,7 +638,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
     <ProductNavigation active={initialTool === "converter" ? "converter" : "home"} />
     <section className="assistant-shell">
       <header className="assistant-toolbar">
-        <span><i aria-hidden="true" /> Verified football data</span>
+        <span><i aria-hidden="true" /> Live data</span>
         <button type="button" onClick={startNewChat}>New chat</button>
       </header>
       <section className={`assistant-workspace ${messages.length ? "has-messages" : ""}`} aria-label="OddsAura betting assistant">
@@ -670,7 +675,13 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
 
 function OutputView({ output }: { output: AssistantOutput }) {
   const [copied, setCopied] = useState("");
+  const [saving, setSaving] = useState("");
   async function copy(value: string) { await navigator.clipboard.writeText(value); setCopied(value); window.setTimeout(() => setCopied(""), 1600); }
+  async function save(provider: string, code: string, totalOdds: number | null, selections: SelectionSummary[]) {
+    setSaving(code);
+    try { await saveBetslipImage({ provider, code, totalOdds, selections }); }
+    finally { setSaving(""); }
+  }
 
   if (output.kind === "best") return <details className="assistant-expandable"><summary><span>{output.picks.length} best selections</span><b>Show</b></summary><div className="assistant-picks">{output.picks.map((pick, index) => <div key={pick.id}><span>#{index + 1}</span><div><b>{pick.match}</b><small>{pick.market}: {pick.selection}</small></div><strong>{pick.odds?.toFixed(2) ?? "—"}</strong></div>)}</div></details>;
 
@@ -679,7 +690,7 @@ function OutputView({ output }: { output: AssistantOutput }) {
       <header><div><span>Ticket check</span><b>{ticket.title}</b></div><strong>{ticket.totalOdds == null ? "—" : formatOdds(ticket.totalOdds)}</strong></header>
       <small>{ticket.selections.length} picks · {ticket.status === "CODE_READY" ? "Verified code ready" : "Review required"}</small>
       <details className="assistant-output-details"><summary><span>{ticket.selections.length} selections</span><b>Show</b></summary>{ticket.selections.map((pick) => <SelectionRow key={pick.id} pick={pick} />)}</details>
-      {ticket.bookingCodes.map((item) => <div className="assistant-inline-code" key={`${ticket.id}-${item.provider}`}><span>{item.provider}</span><b>{item.code}</b><button type="button" onClick={() => void copy(item.code)}>{copied === item.code ? "Copied ✓" : "Copy"}</button></div>)}
+      {ticket.bookingCodes.map((item) => <div className="assistant-inline-code" key={`${ticket.id}-${item.provider}`}><span>{item.provider}</span><b>{item.code}</b><button type="button" onClick={() => void copy(item.code)}>{copied === item.code ? "Copied ✓" : "Copy"}</button><button type="button" onClick={() => void save(providerName(item.provider), item.code, ticket.totalOdds, ticket.selections)}>{saving === item.code ? "Preparing…" : "Save image"}</button></div>)}
       {ticket.warning ? <p className="assistant-warning">{ticket.warning}</p> : null}
     </section>)}
     {output.watchlist.length ? <details className="assistant-watchlist assistant-expandable"><summary><span>{output.watchlist.length} qualified selections</span><b>Show</b></summary><div>{output.watchlist.map((pick) => <SelectionRow key={pick.id} pick={pick} />)}</div></details> : null}
@@ -691,8 +702,9 @@ function OutputView({ output }: { output: AssistantOutput }) {
   </div>;
 
   if (output.kind === "analysis") return <section className="assistant-analysis">
-    <header><div><span>Slip assessment</span><b>{output.risk} RISK</b></div><strong>{output.totalOdds == null ? "Odds unavailable" : formatOdds(output.totalOdds)}</strong></header>
-    <div>{output.selections.map((pick) => <SelectionRow key={pick.id} pick={pick} detailed />)}</div>
+    <header><div><span>Slip assessment</span><b>{output.risk === "UNKNOWN" ? "NOT ENOUGH DATA" : `${output.risk} RISK`}</b></div><strong>{output.totalOdds == null ? `${output.selections.length} picks` : formatOdds(output.totalOdds)}</strong></header>
+    <div className="assistant-analysis-preview">{output.selections.slice(0, 3).map((pick) => <SelectionRow key={pick.id} pick={pick} detailed />)}</div>
+    {output.selections.length > 3 ? <details className="assistant-output-details"><summary><span>View all {output.selections.length} selections</span><b>Show</b></summary>{output.selections.slice(3).map((pick) => <SelectionRow key={pick.id} pick={pick} detailed />)}</details> : null}
     {output.warning ? <p className="assistant-warning">{output.warning}</p> : null}
   </section>;
 
@@ -704,7 +716,7 @@ function OutputView({ output }: { output: AssistantOutput }) {
 
   return <div className="assistant-code-grid">{output.cards.map((card, index) => <section className="assistant-code-card" key={`${card.provider}-${index}`}>
     <header><div><span>{providerName(card.provider)} {output.cards.length > 1 ? `code ${index + 1}` : "code"}</span>{card.code ? <strong>{card.code}</strong> : <strong className="unavailable">Not created</strong>}</div>{card.liveOdds ? <b>{formatOdds(card.liveOdds)}</b> : card.estimatedOdds ? <b>{formatOdds(card.estimatedOdds)}</b> : null}</header>
-    {card.code ? <div className="assistant-code-actions"><button type="button" onClick={() => void copy(card.code!)}>{copied === card.code ? "Copied ✓" : "Copy code"}</button>{card.deepLink ? <a href={card.deepLink} target="_blank" rel="noreferrer">Open {providerName(card.provider)} ↗</a> : null}</div> : card.deepLink ? <a className="assistant-open-manual" href={card.deepLink} target="_blank" rel="noreferrer">Open {providerName(card.provider)} ↗</a> : null}
+    {card.code ? <div className="assistant-code-actions"><button type="button" onClick={() => void copy(card.code!)}>{copied === card.code ? "Copied ✓" : "Copy code"}</button><button type="button" onClick={() => void save(providerName(card.provider), card.code!, card.liveOdds ?? card.estimatedOdds ?? null, card.selections)}>{saving === card.code ? "Preparing…" : "Save betslip"}</button>{card.deepLink ? <a href={card.deepLink} target="_blank" rel="noreferrer">Open {providerName(card.provider)} ↗</a> : null}</div> : card.deepLink ? <a className="assistant-open-manual" href={card.deepLink} target="_blank" rel="noreferrer">Open {providerName(card.provider)} ↗</a> : null}
     <details className="assistant-output-details"><summary><span>{card.selections.length} {card.code ? "included" : "proposed"} {card.selections.length === 1 ? "selection" : "selections"}</span><b>Show</b></summary>{card.selections.map((pick) => <SelectionRow key={pick.id} pick={pick} />)}</details>
     {card.unmatched?.length ? <details className="assistant-unmatched assistant-output-details"><summary><span>{card.unmatched.length} not included</span><b>Show</b></summary>{card.unmatched.map((row, rowIndex) => <p key={`${row.homeTeam}-${rowIndex}`}><b>{row.homeTeam} vs {row.awayTeam}</b><span>{row.reason}</span></p>)}</details> : null}
     {card.warning ? <p className="assistant-warning">{card.warning}</p> : null}

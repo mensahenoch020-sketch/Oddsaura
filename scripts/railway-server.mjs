@@ -31,7 +31,15 @@ function normalizeEmail(value) { const email = String(value || "").trim().toLowe
 function validPassword(value) { const password = String(value || ""); return password.length >= 8 && password.length <= 128 ? password : null; }
 function parseCookies(header = "") { return Object.fromEntries(header.split(";").map((part) => part.trim().split("=")).filter(([key]) => key).map(([key, ...rest]) => [key, decodeURIComponent(rest.join("="))])); }
 function setCookie(value, maxAge) { return `${cookieName}=${encodeURIComponent(value)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}; Secure`; }
-function json(res, status, payload, headers = {}) { const body = JSON.stringify(payload); res.writeHead(status, { "content-type": "application/json; charset=utf-8", "content-length": Buffer.byteLength(body), "cache-control": "no-store", ...headers }); res.end(body); }
+const securityHeaders = {
+  "strict-transport-security": "max-age=31536000; includeSubDomains",
+  "x-content-type-options": "nosniff",
+  "x-frame-options": "DENY",
+  "referrer-policy": "strict-origin-when-cross-origin",
+  "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=()",
+  "content-security-policy": "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self' https:; font-src 'self' data:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
+};
+function json(res, status, payload, headers = {}) { const body = JSON.stringify(payload); res.writeHead(status, { ...securityHeaders, "content-type": "application/json; charset=utf-8", "content-length": Buffer.byteLength(body), "cache-control": "no-store", ...headers }); res.end(body); }
 async function readJson(req) { const chunks = []; let size = 0; for await (const chunk of req) { size += chunk.length; if (size > 100_000) throw new Error("Request is too large."); chunks.push(chunk); } try { return JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}"); } catch { return {}; } }
 
 async function ensureTables() {
@@ -66,6 +74,11 @@ async function authApi(req, res, url) {
   if (!pool) return json(res, 503, { error: "Account storage is not configured yet." });
   const body = req.method === "POST" || req.method === "PATCH" ? await readJson(req) : {};
   const now = Date.now();
+  if (req.method === "POST" && ["/api/auth/login", "/api/auth/signup", "/api/auth/forgot-password", "/api/auth/reset-password"].includes(url.pathname)) {
+    const emailKey = normalizeEmail(body.email) || "anonymous";
+    const quota = await consumeRateLimit(req, `auth:${url.pathname}:${emailKey}`, 15 * 60_000, url.pathname === "/api/auth/login" ? 10 : 5);
+    if (!quota.allowed) return json(res, 429, { error: "Too many attempts. Please wait a few minutes and try again." }, { "retry-after": String(quota.retryAfter) });
+  }
   if (url.pathname === "/api/auth/signup" && req.method === "POST") {
     const email = normalizeEmail(body.email); const password = validPassword(body.password); const name = String(body.name || "").trim().slice(0, 60);
     if (!email || !password || name.length < 2 || body.password !== body.confirmPassword || body.acceptedTerms !== true) return json(res, 400, { error: "Enter a valid name, email and matching password, then accept the terms." });
@@ -118,6 +131,15 @@ function publicClientKey(req) {
   const address = forwarded || String(req.headers["x-real-ip"] || req.socket.remoteAddress || "unknown");
   const agent = String(req.headers["user-agent"] || "unknown").slice(0, 180);
   return createHash("sha256").update(`${address}|${agent}`).digest("hex");
+}
+
+async function consumeRateLimit(req, scope, windowMs, limit) {
+  const windowStart = Math.floor(Date.now() / windowMs) * windowMs;
+  const clientKey = createHash("sha256").update(`${scope}|${publicClientKey(req)}`).digest("hex");
+  const result = await pool.query(`INSERT INTO oa_public_rate_limits(client_key,window_start,request_count) VALUES($1,$2,1)
+    ON CONFLICT(client_key,window_start) DO UPDATE SET request_count=oa_public_rate_limits.request_count+1
+    WHERE oa_public_rate_limits.request_count<$3 RETURNING request_count`, [clientKey, windowStart, limit]);
+  return { allowed: result.rowCount > 0, retryAfter: Math.max(1, Math.ceil((windowStart + windowMs - Date.now()) / 1000)) };
 }
 
 async function consumePublicConversion(req) {
@@ -360,7 +382,7 @@ function proxy(req, res, user) {
   const headers = { ...req.headers, host: `127.0.0.1:${appPort}` };
   for (const name of Object.keys(headers)) if (name.startsWith("x-oddsaura-")) delete headers[name];
   if (user) { headers["x-oddsaura-user-email"] = user.email; headers["x-oddsaura-user-name"] = user.name; headers["x-oddsaura-user-role"] = user.role; }
-  const upstream = httpRequest({ hostname: "127.0.0.1", port: appPort, path: req.url, method: req.method, headers }, (upstreamResponse) => { res.writeHead(upstreamResponse.statusCode || 502, upstreamResponse.headers); upstreamResponse.pipe(res); });
+  const upstream = httpRequest({ hostname: "127.0.0.1", port: appPort, path: req.url, method: req.method, headers }, (upstreamResponse) => { res.writeHead(upstreamResponse.statusCode || 502, { ...upstreamResponse.headers, ...securityHeaders }); upstreamResponse.pipe(res); });
   upstream.on("error", () => json(res, 502, { error: "OddsAura is starting. Please retry shortly." }));
   req.pipe(upstream);
 }
@@ -386,7 +408,7 @@ async function proxyEdge(req, res) {
   const location = response.headers.get("location");
   if (location) responseHeaders.location = location.startsWith(edgeOrigin) ? `https://${req.headers.host}${location.slice(edgeOrigin.length)}` : location;
   responseHeaders["content-length"] = String(body.length);
-  res.writeHead(response.status, responseHeaders);
+  res.writeHead(response.status, { ...responseHeaders, ...securityHeaders });
   res.end(body);
 }
 
