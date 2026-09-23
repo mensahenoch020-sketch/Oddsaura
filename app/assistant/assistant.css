@@ -548,16 +548,16 @@
   .assistant-bubble > p { font-size: .84rem; }
   .assistant-message.user .assistant-bubble { max-width: calc(100vw - 68px); }
   .assistant-composer-dock {
-    position: fixed;
-    left: 11px;
-    right: 11px;
-    bottom: calc(62px + env(safe-area-inset-bottom));
-    z-index: 90;
+    position: relative;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    z-index: 15;
     padding: 8px 0 7px;
-    background: linear-gradient(180deg, rgba(9, 12, 15, 0), var(--chat-bg) 18%);
+    background: var(--chat-bg);
   }
   .assistant-composer { padding: 6px 6px 6px 13px; border-radius: 16px; }
-  .assistant-composer textarea { font-size: 16px; min-height: 42px; max-height: 88px; padding-top: 10px; }
+  .assistant-composer textarea { height: 42px; min-height: 42px; max-height: 42px; overflow-y: auto; font-size: 16px; padding-top: 10px; }
   .assistant-composer button { width: 42px; height: 42px; border-radius: 11px; }
   .assistant-composer-dock > p { font-size: .58rem; margin-top: 6px; }
   .assistant-code-grid:has(.assistant-code-card:nth-child(2)) { grid-template-columns: 1fr; }
