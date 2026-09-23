@@ -91,6 +91,17 @@ test("understands league-only prediction requests from normal user language", ()
   assert.deepEqual(intent.leagueFilters, ["PREMIER_LEAGUE", "LA_LIGA"]);
 });
 
+test("separates fixture lists from prediction requests and recognizes more competitions", () => {
+  const fixtures = interpretAssistantRequest("List Premier League, Seria A and International Friendlies tomorrow", lagosReference);
+  assert.equal(fixtures.kind, "fixtures");
+  assert.deepEqual(fixtures.leagueFilters, ["PREMIER_LEAGUE", "SERIE_A", "INTERNATIONAL_FRIENDLY"]);
+  assert.equal(fixtures.dateWindow.kind, "TOMORROW");
+
+  const predictions = interpretAssistantRequest("Give me Champions League and Serie A predictions");
+  assert.equal(predictions.kind, "best");
+  assert.deepEqual(predictions.leagueFilters, ["SERIE_A", "CHAMPIONS_LEAGUE"]);
+});
+
 test("combines multiple requested market families", () => {
   const intent = interpretAssistantRequest("Build 8 odds using only double chance and draw-no-bet for SportyBet");
   assert.equal(intent.kind, "build");
@@ -105,9 +116,14 @@ test("recognizes conversational slip revision requests", () => {
   assert.deepEqual(interpretAssistantRequest("Which is the safest pick?").action, "safest");
 });
 
+test("recognizes confirmation follow-ups after partial conversions", () => {
+  assert.equal(interpretAssistantRequest("Send it like that").kind, "confirm");
+  assert.equal(interpretAssistantRequest("Continue with the available matches").kind, "confirm");
+});
+
 test("extracts Lagos calendar days and filters date numbers out of target odds", () => {
   const today = interpretAssistantRequest("Give me matches for today", lagosReference);
-  assert.equal(today.kind, "daily");
+  assert.equal(today.kind, "fixtures");
   assert.equal(today.dateWindow.label, "today");
   assert.equal(today.dateWindow.start, "2026-09-11T23:00:00.000Z");
   assert.equal(today.dateWindow.end, "2026-09-12T23:00:00.000Z");
@@ -126,7 +142,7 @@ test("extracts Lagos calendar days and filters date numbers out of target odds",
 
 test("recognizes tomorrow, weekends, future windows and dated results", () => {
   const tomorrow = interpretAssistantRequest("Show tomorrow matches", lagosReference);
-  assert.equal(tomorrow.kind, "daily");
+  assert.equal(tomorrow.kind, "fixtures");
   assert.equal(tomorrow.dateWindow.kind, "TOMORROW");
 
   const weekend = interpretAssistantRequest("best bets this weekend", lagosReference);
@@ -134,7 +150,7 @@ test("recognizes tomorrow, weekends, future windows and dated results", () => {
   assert.equal(weekend.dateWindow.kind, "WEEKEND");
 
   const future = interpretAssistantRequest("show upcoming games", lagosReference);
-  assert.equal(future.kind, "daily");
+  assert.equal(future.kind, "fixtures");
   assert.equal(future.dateWindow.kind, "NEXT_DAYS");
 
   const results = interpretAssistantRequest("show yesterday results", lagosReference);

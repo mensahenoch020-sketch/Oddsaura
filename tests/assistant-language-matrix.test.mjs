@@ -21,7 +21,7 @@ const matrix = [
   ["Best pawa picks this weekend", "best"],
   ["Give me Premier League and La Liga predictions only", "best"],
   ["Show today's picks", "daily"],
-  ["What matches are available tomorrow?", "daily"],
+  ["What matches are available tomorrow?", "fixtures"],
   ["Show yesterday's results", "results"],
   ["Did our last tickets win?", "results"],
   ["4V0XMZ split this SportyBet code into 3", "split"],

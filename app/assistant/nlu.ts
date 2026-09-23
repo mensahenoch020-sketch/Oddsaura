@@ -30,6 +30,8 @@ export type AssistantIntent =
   | { kind: "limits"; confidence: number; subject: string }
   | { kind: "best"; confidence: number; provider: ProviderId | null; strategy: RecommendationStrategy } & RequestContext
   | { kind: "daily"; confidence: number; provider: ProviderId | null; strategy: RecommendationStrategy } & RequestContext
+  | { kind: "fixtures"; confidence: number; provider: ProviderId | null } & RequestContext
+  | { kind: "confirm"; confidence: number }
   | { kind: "results"; confidence: number } & RequestContext
   | { kind: "unknown"; confidence: number };
 
@@ -328,13 +330,21 @@ export function requestedLeagueFilters(input: string): LeagueFilter[] | undefine
   const aliases: Array<[LeagueFilter, RegExp]> = [
     ["PREMIER_LEAGUE", /\b(?:premier league|epl|english premier)\b/],
     ["LA_LIGA", /\b(?:la liga|laliga|spanish primera)\b/],
-    ["SERIE_A", /\b(?:serie a|italian league)\b/],
+    ["SERIE_A", /\b(?:serie a|seria a|italian league)\b/],
     ["BUNDESLIGA", /\b(?:bundesliga|german league)\b/],
     ["LIGUE_1", /\b(?:ligue 1|french league)\b/],
     ["EREDIVISIE", /\b(?:eredivisie|dutch league)\b/],
     ["SAUDI_PRO", /\b(?:saudi pro|saudi league|roshan league)\b/],
     ["PORTUGAL", /\b(?:primeira liga|portugal league|portuguese league)\b/],
     ["TURKIYE", /\b(?:super lig|turkiye league|turkish league)\b/],
+    ["CHAMPIONS_LEAGUE", /\b(?:uefa champions league|champions league|ucl)\b/],
+    ["EUROPA_LEAGUE", /\b(?:uefa europa league|europa league|uel)\b/],
+    ["CONFERENCE_LEAGUE", /\b(?:uefa conference league|conference league|uecl)\b/],
+    ["MLS", /\b(?:major league soccer|mls|american soccer league)\b/],
+    ["INTERNATIONAL_FRIENDLY", /\b(?:international friendl(?:y|ies)|friendly internationals?|national team friendl(?:y|ies))\b/],
+    ["CLUB_FRIENDLY", /\b(?:club friendl(?:y|ies)|friendly clubs?)\b/],
+    ["WORLD_CUP", /\b(?:fifa world cup|world cup(?: qualifiers?| qualification)?)\b/],
+    ["AFCON", /\b(?:africa cup of nations|afcon)\b/],
   ];
   const filters = aliases.filter(([, matcher]) => matcher.test(text)).map(([id]) => id);
   return filters.length ? filters : undefined;
@@ -388,9 +398,13 @@ export function interpretAssistantRequest(input: string, referenceTime = Date.no
   const hasAnalysisLanguage = /\b(analy[sz]e|assess|review|rate|risky|opinion)\b|\bwhat do you think\b|\bhow (?:good|safe|strong)\b/.test(text);
   const hasExplanationLanguage = /\bwhy\b|\bexplain\b|\breason\b|\bhow come\b|\bwhat made you\b|what (?:could|can|might) make .{0,40}(?:lose|fail)|how (?:could|can|might) .{0,40}(?:lose|fail)|can (?:this|that|the) .{0,24}(?:lose|fail)/.test(text);
   const hasBuildLanguage = /\b(odds?|bet|slip|ticket|games?|matches?|booking|picks?|predictions?)\b/.test(text);
+  const hasFixtureListLanguage = /\b(?:list|show|display|give me|what|which|find|see)\b.*\b(?:fixtures?|matches?|games?|schedule|playing)\b|\b(?:fixtures?|matches?|games?|schedule)\b.*\b(?:today|tomorrow|weekend|upcoming|next|in the)\b/.test(text);
+  const requestsPrediction = /\b(?:predictions?|picks?|best|safe|safest|value|strongest|protected|odds?|bet|slip|ticket)\b/.test(text);
 
   if (/\b(?:guaranteed|guarantee|sure win|cannot lose|100 percent)\b|\b(?:correct score|corners?|cards?|player bets?|goalscorer|1up|2up)\b/.test(text)) return { kind: "limits", confidence: 1, subject: input.trim() };
   if (/^(?:hi|hello|hey|good morning|good afternoon|good evening)\b/.test(text) || /\b(?:what can you do|how can you help|help me|show me how|what should i ask)\b/.test(text)) return { kind: "help", confidence: 1 };
+  if (/^(?:yes|okay|ok|continue|proceed|do it|send it|send it like that|use the available|keep the available|go ahead)(?: please)?$/.test(text)
+    || /\b(?:continue|proceed|create|send|keep|use)\b.*\b(?:available|remaining|matched)\b/.test(text)) return { kind: "confirm", confidence: 1 };
 
   // Explicit verbs win over weak inferences. Previously any code plus a
   // bookmaker was treated as conversion, so "split this Sporty code" could
@@ -415,10 +429,13 @@ export function interpretAssistantRequest(input: string, referenceTime = Date.no
   if (/\b(results?|settled|won|lost|performance|hit rate)\b/.test(text)) return { kind: "results", confidence: 1, ...context };
   const explicitTarget = extractTarget(text, null);
   if (explicitTarget && /\bodds?\b/.test(text)) return { kind: "build", confidence: 1, targetOdds: explicitTarget, provider: providers[0]?.id ?? null, ...context };
-  if (scores.best >= .58 || /\b(best|safe|safest|protected|strongest|strong|reliable|top|low risk|lower risk)\b/.test(text) || Boolean(context.marketKeys?.length && !extractTarget(text, null) && /\b(picks?|predictions?|options?|selections?)\b/.test(text)) || Boolean(leagueFilters?.length && /\b(picks?|predictions?|matches?|games?)\b/.test(text))) {
+  if ((hasFixtureListLanguage || Boolean(leagueFilters?.length && /\b(?:list|show|display|give me|find|see)\b/.test(text))) && !requestsPrediction) {
+    return { kind: "fixtures", confidence: 1, provider: providers[0]?.id ?? null, ...context };
+  }
+  if (scores.best >= .58 || /\b(best|safe|safest|protected|strongest|strong|reliable|top|low risk|lower risk)\b/.test(text) || Boolean(context.marketKeys?.length && !extractTarget(text, null) && /\b(picks?|predictions?|options?|selections?)\b/.test(text)) || Boolean(leagueFilters?.length && /\b(picks?|predictions?)\b/.test(text))) {
     return { kind: "best", confidence: Math.min(1, scores.best + .18), provider: providers[0]?.id ?? null, strategy, ...context };
   }
-  if (scores.daily >= .6 || /\bdaily\b|\btoday.?s?(?:\s+[a-z]+){0,2}\s+(?:odds|tickets|slips)\b|\bready made (?:tickets|slips)\b/.test(text) || Boolean(dateWindow && /\b(?:matches|games|odds|picks|predictions)\b/.test(text) && !extractTarget(text, parts))) {
+  if (scores.daily >= .6 || /\bdaily\b|\btoday.?s?(?:\s+[a-z]+){0,2}\s+(?:odds|tickets|slips)\b|\bready made (?:tickets|slips)\b/.test(text) || Boolean(dateWindow && /\b(?:odds|picks|predictions)\b/.test(text) && !extractTarget(text, parts))) {
     return { kind: "daily", confidence: Math.min(1, scores.daily + .18), provider: providers[0]?.id ?? null, strategy, ...context };
   }
   if (scores.results >= .58 || /\b(results?|settled|won|lost|performance|hit rate)\b/.test(text)) {
