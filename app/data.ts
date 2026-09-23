@@ -55,7 +55,8 @@ export type PredictedPick = Omit<TicketSelection, "odds"> & {
 };
 export type Ticket = { id: string; title: string; category: string; status: string; totalOdds: number; confidence: number; oddsProvider?: string | null; estimatedWinChance?: number; breakEvenChance?: number; strategyVersion?: string; paper?: boolean; priceStatus?: "QUOTED" | "MODEL_ESTIMATE"; publishedAt?: string; settledAt?: string | null; wonLegs?: number; lostLegs?: number; voidLegs?: number; bookingCodes: Array<{ provider: string; code: string; deepLink?: string }>; selections: TicketSelection[] };
 export type PaperTrial = TicketSelection & { predictedAt: string; settledAt: string | null; trialTier?: "OBSERVATION" };
-export type PaperMetrics = { recorded: number; settled: number; won: number; lost: number; hitRate: number | null; flatStakeRoi: number | null };
+export type MetricInterval = { low: number; high: number } | null;
+export type PaperMetrics = { recorded: number; settled: number; won: number; lost: number; hitRate: number | null; hitRate95?: MetricInterval; flatStakeRoi: number | null; flatStakeRoi95?: MetricInterval };
 export type Snapshot = {
   version: number;
   generatedAt: string | null;

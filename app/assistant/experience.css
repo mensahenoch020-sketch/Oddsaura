@@ -107,11 +107,12 @@
 .assistant-inline-code{grid-template-columns:auto minmax(0,1fr) auto auto}.assistant-inline-code button:last-child{background:var(--experience-coral);color:#fff}
 .assistant-analysis>header{background:#f5f6f8}.assistant-analysis>header strong{color:var(--experience-navy)}.assistant-analysis-preview>.assistant-selection:last-child{border-bottom:1px solid #e3e8e3}
 @media(max-width:760px){
-  .assistant-shell{height:calc(100dvh - 66px - env(safe-area-inset-bottom))!important}
+  .assistant-shell{height:calc(100dvh - 66px - 65px - env(safe-area-inset-bottom))!important}
   .assistant-toolbar{height:48px;padding:0 16px}.assistant-toolbar>span{font-size:.64rem}.assistant-toolbar button{font-size:.68rem;padding:7px 11px}
-  .assistant-workspace{display:flex;min-height:0;border-radius:18px 18px 0 0}.assistant-thread{padding:14px 12px 12px;scroll-padding-bottom:12px;gap:12px}
-  .assistant-composer-dock{position:relative;left:auto;right:auto;bottom:auto;z-index:15;padding:9px 12px calc(9px + env(safe-area-inset-bottom));background:#f2f4f7!important;border-top:1px solid #dce1e8}
+  .assistant-workspace{display:grid;grid-template-rows:minmax(0,1fr) auto;min-height:0;border-radius:18px 18px 0 0;overflow:hidden}.assistant-thread{width:100%;height:100%;padding:14px 12px;scroll-padding-bottom:12px;gap:12px;overflow-y:auto}
+  .assistant-composer-dock{position:relative;left:auto;right:auto;bottom:auto;z-index:15;width:100%;padding:9px 12px 10px;background:#f2f4f7!important;border-top:1px solid #dce1e8}
   .assistant-composer{box-shadow:0 8px 25px rgba(11,23,48,.1)}
+  .assistant-composer textarea{height:42px;min-height:42px;max-height:42px;overflow-y:auto}
   .assistant-app>.product-mobile-nav{background:var(--experience-navy)!important}.assistant-app>.product-mobile-nav a{color:#8d99ae!important}.assistant-app>.product-mobile-nav a.active{color:#fff!important}.assistant-app>.product-mobile-nav a.active .product-nav-icon:after{background:var(--experience-coral)!important}
   .assistant-inline-code{grid-template-columns:1fr auto}.assistant-inline-code span{grid-column:1/-1}.assistant-inline-code button:last-child{grid-column:1/-1}
   .assistant-code-actions>*{flex:1 1 calc(50% - 4px);text-align:center}.assistant-code-actions a{flex-basis:100%}

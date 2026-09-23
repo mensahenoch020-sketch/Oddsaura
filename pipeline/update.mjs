@@ -8,6 +8,7 @@ import { buildTicket } from "./lib/tickets.mjs";
 import { resultForSelection, settleSelection, trackTicket } from "./lib/settlement.mjs";
 import { canonicalEventIdentity, normalizeEventIdentity } from "./lib/identity.mjs";
 import { historyEvidence } from "./lib/history-coverage.mjs";
+import { bootstrapMeanInterval, wilsonInterval } from "./lib/statistics.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const output = resolve(root, "data/public/snapshot.json");
@@ -462,13 +463,17 @@ const settledPaperTrials = paperTrials.filter((trial) => ["WON", "LOST", "VOID"]
 const wonPaperTrials = settledPaperTrials.filter((trial) => trial.result === "WON");
 const decidedPaperTrials = settledPaperTrials.filter((trial) => trial.result !== "VOID");
 const paperProfit = decidedPaperTrials.reduce((sum, trial) => sum + (trial.result === "WON" ? trial.odds - 1 : -1), 0);
+const paperReturns = decidedPaperTrials.map((trial) => trial.result === "WON" ? trial.odds - 1 : -1);
+const paperHitRate = decidedPaperTrials.length ? wonPaperTrials.length / decidedPaperTrials.length : null;
 const paperMetrics = {
   recorded: paperTrials.length,
   settled: settledPaperTrials.length,
   won: wonPaperTrials.length,
   lost: decidedPaperTrials.length - wonPaperTrials.length,
-  hitRate: decidedPaperTrials.length ? wonPaperTrials.length / decidedPaperTrials.length : null,
+  hitRate: paperHitRate,
+  hitRate95: wilsonInterval(wonPaperTrials.length, decidedPaperTrials.length),
   flatStakeRoi: decidedPaperTrials.length ? paperProfit / decidedPaperTrials.length : null,
+  flatStakeRoi95: bootstrapMeanInterval(paperReturns),
 };
 
 const ticketArchive = new Map();

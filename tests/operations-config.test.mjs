@@ -69,13 +69,27 @@ test("mobile assistant fixes the composer while only the message thread scrolls"
   const [css, experience, client] = await Promise.all([read("app/assistant/assistant.css"), read("app/assistant/experience.css"), read("app/assistant/assistant-client.tsx")]);
   assert.match(css, /\.assistant-thread[\s\S]*?overflow-y:\s*auto/);
   assert.match(experience, /\.assistant-composer-dock\{position:relative/);
+  assert.match(experience, /grid-template-rows:minmax\(0,1fr\) auto/);
+  assert.match(experience, /height:calc\(100dvh - 66px - 65px - env\(safe-area-inset-bottom\)\)/);
   assert.match(experience, /scroll-padding-bottom:12px/);
   assert.match(css, /\.assistant-expandable\[open\][\s\S]*?content:\s*"Hide"/);
   assert.match(css, /\.assistant-output-details\[open\][\s\S]*?content:\s*"Hide"/);
   assert.match(client, /assistant-output-details/);
   assert.doesNotMatch(client, /scrollIntoView/);
   assert.match(client, /thread\.scrollTo/);
-  assert.match(css, /\.assistant-composer textarea \{ font-size: 16px/);
+  assert.match(css, /\.assistant-composer textarea \{ height: 42px; min-height: 42px; max-height: 42px; overflow-y: auto; font-size: 16px/);
+});
+
+test("model evidence reports uncertainty, coverage and a calibration-excluded holdout", async () => {
+  const [backtest, statistics, pipeline, admin] = await Promise.all([read("pipeline/lib/backtest.mjs"), read("pipeline/lib/statistics.mjs"), read("pipeline/update.mjs"), read("app/admin/page.tsx")]);
+  assert.match(backtest, /rankedProbabilityScore/);
+  assert.match(backtest, /excluded from generated calibration and market-blend parameters/);
+  assert.match(backtest, /parameterCalibrationRows/);
+  assert.match(backtest, /abstainedMatches/);
+  assert.match(statistics, /wilsonInterval/);
+  assert.match(statistics, /bootstrapMeanInterval/);
+  assert.match(pipeline, /flatStakeRoi95/);
+  assert.match(admin, /Ranked probability score/);
 });
 
 test("chat exports real betslip images and avoids false risk ratings without prices", async () => {

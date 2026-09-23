@@ -15,4 +15,9 @@ test("expanded report counts settled examples and excludes DNB voids", () => {
   assert.ok(report.markets.every(r => r.selected <= r.matches));
   assert.equal(report.pricingAudit.probabilityModels[0].matches, 4);
   assert.match(report.pricingAudit.conclusion, /primary probability baseline/);
+  assert.ok(Number.isFinite(report.rankedProbabilityScore));
+  assert.equal(report.coverage.evaluatedMatches, report.matches);
+  assert.equal(report.holdout.matches, 1);
+  assert.match(report.holdout.methodology, /excluded from generated calibration/);
+  assert.ok(report.uncertainty.oneXTwoAccuracy95.low <= report.oneXTwoAccuracy);
 });
