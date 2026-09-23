@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import Brand from "./brand";
+import LegalFooter from "./legal-footer";
 
 const prompts = [
   { icon: "✓", text: "Best protection for today" },
@@ -59,5 +60,6 @@ export default function PublicAssistant() {
       </section>
     </div>
     <p className="landing-supported" aria-label="Supported bookmakers"><span>SportyBet</span><span>Bet9ja</span><span>betPawa</span><span>BetKing</span><span>Betway</span></p>
+    <LegalFooter className="landing-legal" />
   </main>;
 }
