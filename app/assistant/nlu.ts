@@ -255,9 +255,11 @@ export function extractDateWindow(input: string, referenceTime = Date.now()): Da
     const monthName = dayMonth?.[2] ?? monthDay?.[1] ?? "";
     const day = Number(dayMonth?.[1] ?? monthDay?.[2]);
     let year = Number(dayMonth?.[3] ?? monthDay?.[3] ?? today.year);
+    const explicitYear = Boolean(dayMonth?.[3] ?? monthDay?.[3]);
     const month = months.indexOf(monthName) + 1;
-    let window = calendarDateWindow(year, month, day, `${monthName} ${day}`);
-    if (window && !dayMonth?.[3] && !monthDay?.[3] && Date.parse(window.end) <= referenceTime) window = calendarDateWindow(++year, month, day, `${monthName} ${day}`);
+    const label = `${monthName} ${day}${explicitYear ? `, ${year}` : ""}`;
+    let window = calendarDateWindow(year, month, day, label);
+    if (window && !explicitYear && Date.parse(window.end) <= referenceTime) window = calendarDateWindow(++year, month, day, `${monthName} ${day}`);
     return window;
   }
   const namedMonthYear = text.match(new RegExp(`\\b(${months.join("|")})\\s+(20\\d{2})\\b`));

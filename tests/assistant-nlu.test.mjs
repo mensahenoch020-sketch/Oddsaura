@@ -119,6 +119,13 @@ test("keeps a named league and an explicit date together as hard filters", () =>
   assert.equal(intent.dateWindow.end, "2026-09-15T23:00:00.000Z");
 });
 
+test("keeps the year visible in explicitly dated match requests", () => {
+  const intent = interpretAssistantRequest("List Premier League matches on 14 September 2025", lagosReference);
+  assert.equal(intent.dateWindow.start, "2025-09-13T23:00:00.000Z");
+  assert.equal(intent.dateWindow.end, "2025-09-14T23:00:00.000Z");
+  assert.equal(intent.dateWindow.label, "september 14, 2025");
+});
+
 test("combines multiple requested market families", () => {
   const intent = interpretAssistantRequest("Build 8 odds using only double chance and draw-no-bet for SportyBet");
   assert.equal(intent.kind, "build");
