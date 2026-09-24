@@ -1,6 +1,6 @@
 {
   "version": "ensemble-calibrated-v3",
-  "generatedAt": "2026-09-24T00:56:20.465Z",
+  "generatedAt": "2026-09-24T07:03:25.285Z",
   "methodology": "Walk-forward Platt calibration with hierarchical league shrinkage and out-of-sample bookmaker-blend selection.",
   "calibrationRows": 49782,
   "priceRows": 298,
@@ -19,7 +19,7 @@
     "BTTS_NO": {
       "enabled": true,
       "samples": 1600,
-      "intercept": -0.09181648889795341,
+      "intercept": -0.09181648889795342,
       "slope": 0.5509343125878093,
       "validationBrierRaw": 0.24716752839897255,
       "validationBrierCalibrated": 0.24510335755905296,
@@ -41,7 +41,7 @@
     "OVER_2_5": {
       "enabled": true,
       "samples": 1600,
-      "intercept": 0.1003439640981285,
+      "intercept": 0.10034396409812849,
       "slope": 1.030951929851752,
       "validationBrierRaw": 0.24046930850114964,
       "validationBrierCalibrated": 0.2396616739371733,
@@ -52,8 +52,8 @@
     "UNDER_3_5": {
       "enabled": true,
       "samples": 1600,
-      "intercept": -0.023547368566264444,
-      "slope": 0.9257695565325381,
+      "intercept": -0.023547368566264545,
+      "slope": 0.9257695565325382,
       "validationBrierRaw": 0.21943196674884477,
       "validationBrierCalibrated": 0.21912949922040606,
       "validationLogLossRaw": 0.6304039290837676,
@@ -67,8 +67,8 @@
       "slope": 1.003632591970526,
       "validationBrierRaw": 0.21764361894813525,
       "validationBrierCalibrated": 0.21640378747393738,
-      "validationLogLossRaw": 0.627184056661602,
-      "validationLogLossCalibrated": 0.6242424572051763,
+      "validationLogLossRaw": 0.6271840566616022,
+      "validationLogLossCalibrated": 0.6242424572051766,
       "validationGain": 0.0012398314741978722
     },
     "DC_X2": {
@@ -96,34 +96,34 @@
     "DNB_HOME": {
       "enabled": true,
       "samples": 1222,
-      "intercept": -0.08799084300205416,
+      "intercept": -0.08799084300205419,
       "slope": 1.0145035652586114,
       "validationBrierRaw": 0.23585026296030706,
       "validationBrierCalibrated": 0.23543127426777427,
       "validationLogLossRaw": 0.6660936662175387,
-      "validationLogLossCalibrated": 0.665511059100392,
+      "validationLogLossCalibrated": 0.6655110591003919,
       "validationGain": 0.00041898869253279014
     },
     "DNB_AWAY": {
       "enabled": true,
       "samples": 1222,
-      "intercept": 0.08799084300205416,
+      "intercept": 0.08799084300205418,
       "slope": 1.0145035652586114,
       "validationBrierRaw": 0.23585026296030706,
       "validationBrierCalibrated": 0.23543127426777433,
       "validationLogLossRaw": 0.6660936662175386,
-      "validationLogLossCalibrated": 0.6655110591003919,
+      "validationLogLossCalibrated": 0.665511059100392,
       "validationGain": 0.00041898869253273463
     },
     "HOME_OVER_0_5": {
       "enabled": true,
       "samples": 1600,
-      "intercept": 0.19260489690503022,
-      "slope": 0.8920534626568516,
+      "intercept": 0.19260489690502997,
+      "slope": 0.8920534626568518,
       "validationBrierRaw": 0.16059128241682566,
       "validationBrierCalibrated": 0.16027247466648892,
       "validationLogLossRaw": 0.5001471890827548,
-      "validationLogLossCalibrated": 0.49954214261387747,
+      "validationLogLossCalibrated": 0.4995421426138774,
       "validationGain": 0.00031880775033674147
     },
     "HOME_OVER_1_5": {
@@ -134,7 +134,7 @@
       "validationBrierRaw": 0.2439421607525105,
       "validationBrierCalibrated": 0.24587294694474351,
       "validationLogLossRaw": 0.6807737002523078,
-      "validationLogLossCalibrated": 0.6851548015726272,
+      "validationLogLossCalibrated": 0.685154801572627,
       "validationGain": -0.001930786192233025
     },
     "AWAY_OVER_0_5": {
@@ -143,10 +143,10 @@
       "intercept": 0,
       "slope": 1,
       "validationBrierRaw": 0.19022951162805296,
-      "validationBrierCalibrated": 0.19010924792386344,
+      "validationBrierCalibrated": 0.19010924792386347,
       "validationLogLossRaw": 0.5657471415262131,
       "validationLogLossCalibrated": 0.565614421975902,
-      "validationGain": 0.00012026370418952159
+      "validationGain": 0.00012026370418949384
     },
     "AWAY_OVER_1_5": {
       "enabled": false,
@@ -167,19 +167,19 @@
       "validationBrierRaw": 0.190229511628053,
       "validationBrierCalibrated": 0.19010924792386352,
       "validationLogLossRaw": 0.5657471415262134,
-      "validationLogLossCalibrated": 0.5656144219759022,
+      "validationLogLossCalibrated": 0.5656144219759023,
       "validationGain": 0.00012026370418946608
     },
     "AWAY_CLEAN": {
       "enabled": true,
       "samples": 1600,
-      "intercept": -0.19260489690503005,
-      "slope": 0.8920534626568517,
-      "validationBrierRaw": 0.1605912824168256,
-      "validationBrierCalibrated": 0.16027247466648897,
+      "intercept": -0.19260489690503024,
+      "slope": 0.8920534626568516,
+      "validationBrierRaw": 0.16059128241682566,
+      "validationBrierCalibrated": 0.16027247466648895,
       "validationLogLossRaw": 0.5001471890827549,
       "validationLogLossCalibrated": 0.49954214261387747,
-      "validationGain": 0.00031880775033663045
+      "validationGain": 0.0003188077503367137
     },
     "HOME_WIN_NIL": {
       "enabled": false,
@@ -195,8 +195,8 @@
     "AWAY_WIN_NIL": {
       "enabled": true,
       "samples": 1600,
-      "intercept": -0.06496516835974257,
-      "slope": 0.914061694508406,
+      "intercept": -0.06496516835974339,
+      "slope": 0.9140616945084056,
       "validationBrierRaw": 0.12871761548474228,
       "validationBrierCalibrated": 0.12850578686735548,
       "validationLogLossRaw": 0.42248901294150815,
@@ -206,7 +206,7 @@
     "ASIAN_HOME_P0_5": {
       "enabled": true,
       "samples": 1600,
-      "intercept": -0.11531426391034462,
+      "intercept": -0.11531426391034452,
       "slope": 1.0036325919705265,
       "validationBrierRaw": 0.21764361894813514,
       "validationBrierCalibrated": 0.21640378747393738,
@@ -222,7 +222,7 @@
       "validationBrierRaw": 0.23719435260824911,
       "validationBrierCalibrated": 0.2404454361719077,
       "validationLogLossRaw": 0.6664685554475873,
-      "validationLogLossCalibrated": 0.6732082542592692,
+      "validationLogLossCalibrated": 0.6732082542592691,
       "validationGain": -0.00325108356365858
     },
     "ASIAN_AWAY_P1": {
@@ -231,10 +231,10 @@
       "intercept": 0,
       "slope": 1,
       "validationBrierRaw": 0.19459704232912353,
-      "validationBrierCalibrated": 0.19880349211920492,
+      "validationBrierCalibrated": 0.1988034921192049,
       "validationLogLossRaw": 0.5761925719477008,
       "validationLogLossCalibrated": 0.5852092325356073,
-      "validationGain": -0.00420644979008139
+      "validationGain": -0.0042064497900813624
     },
     "ASIAN_HOME_P1_5": {
       "enabled": false,
@@ -253,10 +253,10 @@
       "intercept": 0,
       "slope": 1,
       "validationBrierRaw": 0.17304286480764242,
-      "validationBrierCalibrated": 0.17459447239061632,
+      "validationBrierCalibrated": 0.1745944723906163,
       "validationLogLossRaw": 0.5295162078736166,
       "validationLogLossCalibrated": 0.5333363646553932,
-      "validationGain": -0.0015516075829739018
+      "validationGain": -0.001551607582973874
     },
     "ASIAN_HOME_M0_5": {
       "enabled": false,
@@ -272,7 +272,7 @@
     "ASIAN_AWAY_M0_5": {
       "enabled": true,
       "samples": 1600,
-      "intercept": 0.11531426391034436,
+      "intercept": 0.11531426391034447,
       "slope": 1.0036325919705262,
       "validationBrierRaw": 0.2176436189481352,
       "validationBrierCalibrated": 0.21640378747393738,
@@ -340,11 +340,11 @@
       "samples": 1252,
       "intercept": 0,
       "slope": 1,
-      "validationBrierRaw": 0.23322007718903306,
+      "validationBrierRaw": 0.23322007718903315,
       "validationBrierCalibrated": 0.2339443729958885,
       "validationLogLossRaw": 0.6568861527034046,
       "validationLogLossCalibrated": 0.6576037722213944,
-      "validationGain": -0.0007242958068554295
+      "validationGain": -0.0007242958068553462
     },
     "ASIAN_HOME_P1": {
       "enabled": false,
@@ -11796,7 +11796,7 @@
       "validationBrierRaw": 0.2090821483232282,
       "validationBrierCalibrated": 0.2082916949606596,
       "validationLogLossRaw": 0.6070879448863844,
-      "validationLogLossCalibrated": 0.604325137624563,
+      "validationLogLossCalibrated": 0.6043251376245629,
       "validationGain": 0.0007904533625685828
     },
     "scoped-ncaa-women-s-soccer-usa-ncaa-w-1:DC_1X": {
@@ -11862,7 +11862,7 @@
       "validationBrierRaw": 0.16118035834951044,
       "validationBrierCalibrated": 0.1611066341800094,
       "validationLogLossRaw": 0.49755559128573834,
-      "validationLogLossCalibrated": 0.49912121241241203,
+      "validationLogLossCalibrated": 0.49912121241241214,
       "validationGain": 0.00007372416950104932
     },
     "scoped-ncaa-women-s-soccer-usa-ncaa-w-1:HOME_OVER_1_5": {
@@ -11917,7 +11917,7 @@
       "validationBrierRaw": 0.16118035834951044,
       "validationBrierCalibrated": 0.1611066341800093,
       "validationLogLossRaw": 0.49755559128573806,
-      "validationLogLossCalibrated": 0.49912121241241203,
+      "validationLogLossCalibrated": 0.4991212124124121,
       "validationGain": 0.00007372416950113259
     },
     "scoped-ncaa-women-s-soccer-usa-ncaa-w-1:HOME_WIN_NIL": {
@@ -11934,11 +11934,11 @@
     "scoped-ncaa-women-s-soccer-usa-ncaa-w-1:AWAY_WIN_NIL": {
       "enabled": true,
       "samples": 243,
-      "intercept": 0.39061116923015055,
+      "intercept": 0.3906111692301508,
       "slope": 1.0253065213789136,
       "validationBrierRaw": 0.14401253257400473,
       "validationBrierCalibrated": 0.14201215482158241,
-      "validationLogLossRaw": 0.4571749353563042,
+      "validationLogLossRaw": 0.45717493535630427,
       "validationLogLossCalibrated": 0.45121134267911367,
       "validationGain": 0.0020003777524223165
     },
@@ -11978,8 +11978,8 @@
     "scoped-ncaa-women-s-soccer-usa-ncaa-w-1:ASIAN_HOME_P0_5": {
       "enabled": true,
       "samples": 243,
-      "intercept": -0.45796189469104254,
-      "slope": 1.2806595233607527,
+      "intercept": -0.4579618946910425,
+      "slope": 1.2806595233607525,
       "validationBrierRaw": 0.21545812292077823,
       "validationBrierCalibrated": 0.21328932934685954,
       "validationLogLossRaw": 0.6195139624519862,
@@ -12055,13 +12055,13 @@
     "scoped-ncaa-women-s-soccer-usa-ncaa-w-1:ASIAN_AWAY_M0_5": {
       "enabled": true,
       "samples": 243,
-      "intercept": 0.45796189469104265,
+      "intercept": 0.45796189469104237,
       "slope": 1.2806595233607527,
       "validationBrierRaw": 0.21545812292077818,
-      "validationBrierCalibrated": 0.21328932934685954,
-      "validationLogLossRaw": 0.6195139624519864,
+      "validationBrierCalibrated": 0.2132893293468595,
+      "validationLogLossRaw": 0.6195139624519863,
       "validationLogLossCalibrated": 0.6148996416120659,
-      "validationGain": 0.002168793573918637
+      "validationGain": 0.002168793573918665
     },
     "scoped-ncaa-women-s-soccer-usa-ncaa-w-1:ASIAN_HOME_M1": {
       "enabled": false,
