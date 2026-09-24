@@ -186,3 +186,35 @@ test("typed selections and all-bookmaker conversions are distinct intents", () =
   assert.equal(everyBook.allDestinations, true);
   assert.equal(everyBook.destinationProvider, null);
 });
+
+test("parses complete month, year, and kickoff-time windows without losing the league", () => {
+  const month = interpretAssistantRequest("List all Nations League matches for this month", lagosReference);
+  assert.equal(month.kind, "fixtures");
+  assert.deepEqual(month.leagueFilters, ["NATIONS_LEAGUE"]);
+  assert.equal(month.dateWindow.kind, "MONTH");
+  assert.equal(month.dateWindow.start, "2026-08-31T23:00:00.000Z");
+  assert.equal(month.dateWindow.end, "2026-09-30T23:00:00.000Z");
+
+  const year = interpretAssistantRequest("Premier League matches in 2025", lagosReference);
+  assert.equal(year.kind, "fixtures");
+  assert.equal(year.dateWindow.kind, "YEAR");
+  assert.equal(year.dateWindow.start, "2024-12-31T23:00:00.000Z");
+
+  const time = interpretAssistantRequest("Show Nations League fixtures tomorrow at 7:45 pm", lagosReference);
+  assert.equal(time.kind, "fixtures");
+  assert.equal(time.dateWindow.kind, "TIME");
+  assert.equal(time.dateWindow.start, "2026-09-13T18:45:00.000Z");
+  assert.equal(time.dateWindow.end, "2026-09-13T19:45:00.000Z");
+});
+
+test("routes requests for every match prediction separately from a short best-picks answer", () => {
+  const intent = interpretAssistantRequest("Give me all Nations League match predictions this week", lagosReference);
+  assert.equal(intent.kind, "allPicks");
+  assert.deepEqual(intent.leagueFilters, ["NATIONS_LEAGUE"]);
+  assert.equal(intent.dateWindow.kind, "WEEK");
+});
+
+test("recognizes a pasted list of team-only user picks as text-to-code input", () => {
+  const intent = interpretAssistantRequest("1. Netherlands - 1UP\n2. Malta - 1UP\n3. Portugal - 1UP");
+  assert.equal(intent.kind, "textCode");
+});

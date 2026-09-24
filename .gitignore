@@ -45,3 +45,4 @@ next-env.d.ts
 /outputs/
 /work/
 /public/data/
+/data/public/fixture-history/

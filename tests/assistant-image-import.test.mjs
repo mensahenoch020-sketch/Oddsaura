@@ -121,3 +121,16 @@ test("turns plainly typed fixtures and markets into neutral selections", () => {
   const matched = matchImageRowsToFixtures(rows, fixtures);
   assert.deepEqual(matched.matched.map(item => item.selection.marketKey), ["ONE_UP_HOME", "DNB_AWAY", "BTTS_NO"]);
 });
+
+test("accepts pasted team-only markets and leaves ambiguous opponents for user review", () => {
+  const rows = parseTypedPredictionText("1. Netherlands - 1UP\n2. Malta - 1UP\n3. Portugal - 1UP");
+  assert.equal(rows.length, 3);
+  assert.equal(rows[0].selectionTeam, "Netherlands");
+  const fixtures = [
+    { id: "nl-de", league: { name: "UEFA Nations League" }, kickoff: "2026-09-24T18:00:00.000Z", status: "SCHEDULED", homeTeam: { name: "Netherlands" }, awayTeam: { name: "Germany" }, odds: [] },
+    { id: "nl-be", league: { name: "UEFA Nations League" }, kickoff: "2026-09-28T18:00:00.000Z", status: "SCHEDULED", homeTeam: { name: "Netherlands" }, awayTeam: { name: "Belgium" }, odds: [] },
+  ];
+  const matched = matchImageRowsToFixtures([rows[0]], fixtures);
+  assert.equal(matched.matched.length, 0);
+  assert.match(matched.unmatched[0].reason, /Add the opponent, date or competition/);
+});
