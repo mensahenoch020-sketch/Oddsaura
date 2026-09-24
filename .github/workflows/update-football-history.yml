@@ -14,6 +14,9 @@ on:
       - "pipeline/lib/source-policy.mjs"
       - "pipeline/update-history.mjs"
       - "pipeline/update-coverage.mjs"
+      - "pipeline/export-fixture-history.mjs"
+      - "data/history/football-data.json"
+      - "data/history/global-football.json"
       - "data/source-authorizations.json"
       - ".github/workflows/update-football-history.yml"
   schedule:

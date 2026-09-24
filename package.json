@@ -13,6 +13,7 @@
     "test": "npm run build && node --test tests/*.test.mjs",
     "data:update": "node pipeline/update.mjs",
     "data:history": "node pipeline/update-history.mjs",
+    "data:fixture-history": "node pipeline/export-fixture-history.mjs",
     "data:coverage": "node pipeline/update-coverage.mjs",
     "data:test": "node --test pipeline/tests/*.test.mjs",
     "lint": "bash scripts/sites-env.sh -- eslint . --ignore-pattern dist --ignore-pattern .next",

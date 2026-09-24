@@ -163,6 +163,8 @@ export function parseTypedPredictionText(raw: string): ImagePredictionRow[] {
     .split(/[;\n]+/)
     .map(value => value.replace(/^\s*(?:create|make|build|turn|convert)?\s*(?:a\s+)?(?:code|slip)?\s*(?:for|from|with)?\s*/i, "").replace(/\s+(?:on|for)\s+(?:sporty\s*bet|bet9ja|betpawa|betway|betking)\s*$/i, "").trim())
     .flatMap((value): ImagePredictionRow[] => {
+      const single = singleTeamRow(value);
+      if (single) return [single];
       const versus = value.match(/^(.{2,60}?)\s+(?:vs\.?|versus|v|against)\s+(.+)$/i);
       if (!versus) return [];
       const suffix = versus[2]!.match(typedMarketSuffix);

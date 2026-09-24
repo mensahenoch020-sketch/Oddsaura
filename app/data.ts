@@ -1,3 +1,5 @@
+import { leagueMatches, type LeagueFilter } from "./leagues";
+
 export type Team = { id?: string; name: string; shortName?: string; logo?: string | null };
 export type League = { id?: string; name: string; country?: string; season?: string };
 export type FixtureOdd = { marketId: string; market: string; selectionId: string; selection: string; line?: number | null; odds: number; source: string; provider?: string; deepLink?: string | null };
@@ -97,6 +99,52 @@ export const fallbackSnapshot: Snapshot = {
 };
 export type SnapshotScope = "snapshot" | "builder" | "matches" | "daily" | "results" | "admin";
 const publicDataBase = "https://raw.githubusercontent.com/mensahenoch020-sketch/Oddsaura/main/data/public";
+const fixtureArchiveCache = new Map<string, Promise<Fixture[]>>();
+let fixtureArchiveIndex: Promise<Array<{ year: number; leagues: Array<{ file: string; league: Fixture["league"] }> }> | null> | null = null;
+
+export async function loadHistoricalFixtures(start: string, end: string, filters?: LeagueFilter[]): Promise<Fixture[]> {
+  if (typeof window === "undefined") return [];
+  const firstYear = new Date(start).getUTCFullYear();
+  const lastYear = new Date(Date.parse(end) - 1).getUTCFullYear();
+  if (!Number.isFinite(firstYear) || !Number.isFinite(lastYear) || lastYear - firstYear > 20) return [];
+  if (!fixtureArchiveIndex) {
+    fixtureArchiveIndex = (async () => {
+      for (const path of ["/data/fixture-history/index.json", `${publicDataBase}/fixture-history/index.json`]) {
+        try {
+          const payload = await fetchSnapshot(path, 12_000) as unknown as { years?: Array<{ year: number; leagues: Array<{ file: string; league: Fixture["league"] }> }> };
+          return payload.years ?? [];
+        } catch { /* try the public source if the deployed static archive is unavailable */ }
+      }
+      return null;
+    })();
+  }
+  const index = await fixtureArchiveIndex;
+  if (!index) return [];
+  const files = index.filter(({ year }) => year >= firstYear && year <= lastYear).flatMap(({ year, leagues }) => leagues
+    .filter(({ league }) => !filters?.length || filters.some((filter) => leagueMatches(league, filter)))
+    .map(({ file }) => `${year}-${file}`));
+  const pages = await Promise.all(files.map((file) => {
+    let page = fixtureArchiveCache.get(file);
+    if (!page) {
+      page = (async () => {
+        for (const path of [`/data/fixture-history/${file}`, `${publicDataBase}/fixture-history/${file}`]) {
+          try {
+            const payload = await fetchSnapshot(path, 12_000) as unknown as { fixtures?: Fixture[] };
+            return payload.fixtures ?? [];
+          } catch { /* skip one unavailable competition archive */ }
+        }
+        return [];
+      })();
+      fixtureArchiveCache.set(file, page);
+    }
+    return page;
+  }));
+  const byId = new Map<string, Fixture>();
+  for (const fixture of pages.flat()) {
+    if (Date.parse(fixture.kickoff) >= Date.parse(start) && Date.parse(fixture.kickoff) < Date.parse(end)) byId.set(fixture.id, fixture);
+  }
+  return [...byId.values()];
+}
 
 async function fetchSnapshot(url: string, timeout = 6_000, cache: RequestCache = "force-cache") {
   const controller = new AbortController();

@@ -4,7 +4,7 @@ import type { LeagueFilter } from "../leagues";
 export const ASSISTANT_TIME_ZONE = "Africa/Lagos";
 
 export type DateWindow = {
-  kind: "TODAY" | "TOMORROW" | "DAY" | "WEEKEND" | "NEXT_DAYS";
+  kind: "TODAY" | "TOMORROW" | "DAY" | "WEEK" | "WEEKEND" | "NEXT_DAYS" | "MONTH" | "YEAR" | "TIME";
   label: string;
   start: string;
   end: string;
@@ -30,6 +30,7 @@ export type AssistantIntent =
   | { kind: "help"; confidence: number }
   | { kind: "limits"; confidence: number; subject: string }
   | { kind: "best"; confidence: number; provider: ProviderId | null; strategy: RecommendationStrategy } & RequestContext
+  | { kind: "allPicks"; confidence: number; provider: ProviderId | null; strategy: RecommendationStrategy } & RequestContext
   | { kind: "daily"; confidence: number; provider: ProviderId | null; strategy: RecommendationStrategy } & RequestContext
   | { kind: "fixtures"; confidence: number; provider: ProviderId | null } & RequestContext
   | { kind: "confirm"; confidence: number }
@@ -73,7 +74,7 @@ const examples = {
 } as const;
 
 function normalize(value: string) {
-  return value.toLowerCase().replace(/\btoday[’']s\b/g, "today").replace(/[’']/g, "").replace(/[^a-z0-9.\/-]+/g, " ").trim();
+  return value.toLowerCase().replace(/\btoday[’']s\b/g, "today").replace(/[’']/g, "").replace(/[^a-z0-9.:\/-]+/g, " ").trim();
 }
 
 function features(value: string) {
@@ -182,6 +183,9 @@ function extractTarget(input: string, parts: number | null) {
     .replace(/\b(?:over|under)\s+\d+(?:\.\d+)?\b/g, " ")
     .replace(/\b20\d{2}[\/.\-]\d{1,2}[\/.\-]\d{1,2}\b/g, " ")
     .replace(/\b\d{1,2}[\/.\-]\d{1,2}[\/.\-]20\d{2}\b/g, " ")
+    .replace(/\b20\d{2}\b/g, " ")
+    .replace(/\b(?:[01]?\d|2[0-3]):[0-5]\d\s*(?:am|pm)?\b/g, " ")
+    .replace(/\b(?:1[0-2]|0?[1-9])\s*(?::[0-5]\d)?\s*(?:am|pm)\b/g, " ")
     .replace(/\b\d{1,2}(?:st|nd|rd|th)?\s+(?:january|february|march|april|may|june|july|august|september|october|november|december)(?:\s+20\d{2})?\b/g, " ")
     .replace(/\b(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}(?:st|nd|rd|th)?(?:\s+20\d{2})?\b/g, " ");
   const numbers = extractNumbers(withoutDates).filter((item) => item.value >= 1.2);
@@ -232,6 +236,59 @@ export function extractDateWindow(input: string, referenceTime = Date.now()): Da
   const today = lagosDateParts(referenceTime);
   const todayStart = lagosStart(today.year, today.month, today.day);
 
+  if (/\b(?:this|current) month\b/.test(text)) {
+    const start = lagosStart(today.year, today.month, 1);
+    const end = today.month === 12 ? lagosStart(today.year + 1, 1, 1) : lagosStart(today.year, today.month + 1, 1);
+    return { kind: "MONTH", label: "this month", start: new Date(start).toISOString(), end: new Date(end).toISOString() };
+  }
+  if (/\b(?:this|current) year\b/.test(text)) {
+    const start = lagosStart(today.year, 1, 1);
+    return { kind: "YEAR", label: "this year", start: new Date(start).toISOString(), end: new Date(lagosStart(today.year + 1, 1, 1)).toISOString() };
+  }
+  const explicitIso = text.match(/\b(20\d{2})[\/.\-](\d{1,2})[\/.\-](\d{1,2})\b/);
+  if (explicitIso) return calendarDateWindow(Number(explicitIso[1]), Number(explicitIso[2]), Number(explicitIso[3]), explicitIso[0]);
+  const explicitDmy = text.match(/\b(\d{1,2})[\/.\-](\d{1,2})[\/.\-](20\d{2})\b/);
+  if (explicitDmy) return calendarDateWindow(Number(explicitDmy[3]), Number(explicitDmy[2]), Number(explicitDmy[1]), explicitDmy[0]);
+  const dayMonth = text.match(new RegExp(`\\b(\\d{1,2})(?:st|nd|rd|th)?\\s+(${months.join("|")})(?:\\s+(20\\d{2}))?\\b`));
+  const monthDay = text.match(new RegExp(`\\b(${months.join("|")})\\s+(\\d{1,2})(?:st|nd|rd|th)?(?:\\s+(20\\d{2}))?\\b`));
+  if (dayMonth || monthDay) {
+    const monthName = dayMonth?.[2] ?? monthDay?.[1] ?? "";
+    const day = Number(dayMonth?.[1] ?? monthDay?.[2]);
+    let year = Number(dayMonth?.[3] ?? monthDay?.[3] ?? today.year);
+    const month = months.indexOf(monthName) + 1;
+    let window = calendarDateWindow(year, month, day, `${monthName} ${day}`);
+    if (window && !dayMonth?.[3] && !monthDay?.[3] && Date.parse(window.end) <= referenceTime) window = calendarDateWindow(++year, month, day, `${monthName} ${day}`);
+    return window;
+  }
+  const namedMonthYear = text.match(new RegExp(`\\b(${months.join("|")})\\s+(20\\d{2})\\b`));
+  if (namedMonthYear && !new RegExp(`\\b\\d{1,2}(?:st|nd|rd|th)?\\s+${namedMonthYear[1]}\\b`).test(text)) {
+    const month = months.indexOf(namedMonthYear[1]!) + 1;
+    const year = Number(namedMonthYear[2]);
+    const start = lagosStart(year, month, 1);
+    const end = month === 12 ? lagosStart(year + 1, 1, 1) : lagosStart(year, month + 1, 1);
+    return { kind: "MONTH", label: `${months[month - 1]} ${year}`, start: new Date(start).toISOString(), end: new Date(end).toISOString() };
+  }
+  const time = text.match(/\b(?:at\s+)?(1[0-2]|0?[1-9])(?::([0-5]\d))?\s*(am|pm)\b|\b(?:at\s+)?([01]?\d|2[0-3]):([0-5]\d)\b/);
+  if (time) {
+    let hour = Number(time[1] ?? time[4]);
+    const minute = Number(time[2] ?? time[5] ?? 0);
+    if (time[3] === "pm" && hour < 12) hour += 12;
+    if (time[3] === "am" && hour === 12) hour = 0;
+    let base = todayStart;
+    const isoDate = text.match(/\b(20\d{2})[/.\-](\d{1,2})[/.\-](\d{1,2})\b/);
+    const dmyDate = text.match(/\b(\d{1,2})[/.\-](\d{1,2})[/.\-](20\d{2})\b/);
+    const namedDate = text.match(new RegExp(`\\b(\\d{1,2})(?:st|nd|rd|th)?\\s+(${months.join("|")})\\s+(20\\d{2})\\b`));
+    const namedDateReverse = text.match(new RegExp(`\\b(${months.join("|")})\\s+(\\d{1,2})(?:st|nd|rd|th)?\\s+(20\\d{2})\\b`));
+    if (isoDate) base = lagosStart(Number(isoDate[1]), Number(isoDate[2]), Number(isoDate[3]));
+    else if (dmyDate) base = lagosStart(Number(dmyDate[3]), Number(dmyDate[2]), Number(dmyDate[1]));
+    else if (namedDate) base = lagosStart(Number(namedDate[3]), months.indexOf(namedDate[2]!) + 1, Number(namedDate[1]));
+    else if (namedDateReverse) base = lagosStart(Number(namedDateReverse[3]), months.indexOf(namedDateReverse[1]!) + 1, Number(namedDateReverse[2]));
+    else if (/\btomorrow\b/.test(text)) base += DAY_MS;
+    else if (/\byesterday\b/.test(text)) base -= DAY_MS;
+    const start = base + hour * 60 * 60_000 + minute * 60_000;
+    return { kind: "TIME", label: `matches around ${time[0].trim()}`, start: new Date(start).toISOString(), end: new Date(start + 60 * 60_000).toISOString() };
+  }
+
   if (/\bday after tomorrow\b/.test(text)) return dayWindow(todayStart + 2 * DAY_MS, "DAY", "the day after tomorrow");
   if (/\byesterday\b/.test(text)) return dayWindow(todayStart - DAY_MS, "DAY", "yesterday");
   if (/\btomorrow\b|\btmrw\b|\btomoro\b/.test(text)) return dayWindow(todayStart + DAY_MS, "TOMORROW", "tomorrow");
@@ -243,6 +300,13 @@ export function extractDateWindow(input: string, referenceTime = Date.now()): Da
     const words: Record<string, number> = { two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7 };
     const days = Math.max(1, Math.min(7, Number(nextDays[1]) || words[nextDays[1]] || 1));
     return dayWindow(todayStart, "NEXT_DAYS", `the next ${days} days`, days);
+  }
+
+  if (/\b(?:this|current|next) week\b/.test(text)) {
+    const todayIndex = weekdays.indexOf(today.weekday);
+    const mondayOffset = (todayIndex + 6) % 7;
+    const nextOffset = /\bnext week\b/.test(text) ? 7 : 0;
+    return dayWindow(todayStart - mondayOffset * DAY_MS + nextOffset * DAY_MS, "WEEK", /\bnext week\b/.test(text) ? "next week" : "this week", 7);
   }
 
   if (/\b(?:this|coming) weekend\b|\bweekend\b/.test(text)) {
@@ -257,16 +321,18 @@ export function extractDateWindow(input: string, referenceTime = Date.now()): Da
   const dmy = text.match(/\b(\d{1,2})[\/.\-](\d{1,2})[\/.\-](20\d{2})\b/);
   if (dmy) return calendarDateWindow(Number(dmy[3]), Number(dmy[2]), Number(dmy[1]), dmy[0]);
 
-  const dayMonth = text.match(new RegExp(`\\b(\\d{1,2})(?:st|nd|rd|th)?\\s+(${months.join("|")})(?:\\s+(20\\d{2}))?\\b`));
-  const monthDay = text.match(new RegExp(`\\b(${months.join("|")})\\s+(\\d{1,2})(?:st|nd|rd|th)?(?:\\s+(20\\d{2}))?\\b`));
-  if (dayMonth || monthDay) {
-    const monthName = dayMonth?.[2] ?? monthDay?.[1] ?? "";
-    const day = Number(dayMonth?.[1] ?? monthDay?.[2]);
-    let year = Number(dayMonth?.[3] ?? monthDay?.[3] ?? today.year);
-    const month = months.indexOf(monthName) + 1;
-    let window = calendarDateWindow(year, month, day, `${monthName} ${day}`);
-    if (window && !dayMonth?.[3] && !monthDay?.[3] && Date.parse(window.end) <= referenceTime) window = calendarDateWindow(++year, month, day, `${monthName} ${day}`);
-    return window;
+  const monthYear = text.match(new RegExp(`\\b(${months.join("|")})(?:\\s+(20\\d{2}))?\\b`));
+  if (monthYear && !new RegExp(`\\b\\d{1,2}(?:st|nd|rd|th)?\\s+${monthYear[1]}\\b`).test(text) && /\b(?:in|during|for|of|from)\b/.test(text)) {
+    const month = months.indexOf(monthYear[1]!) + 1;
+    const year = Number(monthYear[2] ?? today.year);
+    const start = lagosStart(year, month, 1);
+    const end = month === 12 ? lagosStart(year + 1, 1, 1) : lagosStart(year, month + 1, 1);
+    return { kind: "MONTH", label: `${months[month - 1]} ${year}`, start: new Date(start).toISOString(), end: new Date(end).toISOString() };
+  }
+  const yearOnly = text.match(/\b(20\d{2})\b/);
+  if (yearOnly && /\b(?:in|during|for|of|from|year)\b/.test(text)) {
+    const year = Number(yearOnly[1]);
+    return { kind: "YEAR", label: String(year), start: new Date(lagosStart(year, 1, 1)).toISOString(), end: new Date(lagosStart(year + 1, 1, 1)).toISOString() };
   }
 
   for (const [index, weekday] of weekdays.entries()) {
@@ -400,13 +466,15 @@ export function interpretAssistantRequest(input: string, referenceTime = Date.no
   const hasAnalysisLanguage = /\b(analy[sz]e|assess|review|rate|risky|opinion)\b|\bwhat do you think\b|\bhow (?:good|safe|strong)\b/.test(text);
   const hasExplanationLanguage = /\bwhy\b|\bexplain\b|\breason\b|\bhow come\b|\bwhat made you\b|what (?:could|can|might) make .{0,40}(?:lose|fail)|how (?:could|can|might) .{0,40}(?:lose|fail)|can (?:this|that|the) .{0,24}(?:lose|fail)/.test(text);
   const hasBuildLanguage = /\b(odds?|bet|slip|ticket|games?|matches?|booking|picks?|predictions?)\b/.test(text);
-  const hasFixtureListLanguage = /\b(?:list|show|display|give me|what|which|find|see)\b.*\b(?:fixtures?|matches?|games?|schedule|playing)\b|\b(?:fixtures?|matches?|games?|schedule)\b.*\b(?:today|tomorrow|weekend|upcoming|next|in the)\b/.test(text);
+  const hasFixtureListLanguage = /\b(?:list|show|display|give me|what|which|find|see)\b.*\b(?:fixtures?|matches?|games?|schedule|playing)\b|\b(?:fixtures?|matches?|games?|schedule)\b.*\b(?:today|tomorrow|weekend|upcoming|next|in the|in 20\d{2})\b/.test(text);
   const requestsPrediction = /\b(?:predictions?|picks?|best|safe|safest|value|strongest|protected|odds?|bet|slip|ticket)\b/.test(text);
+  const requestsAllPredictions = requestsPrediction && /\b(?:all|every|each)\b/.test(text) && /\b(?:matches?|games?|fixtures?|predictions?|picks?)\b/.test(text);
+  const typedTeamRows = input.split(/[;\n]+/).some(line => /^\s*(?:\d+[.)]\s*)?[^\r\n]{2,55}?\s*[-–—:]\s*(?:1\s*up|2\s*up|1up|2up|ml|moneyline)\s*$/i.test(line));
   const typedMarket = /\b(?:home|away)?\s*(?:1\s*up|2\s*up|win|moneyline|ml|draw no bet|dnb|btts|both teams to score|over\s*\d+(?:\.\d+)?|under\s*\d+(?:\.\d+)?|handicap\s*[+-]\d+(?:\.\d+)?|1x|x2|12)\b/.test(text);
   const allDestinations = /\b(?:all|every)\s+(?:the\s+)?(?:bookmakers?|books?)\b|\b(?:everywhere|to all)\b/.test(text);
 
   if (/\b(?:guaranteed|guarantee|sure win|cannot lose|100 percent)\b|\b(?:correct score|corners?|cards?|player bets?|goalscorer)\b/.test(text)
-    || (!matchup && /\b(?:1\s*up|2\s*up)\b/.test(text))) return { kind: "limits", confidence: 1, subject: input.trim() };
+    || (!matchup && /\b(?:1\s*up|2\s*up)\b/.test(text) && !typedTeamRows)) return { kind: "limits", confidence: 1, subject: input.trim() };
   if (/^(?:hi|hello|hey|good morning|good afternoon|good evening)\b/.test(text) || /\b(?:what can you do|how can you help|help me|show me how|what should i ask)\b/.test(text)) return { kind: "help", confidence: 1 };
   if (/^(?:yes|okay|ok|continue|proceed|do it|send it|send it like that|use the available|keep the available|go ahead)(?: please)?$/.test(text)
     || /\b(?:continue|proceed|create|send|keep|use)\b.*\b(?:available|remaining|matched)\b/.test(text)) return { kind: "confirm", confidence: 1 };
@@ -422,7 +490,7 @@ export function interpretAssistantRequest(input: string, referenceTime = Date.no
     : /\b(?:which|show|tell).*(?:safest|strongest)\b.*\b(?:pick|selection|match|game|one)\b/.test(text) ? "safest"
     : null;
   if (reviseAction) return { kind: "revise", confidence: 1, action: reviseAction, subject: input.trim() };
-  if (matchup && typedMarket && !requestsPrediction && !/\bwho will win\b|\bwill .{0,30} win\b/.test(text)) return { kind: "textCode", confidence: 1, text: input.trim(), provider: providers[0]?.id ?? null };
+  if (((matchup && typedMarket) || typedTeamRows) && !requestsPrediction && !/\bwho will win\b|\bwill .{0,30} win\b/.test(text)) return { kind: "textCode", confidence: 1, text: input.trim(), provider: providers[0]?.id ?? null };
   if (matchup) return { kind: "match", confidence: 1, ...matchup, provider: providers[0]?.id ?? null };
   if (hasSplitLanguage || parts || scores.split >= .62) {
     return { kind: "split", confidence: Math.min(1, scores.split + (hasSplitLanguage ? .2 : 0) + (code ? .15 : 0)), code, targetOdds: code ? null : extractTarget(text, parts), parts, provider: providers[0]?.id ?? null, ...context };
@@ -435,9 +503,10 @@ export function interpretAssistantRequest(input: string, referenceTime = Date.no
   if (/\b(results?|settled|won|lost|performance|hit rate)\b/.test(text)) return { kind: "results", confidence: 1, ...context };
   const explicitTarget = extractTarget(text, null);
   if (explicitTarget && /\bodds?\b/.test(text)) return { kind: "build", confidence: 1, targetOdds: explicitTarget, provider: providers[0]?.id ?? null, ...context };
-  if ((hasFixtureListLanguage || Boolean(leagueFilters?.length && /\b(?:list|show|display|give me|find|see)\b/.test(text))) && !requestsPrediction) {
+  if ((hasFixtureListLanguage || Boolean(leagueFilters?.length && /\b(?:list|show|display|give me|find|see)\b/.test(text)) || Boolean(leagueFilters?.length && /\b(?:fixtures?|matches?|games?|schedule)\b/.test(text) && !requestsPrediction)) && !requestsPrediction) {
     return { kind: "fixtures", confidence: 1, provider: providers[0]?.id ?? null, ...context };
   }
+  if (requestsAllPredictions) return { kind: "allPicks", confidence: 1, provider: providers[0]?.id ?? null, strategy, ...context };
   if (scores.best >= .58 || /\b(best|safe|safest|protected|strongest|strong|reliable|top|low risk|lower risk)\b/.test(text) || Boolean(context.marketKeys?.length && !extractTarget(text, null) && /\b(picks?|predictions?|options?|selections?)\b/.test(text)) || Boolean(leagueFilters?.length && /\b(picks?|predictions?)\b/.test(text))) {
     return { kind: "best", confidence: Math.min(1, scores.best + .18), provider: providers[0]?.id ?? null, strategy, ...context };
   }
