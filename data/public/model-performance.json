@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-23T01:52:04.055Z",
+  "generatedAt": "2026-09-24T00:56:20.464Z",
   "methodology": "Walk-forward test: every prediction uses only earlier matches with a two-hour completion buffer before kickoff.",
   "matches": 2000,
   "oneXTwoAccuracy": 0.4805,
@@ -176,7 +176,7 @@
       "status": "TESTED",
       "accuracy": 0.6945,
       "baselineAccuracy": 0.6855,
-      "brier": 0.2027738959479287,
+      "brier": 0.20277389594792866,
       "selectedHitRate": 0.6985370950888192
     },
     {
@@ -288,7 +288,7 @@
       "status": "TESTED",
       "accuracy": 0.655,
       "baselineAccuracy": 0.6455,
-      "brier": 0.21928824081959278,
+      "brier": 0.21928824081959275,
       "selectedHitRate": 0.5477386934673367
     },
     {
