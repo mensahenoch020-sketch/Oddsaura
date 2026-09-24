@@ -887,7 +887,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
         workerPath: "/data/ocr/worker.min.js",
         corePath: "/data/ocr/tesseract-core.wasm.js",
         langPath: "/data/ocr/lang",
-        gzip: true,
+        gzip: false,
         logger: (progress) => {
           if (progress.status === "loading language traineddata") setOcrStatus("Loading text data…");
           else if (progress.status === "recognizing text") setOcrStatus(`Reading screenshot… ${Math.round((progress.progress ?? 0) * 100)}%`);

@@ -1,5 +1,6 @@
 import { copyFile, cp, mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
+import { gunzipSync } from "node:zlib";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -41,9 +42,13 @@ const assetCopies = [
   [resolve(root, "node_modules/tesseract.js/dist/worker.min.js"), resolve(ocrDir, "worker.min.js")],
   [resolve(root, "node_modules/tesseract.js-core/tesseract-core.wasm.js"), resolve(ocrDir, "tesseract-core.wasm.js")],
   [resolve(root, "node_modules/tesseract.js-core/tesseract-core.wasm"), resolve(ocrDir, "tesseract-core.wasm")],
-  [resolve(root, "node_modules/@tesseract.js-data/eng/4.0.0_best_int/eng.traineddata.gz"), resolve(ocrDir, "lang/eng.traineddata.gz")],
 ];
 await Promise.all(assetCopies.map(([source, destination]) => copyFile(source, destination)));
+// Serve the language model uncompressed. Railway's static response path was
+// returning 404 for `.traineddata.gz` even though the other OCR files existed.
+// Tesseract accepts the plain `.traineddata` file with gzip disabled.
+const compressedEnglishData = await readFile(resolve(root, "node_modules/@tesseract.js-data/eng/4.0.0_best_int/eng.traineddata.gz"));
+await writeFile(resolve(ocrDir, "lang/eng.traineddata"), gunzipSync(compressedEnglishData));
 await cp(resolve(sourceDir, "fixture-history"), resolve(targetDir, "fixture-history"), { recursive: true, force: true }).catch(() => undefined);
 const performance = await readFile(resolve(sourceDir, "model-performance.json"), "utf8").catch(() => null);
 if (performance) await writeFile(resolve(targetDir, "model-performance.json"), performance);
