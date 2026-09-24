@@ -21,7 +21,8 @@ export type RecommendationStrategy = "protection" | "value";
 export type AssistantIntent =
   | { kind: "build"; confidence: number; targetOdds: number | null; provider: ProviderId | null } & RequestContext
   | { kind: "split"; confidence: number; code: string | null; targetOdds: number | null; parts: number | null; provider: ProviderId | null } & RequestContext
-  | { kind: "convert"; confidence: number; code: string | null; sourceProvider: ProviderId | null; destinationProvider: ProviderId | null }
+  | { kind: "convert"; confidence: number; code: string | null; sourceProvider: ProviderId | null; destinationProvider: ProviderId | null; allDestinations: boolean }
+  | { kind: "textCode"; confidence: number; text: string; provider: ProviderId | null }
   | { kind: "analyze"; confidence: number; code: string | null; provider: ProviderId | null }
   | { kind: "explain"; confidence: number; subject: string }
   | { kind: "revise"; confidence: number; action: "safer" | "remove" | "replace" | "riskiest" | "safest"; subject: string }
@@ -344,7 +345,8 @@ export function requestedLeagueFilters(input: string): LeagueFilter[] | undefine
     ["INTERNATIONAL_FRIENDLY", /\b(?:international friendl(?:y|ies)|friendly internationals?|national team friendl(?:y|ies))\b/],
     ["CLUB_FRIENDLY", /\b(?:club friendl(?:y|ies)|friendly clubs?)\b/],
     ["WORLD_CUP", /\b(?:fifa world cup|world cup(?: qualifiers?| qualification)?)\b/],
-    ["AFCON", /\b(?:africa cup of nations|afcon)\b/],
+    ["NATIONS_LEAGUE", /\b(?:uefa nations league|womens? nations league|concacaf nations league|nations league)\b/],
+    ["AFCON", /\b(?:africa(?:n)? (?:cup of )?nations|afcon|africa nations matches?|african nations(?: cup| championship)?(?: qualifiers?| qualifying)?)\b/],
   ];
   const filters = aliases.filter(([, matcher]) => matcher.test(text)).map(([id]) => id);
   return filters.length ? filters : undefined;
@@ -400,8 +402,11 @@ export function interpretAssistantRequest(input: string, referenceTime = Date.no
   const hasBuildLanguage = /\b(odds?|bet|slip|ticket|games?|matches?|booking|picks?|predictions?)\b/.test(text);
   const hasFixtureListLanguage = /\b(?:list|show|display|give me|what|which|find|see)\b.*\b(?:fixtures?|matches?|games?|schedule|playing)\b|\b(?:fixtures?|matches?|games?|schedule)\b.*\b(?:today|tomorrow|weekend|upcoming|next|in the)\b/.test(text);
   const requestsPrediction = /\b(?:predictions?|picks?|best|safe|safest|value|strongest|protected|odds?|bet|slip|ticket)\b/.test(text);
+  const typedMarket = /\b(?:home|away)?\s*(?:1\s*up|2\s*up|win|moneyline|ml|draw no bet|dnb|btts|both teams to score|over\s*\d+(?:\.\d+)?|under\s*\d+(?:\.\d+)?|handicap\s*[+-]\d+(?:\.\d+)?|1x|x2|12)\b/.test(text);
+  const allDestinations = /\b(?:all|every)\s+(?:the\s+)?(?:bookmakers?|books?)\b|\b(?:everywhere|to all)\b/.test(text);
 
-  if (/\b(?:guaranteed|guarantee|sure win|cannot lose|100 percent)\b|\b(?:correct score|corners?|cards?|player bets?|goalscorer|1up|2up)\b/.test(text)) return { kind: "limits", confidence: 1, subject: input.trim() };
+  if (/\b(?:guaranteed|guarantee|sure win|cannot lose|100 percent)\b|\b(?:correct score|corners?|cards?|player bets?|goalscorer)\b/.test(text)
+    || (!matchup && /\b(?:1\s*up|2\s*up)\b/.test(text))) return { kind: "limits", confidence: 1, subject: input.trim() };
   if (/^(?:hi|hello|hey|good morning|good afternoon|good evening)\b/.test(text) || /\b(?:what can you do|how can you help|help me|show me how|what should i ask)\b/.test(text)) return { kind: "help", confidence: 1 };
   if (/^(?:yes|okay|ok|continue|proceed|do it|send it|send it like that|use the available|keep the available|go ahead)(?: please)?$/.test(text)
     || /\b(?:continue|proceed|create|send|keep|use)\b.*\b(?:available|remaining|matched)\b/.test(text)) return { kind: "confirm", confidence: 1 };
@@ -417,6 +422,7 @@ export function interpretAssistantRequest(input: string, referenceTime = Date.no
     : /\b(?:which|show|tell).*(?:safest|strongest)\b.*\b(?:pick|selection|match|game|one)\b/.test(text) ? "safest"
     : null;
   if (reviseAction) return { kind: "revise", confidence: 1, action: reviseAction, subject: input.trim() };
+  if (matchup && typedMarket && !requestsPrediction && !/\bwho will win\b|\bwill .{0,30} win\b/.test(text)) return { kind: "textCode", confidence: 1, text: input.trim(), provider: providers[0]?.id ?? null };
   if (matchup) return { kind: "match", confidence: 1, ...matchup, provider: providers[0]?.id ?? null };
   if (hasSplitLanguage || parts || scores.split >= .62) {
     return { kind: "split", confidence: Math.min(1, scores.split + (hasSplitLanguage ? .2 : 0) + (code ? .15 : 0)), code, targetOdds: code ? null : extractTarget(text, parts), parts, provider: providers[0]?.id ?? null, ...context };
@@ -424,7 +430,7 @@ export function interpretAssistantRequest(input: string, referenceTime = Date.no
   if ((hasAnalysisLanguage || (code && !hasConversionLanguage)) && !extractTarget(text, null)) return { kind: "analyze", confidence: 1, code, provider: providers[0]?.id ?? null };
   if (hasConversionLanguage || (code && providers.length > 0) || scores.convert >= .56) {
     const routes = conversionProviders(text, providers);
-    return { kind: "convert", confidence: Math.min(1, scores.convert + (code ? .22 : 0) + (hasConversionLanguage ? .18 : 0)), code, ...routes };
+    return { kind: "convert", confidence: Math.min(1, scores.convert + (code ? .22 : 0) + (hasConversionLanguage ? .18 : 0)), code, ...routes, allDestinations };
   }
   if (/\b(results?|settled|won|lost|performance|hit rate)\b/.test(text)) return { kind: "results", confidence: 1, ...context };
   const explicitTarget = extractTarget(text, null);

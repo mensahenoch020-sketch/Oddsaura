@@ -7,6 +7,12 @@ const DEFAULT_LEAGUES = [
   "eng.1", "esp.1", "ger.1", "ita.1", "fra.1", "uefa.champions",
   "uefa.europa", "uefa.europa.conf", "ned.1", "por.1", "sco.1",
   "bel.1", "tur.1", "ksa.1", "usa.1", "mex.1", "bra.1", "arg.1",
+  // International competitions are collected explicitly as well as through
+  // the worldwide board. This preserves their real competition labels and
+  // gives national-team models a dependable recent-results path.
+  "uefa.nations", "uefa.w.nations", "concacaf.nations.league",
+  "caf.nations", "caf.nations_qual", "caf.championship", "caf.w.nations",
+  "fifa.friendly", "fifa.friendly.w", "fifa.friendly_u21", "club.friendly",
 ];
 const COUNTRY_LEAGUE_FALLBACKS = {
   Colombia: { id: "col.1", slug: "col.1", name: "Colombian Fútbol Profesional", country: "Colombia" },

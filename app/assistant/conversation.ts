@@ -1,7 +1,7 @@
 import type { ProviderId } from "../builder/providers";
 import { interpretAssistantRequest, type AssistantIntent } from "./nlu";
 
-export type PendingIntent = Extract<AssistantIntent, { kind: "build" | "split" | "convert" | "analyze" }>;
+export type PendingIntent = Extract<AssistantIntent, { kind: "build" | "split" | "convert" | "analyze" | "textCode" }>;
 
 export type ConversationReference = { provider: ProviderId | null; code: string | null };
 
@@ -9,6 +9,7 @@ export function applyConversationReference(intent: AssistantIntent, reference: C
   if (intent.kind === "analyze" && !intent.code && reference.code) return { ...intent, code: reference.code, provider: intent.provider ?? reference.provider };
   if (intent.kind === "split" && !intent.code && reference.code) return { ...intent, code: reference.code, provider: intent.provider ?? reference.provider };
   if (intent.kind === "convert" && !intent.code && reference.code) return { ...intent, code: reference.code, sourceProvider: intent.sourceProvider ?? reference.provider };
+  if (intent.kind === "textCode" && !intent.provider && reference.provider) return { ...intent, provider: reference.provider };
   return intent;
 }
 
@@ -21,7 +22,8 @@ function providerFromIntent(intent: AssistantIntent): ProviderId | null {
 export function isCompleteStandalone(intent: AssistantIntent) {
   if (intent.kind === "build") return Boolean(intent.targetOdds && intent.provider);
   if (intent.kind === "split") return Boolean((intent.code || intent.targetOdds) && intent.parts && intent.provider);
-  if (intent.kind === "convert") return Boolean(intent.code && intent.sourceProvider && intent.destinationProvider && intent.sourceProvider !== intent.destinationProvider);
+  if (intent.kind === "convert") return Boolean(intent.code && intent.sourceProvider && (intent.allDestinations || (intent.destinationProvider && intent.sourceProvider !== intent.destinationProvider)));
+  if (intent.kind === "textCode") return Boolean(intent.text && intent.provider);
   if (intent.kind === "analyze") return Boolean(intent.code && intent.provider);
   return intent.kind !== "unknown";
 }
@@ -56,8 +58,9 @@ export function mergePendingIntent(pending: PendingIntent, input: string, refere
     const secondMentioned = candidates[1] ?? null;
     const sourceProvider = pending.sourceProvider ?? (!pending.destinationProvider && candidates.length === 1 ? firstMentioned : candidate?.sourceProvider ?? null);
     const destinationProvider = pending.destinationProvider ?? (pending.sourceProvider && candidates.length === 1 ? firstMentioned : secondMentioned ?? (candidates.length > 1 ? candidate?.destinationProvider ?? null : null));
-    return { ...pending, code: candidate?.code ?? pending.code, sourceProvider, destinationProvider, confidence: Math.max(pending.confidence, next.confidence) };
+    return { ...pending, code: candidate?.code ?? pending.code, sourceProvider, destinationProvider, allDestinations: candidate?.allDestinations ?? pending.allDestinations, confidence: Math.max(pending.confidence, next.confidence) };
   }
+  if (pending.kind === "textCode") return { ...pending, provider: nextProvider ?? pending.provider, confidence: Math.max(pending.confidence, next.confidence) };
   const candidate = next.kind === "analyze" ? next : next.kind === "convert" ? next : null;
   return { ...pending, code: candidate && "code" in candidate ? candidate.code ?? pending.code : pending.code, provider: nextProvider ?? pending.provider, confidence: Math.max(pending.confidence, next.confidence) };
 }
