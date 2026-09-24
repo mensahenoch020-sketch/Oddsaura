@@ -115,6 +115,13 @@ test("Railway applies security headers and rate limits account entry points", as
   assert.match(server, /consumeRateLimit/);
   assert.match(server, /Too many attempts/);
   assert.match(server, /HttpOnly; SameSite=Lax/);
+  assert.match(server, /'wasm-unsafe-eval'/);
+});
+
+test("public example does not show banned Over 2.5 picks or a fake bookmaker code", async () => {
+  const page = await read("app/public-assistant.tsx");
+  assert.doesNotMatch(page, /Over 2\.5|OA7X92|SPORTYBET CODE/);
+  assert.match(page, /No bookmaker code was created/);
 });
 
 test("public trust pages, consent links and responsible gambling guidance are present", async () => {

@@ -27,7 +27,10 @@ export type LeagueFilter = typeof LEAGUE_FILTERS[number]["id"];
 export type PriorityLeague = Exclude<LeagueFilter, "ALL" | "OTHER">;
 
 const priorityMatchers: Array<[PriorityLeague, RegExp]> = [
-  ["PREMIER_LEAGUE", /\b(eng\.1|english premier|premier league)\b/i],
+  // A bare "Premier League" label is ambiguous (for example, Russia also
+  // calls its top division the Premier League). Resolve England only from an
+  // English competition id/country or an explicit "English Premier" name.
+  ["PREMIER_LEAGUE", /\b(eng[._-]1|english premier)\b/i],
   ["LA_LIGA", /\b(esp\.1|la ?liga|spanish primera)\b/i],
   ["SERIE_A", /\b(ita\.1|italian serie a|serie a)\b/i],
   ["BUNDESLIGA", /\b(ger\.1|german bundesliga|bundesliga)\b/i],
@@ -49,6 +52,11 @@ const priorityMatchers: Array<[PriorityLeague, RegExp]> = [
 
 export function leagueFilterFor(league: League): LeagueFilter {
   const value = `${league.id ?? ""} ${league.name} ${league.country ?? ""}`;
+  if (/\b(?:premier league)\b/i.test(league.name) && !/\benglish premier\b/i.test(league.name)) {
+    const england = /\beng(?:land)?\b/i.test(league.country ?? "") || /\beng[._-]1\b/i.test(league.id ?? "");
+    if (!england) return "OTHER";
+    if (/^\s*premier league\s*$/i.test(league.name)) return "PREMIER_LEAGUE";
+  }
   return priorityMatchers.find(([, matcher]) => matcher.test(value))?.[0] ?? "OTHER";
 }
 

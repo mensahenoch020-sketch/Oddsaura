@@ -13,4 +13,7 @@ test("classifies national-team competitions without collapsing them into other l
   assert.equal(leagueFilterFor({ id: "caf.nations_qual", name: "Africa Cup of Nations Qualifying", country: "Africa" }), "AFCON");
   assert.equal(leagueFilterFor({ id: "caf.championship", name: "African Nations Championship", country: "Africa" }), "AFCON");
   assert.equal(leagueMatches({ name: "Premier League", country: "England" }, "NATIONS_LEAGUE"), false);
+  assert.equal(leagueFilterFor({ id: "eng.1", name: "Premier League", country: "England" }), "PREMIER_LEAGUE");
+  assert.equal(leagueFilterFor({ id: "rus-1", name: "Russian Premier League", country: "Russia" }), "OTHER");
+  assert.equal(leagueMatches({ id: "rus-1", name: "Russian Premier League", country: "Russia" }, "PREMIER_LEAGUE"), false);
 });

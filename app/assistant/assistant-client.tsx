@@ -9,7 +9,8 @@ import { buildTargetSlip, rankBestBets } from "../builder/target-builder";
 import { extractDateWindow, interpretAssistantRequest, isWithinDateWindow, matchesRequestedMarket, type AssistantIntent, type DateWindow } from "./nlu";
 import { includedPicks, resolvedTotal, targetReached } from "./code-summary";
 import { plainPickExplanation, unmetTargetMessage } from "./plain-language";
-import { leagueFilterLabel, leagueMatches, type LeagueFilter } from "../leagues";
+import { leagueFilterFor, leagueFilterLabel, leagueMatches, type LeagueFilter } from "../leagues";
+import { canonicalFixtureIdentity } from "./fixture-identity";
 import { applyConversationReference, resolveAssistantTurn, type PendingIntent } from "./conversation";
 import { saveBetslipImage } from "./betslip-image";
 import { matchImageRowsToFixtures, parsePredictionImageText, parseTypedPredictionText, type MatchedImagePrediction } from "./image-import";
@@ -774,7 +775,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
             return leftFuture ? leftTime - rightTime : rightTime - leftTime;
           })
           .filter((fixture) => {
-            const key = `${normalizedWords(fixture.homeTeam.name)}|${normalizedWords(fixture.awayTeam.name)}|${fixture.kickoff}`;
+            const key = canonicalFixtureIdentity(fixture, leagueFilterFor(fixture.league));
             if (seen.has(key)) return false;
             seen.add(key);
             return true;
@@ -882,14 +883,18 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
     let timedOut = false;
     try {
       setOcrStatus("Loading image reader…");
-      const { createWorker } = await import("tesseract.js");
+      const { createWorker } = await withDeadline(import("tesseract.js"), 15_000, "Image reader download");
       const workerPromise = createWorker("eng", 1, {
         workerPath: "/data/ocr/worker.min.js",
         corePath: "/data/ocr/tesseract-core.wasm.js",
         langPath: "/data/ocr/lang",
         gzip: false,
+        workerBlobURL: false,
         logger: (progress) => {
-          if (progress.status === "loading language traineddata") setOcrStatus("Loading text data…");
+          if (progress.status === "loading tesseract core") setOcrStatus("Loading image engine…");
+          else if (progress.status === "initializing tesseract") setOcrStatus("Starting image reader…");
+          else if (progress.status === "loading language traineddata") setOcrStatus("Loading text data…");
+          else if (progress.status === "initializing api") setOcrStatus("Preparing text recognition…");
           else if (progress.status === "recognizing text") setOcrStatus(`Reading screenshot… ${Math.round((progress.progress ?? 0) * 100)}%`);
         },
       }).then(created => {

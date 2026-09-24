@@ -6,7 +6,7 @@ import Brand from "./brand";
 import LegalFooter from "./legal-footer";
 
 const samplePicks = [
-  ["Netherlands vs Germany", "Over 2.5", "1.70"],
+  ["Netherlands vs Germany", "Both teams to score", "1.70"],
   ["Norway vs Denmark", "Norway moneyline", "2.10"],
   ["Portugal vs Wales", "Portugal draw no bet", "1.42"],
 ];
@@ -49,8 +49,8 @@ export default function PublicAssistant() {
       <div className="oa-product-preview" aria-label="Example OddsAura betslip">
         <header><div><span>ODDSAURA PICK BUILDER</span><b>Verified markets</b></div><strong>2.00</strong></header>
         <div className="oa-preview-list">{samplePicks.map(([match, market, odds]) => <article key={match}><span>✓</span><div><b>{match}</b><small>{market}</small></div><strong>{odds}</strong></article>)}</div>
-        <div className="oa-preview-code"><span>SPORTYBET CODE</span><b>OA7X92</b><button type="button">Copy code</button></div>
-        <small>Example only · Always confirm the final bookmaker slip</small>
+        <div className="oa-preview-code"><span>EXAMPLE SLIP</span><span>DEMO ONLY</span><b>Sample picks</b></div>
+        <small>Illustrative picks only · No bookmaker code was created</small>
       </div>
     </section>
 
