@@ -18,6 +18,7 @@ export const LEAGUE_FILTERS = [
   { id: "INTERNATIONAL_FRIENDLY", label: "International Friendlies" },
   { id: "CLUB_FRIENDLY", label: "Club Friendlies" },
   { id: "WORLD_CUP", label: "World Cup" },
+  { id: "NATIONS_LEAGUE", label: "Nations League" },
   { id: "AFCON", label: "Africa Cup of Nations" },
   { id: "OTHER", label: "Other leagues" },
 ] as const;
@@ -42,7 +43,8 @@ const priorityMatchers: Array<[PriorityLeague, RegExp]> = [
   ["INTERNATIONAL_FRIENDLY", /\b(international friendl(?:y|ies)|friendly internationals?|fifa friendl(?:y|ies))\b/i],
   ["CLUB_FRIENDLY", /\b(club friendl(?:y|ies)|friendly clubs?)\b/i],
   ["WORLD_CUP", /\b(fifa world cup|world cup qualif|world cup)\b/i],
-  ["AFCON", /\b(africa cup of nations|afcon)\b/i],
+  ["NATIONS_LEAGUE", /\b(uefa(?:\.w)?\.nations|concacaf\.nations|nations league)\b/i],
+  ["AFCON", /\b(caf\.(?:nations|nations_qual|championship|w\.nations)|africa(?:n)? (?:cup of )?nations|afcon|african nations(?: cup| championship)?(?: qualif(?:ying|iers?))?)\b/i],
 ];
 
 export function leagueFilterFor(league: League): LeagueFilter {
@@ -52,6 +54,10 @@ export function leagueFilterFor(league: League): LeagueFilter {
 
 export function leagueMatches(league: League, filter: LeagueFilter) {
   return filter === "ALL" || leagueFilterFor(league) === filter;
+}
+
+export function leagueFilterLabel(filter: LeagueFilter) {
+  return LEAGUE_FILTERS.find((item) => item.id === filter)?.label ?? filter;
 }
 
 export function leaguePriority(league: League) {

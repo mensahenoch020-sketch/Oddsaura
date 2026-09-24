@@ -39,7 +39,7 @@ export async function createBetslipPng(input: BetslipImageInput) {
 
   context.fillStyle = "#0b1730";
   context.fillRect(0, 0, width, height);
-  context.fillStyle = "#ff4d2e";
+  context.fillStyle = "#19c36a";
   context.fillRect(0, 0, 22, height);
   context.fillRect(0, 0, width, 18);
 
@@ -49,7 +49,7 @@ export async function createBetslipPng(input: BetslipImageInput) {
   context.fillStyle = "#b8c4da";
   context.font = "700 24px Arial";
   context.fillText(`${input.provider.toUpperCase()} · ${new Date().toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" })}`, 82, 158);
-  context.fillStyle = "#ff4d2e";
+  context.fillStyle = "#19c36a";
   context.fillRect(82, 190, 150, 8);
 
   const cardX = 62, cardY = 240, cardWidth = width - 124;

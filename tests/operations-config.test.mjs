@@ -19,6 +19,12 @@ test("historical automation keeps the approved eight-season 2,000-match scope", 
   assert.match(live, /git pull --rebase origin main/);
 });
 
+test("international competitions have explicit live and historical coverage", async () => {
+  const [espn, coverage] = await Promise.all([read("pipeline/lib/espn.mjs"), read("pipeline/lib/history-coverage.mjs")]);
+  for (const league of ["uefa.nations", "concacaf.nations.league", "caf.nations", "fifa.friendly", "club.friendly"]) assert.match(espn, new RegExp(league.replaceAll(".", "\\.")));
+  for (const family of ["NATIONS_LEAGUE", "AFCON", "INTERNATIONAL_FRIENDLY", "CLUB_FRIENDLY"]) assert.match(coverage, new RegExp(family));
+});
+
 test("assistant expands an insufficient saved pool through only the requested bookmaker", async () => {
   const [client, providers, worker, collection, pipeline] = await Promise.all([
     read("app/assistant/assistant-client.tsx"),
@@ -51,7 +57,7 @@ test("Railway protects and serves account operations used by the live UI", async
 test("public converter and private X reply assistant use the verified conversion path", async () => {
   const [server, publicPage, publicAssistant, admin, helper, reader, manifest] = await Promise.all([read("scripts/railway-server.mjs"), read("app/convert/page.tsx"), read("app/public-assistant.tsx"), read("app/admin/x-reply-assistant.tsx"), read("scripts/x-reply-helper.mjs"), read("scripts/x-post-reader.mjs"), read("app/manifest.ts")]);
   assert.match(server, /oa_public_rate_limits/); assert.match(server, /oa_x_reply_requests/); assert.match(server, /url\.pathname === "\/api\/public\/convert"/); assert.match(server, /\/api\/public\/x-results\//); assert.match(server, /activePublicConversions >= 3/); assert.match(server, /internalConversion/); assert.match(server, /url\.pathname === "\/api\/health"/);
-  assert.match(publicPage, /<ConverterForm publicMode/); assert.match(publicAssistant, /href: "\/convert"/); assert.match(admin, /Convert all and draft reply/); assert.match(admin, /Open reply on X/); assert.match(admin, /x_url/); assert.match(helper, /buildBatchXReply/); assert.match(reader, /publish\.x\.com\/oembed/); assert.match(manifest, /share_target/);
+  assert.match(publicPage, /<ConverterForm publicMode/); assert.match(publicAssistant, /href="\/convert"/); assert.match(admin, /Convert all and draft reply/); assert.match(admin, /Open reply on X/); assert.match(admin, /x_url/); assert.match(helper, /buildBatchXReply/); assert.match(reader, /publish\.x\.com\/oembed/); assert.match(manifest, /share_target/);
 });
 
 test("public football payloads are split, bundled and cached for faster mobile loading", async () => {

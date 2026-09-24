@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "generatedAt": "2026-09-23T01:52:04.269Z",
+  "version": 2,
+  "generatedAt": "2026-09-24T00:41:54.029Z",
   "requirements": {
     "long": 20,
     "recent": 8,
@@ -10,6 +10,44 @@
   "competitionCount": 189,
   "teamCount": 5213,
   "teamsMeetingLongRequirement": 2083,
+  "priorityFamilies": [
+    {
+      "id": "NATIONS_LEAGUE",
+      "label": "Nations League",
+      "matches": 379,
+      "teams": 148,
+      "competitions": 3,
+      "firstKickoff": "2024-10-09T19:30:00.000Z",
+      "lastKickoff": "2026-03-31T16:00:00.000Z"
+    },
+    {
+      "id": "AFCON",
+      "label": "Africa Cup of Nations",
+      "matches": 156,
+      "teams": 50,
+      "competitions": 3,
+      "firstKickoff": "2025-07-05T20:00:00.000Z",
+      "lastKickoff": "2026-08-16T19:00:00.000Z"
+    },
+    {
+      "id": "INTERNATIONAL_FRIENDLY",
+      "label": "International friendlies",
+      "matches": 765,
+      "teams": 272,
+      "competitions": 2,
+      "firstKickoff": "2024-10-10T09:30:00.000Z",
+      "lastKickoff": "2026-09-21T04:00:00.000Z"
+    },
+    {
+      "id": "CLUB_FRIENDLY",
+      "label": "Club friendlies",
+      "matches": 651,
+      "teams": 651,
+      "competitions": 1,
+      "firstKickoff": "2024-11-15T17:00:00.000Z",
+      "lastKickoff": "2026-09-19T15:30:00.000Z"
+    }
+  ],
   "competitions": [
     {
       "id": "scoped-ncaa-women-s-soccer-usa-ncaa-w-1",

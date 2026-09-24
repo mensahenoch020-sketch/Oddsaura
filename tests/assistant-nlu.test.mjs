@@ -100,6 +100,23 @@ test("separates fixture lists from prediction requests and recognizes more compe
   const predictions = interpretAssistantRequest("Give me Champions League and Serie A predictions");
   assert.equal(predictions.kind, "best");
   assert.deepEqual(predictions.leagueFilters, ["SERIE_A", "CHAMPIONS_LEAGUE"]);
+
+  const nations = interpretAssistantRequest("Give me 20 odds for Nations League SportyBet");
+  assert.equal(nations.kind, "build");
+  assert.equal(nations.targetOdds, 20);
+  assert.deepEqual(nations.leagueFilters, ["NATIONS_LEAGUE"]);
+
+  const africa = interpretAssistantRequest("Show Africa nations matches");
+  assert.equal(africa.kind, "fixtures");
+  assert.deepEqual(africa.leagueFilters, ["AFCON"]);
+});
+
+test("keeps a named league and an explicit date together as hard filters", () => {
+  const intent = interpretAssistantRequest("Premier League odds for SportyBet on 15 September 2026", lagosReference);
+  assert.equal(intent.kind, "daily");
+  assert.deepEqual(intent.leagueFilters, ["PREMIER_LEAGUE"]);
+  assert.equal(intent.dateWindow.start, "2026-09-14T23:00:00.000Z");
+  assert.equal(intent.dateWindow.end, "2026-09-15T23:00:00.000Z");
 });
 
 test("combines multiple requested market families", () => {
@@ -156,4 +173,16 @@ test("recognizes tomorrow, weekends, future windows and dated results", () => {
   const results = interpretAssistantRequest("show yesterday results", lagosReference);
   assert.equal(results.kind, "results");
   assert.equal(results.dateWindow.label, "yesterday");
+});
+
+test("typed selections and all-bookmaker conversions are distinct intents", () => {
+  const typed = interpretAssistantRequest("Chelsea vs Arsenal home 1UP on SportyBet");
+  assert.equal(typed.kind, "textCode");
+  assert.equal(typed.provider, "sportybet");
+
+  const everyBook = interpretAssistantRequest("Convert SportyBet code 4V0XMZ to all bookmakers");
+  assert.equal(everyBook.kind, "convert");
+  assert.equal(everyBook.sourceProvider, "sportybet");
+  assert.equal(everyBook.allDestinations, true);
+  assert.equal(everyBook.destinationProvider, null);
 });
