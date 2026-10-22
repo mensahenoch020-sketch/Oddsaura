@@ -53,7 +53,7 @@ export function buildTicket(candidates, category, fixtures) {
         && odds >= band.minOdds && odds <= band.maxOdds
         && (item.marketProbability ?? 0) >= band.minMarketProbability
         && (item.modelMarketGap ?? 1) <= .1
-        && (item.edge ?? -1) >= 0;
+        && (item.edge ?? -1) >= 0 && (item.expectedValue ?? -1) >= 0;
     })
     .sort((a, b) => {
       const leagueDelta = priorityLeague(fixtureMap.get(a.fixtureId)?.league) - priorityLeague(fixtureMap.get(b.fixtureId)?.league);
@@ -90,6 +90,7 @@ export function buildTicket(candidates, category, fixtures) {
       probability: item.probability,
       confidence: item.confidence,
       edge: item.edge,
+      expectedValue: item.expectedValue,
       oddsSource: item.oddsSource,
       oddsProvider: item.oddsProvider,
       quoteObservedAt: item.quoteObservedAt,
@@ -110,7 +111,7 @@ export function buildTicket(candidates, category, fixtures) {
   if (selected.length < 2 || totalOdds < band.min || totalOdds > band.max) return null;
   const confidence = selected.reduce((sum, item) => sum + item.confidence, 0) / selected.length;
   const estimatedWinChance = selected.reduce((chance, item) => chance * item.probability, 1);
-  if (estimatedWinChance < .88 / totalOdds) return null;
+  if (estimatedWinChance * Number(totalOdds.toFixed(2)) < 1) return null;
   return {
     id: `${category.toLowerCase()}-${new Date().toISOString().slice(0, 10)}`,
     title: band.title,

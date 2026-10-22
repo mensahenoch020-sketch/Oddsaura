@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import ProductNavigation from "../product-navigation";
-import { fallbackSnapshot, loadSnapshot, refreshSnapshot, type Snapshot, type Ticket } from "../data";
+import { fallbackSnapshot, loadSnapshot, refreshSnapshot, type Snapshot, type Ticket, type WatchlistPick } from "../data";
 import { generateBookmakerCode, providerAdapters, type ProviderId } from "../builder/providers";
 import { activeDailyTicket } from "./active-ticket";
 import "./daily.css";
@@ -13,6 +13,7 @@ type TicketControl = { ticketId: string; visible: boolean; titleOverride: string
 const ticketOrder: Record<string, number> = { SAFE_2: 1, VALUE_5: 2, BALANCED_10: 3, HIGH_RISK: 4, LONGSHOT_21: 5 };
 const providerName = (provider: ProviderId) => providerAdapters.find((item) => item.id === provider)?.label ?? provider;
 const ticketProvider = (ticket: Ticket) => (ticket.oddsProvider || ticket.selections[0]?.oddsProvider || "sportybet") as ProviderId;
+const expectedReturn = (pick: WatchlistPick) => pick.expectedValue ?? pick.probability * (pick.quotedOdds ?? pick.fairOdds) - 1;
 
 function serialize(ids: string[]) {
   return btoa(JSON.stringify(ids.map((predictionId) => ({ predictionId })))).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
@@ -44,11 +45,13 @@ export default function DailyOddsPage() {
     return snapshot.tickets.flatMap((ticket) => {
       if (byId.get(ticket.id)?.visible === false) return [];
       const refreshed = activeDailyTicket(ticket, referenceTime);
-      return refreshed ? [{ ...refreshed, title: byId.get(ticket.id)?.titleOverride || ticket.title }] : [];
+      return refreshed && refreshed.estimatedWinChance != null && refreshed.estimatedWinChance * refreshed.totalOdds >= 1
+        ? [{ ...refreshed, title: byId.get(ticket.id)?.titleOverride || ticket.title }]
+        : [];
     }).sort((a, b) => (ticketOrder[a.category] ?? 99) - (ticketOrder[b.category] ?? 99));
   }, [snapshot.tickets, controls, referenceTime]);
   const bestMatches = useMemo(() => (snapshot.watchlist ?? [])
-    .filter((pick) => Date.parse(pick.kickoff) > referenceTime + 5 * 60_000)
+    .filter((pick) => Date.parse(pick.kickoff) > referenceTime + 5 * 60_000 && Number.isFinite(expectedReturn(pick)) && expectedReturn(pick) >= 0)
     .sort((a, b) => b.confidence - a.confidence)
     .slice(0, 8), [snapshot.watchlist, referenceTime]);
 
@@ -104,14 +107,14 @@ export default function DailyOddsPage() {
       {loading ? <div className="daily-loading" role="status">Loading today&apos;s available tickets…</div> : null}
       {tickets.map((ticket) => { const shown = open === ticket.id; const code = codes[ticket.id]; return <article key={ticket.id} className="daily-ticket">
         <header><div><span>{ticket.trimmed ? "Available picks" : ticket.category === "LONGSHOT_21" ? "Longshot" : ticket.title.replace("Daily ", "")}</span><h2>{code ? code.liveTotalOdds.toFixed(2) : ticket.totalOdds.toFixed(2)} <span>{code ? `${providerName(code.provider)} live` : `${providerName(ticketProvider(ticket))} quoted total`}</span></h2></div><b className={`daily-status ${ticket.status.toLowerCase()}`}>{ticket.trimmed ? "Refreshed" : ticket.status === "PUBLISHED" ? "Open" : ticket.status}</b></header>
-        <div className="daily-meta"><span>{ticket.selections.length} picks</span><span>{ticket.estimatedWinChance != null ? `About ${Math.round(ticket.estimatedWinChance * 100)}% combined chance` : `${Math.round(ticket.confidence * 100)}% average pick probability`}</span><span>{code ? `${code.matched}/${code.total} live prices · ${code.verified ? "verified" : "check slip"}` : "Rechecked when you generate the code"}</span></div>
+        <div className="daily-meta"><span>{ticket.selections.length} picks</span><span>{ticket.estimatedWinChance != null ? `About ${Math.round(ticket.estimatedWinChance * 100)}% combined chance` : `${Math.round(ticket.confidence * 100)}% average pick probability`}</span>{ticket.estimatedWinChance != null ? <span>Estimated return at quoted total: {((ticket.estimatedWinChance * ticket.totalOdds - 1) * 100).toFixed(1)}% per unit</span> : null}<span>{code ? `${code.matched}/${code.total} live prices · ${code.verified ? "verified" : "check slip"}` : "Rechecked when you generate the code"}</span></div>
         <button className="daily-view" type="button" onClick={() => setOpen(shown ? null : ticket.id)}>{shown ? "Hide picks" : "View picks"}<span>{shown ? "−" : "+"}</span></button>
         {shown ? <div className="daily-legs">{ticket.selections.map((selection) => <div key={selection.id}><span>{selection.homeTeam.name} vs {selection.awayTeam.name}</span><b>{selection.market.name}: {selection.selection}</b><strong>{selection.odds.toFixed(2)} quoted</strong></div>)}</div> : null}
         {code ? <div className="daily-code"><span>{providerName(code.provider)}</span><strong>{code.code}</strong><small>{code.matched}/{code.total} included</small><div><button type="button" onClick={() => void copy(code.code)}>Copy</button><a href={code.deepLink} target="_blank" rel="noreferrer">Open</a></div></div> : null}
         <footer><button type="button" onClick={() => addTicket(ticket)}>Add ticket</button><button className="primary" type="button" disabled={creating === ticket.id} onClick={() => void createCode(ticket)}>{creating === ticket.id ? "Checking…" : `Get ${providerName(ticketProvider(ticket))} code`}</button></footer>
       </article>; })}
-      {!loading && !tickets.length && !bestMatches.length ? <div className="daily-empty"><strong>No qualified odds are ready.</strong><span>No complete ticket or individual match currently passes the live-price, match-history and model-agreement checks.</span><a href="/builder">Check the Smart Bet Router</a></div> : null}
+      {!loading && !tickets.length && !bestMatches.length ? <div className="daily-empty"><strong>No qualified odds are ready.</strong><span>No ticket or individual match currently passes the live-price, match-history, model-agreement and positive-return checks.</span><a href="/builder">Check the Smart Bet Router</a></div> : null}
     </section>
-    {!loading && bestMatches.length ? <section className="daily-best" aria-label="Today's best individual matches"><header><div><span>Qualified individually</span><h2>Today&apos;s best matches</h2></div><p>{tickets.length ? "More qualified selections are available today." : "No full accumulator passed every check, but these individual selections did. Prices are rechecked when you build the slip."}</p></header><div>{bestMatches.map((pick) => <article key={pick.id}><span>{pick.league.name} · {pick.oddsProvider ? providerName(pick.oddsProvider as ProviderId) : "Bookmaker"} · {new Date(pick.kickoff).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span><h3>{pick.homeTeam.name} vs {pick.awayTeam.name}</h3><div><p><small>{pick.market.name}</small><b>{pick.selection}</b></p><strong>{(pick.quotedOdds ?? pick.fairOdds).toFixed(2)}</strong></div><footer><span>{Math.round(pick.confidence * 100)}% confidence</span><a href={`/builder?fixture=${encodeURIComponent(pick.fixtureId)}`}>Open match</a></footer></article>)}</div></section> : null}
+    {!loading && bestMatches.length ? <section className="daily-best" aria-label="Today's best individual matches"><header><div><span>Qualified individually</span><h2>Today&apos;s best matches</h2></div><p>{tickets.length ? "More qualified selections are available today." : "No full accumulator passed every check, but these individual selections did. Prices are rechecked when you build the slip."}</p></header><div>{bestMatches.map((pick) => <article key={pick.id}><span>{pick.league.name} · {pick.oddsProvider ? providerName(pick.oddsProvider as ProviderId) : "Bookmaker"} · {new Date(pick.kickoff).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span><h3>{pick.homeTeam.name} vs {pick.awayTeam.name}</h3><div><p><small>{pick.market.name}</small><b>{pick.selection}</b></p><strong>{(pick.quotedOdds ?? pick.fairOdds).toFixed(2)}</strong></div><footer><span>{Math.round(pick.confidence * 100)}% confidence</span>{<span>Estimated return: {expectedReturn(pick) >= 0 ? "+" : ""}{(expectedReturn(pick) * 100).toFixed(1)}% per unit</span>}<a href={`/builder?fixture=${encodeURIComponent(pick.fixtureId)}`}>Open match</a></footer></article>)}</div></section> : null}
   </main>;
 }

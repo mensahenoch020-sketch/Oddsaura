@@ -184,7 +184,7 @@ function partitionSelections(selections: BookmakerSelection[], requestedParts: n
   return groups;
 }
 
-export default function AssistantClient({ initialRequest = "", initialTool = "ask" }: { initialRequest?: string; initialTool?: "ask" | "converter" }) {
+export default function AssistantClient({ initialRequest = "", initialTool = "ask", initialFixtureId = "", initialSlip = "" }: { initialRequest?: string; initialTool?: "ask" | "converter"; initialFixtureId?: string; initialSlip?: string }) {
   const [snapshot, setSnapshot] = useState<Snapshot>(fallbackSnapshot);
   const [resultsSnapshot, setResultsSnapshot] = useState<Snapshot>(fallbackSnapshot);
   const [matchesSnapshot, setMatchesSnapshot] = useState<Snapshot>(fallbackSnapshot);
@@ -202,6 +202,7 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
   const threadRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const deepLinkHandled = useRef(false);
 
   useEffect(() => {
     let active = true;
@@ -223,6 +224,59 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
 
   const predictions = snapshot.predictedPicks ?? [];
   const fixtures = matchesSnapshot.fixtures ?? [];
+
+  useEffect(() => {
+    if (loading || deepLinkHandled.current || (!initialFixtureId && !initialSlip)) return;
+    if (!snapshot.generatedAt && !predictions.length) return;
+    deepLinkHandled.current = true;
+
+    if (initialSlip) {
+      try {
+        if (initialSlip.length > 12000) throw new Error("Saved slip link is too large.");
+        const base64 = initialSlip.replaceAll("-", "+").replaceAll("_", "/");
+        const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
+        const entries = JSON.parse(atob(padded)) as Array<{ predictionId?: string }>;
+        const ids = entries.map((entry) => entry.predictionId).filter((id): id is string => typeof id === "string");
+        const picks = ids.flatMap((id) => {
+          const pick = predictions.find((candidate) => candidate.id === id);
+          return pick ? [pick] : [];
+        });
+        if (!picks.length) {
+          addMessage("assistant", "I couldn’t restore this saved slip because its selections are no longer in the current prediction list. Open a current match or build a new slip.");
+          return;
+        }
+        const provider = (picks[0].oddsProvider?.toLowerCase() as ProviderId | undefined) ?? "sportybet";
+        conversation.current = {
+          provider,
+          code: null,
+          selections: picks.map(summarizeSelection),
+          picks,
+          decoded: bookmakerSelections(picks, provider),
+          lastOutcome: null,
+        };
+        addMessage("user", "Open my saved slip");
+        void execute({ kind: "analyze", confidence: 1, code: null, provider: null }, Date.now());
+        if (picks.length < ids.length) addMessage("assistant", `${ids.length - picks.length} saved selection${ids.length - picks.length === 1 ? " is" : "s are"} no longer available in the current prediction list.`);
+      } catch {
+        addMessage("assistant", "This saved slip link is invalid or expired. Open the slip again from your account.");
+      }
+      return;
+    }
+
+    const pick = predictions.find((candidate) => candidate.fixtureId === initialFixtureId);
+    if (!pick) {
+      addMessage("assistant", "This match no longer has a current verified prediction. Try another match or refresh the data.");
+      return;
+    }
+    addMessage("user", `${pick.homeTeam.name} vs ${pick.awayTeam.name}`);
+    void execute({
+      kind: "match",
+      confidence: 1,
+      homeTeam: pick.homeTeam.name,
+      awayTeam: pick.awayTeam.name,
+      provider: (pick.oddsProvider?.toLowerCase() as ProviderId | undefined) ?? null,
+    }, Date.now());
+  }, [loading, initialFixtureId, initialSlip, snapshot.generatedAt, predictions]);
 
   function addMessage(role: Message["role"], text: string, output?: AssistantOutput) {
     setMessages((current) => [...current, { id: nextId.current++, role, text, output }]);

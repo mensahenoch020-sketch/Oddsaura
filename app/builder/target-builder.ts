@@ -17,6 +17,7 @@ export type TargetBuild = {
 };
 
 const priceFor = (pick: PredictedPick, priceOverrides?: Record<string, number>) => priceOverrides?.[pick.fixtureId] ?? pick.quotedOdds ?? 0;
+const expectedReturn = (pick: PredictedPick) => pick.expectedValue ?? (pick.quotedOdds != null ? pick.probability * pick.quotedOdds - 1 : -1);
 
 // Only markets with usable historical price evidence are eligible for public
 // recommendations. The wider model catalog remains available for research,
@@ -46,6 +47,7 @@ function predictionScore(pick: PredictedPick, provider: ProviderId, mode: BuildM
 
 function rankedPredictions(predictions: PredictedPick[], now: number, provider: ProviderId, mode: BuildMode, priceOverrides?: Record<string, number>) {
   return predictions.filter((pick) => {
+    const pickExpectedReturn = expectedReturn(pick);
     // A different bookmaker's price cannot fulfil this bookmaker's request.
     if (pick.oddsProvider && pick.oddsProvider.toLowerCase() !== provider) return false;
     if (pick.quoteObservedAt) {
@@ -69,11 +71,12 @@ function rankedPredictions(predictions: PredictedPick[], now: number, provider: 
         && pick.probability >= .56
         && (pick.marketProbability ?? 0) >= .5
         && (pick.edge ?? -1) >= .01
-        && (pick.expectedValue ?? -1) >= .015;
+        && pickExpectedReturn >= .015;
       return pick.confidence >= .62
         && pick.probability >= .65
         && (pick.marketProbability ?? 0) >= .59
-        && (pick.edge ?? -1) >= -.015;
+        && (pick.edge ?? -1) >= -.015
+        && pickExpectedReturn >= 0;
     }
 
     // Target mode answers an explicit accumulator request. It still requires
