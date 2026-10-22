@@ -184,11 +184,13 @@ test("builder receives market evidence, verified-price gates and forward proof",
   assert.match(pipeline, /trialTier: "OBSERVATION"/);
 });
 
-test("Daily Odds uses model-versus-market edge instead of bookmaker-margin EV", async () => {
+test("Daily Odds requires model edge and nonnegative quoted-price return", async () => {
   const [pipeline, tickets] = await Promise.all([read("pipeline/update.mjs"), read("pipeline/lib/tickets.mjs")]);
-  assert.match(pipeline, /\(item\.edge \?\? -1\) >= 0/); assert.match(tickets, /\(item\.edge \?\? -1\) >= 0/); assert.doesNotMatch(tickets, /\(item\.expectedValue \?\? -1\) >= 0/);
+  assert.match(pipeline, /\(item\.edge \?\? -1\) >= 0/);
+  assert.match(pipeline, /\(item\.expectedValue \?\? -1\) >= 0/);
+  assert.match(tickets, /\(item\.edge \?\? -1\) >= 0/);
+  assert.match(tickets, /\(item\.expectedValue \?\? -1\) >= 0/);
 });
-
 test("live fixtures inherit archived team history through canonical identities", async () => {
   const update = await read("pipeline/update.mjs");
   assert.match(update, /normalizeEventIdentity/);
