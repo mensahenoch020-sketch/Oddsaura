@@ -73,7 +73,8 @@ function rankedPredictions(predictions: PredictedPick[], now: number, provider: 
       return pick.confidence >= .62
         && pick.probability >= .65
         && (pick.marketProbability ?? 0) >= .59
-        && (pick.edge ?? -1) >= -.015;
+        && (pick.edge ?? -1) >= -.015
+        && (pick.expectedValue ?? -1) >= 0;
     }
 
     // Target mode answers an explicit accumulator request. It still requires
