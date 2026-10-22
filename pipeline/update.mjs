@@ -317,7 +317,7 @@ function watchlistFamily(key) {
   return "OTHER";
 }
 const watchlistCandidates = [...predictions]
-  .filter((item) => dailyFixtureIds.has(item.fixtureId) && publicMarketKeys.test(item.key) && marketEvidenceReady(item) && historyEvidence(item).ready && item.confidence >= 0.62 && item.quotedOdds >= 1.1 && item.quotedOdds <= 3 && item.marketProbability != null && (item.modelMarketGap ?? 1) <= .1 && (item.edge ?? -1) >= 0)
+  .filter((item) => dailyFixtureIds.has(item.fixtureId) && publicMarketKeys.test(item.key) && marketEvidenceReady(item) && historyEvidence(item).ready && item.confidence >= 0.62 && item.quotedOdds >= 1.1 && item.quotedOdds <= 3 && item.marketProbability != null && (item.modelMarketGap ?? 1) <= .1 && (item.edge ?? -1) >= 0 && (item.expectedValue ?? -1) >= 0)
   .sort((a, b) => (b.confidence + Math.max(0, b.edge ?? 0)) - (a.confidence + Math.max(0, a.edge ?? 0)));
 const watchlistFamilies = [...new Set(watchlistCandidates.map((pick) => watchlistFamily(pick.key)))];
 const watchlistBuckets = new Map(watchlistFamilies.map((family) => [family, watchlistCandidates.filter((pick) => watchlistFamily(pick.key) === family)]));
@@ -349,6 +349,7 @@ for (const pick of orderedWatchlistCandidates) {
     selection: pick.selection,
     probability: pick.probability,
     confidence: pick.confidence,
+    expectedValue: pick.expectedValue,
     fairOdds: pick.fairOdds,
     quotedOdds: pick.quotedOdds,
     oddsSource: pick.oddsSource,
