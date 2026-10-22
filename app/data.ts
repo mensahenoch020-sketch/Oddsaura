@@ -40,6 +40,7 @@ export type TicketSelection = {
   result?: "PENDING" | "WON" | "LOST" | "VOID" | "UNVERIFIED";
 };
 export type WatchlistPick = Omit<TicketSelection, "odds" | "edge"> & {
+  expectedValue?: number | null;
   fairOdds: number;
   quotedOdds?: number | null;
 };
