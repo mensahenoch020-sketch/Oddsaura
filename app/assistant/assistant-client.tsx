@@ -12,6 +12,7 @@ import { plainPickExplanation, unmetTargetMessage } from "./plain-language";
 import { leagueFilterFor, leagueFilterLabel, leagueMatches, type LeagueFilter } from "../leagues";
 import { canonicalFixtureIdentity } from "./fixture-identity";
 import { applyConversationReference, resolveAssistantTurn, type PendingIntent } from "./conversation";
+import { assistantFailureMessage } from "./failures";
 import { saveBetslipImage } from "./betslip-image";
 import { matchImageRowsToFixtures, parsePredictionImageText, parseTypedPredictionText, type MatchedImagePrediction } from "./image-import";
 import "./assistant.css";
@@ -918,6 +919,8 @@ export default function AssistantClient({ initialRequest = "", initialTool = "as
       } else {
         addMessage("assistant", "I’m not certain what you want yet. Try “20 odds for Sporty”, “split Sporty code BA12345 into 3”, “what do you think about this odds?”, “why this pick?”, or “convert this code”.");
       }
+    } catch (error) {
+      addMessage("assistant", assistantFailureMessage(error));
     } finally { setBusy(false); }
   }
 
